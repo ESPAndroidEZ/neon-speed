@@ -34,7 +34,8 @@ export interface CarVisual {
 }
 
 /** Low-poly procedural car from a BodyShape. Nose +Z, +X left, origin on the ground at the centre. */
-export function buildProceduralCar(shape: BodyShape, paintHex: number, loadout: Loadout = defaultLoadout()): CarVisual {
+export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loadout: Loadout = defaultLoadout()): CarVisual {
+  const shape: BodyShape = loadout.parts.spoiler ? { ...baseShape, spoiler: 'none' } : baseShape; // an add-on spoiler replaces the stock one
   const root = new Group();
   const body = new Group();
   root.add(body);
@@ -98,7 +99,8 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number, loadout: 
   let pattern = loadout.glowPattern;
   let clock = 0;
   const tmp = new Color();
-  const targets = { paint, glass, headMat, glowMat, wheels, body, pivots };
+  const addOn = { root: body, anchors: { length: shape.length, width: shape.width, height: shape.height, belt: shape.beltHeight, wheelbase: shape.wheelbase }, trim };
+  const targets = { paint, glass, headMat, glowMat, wheels, body, pivots, parts: addOn };
   applyAppearance(targets, loadout, paintHex);
   let pitch = 0;
   let roll = 0;

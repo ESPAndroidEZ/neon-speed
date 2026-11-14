@@ -1,3 +1,4 @@
+import { THEME_CSS } from './theme';
 const CSS = `
 .rb-layer{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#e8f6ff;font:600 16px system-ui,sans-serif;z-index:30;text-shadow:0 0 10px #18d8ff66;user-select:none}
 .rb-layer.dim{background:radial-gradient(ellipse at center,#05060d55 0%,#05060dcc 100%)}
@@ -24,7 +25,7 @@ export function injectCss(): void {
   if (injected) return;
   injected = true;
   const s = document.createElement('style');
-  s.textContent = CSS;
+  s.textContent = THEME_CSS + CSS;
   document.head.appendChild(s);
 }
 

@@ -1,6 +1,7 @@
 import type { SaveStore } from '../core/save';
 import { CALIPERS, defaultLoadout, FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, type Loadout } from '../data/loadout';
 import { PAINTS } from '../data/cars';
+import { PART_SLOTS, PARTS } from '../world/carParts';
 import { RIM_IDS } from '../world/rims';
 import { VINYL_IDS } from '../world/vinylLayer';
 import { h } from './uiKit';
@@ -70,6 +71,14 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
   swatches(PAINTS, l.vinyl.color, (c) => { l.vinyl.color = c; commit(); });
   slider('Scale', 0.5, 2, 0.1, l.vinyl.scale, (v) => (l.vinyl.scale = v));
   slider('Rotate', -90, 90, 5, l.vinyl.rotation, (v) => (l.vinyl.rotation = v));
+  for (const slot of PART_SLOTS) {
+    label(slot === 'skirts' ? 'Side skirts' : slot[0].toUpperCase() + slot.slice(1));
+    chips([{ id: '', name: 'stock' }, ...Object.keys(PARTS[slot]).map((id) => ({ id, name: id }))], l.parts[slot] ?? '', (id) => {
+      if (id) l.parts[slot] = id;
+      else delete l.parts[slot];
+      commit(slot === 'spoiler'); // the stock spoiler is part of the body: rebuild
+    });
+  }
   label('Rims');
   chips(RIM_IDS.map((id) => ({ id, name: id })), l.rim.design, (id) => { l.rim.design = id; commit(true); });
   slider('Size', 17, 21, 1, l.rim.size, (v) => (l.rim.size = v), true);

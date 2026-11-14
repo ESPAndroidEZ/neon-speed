@@ -2,6 +2,7 @@ import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Material, Me
 import { damp } from '../core/math';
 import type { CarModel } from '../types/game';
 import { findBodyMaterial, setModelYaw } from './assetLoader';
+import { attachParts } from './carParts';
 import { addLightsAndShadow } from './carLights';
 import { upgradeCarMaterials } from './materialUpgrade';
 import type { CarVisual } from './proceduralCar';
@@ -11,6 +12,8 @@ import type { CarVisual } from './proceduralCar';
  * Pitch and roll, underglow, paint tint (only if the body material can be identified) and a yaw
  * calibration arrow are provided.
  */
+const addOnTrim = new MeshStandardMaterial({ color: 0x0b0c10, roughness: 0.6, metalness: 0.4 });
+
 export function buildModelCar(model: CarModel, factoryColor: number, paintHex: number, yaw: number): CarVisual {
   const root = new Group();
   const body = new Group();
@@ -82,6 +85,10 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
     },
     setPaint: tint,
     setUnderglow: (hex) => glowMat.color.setHex(hex).multiplyScalar(1.5),
+    // GLB bodies are not swappable: add-on parts attach at anchors from the bounding box; finish, tint and the rest are applied to what can be found
+    setAppearance: (l) => {
+      attachParts(body, { length: len, width: w, height: model.size.y, belt: model.size.y * 0.55, wheelbase: len * 0.6 }, l.parts, (bodyMat as Material | null) ?? addOnTrim, addOnTrim);
+    },
     setEnv: (env: Texture) => {
       model.root.traverse((o) => {
         if (o instanceof Mesh && o.material instanceof MeshStandardMaterial) {

@@ -2,6 +2,7 @@ import { Color, BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBa
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
+import { ARCHETYPES, archetypesFor, pickArchetype, type Archetype } from './city/archetypes';
 import { makeFacadeSheet, makeShopfrontTexture, type FacadeSheet } from './city/textures';
 
 export interface Plaza {
@@ -63,20 +64,18 @@ class Strips {
   }
 }
 
-const TINTS: readonly (readonly number[])[] = [[0.55, 0.45, 0.42], [0.42, 0.45, 0.55], [0.5, 0.5, 0.5], [0.58, 0.5, 0.38], [0.45, 0.38, 0.5], [0.4, 0.5, 0.48]];
 const SHOP: readonly (readonly number[])[] = [[0.7, 0.32, 0.12], [0.12, 0.5, 0.62], [0.7, 0.1, 0.35], [0.1, 0.55, 0.25], [0.6, 0.5, 0.32], [0.04, 0.04, 0.06], [0.04, 0.04, 0.06], [0.04, 0.04, 0.06]];
 
 /**
  * Continuous building facades flush with the street walls, in runs of random height and tint,
  * with lit ground-floor shopfronts. Street, alley and plaza zones only; the plaza's inner side is a low fountain rim.
  */
-export function buildFacades(tr: Track, plaza?: Plaza): Facades {
+export function buildFacades(tr: Track, plaza?: Plaza, district = 'kestrel', archetypes: readonly Archetype[] = ARCHETYPES): Facades {
+  const pool = archetypesFor(district, archetypes);
   const rnd = createRng(31);
   const n = tr.samples.length;
   const height: [Float32Array, Float32Array] = [new Float32Array(n), new Float32Array(n)];
-  const warm = new Strips();
-  const cool = new Strips();
-  const neon = new Strips();
+  const strips: Record<string, Strips> = { brick: new Strips(), concrete: new Strips(), glass: new Strips(), metal: new Strips() };
   const shops = new Strips();
   const rim = new Strips();
   const inPlaza = (i: number): boolean => {
@@ -107,20 +106,21 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
         continue;
       }
       const alley = tr.zones[i] === 'alley';
-      const h = basin ? 1.1 : (alley ? 24 : 12) + rnd() * (alley ? 26 : 38);
+      const arch = pickArchetype(pool, rnd());
+      const h = basin ? 1.1 : arch.height[0] + rnd() * (arch.height[1] - arch.height[0]) * (alley ? 1.2 : 1) + (alley ? 8 : 0);
       const b = Math.min(n, j);
       if (basin) rim.run(tr, side, i, b, h, [0.15, 1.2, 1.8], 0, 0, 0.05);
       else {
-        (rnd() < 0.18 ? neon : rnd() < 0.5 ? warm : cool).run(tr, side, i, b, h, TINTS[Math.floor(rnd() * TINTS.length)], 2);
+        strips[arch.kind].run(tr, side, i, b, h, arch.tint.map((t) => t * (0.9 + rnd() * 0.2)), 2);
         const c = SHOP[Math.floor(rnd() * SHOP.length)];
-        if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07, 6, 2.65);
+        if (arch.shop && b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07, 6, 2.65);
       }
       for (let k = i; k <= b; k++) height[hi][k % n] = h;
       i = b;
     }
   }
   const group = new Group();
-  const sheets = { brick: makeFacadeSheet('brick', 1), concrete: makeFacadeSheet('concrete', 2), glass: makeFacadeSheet('glass', 3) };
+  const sheets = { brick: makeFacadeSheet('brick', 1), concrete: makeFacadeSheet('concrete', 2), glass: makeFacadeSheet('glass', 3), metal: makeFacadeSheet('metal', 4) };
   const addWalls = (s: Strips, sheet: FacadeSheet): void => {
     if (s.idx.length === 0) return;
     const m = new MeshStandardMaterial({
@@ -129,9 +129,10 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
     });
     group.add(new Mesh(s.geometry(), m));
   };
-  addWalls(warm, sheets.brick);
-  addWalls(cool, sheets.concrete);
-  addWalls(neon, sheets.glass);
+  addWalls(strips.brick, sheets.brick);
+  addWalls(strips.concrete, sheets.concrete);
+  addWalls(strips.glass, sheets.glass);
+  addWalls(strips.metal, sheets.metal);
   const basic = new MeshBasicMaterial({ vertexColors: true, side: DoubleSide });
   if (shops.idx.length > 0) group.add(new Mesh(shops.geometry(), new MeshBasicMaterial({ vertexColors: true, side: DoubleSide, map: makeShopfrontTexture(), color: new Color(1.5, 1.5, 1.5) })));
   if (rim.idx.length > 0) group.add(new Mesh(rim.geometry(), basic));

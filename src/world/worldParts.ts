@@ -43,7 +43,7 @@ export function buildParts(track: Track, def: TrackDef, layout: PropsLayout, env
   let dock: Dock | null = null;
   let details: Details | null = null;
   if (def.theme === 'city') {
-    const facades = buildFacades(track, def.plaza);
+    const facades = buildFacades(track, def.plaza, def.id);
     furniture = buildFurniture(track, facades.height);
     dock = buildDock(track);
     details = buildDetails(layoutDetails(track, facades.height, paletteOf(def.id)));

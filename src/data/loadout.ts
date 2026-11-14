@@ -29,6 +29,8 @@ export interface Loadout {
   plate: string;
   /** -1 (high, soft) .. +1 (slammed): ride height and camber; shifts handling slightly. */
   stance: number;
+  /** Add-on body parts by slot (keys of `PARTS`): spoiler, splitter, skirts, hood. */
+  parts: Record<string, string>;
 }
 
 export const FINISHES: Record<Finish, { name: string; metalness: number; roughness: number; clearcoat: number; ccRough: number }> = {
@@ -57,11 +59,19 @@ export const defaultLoadout = (): Loadout => ({
   smoke: 0xe8e8ee,
   plate: 'RB-0001',
   stance: 0,
+  parts: {},
 });
 
 const num = (v: unknown, d: number, lo: number, hi: number): number => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
 const col = (v: unknown, d: number): number => Math.round(num(v, d, 0, 0xffffff));
 const str = (v: unknown, d: string, max: number): string => (typeof v === 'string' ? v.slice(0, max) : d);
+
+const SLOTS = ['spoiler', 'splitter', 'skirts', 'hood'];
+function sanitizeParts(raw: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (typeof raw === 'object' && raw !== null) for (const k of SLOTS) { const v = (raw as Record<string, unknown>)[k]; if (typeof v === 'string' && v.length < 24) out[k] = v; }
+  return out;
+}
 
 /** Make a stored loadout safe: unknown fields dropped, numbers clamped, bad finishes and patterns replaced by defaults. */
 export function sanitizeLoadout(raw: unknown): Loadout {
@@ -82,6 +92,7 @@ export function sanitizeLoadout(raw: unknown): Loadout {
     smoke: col(r.smoke, d.smoke),
     plate: str(r.plate, d.plate, 8).toUpperCase(),
     stance: num(r.stance, 0, -1, 1),
+    parts: sanitizeParts(r.parts),
   };
 }
 
