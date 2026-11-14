@@ -22,12 +22,27 @@ export interface BodyShape {
 
 const RIDE = 0.2;
 
+/** Chaikin corner cutting: each pass replaces every corner of a closed polygon by two points, rounding the outline. */
+function smooth(pts: readonly (readonly [number, number])[], passes: number): [number, number][] {
+  let p = pts.map((q) => [q[0], q[1]] as [number, number]);
+  for (let k = 0; k < passes; k++) {
+    const out: [number, number][] = [];
+    for (let i = 0; i < p.length; i++) {
+      const a = p[i];
+      const b = p[(i + 1) % p.length];
+      out.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]);
+    }
+    p = out;
+  }
+  return p;
+}
+
 /** Extrude a (z, y) profile across `width` (centred on x = 0). Shape x = z, bevelled for a soft low-poly look. */
 function extrudeProfile(pts: readonly (readonly [number, number])[], width: number, bevel: number): BufferGeometry {
   const s = new Shape();
-  pts.forEach(([z, y], i) => (i === 0 ? s.moveTo(-z, y) : s.lineTo(-z, y)));
+  smooth(pts, 2).forEach(([z, y], i) => (i === 0 ? s.moveTo(-z, y) : s.lineTo(-z, y)));
   s.closePath();
-  const g = new ExtrudeGeometry(s, { depth: width - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 2, curveSegments: 1 });
+  const g = new ExtrudeGeometry(s, { depth: width - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3, curveSegments: 1 });
   g.rotateY(Math.PI / 2); // shape x -> -z... see below: after rotation shape x maps to car z
   g.translate(-(width - bevel * 2) / 2, 0, 0);
   return g;
@@ -43,7 +58,7 @@ export function bodyShell(s: BodyShape): BufferGeometry {
       [-zf + 0.7, belt - 0.02], [-zf + 0.12, belt - 0.1], [-zf, RIDE + 0.55], [-zf, RIDE + 0.12],
     ],
     s.width,
-    0.07,
+    0.1,
   );
 }
 

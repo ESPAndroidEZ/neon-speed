@@ -1,7 +1,8 @@
-import { BoxGeometry, Color, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, type Object3D, type Texture } from 'three';
+import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { damp } from '../core/math';
 import { bodyShell, cabin, roofSpan, type BodyShape } from './carBody';
 import { addLightsAndShadow } from './carLights';
+import { buildArch, buildWheel } from './carWheels';
 
 const bright = (hex: number, k: number): Color => new Color(hex).multiplyScalar(k);
 
@@ -67,28 +68,31 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
   glowPlane.position.y = 0.08;
   root.add(glowPlane);
 
-  const tyreMat = new MeshStandardMaterial({ color: 0x060606, roughness: 0.9 });
-  const rimMat = new MeshStandardMaterial({ color: 0xb8bcc8, metalness: 0.9, roughness: 0.25 });
   const wr = shape.wheelRadius;
   const spinners: Object3D[] = [];
   const steerPivots: Object3D[] = [];
   const rear: Object3D[] = [];
   for (const sx of [1, -1]) {
     for (const front of [true, false]) {
+      const x = sx * (w / 2 - 0.12);
+      const z = (front ? 1 : -1) * shape.wheelbase * 0.5;
+      const arch = buildArch(wr);
+      arch.position.set(sx * (w / 2 - 0.2), wr, z);
+      root.add(arch);
       const pivot = new Group();
-      pivot.position.set(sx * (w / 2 - 0.12), wr, (front ? 1 : -1) * shape.wheelbase * 0.5);
-      const spin = new Group();
-      const tyre = new Mesh(new CylinderGeometry(wr, wr, 0.26, 18).rotateZ(Math.PI / 2), tyreMat);
-      const rim = new Mesh(new CylinderGeometry(wr * 0.62, wr * 0.62, 0.28, 10).rotateZ(Math.PI / 2), rimMat);
-      tyre.castShadow = true;
-      spin.add(tyre, rim);
-      pivot.add(spin);
+      pivot.position.set(x, wr, z);
+      const { spin, caliper } = buildWheel(wr, sx);
+      pivot.add(spin, caliper);
       root.add(pivot);
       spinners.push(spin);
       if (front) steerPivots.push(pivot);
       else rear.push(pivot);
     }
   }
+  // details: grille, headlight housings, mirrors
+  mesh(new BoxGeometry(w * 0.46, 0.13, 0.05), trim, 0, 0.5, zf + 0.02);
+  for (const x of [-w * 0.34, w * 0.34]) mesh(new BoxGeometry(0.5, 0.17, 0.05), trim, x, 0.66, zf);
+  for (const x of [-w * 0.5, w * 0.5]) mesh(new BoxGeometry(0.14, 0.1, 0.2), paint, x, shape.beltHeight + 0.12, zf - shape.hoodLength - 0.05);
   const exhaust: Object3D[] = [];
   for (const x of [-w * 0.28, w * 0.28]) {
     const e = new Group();

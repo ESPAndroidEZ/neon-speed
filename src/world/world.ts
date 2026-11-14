@@ -75,7 +75,8 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
       applyWorldLook(targets, p);
     },
     applyPropModels: async () => {
-      const [lamp, container, kiosk] = await Promise.all([loadPropModel('lamp'), loadPropModel('container'), loadPropModel('kiosk')]);
+      const [lamp, container, kiosk, sign] = await Promise.all([loadPropModel('lamp'), loadPropModel('container'), loadPropModel('kiosk'), loadPropModel('sign')]);
+      if (sign) root.add(instanceProp(sign, furniture.signSpots));
       if (lamp) {
         root.add(instanceProp(lamp, furniture.lamps.map((l) => ({ x: l.x, z: l.z, yaw: l.yaw }))));
         furniture.heads.visible = false;

@@ -15,14 +15,14 @@ export function addLightsAndShadow(root: Group, width: number, length: number, l
     const mat = new MeshBasicMaterial({ map: pool, color: new Color(color).multiplyScalar(k), transparent: true, depthWrite: false, blending: AdditiveBlending });
     for (const sx of [-1, 1]) {
       for (const turn of [0, Math.PI / 2]) { // two crossed quads so the glow reads from the side too
-        const q = new Mesh(new PlaneGeometry(1.1, 0.55), mat);
+        const q = new Mesh(new PlaneGeometry(0.8, 0.4), mat);
         q.position.set(sx * width * 0.33, lampY, z + dir * 0.02);
         q.rotation.y = dir > 0 ? turn : Math.PI + turn;
         root.add(q);
       }
     }
   };
-  glow(0xdff2ff, 2.2, length / 2, 1);
+  glow(0xdff2ff, 1.5, length / 2, 1);
   glow(0xff1a10, 1.8, -length / 2, -1);
   const sh = new Mesh(new PlaneGeometry(width * 1.7, length * 1.25).rotateX(-Math.PI / 2), new MeshBasicMaterial({ map: shadow, transparent: true, depthWrite: false, opacity: 0.8 }));
   sh.position.y = 0.035;

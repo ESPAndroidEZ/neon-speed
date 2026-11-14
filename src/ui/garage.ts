@@ -3,6 +3,7 @@ import type { SaveStore } from '../core/save';
 import { measureCar, type CarStats } from '../physics/carStats';
 import type { CarVisual } from '../world/proceduralCar';
 import { setYawOverride } from '../world/modelPrefs';
+import { modelStatus, statusListeners } from '../world/carFactory';
 import { button, h, money } from './uiKit';
 
 export interface GarageDeps {
@@ -97,7 +98,13 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const title = h('div', 'rb-title', c.name);
     title.style.fontSize = c.name.length > 10 ? '26px' : '38px';
     const st = statsOf(c);
-    panel.append(h('div', 'rb-sub', c.brand), title, h('div', '', c.blurb));
+    const st2 = modelStatus(c.id);
+    const badge = h('span', '', st2 === 'glb' ? 'GLB model' : st2 === 'procedural' ? 'procedural' : 'checking...');
+    badge.style.cssText = `margin-left:8px;padding:1px 7px;border-radius:9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;border:1px solid ${st2 === 'glb' ? '#7dff9a' : '#ffb347'};color:${st2 === 'glb' ? '#7dff9a' : '#ffb347'}`;
+    const brand = h('div', 'rb-sub', c.brand);
+    brand.append(badge);
+    panel.append(brand, title, h('div', '', c.blurb));
+    if (st2 === 'procedural') panel.append(h('div', 'rb-sub', `Put ${c.id}.glb in public/models/`));
     panel.insertAdjacentHTML('beforeend', bar('Acceleration', 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar('Top speed', (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar('Grip', (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar('Slides easily', st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
       h('div', 'rb-sub', 'Paint'),
@@ -162,6 +169,11 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     setYawOverride(CARS[idx].id, cal.getYaw());
     render();
   });
+  const rerender = (): void => {
+    if (root.isConnected) render();
+    else statusListeners.delete(rerender);
+  };
+  statusListeners.add(rerender);
   render();
   return root;
 }

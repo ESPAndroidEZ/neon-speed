@@ -48,3 +48,18 @@ None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src
 - 2026-11-14 Claude: feedback round 1 done: GLB pipeline, 5 cars, Kestrel Bay Streets, AI rivals, story mode chapter 1, UI margins. Contract change: AIWorldView.grip. Qwen queue now 004, 003, 005, 006, 007.
 - 2026-11-14 Claude: round 2 steps 1-3: graphics pass (material upgrade, glow, headlight spots, env, shafts, FinalFx, tiers + auto quality, prop GLB pipeline), particles (weatherFx, tyre/exhaust/skid fx, showcase P), weather physics levels (NORMAL/AGGRESSIVE/EXTREME, puddles, snow banks, ice, ramp-in), turbo model + drive events.
 - 2026-11-14 Claude: round 2 done: graphics pass, particles, weather physics levels, turbo + audio rebuild (worklet), lore, radio, crew screen, Red Hand Wall. Qwen queue unchanged except 004 (done by Claude). Code-health check added to the build.
+
+## Graphics audit (round 3, step 3)
+`public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
+| Round 2 item | Status |
+|---|---|
+| Material upgrade pass (clearcoat body, glass, rubber) | implemented (`world/materialUpgrade`, applied to every GLB car) |
+| Procedural PMREM environment | implemented (`world/envMap`: dusk dome, lit blocks, neon boxes); used by cars, road, puddles, ice |
+| Wet-road reflections | env reflections on the road (rain), neon streak decals, puddle mirrors; real planar mirror only on High tier in rain (`world/roadMirror`, seen in a headless screenshot as car reflections on the road) |
+| Headlight spots + glow | implemented (2 pooled SpotLights on player + nearest rival; additive glow quads front and rear) |
+| Light shafts, fog glow | implemented (instanced open cones + glow Points; strength follows weather) |
+| Vignette / chromatic aberration / speed blur / grain | implemented (`fx/finalFx`) |
+| Quality tiers + auto downgrade | implemented (`core/quality`, test) |
+| Props pipeline | lamp, container, kiosk and now sign GLBs are picked up from `public/models/props/`; procedural fallback otherwise |
+| Emissive window variety | 3 textures (warm, cool, neon) |
+Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded profile), wheel arches, rounded tyres, five-spoke rims with brake discs and calipers, grille, lamp housings and mirrors; the garage stage got key and rim lights.

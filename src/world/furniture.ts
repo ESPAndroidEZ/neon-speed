@@ -20,6 +20,8 @@ export interface Furniture {
   /** Lamp head mesh and the wall positions of the lamps (a lamp GLB replaces the procedural head). */
   heads: InstancedMesh;
   lamps: { x: number; z: number; yaw: number }[];
+  /** Where a sign GLB can hang: on the wall, facing the road (every few of the neon boards). */
+  signSpots: { x: number; y: number; z: number; yaw: number }[];
   /** Fog glow sprites around lamps and signs. */
   glow: Points;
   glowMat: PointsMaterial;
@@ -98,8 +100,10 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
     d.scale.set(f.w, f.h, f.blade ? 1.4 : 1);
     d.updateMatrix();
     signs.setMatrixAt(k, d.matrix);
+    if (!f.blade && k % 4 === 0) signSpots.push({ x: p.x, y: f.y - 1.6, z: p.z, yaw: f.side > 0 ? yaw + Math.PI : yaw });
     signs.setColorAt(k, col.setHex(NEON[Math.floor(rnd() * NEON.length)]).multiplyScalar(1.7));
   });
+  const signSpots: { x: number; y: number; z: number; yaw: number }[] = [];
   signs.count = flat.length;
   group.add(signs);
   // wet-road streaks: each sign casts a long soft smear of its colour down the street
@@ -150,5 +154,5 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   const cg = new BufferGeometry();
   cg.setAttribute('position', new BufferAttribute(new Float32Array(pts), 3));
   group.add(new LineSegments(cg, new LineBasicMaterial({ color: 0x1a1c22 })));
-  return { group, poolMat, streakMat, shaftMat, shafts, heads, lamps, glow, glowMat };
+  return { group, poolMat, streakMat, shaftMat, shafts, heads, lamps, signSpots, glow, glowMat };
 }
