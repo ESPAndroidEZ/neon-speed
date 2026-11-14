@@ -20,6 +20,8 @@ export interface Racer {
   finishRank: number;
   /** Seconds a rival has been pinned (almost stopped) while racing; past UNSTICK_AFTER it is put back on the road. */
   stuck: number;
+  /** Furthest progress (samples) reached so far: a rival that stops gaining ground is put back on the road. */
+  progress: number;
 }
 
 export interface RaceResult {

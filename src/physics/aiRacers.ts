@@ -1,41 +1,21 @@
-import type { AIRacerAgent, AIWorldView, CarInput, CarState, TrackSample } from '../types/game';
+import type { AIRacerAgent, AIWorldView, CarInput, CarState } from '../types/game';
+import { DIFFICULTIES, LEVELS, RUBBER_MAX, STYLES, type Difficulty, type DriveStyle } from './aiDifficulty';
+import { marginFor, racingLine, speedProfile, type RacingLine } from './aiLine';
+import { createTraffic, readTraffic } from './aiTraffic';
 
 /*
- * AI driver: pure policy (no physics, no three). Each AI owns a speed profile along the track computed from
- * curvature, its skill and the current grip (accelerating and braking limits are propagated both ways round the
- * loop), steers by pure pursuit on a personal lane offset, spreads away from cars ahead, and is rubber-banded
- * gently against the player. Deterministic: noise comes from a PRNG seeded by the id.
+ * AI driver: pure policy (no physics, no three). The car it drives uses the same physics and weather grip as the player's.
+ * Each AI follows a racing line computed from the track (apex-based, see aiLine), with a speed profile from the line's curvature,
+ * its skill, the current grip and its personality; steers by pure pursuit; slipstreams, passes, defends and plans nitro
+ * (aiTraffic); and is rubber-banded against the player by a small, documented amount that shrinks with the difficulty level
+ * (aiDifficulty: Legend has none). Deterministic: all noise comes from a PRNG seeded by the id.
  */
 
-const WINDOW = 14; // nearest-sample search half window
-const MAX_STEER = 0.5; // rad, approx full lock
+const WINDOW = 14;
+const MAX_STEER = 0.5;
 const WHEELBASE = 2.6;
 const V_MAX = 82;
-
-/** Per-track curvature (1/m, absolute, smoothed over +/-4 samples taking the max), shared by every AI. */
-const curvCache = new WeakMap<readonly TrackSample[], { k: Float32Array; ds: number }>();
-
-function curvatureOf(track: readonly TrackSample[]): { k: Float32Array; ds: number } {
-  let c = curvCache.get(track);
-  if (c) return c;
-  const n = track.length;
-  const ds = Math.hypot(track[1].position.x - track[0].position.x, track[1].position.z - track[0].position.z);
-  const raw = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const a = track[(i + n - 1) % n].tangent;
-    const b = track[(i + 1) % n].tangent;
-    raw[i] = Math.abs(Math.atan2(a.x * b.z - a.z * b.x, a.x * b.x + a.z * b.z)) / (2 * ds);
-  }
-  const k = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    let m = 0;
-    for (let d = -4; d <= 4; d++) m = Math.max(m, raw[(i + d + n) % n]);
-    k[i] = m;
-  }
-  c = { k, ds };
-  curvCache.set(track, c);
-  return c;
-}
+const GRID = { A_LAT: 6.5, A_LAT_SKILL: 5.2, A_BRAKE: 6.0, A_BRAKE_SKILL: 2.3, A_ACCEL: 4.5, A_ACCEL_SKILL: 2.5 };
 
 const hash = (s: string): number => {
   let h = 2166136261;
@@ -43,8 +23,15 @@ const hash = (s: string): number => {
   return h >>> 0;
 };
 
-export function createAIRacer(id: string, name: string, skill: number): AIRacerAgent {
-  const sk = Math.min(1, Math.max(0, skill));
+export interface AIOptions {
+  level?: Difficulty;
+  style?: DriveStyle;
+}
+
+export function createAIRacer(id: string, name: string, skill: number, opts: AIOptions = {}): AIRacerAgent {
+  const lv = LEVELS[opts.level && DIFFICULTIES.includes(opts.level) ? opts.level : 'STREET'];
+  const st = STYLES[opts.style ?? 'clean'];
+  const sk = Math.min(1, Math.max(0, skill * lv.skillMul + lv.bonus));
   let seed = hash(id);
   const rnd = (): number => {
     seed = (seed + 0x6d2b79f5) >>> 0;
@@ -52,50 +39,43 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const laneBias = (rnd() - 0.5) * 3; // personal line within +/-1.5 m
+  const laneBias = (rnd() - 0.5) * 1.6;
   const out: CarInput = { throttle: 0, brake: 0, steer: 0, handbrake: false, nitro: false };
+  const traffic = createTraffic();
+  let line!: RacingLine; // set by the first build() before any use
   let profile: Float32Array | null = null;
   let profileGrip = -1;
   let hint = -1;
-  let playerHint = -1;
-  let offset = laneBias;
-  let confidence = 1; // drops when the car slides, recovers slowly
+  let shift = 0;
+  let confidence = 1;
+  let lapse = 0; // seconds left of a small mistake
   let nitroTimer = 0;
   let stuckFor = 0;
   let reverseFor = 0;
-  let pendingGrip = 0; // after a restore: rebuild the speed profile with the saved grip so the driver behaves identically
+  let pendingGrip = 0;
+  let profConf = 1; // the confidence the current profile was built with (kept so a restored driver rebuilds the same one)
 
-  function buildProfile(track: readonly TrackSample[], grip: number): void {
-    const { k, ds } = curvatureOf(track);
-    const n = track.length;
-    const aLat = (7.4 + 5.2 * sk) * grip * confidence * Math.min(1, 0.55 + 0.6 * grip); // extra margin when grip is very low
-    const aBrake = (6.5 + 3.5 * sk) * Math.max(0.5, grip);
-    const aAccel = (4.5 + 2.5 * sk) * Math.max(0.6, grip);
-    if (!profile || profile.length !== n) profile = new Float32Array(n);
-    for (let i = 0; i < n; i++) profile[i] = Math.min(V_MAX, Math.sqrt(aLat / Math.max(k[i], 1e-4)));
-    for (let pass = 0; pass < 2; pass++) {
-      for (let i = n * 2 - 1; i >= 0; i--) { // braking: slow down before slow bits
-        const a = i % n;
-        const b = (i + 1) % n;
-        profile[a] = Math.min(profile[a], Math.sqrt(profile[b] * profile[b] + 2 * aBrake * ds));
-      }
-      for (let i = 0; i < n * 2; i++) { // acceleration limit out of corners
-        const a = i % n;
-        const b = (i + 1) % n;
-        profile[b] = Math.min(profile[b], Math.sqrt(profile[a] * profile[a] + 2 * aAccel * ds + 25));
-      }
-    }
+  function build(world: AIWorldView, grip: number, conf = confidence): void {
+    profConf = conf;
+    line = racingLine(world.track, marginFor(grip));
+    const g = Math.max(0.12, grip);
+    if (!profile || profile.length !== line.n) profile = new Float32Array(line.n);
+    speedProfile(line, {
+      aLat: (GRID.A_LAT + GRID.A_LAT_SKILL * Math.min(1, sk)) * g * profConf * Math.min(1, 0.55 + 0.6 * g) * st.corner,
+      aBrake: (GRID.A_BRAKE + GRID.A_BRAKE_SKILL * Math.min(1, sk)) * Math.max(0.5, g) * st.brake,
+      aAccel: (GRID.A_ACCEL + GRID.A_ACCEL_SKILL * Math.min(1, sk)) * Math.max(0.6, g),
+      vMax: V_MAX,
+    }, profile);
     profileGrip = grip;
   }
 
-  function nearest(track: readonly TrackSample[], x: number, z: number, h: number): number {
+  function nearest(track: AIWorldView['track'], x: number, z: number, h: number): number {
     const n = track.length;
     let best = 0;
     let bd = Infinity;
-    const full = h < 0;
-    const count = full ? n : WINDOW * 2 + 1;
+    const count = h < 0 ? n : WINDOW * 2 + 1;
     for (let q = 0; q < count; q++) {
-      const i = full ? q : (h - WINDOW + q + n * 2) % n;
+      const i = h < 0 ? q : (h - WINDOW + q + n * 2) % n;
       const dx = track[i].position.x - x;
       const dz = track[i].position.z - z;
       const d = dx * dx + dz * dz;
@@ -107,14 +87,26 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
     return best;
   }
 
+  /** Rubber band: a fraction of speed target, never more than RUBBER_MAX and shrinking with the level. */
+  function rubber(self: CarState, world: AIWorldView, line: RacingLine): number {
+    const p = world.racers[world.playerIndex];
+    if (lv.rubber <= 0 || !p || p === self) return 0;
+    const n = line.n;
+    const ph = nearest(world.track, p.position.x, p.position.z, -1);
+    const diff = ((((hint - ph) * line.ds + (n * line.ds) / 2) % (n * line.ds)) + n * line.ds) % (n * line.ds) - (n * line.ds) / 2; // m ahead of the player
+    const band = diff < 0 ? Math.min(1, -diff / 150) * lv.rubber : -Math.min(1, diff / 200) * lv.rubber * 1.2;
+    return Math.max(-RUBBER_MAX, Math.min(RUBBER_MAX, band)) * Math.min(1, world.grip + 0.2);
+  }
+
   return {
     id,
     name,
     skill: sk,
-    snapshot: () => ({ seed, offset, confidence, hint, playerHint, nitroTimer, stuckFor, reverseFor, profileGrip }),
+    snapshot: () => ({ seed, shift, confidence, lapse, hint, nitroTimer, stuckFor, reverseFor, profileGrip, profConf }),
     restore: (d) => {
-      const x = d as { seed: number; offset: number; confidence: number; hint: number; playerHint: number; nitroTimer: number; stuckFor: number; reverseFor: number; profileGrip: number };
-      ({ seed, offset, confidence, hint, playerHint, nitroTimer, stuckFor, reverseFor } = x);
+      const x = d as { seed: number; shift: number; confidence: number; lapse: number; hint: number; nitroTimer: number; stuckFor: number; reverseFor: number; profileGrip: number; profConf: number };
+      ({ seed, shift, confidence, lapse, hint, nitroTimer, stuckFor, reverseFor } = x);
+      profConf = x.profConf ?? 1;
       profile = null;
       pendingGrip = x.profileGrip;
       profileGrip = x.profileGrip;
@@ -123,55 +115,33 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       const track = world.track;
       const n = track.length;
       const speed = self.speed;
+      if (!profile) build(world, pendingGrip > 0 ? pendingGrip : world.grip, pendingGrip > 0 ? profConf : confidence);
       hint = nearest(track, self.position.x, self.position.z, hint);
-      // the profile is recomputed when the weather grip or the driver's confidence changed noticeably
-      const slid = Math.abs(self.slipAngle) > 0.3 && Math.abs(speed) > 8;
-      // lateral offset from the centre line: running wide means the front tyres are not turning the car (understeer)
       const tp = track[hint];
       const lat = (self.position.x - tp.position.x) * tp.tangent.z - (self.position.z - tp.position.z) * tp.tangent.x;
-      const wide = Math.abs(lat) > tp.width / 2 - 1.8 && Math.abs(speed) > 4;
-      confidence = slid || wide ? Math.max(0.5, confidence - dt * 0.6) : Math.min(1, confidence + dt * 0.05);
-      if (!profile && pendingGrip > 0) buildProfile(track, pendingGrip);
-      if (!profile || Math.abs(profileGrip - world.grip * confidence) > 0.03) buildProfile(track, world.grip * confidence);
+      const wide = Math.abs(lat - line.off[hint]) > 3.4 && Math.abs(speed) > 4;
+      const slid = !st.drifts && Math.abs(self.slipAngle) > 0.3 && Math.abs(speed) > 8;
+      confidence = slid || wide ? Math.max(0.5, confidence - dt * 0.4) : Math.min(1, confidence + dt * 0.05);
+      if (lapse > 0) lapse -= dt;
+      else if (lv.lapse > 0 && rnd() < lv.lapse * dt) lapse = 0.8 + rnd() * 0.8;
+      if (!profile || Math.abs(profileGrip - world.grip * confidence) > 0.03) build(world, world.grip * confidence);
       if (!profile) return out;
 
-      // pace: skill, plus a rubber band against the player (behind: a little faster, far ahead: a little slower)
-      const p = world.racers[world.playerIndex];
-      let pace = 0.9 + 0.1 * sk;
-      if (p && p !== self) {
-        playerHint = nearest(track, p.position.x, p.position.z, playerHint);
-        const ds = curvatureOf(track).ds;
-        const lap = n * ds;
-        const diff = ((((hint - playerHint) * ds + lap / 2) % lap) + lap) % lap - lap / 2; // metres ahead of the player (negative = behind)
-        const band = diff < 0 ? Math.min(1, -diff / 150) * 0.06 : -Math.min(1, diff / 200) * 0.08;
-        pace += band * (0.4 + 0.6 * sk) * Math.min(1, world.grip + 0.2); // weaker help when the road is slick
-      }
+      // pace: level, skill, personality, a small capped rubber band, and the odd lapse
+      let pace = (0.9 + 0.1 * sk) * lv.pace * (lapse > 0 ? 0.86 : 1) + rubber(self, world, line);
+      if (Math.abs(lat) > tp.width / 2 - 0.6) pace *= 0.85; // brushing the edge: back off until it is clean
+      const ahead = Math.max(1, Math.round(1 + speed * 0.08));
+      const vTarget = profile[(hint + 2) % n] * pace;
+      readTraffic(self, world, line, hint, Math.min(1, lv.overtake * st.overtake), Math.min(1, lv.block * st.block), vTarget, traffic);
+      shift += (traffic.shift - shift) * Math.min(1, dt * 3);
 
-      // spread away from a car just ahead
-      let want = laneBias;
-      const fx = Math.sin(self.heading);
-      const fz = Math.cos(self.heading);
-      for (let r = 0; r < world.racers.length; r++) {
-        const o = world.racers[r];
-        if (o === self) continue;
-        const dx = o.position.x - self.position.x;
-        const dz = o.position.z - self.position.z;
-        const ahead = dx * fx + dz * fz;
-        if (ahead < 1 || ahead > 11) continue;
-        const side = dx * fz - dz * fx; // +: other car is to the right of us (left normal = (fz,-fx))
-        if (Math.abs(side) < 2.4) want = side > 0 ? 1.8 : -1.8;
-      }
-      offset += (want - offset) * Math.min(1, dt * 2.5);
-      const hw = track[hint].width / 2;
-      const lim = Math.min(1.9, hw - 3);
-      const off = Math.max(-lim, Math.min(lim, offset));
-
-      // pure pursuit toward a point on the personal line ahead
+      // pure pursuit on the line plus the traffic shift
       const look = Math.max(6, 5 + Math.abs(speed) * 0.28);
-      const ti = (hint + Math.round(look / curvatureOf(track).ds)) % n;
+      const ti = (hint + Math.round(look / line.ds)) % n;
       const t = track[ti];
-      const tx = t.position.x + t.tangent.z * off;
-      const tz = t.position.z - t.tangent.x * off;
+      const o = Math.max(-line.lim[ti], Math.min(line.lim[ti], line.off[ti] * (0.55 + 0.45 * sk) + laneBias * 0.4 + shift));
+      const tx = t.position.x + t.tangent.z * o;
+      const tz = t.position.z - t.tangent.x * o;
       let alpha = Math.atan2(tx - self.position.x, tz - self.position.z) - self.heading;
       alpha = Math.atan2(Math.sin(alpha), Math.cos(alpha));
       const dist = Math.max(3, Math.hypot(tx - self.position.x, tz - self.position.z));
@@ -180,17 +150,17 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       const lock = 1 - 0.72 * Math.min(1, Math.max(0, (sp - 5) / 55));
       out.steer = Math.max(-1, Math.min(1, delta / (MAX_STEER * lock) + self.slipAngle * 0.7));
 
-      // speed from the profile a little ahead (the profile already brakes early enough)
-      const si = (hint + 2) % n;
-      const vt = profile[si] * pace;
+      // speed: the profile a little ahead, a slipstream bonus, never into the car in front
+      let vt = Math.min(profile[(hint + ahead) % n] * pace * (traffic.draft ? 1.05 : 1), traffic.cap + 3);
+      vt = Math.max(vt, Math.min(traffic.cap, 3));
       out.throttle = Math.max(0, Math.min(1, (vt - speed) * 0.45 + 0.1));
       out.brake = speed > vt + 1.2 ? Math.min(1, (speed - vt) * 0.22) : 0;
       if (out.brake > 0) out.throttle = 0;
       out.handbrake = false;
 
-      // unstick: if the car is pinned at the road edge for a while, reverse away from the wall, then drive on
-      stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 && Math.abs(lat) > tp.width / 2 - 1.5 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
-      if (stuckFor > 1.2) {
+      // unstick: pinned at the road edge or against another car for a while: reverse away from the wall, then drive on
+      stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
+      if (stuckFor > (Math.abs(lat) > tp.width / 2 - 2.2 || traffic.gap < 5 ? 1.2 : 2.6)) {
         reverseFor = 2;
         stuckFor = 0;
         confidence = Math.max(0.5, confidence - 0.15);
@@ -199,16 +169,18 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
         reverseFor -= dt;
         out.throttle = 0;
         out.brake = 1;
-        out.steer = -out.steer; // reversing: steer the other way
+        out.steer = -out.steer;
         out.nitro = false;
+        out.handbrake = false;
         return out;
       }
 
-      // nitro in short bursts on long straights for the better drivers
+      // nitro: short bursts on long straights; the better drivers use it to chase or attack, not at random
       nitroTimer -= dt;
-      const straight = vt > 55 && profile[(hint + 20) % n] > 50;
-      if (nitroTimer <= -2.5 && straight && sk > 0.4 && rnd() < 0.02) nitroTimer = 1.2;
-      out.nitro = nitroTimer > 0 && straight;
+      const longStraight = vt > 50 && profile[(hint + 22) % n] > 48 && line.k[(hint + 12) % n] < 0.01;
+      const want = lv.smartNitro ? longStraight && (traffic.gap < 70 || (world.racers[world.playerIndex]?.speed ?? 0) > speed + 2 || rnd() < 0.01) : longStraight && rnd() < 0.02;
+      if (nitroTimer <= -2.5 && want && sk > 0.4) nitroTimer = 1.2;
+      out.nitro = nitroTimer > 0 && longStraight;
       return out;
     },
   };

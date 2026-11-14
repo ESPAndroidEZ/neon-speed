@@ -1,10 +1,9 @@
 import type { CarSpec } from './cars';
 import { findCar } from './cars';
+import type { Difficulty, DriveStyle } from '../physics/aiDifficulty';
 import { createAIRacer } from '../physics/aiRacers';
 import type { AIRacerAgent } from '../types/game';
 
-/** How a rival drives: the AI reads this (see physics/aiStyle). */
-export type DriveStyle = 'clean' | 'blocker' | 'drifter' | 'late-braker' | 'aggressive';
 
 /** Everyone you can race against. Brand names stay in cars.ts: rivals only name a car id. */
 export interface Rival {
@@ -49,19 +48,19 @@ export interface FieldEntry {
 }
 
 /** Turn rival ids into race entries (agent + car + paint). `skillScale` lets story events make a field easier or harder. */
-export function buildField(ids: readonly string[], skillScale = 1, wet = false): FieldEntry[] {
+export function buildField(ids: readonly string[], skillScale = 1, wet = false, level: Difficulty = 'STREET'): FieldEntry[] {
   return ids.map((id) => {
     const r = findRival(id);
     const skill = Math.min(1, (r.skill + (wet ? (r.rain ?? 0) + (r.snow ?? 0) : 0)) * skillScale);
-    return { agent: createAIRacer(r.id, r.name, skill), car: findCar(r.carId), paint: r.color, glow: r.glow };
+    return { agent: createAIRacer(r.id, r.name, skill, { level, style: r.style }), car: findCar(r.carId), paint: r.color, glow: r.glow };
   });
 }
 
 /** A mixed free-race field of `count` rivals, weakest first so the front of the grid is the strongest. */
-export function freeRaceField(count: number): FieldEntry[] {
+export function freeRaceField(count: number, level: Difficulty = 'STREET'): FieldEntry[] {
   if (count <= 0) return [];
   const pool = RIVALS.filter((r) => r.id !== 'dante' && r.id !== 'calloway');
   const pick = [...pool].sort((a, b) => a.skill - b.skill);
   const step = pick.length / count;
-  return buildField(Array.from({ length: count }, (_, i) => pick[Math.min(pick.length - 1, Math.floor(i * step + step / 2))].id));
+  return buildField(Array.from({ length: count }, (_, i) => pick[Math.min(pick.length - 1, Math.floor(i * step + step / 2))].id), 1, false, level);
 }

@@ -73,7 +73,7 @@ export class RaceManager {
     contact.surfaces = this.surfaces;
     const r: Racer = {
       id, name, isPlayer, car, contact, laps: new LapCounter(this.track), agent,
-      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0, stuck: 0,
+      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0, stuck: 0, progress: 0,
     };
     if (isPlayer) {
       this.playerIdx = this.racers.length;
@@ -95,6 +95,8 @@ export class RaceManager {
       const idx = (n - 3 - row * 3 + n) % n;
       r.contact.place(r.car, idx, slot % 2 === 0 ? -2.6 : 2.6);
       r.laps.reset(idx);
+      r.progress = r.laps.total;
+      r.stuck = 0;
       r.finished = false;
       r.finishTime = 0;
       r.finishRank = 0;

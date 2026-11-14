@@ -1,7 +1,7 @@
 import { resolveCarPair } from '../physics/carCollision';
 import type { Racer } from './raceResult';
 
-const UNSTICK_AFTER = 8; // seconds pinned before a rival is lifted back onto the road
+const UNSTICK_AFTER = 9; // seconds pinned before a rival is lifted back onto the road
 const RIVAL_BUMP = 0.12; // strength of a rival-rival bump (1 = a full crash)
 
 /** Car-car contacts: the player's are full crashes, rivals trade soft bumps. Returns the player's worst closing speed. */
@@ -16,9 +16,14 @@ export function resolveField(racers: readonly Racer[]): number {
   return impact;
 }
 
-/** A rival pinned against a wall or prop for too long is lifted back onto the road (the player has R). */
+/** A rival that gains no new ground for UNSTICK_AFTER seconds (pinned, spinning, crawling in a loop) is lifted back onto the road. The player has R. */
 export function unstick(r: Racer, dt: number): void {
-  r.stuck = Math.abs(r.car.state.speed) < 0.8 ? r.stuck + dt : Math.max(0, r.stuck - dt * 2);
+  if (r.laps.total > r.progress + 2) {
+    r.progress = r.laps.total;
+    r.stuck = 0;
+    return;
+  }
+  r.stuck += dt;
   if (r.stuck < UNSTICK_AFTER) return;
   r.stuck = 0;
   r.contact.place(r.car, r.contact.nearestIndex(r.car));

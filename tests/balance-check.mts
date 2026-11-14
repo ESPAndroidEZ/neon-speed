@@ -27,7 +27,7 @@ export function lapTime(carId: string, weather: Weather): number {
   return rm.racers[0].finished ? rm.racers[0].finishTime / 2 : 999;
 }
 
-const BANDS: Record<string, [number, number]> = { civic: [79, 89], '350z': [76, 86], rx7: [74, 83], evo: [69, 78], supra: [68, 77] };
+const BANDS: Record<string, [number, number]> = { civic: [74, 82], '350z': [71.5, 78.5], rx7: [71, 78], evo: [68, 75], supra: [67.5, 74.5] };
 const times: Record<string, number> = {};
 for (const c of CARS) {
   times[c.id] = lapTime(c.id, 'CLEAR');
