@@ -70,3 +70,41 @@ Story mode lives in `src/data/story.ts` (text) and `src/game/story.ts` (flow). E
 | 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Vex, Jinx, Tank, Dante | win | race cash + $8,000, **Supra unlocked** |
 
 Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his black and gold RX-7 on show). After the finale: Dante's key line, then Switch's radio message revealing he is Cain, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).
+
+## Chapter 2: "Redline Rising" (implemented, session 5)
+Tagline: *Four districts. Four votes. One street.* Rating: PG (no real violence; crashes are cars, not people).
+
+**Premise.** Dante lost the garage but not the city. He turns money into rules: Redline Holdings buys the impound lot, the tow
+trucks and the street lamps, then pays every district boss to stay neutral. Cain, as DJ Switch, comes out on air (he is no
+longer hiding) and sends the Rookie to win the four votes of the Loop Council: the Neon Strip, the Container Maze, the Cliffside
+and the old Harbor.
+
+**Events** (`src/data/story2a.ts`, `story2b.ts`; map in brackets):
+1. *Redline Rising* [Kestrel Bay, dry, Rook/Vex/Jinx]: the roadblock night. Dante's offer: "I am simply buying what is for sale."
+2. *Neon Night* [Neon Strip, rain, 3 laps]: **Nova**, the drift queen, paid double by Dante to stop you. Win: she votes with you; unlocks the RX-7.
+3. *Container Maze* [Container Maze, snow, 4 laps]: **Brick**, dock-union heavy hitter, never lifts, never moves over. Win: unlocks the Evo.
+4. *Yard Drift Night* [Container Drift, rain, no rivals]: 12,000 points to win the dock crews (a drift event on the maze).
+5. *Cliffside Run* [Cliffside Run, point-to-point, clear turning to snow at 35 s]: **Calloway**, heir to the north coast, owns the road and the guard rail. Win it (P1).
+6. *The Open Loop* [Kestrel Bay, rain turning to snow, Dante + the three bosses]: the Council meets at the Wall.
+
+**The choice (event 6, before the race).** Dante offers a sponsorship (garage safe, pit crew, a season, the livery). Switch/Cain wants the Loop open to everyone.
+- *Open the Loop to everyone* (`open`): Cain +2, Mara +1, Nova +1, Dante -2. Epilogue: crowds queue at the garage, Dante watches "politely".
+- *Accept Redline's sponsorship* (`sponsor`): Dante +2, Brick +1, Mara -1, Cain -2. Epilogue: Redline Racing starts, Mara "proud, and does not like it".
+Both lead to the same hook: Cain asks the Rookie to meet him at the lighthouse. The crash twelve years ago was not an accident.
+Flags and relationships (`career.flags`, `career.rel`, -5..5) are saved; the Crew screen shows the relationship bars from Chapter 2 on.
+
+**Characters in game.** 2D portraits with four expressions (neutral, smirk, angry, worried) in dialogue, the Crew screen and the
+versus screen before every race; low-poly 3D figures (Mara by the garage car, rivals leaning on their cars at the grid, Dante at the finale).
+Optional: Tripo GLBs for Dante and Mara (`public/models/characters/<id>.glb`) replace the procedural figures when present (loader hook is a TODO).
+
+## Chapter 3 outline: "Blood on the Wall" (not built)
+- **Act 1, the lighthouse.** Cain reveals the proof: a brake line cut the night of the crash, and the dock gate log that places
+  Dante at the quay. Cain cannot drive any more (his hands), so he rides along in the Rookie's radio: Switch becomes a co-driver
+  who calls corners (a live "pace note" feature).
+- **Act 2, short tracks.** The new Council holds short-circuit events across the city: tight alley circuits, a tram-depot night, a
+  rooftop car park (vertical map). Each unlocks a piece of evidence. Branch: with `open` the districts help (Nova's crew, Brick's
+  trucks); with `sponsor` the Rookie races in Redline black and gold and must decide when to betray the team.
+- **Act 3, the Final Loop.** One long race through all five districts, point-to-point, dusk to dawn (weather cycles). Dante's last
+  card: he did not cut the line, he *knew*. The truth is Calloway's father. Dante's endgame is to buy the Wall itself.
+- **Endings.** Win clean (Cain returns to drive one lap, Switch goes silent for the first time); or win the dirty way (Dante keeps the
+  Wall). Epilogue sets up Chapter 4 on the open road.
