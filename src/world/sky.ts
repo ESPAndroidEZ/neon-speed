@@ -17,10 +17,10 @@ void main(){
   vec3 c = mix(horizon, top, pow(smoothstep(0.0, 0.75, h), 0.65));
   c += horizon * 0.35 * exp(-abs(h) * 14.0); // horizon glow band
   // stars: hashed cells, twinkle, fade toward the horizon
-  vec2 sp = d.xz / (d.y + 0.25) * 90.0;
+  vec2 sp = d.xz / (d.y + 0.25) * 170.0;
   vec2 cell = floor(sp);
   float r = h21(cell);
-  float star = step(0.992, r) * smoothstep(0.1, 0.4, h) * (0.6 + 0.4 * sin(time * 2.0 + r * 60.0));
+  float star = step(0.9965, r) * smoothstep(0.1, 0.4, h) * (0.6 + 0.4 * sin(time * 2.0 + r * 60.0));
   c += vec3(0.8, 0.9, 1.0) * star * stars * 1.6;
   // two cloud layers lit from below by the city glow
   vec2 cp = d.xz / (d.y + 0.35);

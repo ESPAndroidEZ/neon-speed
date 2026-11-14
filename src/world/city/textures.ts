@@ -180,3 +180,29 @@ export function makeShopfrontTexture(): CanvasTexture {
   t.anisotropy = 4;
   return t;
 }
+
+/** Shipping-container side: vertical corrugation (with a matching normal map), door bars, rust streaks and a stencilled code. Greyscale paint: instance colours tint it. */
+export function makeContainerSheet(): { map: CanvasTexture; normalMap: CanvasTexture } {
+  const S = 256;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  const height = new Float32Array(N * N);
+  if (g) {
+    g.fillStyle = '#c8c8c8';
+    g.fillRect(0, 0, S, S);
+    for (let x = 0; x < S; x += 8) { g.fillStyle = x % 16 ? '#ffffff30' : '#00000038'; g.fillRect(x, 0, 4, S); }
+    g.fillStyle = '#00000050'; // frame and door seam
+    g.fillRect(0, 0, S, 6); g.fillRect(0, S - 6, S, 6); g.fillRect(S - 70, 6, 3, S - 12);
+    g.fillStyle = '#d0d0d0';
+    for (const x of [S - 56, S - 40, S - 24]) g.fillRect(x, 20, 3, S - 40); // locking bars
+    for (let i = 0; i < 34; i++) { g.fillStyle = `rgba(110,50,20,${0.05 + Math.random() * 0.12})`; g.fillRect(Math.random() * S, 0, 2 + Math.random() * 4, 40 + Math.random() * 150); }
+    g.fillStyle = '#f2f2f2';
+    g.font = '700 22px monospace';
+    g.fillText('RBLU 4417', 14, 40);
+    g.font = '700 11px monospace';
+    g.fillText('22G1  MAX 30480 KG', 14, 58);
+  }
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) height[y * N + x] = (Math.floor((x / N) * 64) % 2) * 0.9;
+  return { map: tex(c, true), normalMap: tex(normalFrom(height, 2), false) };
+}

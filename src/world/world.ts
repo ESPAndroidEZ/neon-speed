@@ -53,15 +53,15 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const open = def.theme === 'cliff'; // no street lamps or buildings: lean on moonlight
   const moon = new DirectionalLight(0x8fa4ff, open ? 1.6 : 0.7);
   moon.position.set(-60, 90, -40);
-  const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : 1.3);
+  const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : def.theme === 'port' ? 2.0 : 1.3);
   const pal = paletteOf(def.id);
   const sky = buildSky(pal);
   sky.setLook(look, pal);
   let clock = 0;
   // coloured rim lights from the district palette: key from one side, accent from the other (what makes facades and cars read)
-  const keyL = new DirectionalLight(pal.key, open ? 0.2 : 0.6);
+  const keyL = new DirectionalLight(pal.key, open ? 0.2 : def.theme === 'port' ? 1.2 : 0.6);
   keyL.position.set(-90, 38, 30);
-  const accL = new DirectionalLight(pal.accent[0], open ? 0.2 : 0.22);
+  const accL = new DirectionalLight(pal.accent[0], open ? 0.2 : def.theme === 'port' ? 0.6 : 0.22);
   accL.position.set(70, 30, -60);
   scene.add(root, hemi, moon, sky.group, keyL, accL);
   const visuals = new SurfaceVisuals(track, surfaces, root, env);

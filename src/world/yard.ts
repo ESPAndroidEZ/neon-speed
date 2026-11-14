@@ -1,4 +1,5 @@
 import { BoxGeometry, Color, Group, InstancedMesh, MeshStandardMaterial, Object3D } from 'three';
+import { makeContainerSheet } from './city/textures';
 import { createRng } from '../core/rng';
 import type { Track } from './track';
 
@@ -11,8 +12,9 @@ const COLORS = [0xb3262b, 0x2459a8, 0xd8a31a, 0x2f8f5b, 0x8a8f99, 0xe0662b, 0x6a
 export function buildYard(tr: Track, seed = 9): Group {
   const g = new Group();
   const rnd = createRng(seed);
+  const sheet = makeContainerSheet();
   const n = tr.samples.length;
-  const boxes = new InstancedMesh(new BoxGeometry(2.4, 2.6, 6.1), new MeshStandardMaterial({ roughness: 0.55, metalness: 0.4 }), 1600);
+  const boxes = new InstancedMesh(new BoxGeometry(2.4, 2.6, 6.1), new MeshStandardMaterial({ roughness: 0.5, metalness: 0.55, map: sheet.map, normalMap: sheet.normalMap, envMapIntensity: 0.6 }), 1600);
   const d = new Object3D();
   const c = new Color();
   let count = 0;
@@ -29,7 +31,7 @@ export function buildYard(tr: Track, seed = 9): Group {
         d.rotation.y = yaw;
         d.updateMatrix();
         boxes.setMatrixAt(count, d.matrix);
-        boxes.setColorAt(count, c.setHex(COLORS[Math.floor(rnd() * COLORS.length)]).multiplyScalar(0.8));
+        boxes.setColorAt(count, c.setHex(COLORS[Math.floor(rnd() * COLORS.length)]).multiplyScalar(1.05));
       }
     }
   }
