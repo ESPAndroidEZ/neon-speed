@@ -4,6 +4,7 @@ import { findCar, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
 import { WEATHER } from '../physics/weather';
 import type { Weather } from '../types/game';
+import type { CarVisual } from '../world/proceduralCar';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { button, h, injectCss, lapText, money } from './uiKit';
@@ -13,7 +14,13 @@ export interface MenuDeps {
   audio: AudioBus;
   engine: Engine;
   /** Show a car as the 3D backdrop. */
-  showroom: (car: CarSpec, paint: number) => void;
+  showroom: (car: CarSpec, paint: number, glow?: number) => void;
+  /** Slide the showroom car sideways on screen (garage panel sits on the left). */
+  shift: (metres: number) => void;
+  /** Visual of the car currently on show. */
+  visual: () => CarVisual | null;
+  /** Hook for when a GLB replaces the procedural body. */
+  onSwap: (fn: (() => void) | null) => void;
   /** Launch a race in this weather. */
   startRace: (w: Weather) => void;
 }
@@ -43,10 +50,11 @@ export class Menu {
 
   private backdrop(): void {
     const c = findCar(this.d.store.data.selected);
-    this.d.showroom(c, this.d.store.data.paint[c.id] ?? c.color);
+    this.d.showroom(c, this.d.store.data.paint[c.id] ?? c.color, this.d.store.data.glow[c.id]);
   }
 
-  private mount(el: HTMLElement, s: 'title' | 'main' | 'other'): void {
+  private mount(el: HTMLElement, s: 'title' | 'main' | 'other', shift = 0): void {
+    this.d.shift(shift);
     this.layer?.remove();
     this.cash?.remove();
     this.layer = el;
@@ -99,8 +107,8 @@ export class Menu {
   }
 
   garage(): void {
-    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, onBack: () => this.main() });
-    this.mount(el, 'other');
+    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: () => this.main() });
+    this.mount(el, 'other', window.innerWidth > 800 ? 1.9 : 0);
   }
 
   settings(): void {

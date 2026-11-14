@@ -9,6 +9,8 @@ export interface SaveData {
   selected: string;
   /** Paint per car id (0xRRGGBB). */
   paint: Record<string, number>;
+  /** Underglow colour per car id. */
+  glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
   settings: { volume: number; muted: boolean; quality: Quality };
@@ -30,6 +32,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   owned: [starterId],
   selected: starterId,
   paint: { [starterId]: starterPaint },
+  glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
   settings: { volume: 0.7, muted: false, quality: 'high' },
   races: 0,
@@ -57,6 +60,9 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.selected = typeof j.selected === 'string' && out.owned.includes(j.selected) ? j.selected : out.owned[0];
   if (typeof j.paint === 'object' && j.paint !== null) {
     for (const [id, c] of Object.entries(j.paint as Record<string, unknown>)) if (knownCars.includes(id)) out.paint[id] = num(c, 0xffffff, 0, 0xffffff);
+  }
+  if (typeof j.glow === 'object' && j.glow !== null) {
+    for (const [id, c] of Object.entries(j.glow as Record<string, unknown>)) if (knownCars.includes(id)) out.glow[id] = num(c, 0x2a6bff, 0, 0xffffff);
   }
   if (typeof j.bestLap === 'object' && j.bestLap !== null) {
     const b = j.bestLap as Record<string, unknown>;
@@ -113,6 +119,11 @@ export class SaveStore {
 
   setPaint(id: string, color: number): void {
     this.data.paint[id] = color;
+    this.commit();
+  }
+
+  setGlow(id: string, color: number): void {
+    this.data.glow[id] = color;
     this.commit();
   }
 

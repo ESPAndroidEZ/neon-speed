@@ -33,5 +33,5 @@ Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or 
 ## Owner decisions (fixed)
 - Name Racer's Blood. Real brands. Free Chapter 1 demo first, one city loop, short tracks later.
 - Rain and snow change grip and visibility (clear 1.0, rain 0.72, snow 0.45 to start, tuned live).
-- Minimise asset credits: 3 body-only generated cars, everything else procedural, plus a code-built fallback car.
+- Minimise asset credits: car bodies come from the FREE tier of Tripo3D (web UI, about 13 generations; Carlos generates them and drops GLBs into `public/models/{civic,350z,supra,evo,rx7}.glb`). Everything else procedural. No paid credits. The game must work without the GLBs (procedural fallback car) and pick them up automatically when present. (Decision 2026-11-14, feedback round 1.)
 - Qwen branches are `qwen/<task>`. Never merge without `/review-qwen`.

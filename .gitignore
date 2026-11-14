@@ -8,3 +8,4 @@ dist/
 .aider.input.history
 .aider.tags.cache.v*/
 .aider.llm.history
+assets-src/

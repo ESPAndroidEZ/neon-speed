@@ -13,6 +13,7 @@ import { Hud } from './ui/hud';
 import { Menu } from './ui/menu';
 import { ResultsScreen } from './ui/results';
 import { applySettings } from './ui/settings';
+import { preloadCarModels } from './world/carFactory';
 import { buildWorld } from './world/world';
 
 /* Bootstrap: engine, world, UI, save, audio, then the menu. Dev query flags: ?skip (straight to a race, no menu)
@@ -29,6 +30,7 @@ try {
 } catch {
   kv = null; // blocked storage: play without saving
 }
+preloadCarModels(CARS);
 const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map((c) => c.id));
 
 const engine = new Engine({ container });
@@ -52,7 +54,7 @@ panel.build();
 let firstRace = true;
 const launch = (w: Weather): void => {
   const car = findCar(q.get('car') ?? store.data.selected);
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, weather: w, laps: 3, cinematic: firstRace && !direct, agents: [] });
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: firstRace && !direct, agents: [] });
   firstRace = false;
 };
 game.onFinish = (r) => {
@@ -60,7 +62,14 @@ game.onFinish = (r) => {
 };
 menu = new Menu({
   store, audio: audio.bus, engine,
-  showroom: (c, p) => game.showroom(c, p),
+  showroom: (c, p, g) => game.showroom(c, p, g),
+  shift: (m) => {
+    game.showroomCam.shift = m;
+  },
+  visual: () => game.views.views[0]?.visual ?? null,
+  onSwap: (fn) => {
+    game.views.onSwap = fn ? () => fn() : null;
+  },
   startRace: (w) => {
     menu.hide();
     launch(w);
@@ -97,6 +106,7 @@ if (direct) {
   launch(game.weather);
   if (q.has('ff')) game.fastForward(Number(q.get('ff')));
 } else {
+  if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car
   menu.title();
   const scr = q.get('screen'); // dev: open a menu screen directly
   if (scr === 'garage') menu.garage();

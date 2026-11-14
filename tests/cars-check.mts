@@ -38,14 +38,23 @@ for (const spec of CARS) {
   res.push({ id: spec.id, t100: t, top, slip: peak });
   console.log(`${spec.id}: 0-100 ${t.toFixed(2)}s  top ${top.toFixed(0)} km/h  flick slip ${peak.toFixed(2)}`);
 }
-const [civic, z, supra] = res;
+const by = (id: string) => res.find((r) => r.id === id)!;
+const civic = by('civic');
+const z = by('350z');
+const supra = by('supra');
+const evo = by('evo');
+const rx7 = by('rx7');
+check('five cars', CARS.length === 5, `${CARS.length}`);
 check('civic 0-100 6.2-8 s', civic.t100 > 6.2 && civic.t100 < 8, civic.t100.toFixed(2));
 check('350Z 0-100 5.0-6.0 s', z.t100 > 5 && z.t100 < 6, z.t100.toFixed(2));
+check('rx7 0-100 4.8-5.8 s', rx7.t100 > 4.8 && rx7.t100 < 5.8, rx7.t100.toFixed(2));
+check('evo 0-100 4.2-5.2 s', evo.t100 > 4.2 && evo.t100 < 5.2, evo.t100.toFixed(2));
 check('supra 0-100 3.8-4.8 s', supra.t100 > 3.8 && supra.t100 < 4.8, supra.t100.toFixed(2));
-check('top speed ordered', civic.top < z.top && z.top < supra.top, `${civic.top.toFixed(0)} < ${z.top.toFixed(0)} < ${supra.top.toFixed(0)}`);
-check('civic top 190-230', civic.top > 190 && civic.top < 230, civic.top.toFixed(0));
-check('supra top <= 295', supra.top <= 295, supra.top.toFixed(0));
+check('civic is the slowest top speed, supra the fastest', res.every((r) => r.top >= civic.top) && res.every((r) => r.top <= supra.top), res.map((r) => r.top.toFixed(0)).join(' '));
+check('top speeds sane (190-295)', res.every((r) => r.top > 190 && r.top <= 295), '');
 check('all cars can start a drift (0.3-1.4 rad)', res.every((r) => r.slip >= 0.3 && r.slip <= 1.4), res.map((r) => r.slip.toFixed(2)).join(' '));
-check('prices ascend, starter free', CARS[0].price === 0 && CARS[1].price < CARS[2].price, '');
+check('evo has the most rear grip, civic the least', CARS.find((c) => c.id === 'evo')!.tuning.gripRear! >= Math.max(...CARS.map((c) => c.tuning.gripRear ?? 1.25)) && CARS[0].tuning.gripRear! <= Math.min(...CARS.map((c) => c.tuning.gripRear ?? 1.25)), '');
+check('prices ascend, starter free', CARS[0].price === 0 && CARS.every((c, i) => i === 0 || c.price > CARS[i - 1].price), '');
+check('unique ids', new Set(CARS.map((c) => c.id)).size === CARS.length, '');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

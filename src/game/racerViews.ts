@@ -1,7 +1,8 @@
 import { Group, type Scene, type Texture } from 'three';
 import type { CarSpec } from '../data/cars';
 import type { Racer } from '../core/raceManager';
-import { buildProceduralCar, type CarVisual } from '../world/proceduralCar';
+import { createCarVisual } from '../world/carFactory';
+import type { CarVisual } from '../world/proceduralCar';
 
 export interface RacerView {
   racer: Racer;
@@ -18,6 +19,8 @@ export interface RacerView {
 /** One visual car per racer, posed by interpolating the physics state between fixed steps. */
 export class RacerViews {
   readonly views: RacerView[] = [];
+  /** Fired after a GLB replaces a procedural body (the garage re-applies calibration state). */
+  onSwap: ((v: RacerView) => void) | null = null;
   private readonly scene: Scene;
   private readonly env: Texture;
   private readonly tmp = { x: 0, y: 0, z: 0 };
@@ -27,15 +30,24 @@ export class RacerViews {
     this.env = env;
   }
 
-  add(racer: Racer, spec: CarSpec, paint: number): RacerView {
+  add(racer: Racer, spec: CarSpec, paint: number, glow = 0x2a6bff): RacerView {
     const holder = new Group();
-    const visual = buildProceduralCar(spec.shape, paint);
-    visual.setEnv(this.env);
+    let v: RacerView;
+    const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv));
     holder.add(visual.root);
     this.scene.add(holder);
-    const v: RacerView = { racer, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };
+    v = { racer, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };
     this.views.push(v);
     return v;
+  }
+
+  /** Replace a car's visual in place (procedural body -> loaded GLB). */
+  private swap(v: RacerView, nv: CarVisual): void {
+    if (!this.views.includes(v)) return;
+    v.holder.remove(v.visual.root);
+    v.holder.add(nv.root);
+    v.visual = nv;
+    this.onSwap?.(v);
   }
 
   clear(): void {

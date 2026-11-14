@@ -4,8 +4,17 @@ import { bodyShell, cabin, roofSpan, type BodyShape } from './carBody';
 
 const bright = (hex: number, k: number): Color => new Color(hex).multiplyScalar(k);
 
+/** Present on GLB-based cars: lets the garage fix a model that faces the wrong way. */
+export interface Calibration {
+  getYaw(): number;
+  setYaw(rad: number): void;
+  /** Show an arrow in front of the car pointing along the game's nose direction (+Z). */
+  setArrow(on: boolean): void;
+}
+
 export interface CarVisual {
   root: Group;
+  calibrate?: Calibration;
   /** Rear exhaust tips and tyre contact points in car space, for smoke, flames and skid marks. */
   exhaust: readonly Object3D[];
   rearWheels: readonly Object3D[];

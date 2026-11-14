@@ -18,6 +18,7 @@ import { ShowroomCam } from './showroomCam';
 export interface RaceSetup {
   car: CarSpec;
   paint: number;
+  glow?: number;
   weather: Weather;
   laps: number;
   /** Play the intro cinematic first (otherwise straight to the countdown). */
@@ -59,7 +60,7 @@ export class Game {
   private intro: CinematicCam | null = null;
   private setup: RaceSetup | null = null;
   private readonly bg = new Color();
-  private readonly showroomCam = new ShowroomCam();
+  readonly showroomCam = new ShowroomCam();
 
   constructor(d: GameDeps) {
     this.d = d;
@@ -97,7 +98,7 @@ export class Game {
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
     // views in racer order so index lines up
-    this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint)));
+    this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint)));
     this.setWeather(s.weather);
     this.rm.place();
     this.views.update(0, 0);
@@ -116,14 +117,14 @@ export class Game {
   }
 
   /** Menu / garage backdrop: the car alone on the grid while the camera orbits it. */
-  showroom(car: CarSpec, paint: number): void {
+  showroom(car: CarSpec, paint: number, glow?: number): void {
     this.state = 'MENU';
     this.d.results.hide();
     this.views.clear();
     this.rm = new RaceManager(this.d.world.track, 3);
     applyTuning(this.d.tuning, car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
-    this.views.add(this.rm.player, car, paint);
+    this.views.add(this.rm.player, car, paint, glow);
     this.rm.place();
     this.views.update(0, 0);
   }

@@ -111,6 +111,9 @@ Everything else (more cars, more tracks) is content and comes last.
 5. **Assets (Claude's call):** minimise credits. 3 body-only cars from one service (Tripo; test one on the free tier before subscribing), everything else procedural (wheels, buildings, rain, snow, underglow, decals). A code-built low-poly fallback car means the game never blocks on assets.
 6. **Name:** Racer's Blood. Real car brands are used. Brand names and logos live in one data file (`src/data/cars.ts`) so they can be swapped for fictional ones if the demo is shared publicly.
 
+7. **Car models (2026-11-14, supersedes 5):** FREE Tripo3D tier only (about 13 generations, web UI). Carlos generates the GLBs and drops them in `public/models/{civic,350z,supra,evo,rx7}.glb`; the loader normalises them and falls back to the procedural car when a file is missing. Brief: `docs/assets/tripo-brief.md`.
+8. **Feedback round 1:** five cars, a narrow street circuit (Kestrel Bay Streets), AI rivals, Chapter 1 story mode, UI margin fixes.
+
 Story and cinematic script: `docs/story.md`.
 
 ## 9. Weekend schedule (Sat 14 Nov to Sun 15 Nov)

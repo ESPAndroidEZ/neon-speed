@@ -13,7 +13,7 @@ const CSS = `
 .rb-cash{position:fixed;right:24px;top:18px;font-size:22px;color:#7dff9a;z-index:31}
 .rb-bar{height:7px;width:180px;background:#ffffff22;border-radius:4px;overflow:hidden}
 .rb-bar i{display:block;height:100%;background:linear-gradient(90deg,#18d8ff,#ff2a9d)}
-.rb-sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff6;cursor:pointer}
+.rb-sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff6;cursor:pointer}
 .rb-sw.on{border-color:#fff;box-shadow:0 0 10px #fff}
 `;
 

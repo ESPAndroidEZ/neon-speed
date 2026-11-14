@@ -17,14 +17,14 @@ Juice + audio (step 4): src/fx/ (smoke, skid marks, sparks, nitro flames, speed 
 
 Menu + progression (step 5): title, main, conditions, garage (buy/paint), settings, save (localStorage), quality tiers. tests/save-check.
 
+Feedback round 1, steps 1-2 (GLB pipeline, 5 cars): assetLoader (task 001 done by Claude), modelCar, carFactory, garage rewrite (stats, paint, underglow, yaw calibration), scripts/optimize-models.sh, docs/assets/tripo-brief.md.
+
 ## Next (Claude)
 Playtest feedback from Carlos: tune `carTuning.ts`, per-car overrides in `data/cars.ts`, chase cam, audio levels. Then wire Qwen's AI, weather FX and touch controls after `/review-qwen`. Upgrades (plan phase 5) and Capacitor (phase 6) still to do.
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`; tasks updated to the final code, in this order)
-- 002 `src/physics/aiRacers.ts` + `tests/ai-check.mts` (AI opponents; I wire them into `Game.startRace` after review)
 - 004 `src/world/weatherFx.ts` (rain streaks, snow flakes; hooked from `Game.setWeather` and the frame loop after review)
 - 003 `src/ui/touchControls.ts` (touch overlay; `setVisible` hidden in menus)
-- 001 `src/world/assetLoader.ts` (optional: only for a future .glb body)
 
 ## Open contract requests
 None. Contract change logged: `GameState` gained `'MENU'` (src/types/game.ts), step 5.
@@ -39,3 +39,4 @@ None. Contract change logged: `GameState` gained `'MENU'` (src/types/game.ts), s
 - 2026-11-14 Claude: step 4 juice + audio done (fx/, audio/, tests/audio-check).
 - 2026-11-14 Claude: step 5 menu + progression done (ui/menu, garage, settings, core/save, quality). Contract: GameState += 'MENU'.
 - 2026-11-14 Claude: step 6 docs done; Qwen tasks 002/004/003/001 updated to final code. Baton stays with Claude.
+- 2026-11-14 Claude: feedback round 1 steps 1+2: GLB pipeline with procedural fallback, 5 cars (Civic, 350Z, RX-7, Evo VIII, Supra), garage with turntable, stats, paint, underglow, yaw calibration.

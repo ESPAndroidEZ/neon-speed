@@ -24,8 +24,11 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   `harborLoop` (the circuit), `ribbon`/`trackMesh` (road, kerbs, barriers, neon caps), `city` (instanced
   buildings), `streetFurniture` (lamps, light pools, neon signs), `harbor` (quay, containers, cranes, water),
   `envMap` (fake neon reflection probe), `worldLook` (WeatherProfile -> materials), `world` (assembler).
-- `data/cars.ts`: car specs (real names only here), CarTuning overrides, BodyShape, prices, paints.
+- `data/cars.ts`: 5 car specs (real names only here), CarTuning overrides, BodyShape, model config, prices, paints, underglow colours.
+- `physics/carStats`: headless 0-100 / top speed / slide measurement used by the garage bars and tests.
 - `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.
+- `world/assetLoader` (GLB normalise: long axis Z, scale, ground, yaw; body-material finder), `modelCar` (CarVisual for baked GLBs, no wheel spin, calibration arrow),
+  `carFactory` (procedural first, upgraded to public/models/<id>.glb when it loads), `modelPrefs` (yaw fixes in localStorage).
 - `core/save` (SaveStore: cash, owned cars, paint, best lap per weather, settings; sanitising parse, injectable storage),
   `core/quality` (low/medium/high render scale + bloom).
 - `ui/`: `menu` (title, main, conditions), `garage` (cars, paint, buy), `settings` (volume, mute, quality), `uiKit` (CSS + helpers), `hud`, `results`.
