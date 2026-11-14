@@ -129,7 +129,7 @@ menu = new Menu({
 const subs = new Subtitles(voice);
 story = new StoryController({
   game, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
-  hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: () => menu.showEnding(),
+  hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
   onResume: () => pause.resume(),

@@ -1,9 +1,10 @@
-import { completeEvent, driftCash, evaluate, isDone } from '../core/career';
+import { applyChoice, completeEvent, driftCash, evaluate, isDone, playable, storyComplete } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { buildField, findRival } from '../data/rivals';
-import { EVENTS, findEvent, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
+import { EVENTS, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
+import { findAnyEvent as findEvent } from '../data/story2';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
 import type { TitleCards } from '../ui/titleCards';
 import { PREVIOUSLY } from '../data/lore';
@@ -21,7 +22,7 @@ export interface StoryDeps {
   hideMenu: () => void;
   /** Back to the chapter screen / ending card. */
   showStory: () => void;
-  showEnding: () => void;
+  showEnding: (chapter: number) => void;
 }
 
 /** Runs Chapter 1 as a career: dialogue, race setup per event, objective check, rewards, unlocks and the ending. */
@@ -37,6 +38,11 @@ export class StoryController {
       if (this.current) d.subs.schedule(OPENING_CAPTIONS);
     };
     g.onIntroEnd = () => d.subs.clear();
+    d.dialogue.onChoose = (opt) => {
+      const reply = applyChoice(d.store.data.career, opt);
+      d.store.commit();
+      return playable(reply, d.store.data.career);
+    };
     g.onCountdown = () => {
       if (this.current) d.subs.flash(this.current.card, 3.2);
     };
@@ -56,9 +62,9 @@ export class StoryController {
     const first = !save.career.seenIntro && save.career.completed.length === 0 && ev.id === EVENTS[0].id;
     const player = findCar(ev.carId ?? save.selected);
     // finale cutscene: Dante's car on show while he talks; otherwise your own
-    if (ev.id === 'finale') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
+    if (ev.id === 'finale' || ev.id === 'c2-final') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
     else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
-    const lines = first ? [...INTRO_LINES, ...ev.before] : ev.before;
+    const lines = playable(first ? [...INTRO_LINES, ...ev.before] : ev.before, save.career);
     const run = (): void => d.dialogue.play(lines, () => this.launch(ev, first));
     if (first) d.cards.play(PREVIOUSLY, run); // skippable "Previously in Kestrel Bay" cards before the intro
     else run();
@@ -73,7 +79,7 @@ export class StoryController {
       d.store.commit();
     }
     d.game.startRace({
-      car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, cinematic,
+      car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, trackId: ev.trackId, cinematic,
       weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale, ev.weather !== 'CLEAR'),
       meta: { rivalIds: ev.rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id },
     });
@@ -110,13 +116,17 @@ export class StoryController {
   private after(ev: StoryEvent, won: boolean): void {
     const d = this.d;
     d.results.hide();
-    d.dialogue.play(won ? ev.afterWin : ev.afterLose, () => {
+    d.dialogue.play(playable(won ? ev.afterWin : ev.afterLose, d.store.data.career), () => {
       if (!won) this.launch(ev, false);
-      else if (isDone(d.store.data.career) && !d.store.data.career.endingSeen) {
+      else if (storyComplete(d.store.data.career) && !d.store.data.career.epilogueSeen) {
+        d.store.data.career.epilogueSeen = true;
+        d.store.commit();
+        d.showEnding(2);
+      } else if (isDone(d.store.data.career) && !d.store.data.career.endingSeen) {
         d.store.data.career.endingSeen = true;
         d.store.commit();
         d.game.showroom(findCar(d.store.data.selected), 0xe8e8ee);
-        d.showEnding();
+        d.showEnding(1);
       } else this.leave();
     });
   }

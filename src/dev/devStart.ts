@@ -2,7 +2,7 @@ import { findTrackDef } from '../data/tracks';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { freeRaceField } from '../data/rivals';
-import { findEvent } from '../data/story';
+import { findAnyEvent as findEvent } from '../data/story2';
 import type { Juice } from '../fx/juice';
 import type { Game } from '../game/game';
 import type { PauseController } from '../game/pause';

@@ -1,7 +1,7 @@
 import { SAVE_VERSION, type GameSnapshot } from '../core/gameSave';
 import { findCar } from '../data/cars';
 import { buildField } from '../data/rivals';
-import { findEvent } from '../data/story';
+import { findAnyEvent as findEvent } from '../data/story2';
 import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Weather } from '../types/game';
 import type { Game } from './game';

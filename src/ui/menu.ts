@@ -131,8 +131,8 @@ export class Menu {
     this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other');
   }
 
-  showEnding(): void {
-    this.mount(buildEnding(() => this.main()), 'other');
+  showEnding(chapter = 1): void {
+    this.mount(buildEnding(this.d.store.data.career, chapter, () => this.main()), 'other');
   }
 
   maps(): void {

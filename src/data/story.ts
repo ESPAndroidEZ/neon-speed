@@ -1,12 +1,34 @@
 import type { Weather } from '../types/game';
 
-export type Speaker = 'switch' | 'mara' | 'dante' | 'rookie' | 'vex' | 'jinx' | 'tank' | 'cain' | 'narrator';
+export type Speaker = 'switch' | 'mara' | 'dante' | 'rookie' | 'vex' | 'jinx' | 'tank' | 'cain' | 'narrator' | 'nova' | 'brick' | 'calloway' | 'pixel' | 'lola' | 'rook';
+
+export type Mood = 'neutral' | 'smirk' | 'angry' | 'worried';
+
+/** One of two answers in a branching line. `set` writes story flags, `rel` shifts relationship values, `reply` plays next. */
+export interface ChoiceOption {
+  label: string;
+  set?: Record<string, boolean>;
+  rel?: Record<string, number>;
+  reply: Line[];
+}
+
+export interface Choice {
+  prompt: string;
+  options: [ChoiceOption, ChoiceOption];
+}
 
 export interface Line {
   who: Speaker;
   text: string;
   /** Shown as a phone call (Mara). */
   phone?: boolean;
+  /** Face shown in the portrait (default neutral). */
+  mood?: Mood;
+  /** Only played when this story flag is set (`if`) or not set (`unless`). */
+  if?: string;
+  unless?: string;
+  /** After this line the player picks one of two answers. */
+  choice?: Choice;
 }
 
 export const SPEAKERS: Record<Speaker, { name: string; color: number }> = {
@@ -19,10 +41,20 @@ export const SPEAKERS: Record<Speaker, { name: string; color: number }> = {
   tank: { name: 'Tank', color: 0x8a8f99 },
   cain: { name: 'Cain Vega', color: 0xffd27d },
   narrator: { name: '', color: 0xffffff },
+  nova: { name: 'Nova', color: 0xff4fa3 },
+  brick: { name: 'Brick', color: 0xc77b1a },
+  calloway: { name: 'Calloway', color: 0xdfe6f2 },
+  pixel: { name: 'Pixel', color: 0x6cf2ff },
+  lola: { name: 'Lola', color: 0xff7aa8 },
+  rook: { name: 'Rook', color: 0x9aa4b2 },
 };
 
 export interface StoryEvent {
   id: string;
+  /** Chapter number (1 when omitted). */
+  chapter?: number;
+  /** Map the event is driven on (Kestrel Bay when omitted). */
+  trackId?: string;
   title: string;
   blurb: string;
   kind: 'race' | 'drift';
@@ -126,6 +158,6 @@ export const EVENTS: StoryEvent[] = [
   },
 ];
 
-export const ENDING = { title: 'Chapter 2: Short Tracks', text: 'Coming soon. Tell us what you thought of Chapter 1.', link: 'feedback link goes here' };
+export const ENDING = { title: 'Chapter 2: Redline Rising', text: 'Dante has the money. The street has the votes. Chapter 2 is open in the Story menu.' };
 
 export const findEvent = (id: string): StoryEvent => EVENTS.find((e) => e.id === id) ?? EVENTS[0];

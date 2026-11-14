@@ -1,38 +1,20 @@
-import { SPEAKERS, type Line, type Speaker } from '../data/story';
+import { SPEAKERS, type ChoiceOption, type Line, type Speaker } from '../data/story';
+import { portraitEl } from './portraits';
+import { Voice } from './subtitles';
 import { h, injectCss } from './uiKit';
+
+export { Subtitles, Voice, type Caption } from './subtitles';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 
-/** Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. */
-export class Voice {
-  enabled = false;
-
-  say(text: string): void {
-    if (!this.enabled || typeof speechSynthesis === 'undefined') return;
-    try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.pitch = 0.6;
-      u.rate = 0.95;
-      const v = speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang) && /male|david|daniel|alex|google uk english male/i.test(x.name));
-      if (v) u.voice = v;
-      speechSynthesis.speak(u);
-    } catch {
-      /* speech is a bonus: ignore failures */
-    }
-  }
-
-  stop(): void {
-    try {
-      if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
-    } catch {
-      /* ignore */
-    }
-  }
-}
-
-/** Speaker card with an initial avatar, typewriter text, click / Enter / Space to advance, Esc to skip all. */
+/**
+ * Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / Space to advance and Esc to skip.
+ * A line with a `choice` stops on two buttons: skipping jumps to the question but never answers it.
+ * `onChoose` applies the answer (story flags, relationships) and returns the reply lines to play next.
+ */
 export class DialogueBox {
+  /** Called with the picked option; returns the lines to play next (default: the option's own reply). */
+  onChoose: ((opt: ChoiceOption) => readonly Line[]) | null = null;
   private readonly voice: Voice;
   private layer: HTMLElement | null = null;
   private lines: readonly Line[] = [];
@@ -41,6 +23,8 @@ export class DialogueBox {
   private typing: number | null = null;
   private full = '';
   private textEl: HTMLElement | null = null;
+  private asking = false;
+  private readonly answered = new Set<Line>();
 
   constructor(voice: Voice) {
     injectCss();
@@ -50,7 +34,7 @@ export class DialogueBox {
       if (e.code === 'Enter' || e.code === 'Space') {
         e.preventDefault();
         this.advance();
-      } else if (e.code === 'Escape') this.finish();
+      } else if (e.code === 'Escape') this.skip();
     });
   }
 
@@ -79,19 +63,19 @@ export class DialogueBox {
   private show(): void {
     const l = this.lines[this.idx];
     const sp: { name: string; color: number } = SPEAKERS[l.who as Speaker];
+    this.asking = false;
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:pointer;display:flex;gap:16px;align-items:center;text-align:left;width:min(720px,92vw);box-sizing:border-box;border-color:${hex(sp.color)}88`;
-    const avatar = h('div', '', l.who === 'narrator' ? '' : (sp.name[0] ?? '?'));
-    avatar.style.cssText = `flex:none;width:56px;height:56px;border-radius:50%;display:${l.who === 'narrator' ? 'none' : 'flex'};align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#05060d;background:${hex(sp.color)};box-shadow:0 0 18px ${hex(sp.color)}88`;
     const body = h('div');
     const head = h('div', 'rb-sub', l.phone ? `\u{1F4DE} ${sp.name} (phone)` : sp.name);
     head.style.color = hex(sp.color);
     this.textEl = h('div');
     this.textEl.style.cssText = 'font-size:18px;line-height:1.4;min-height:50px';
-    const hint = h('div', 'rb-sub', 'Enter / click to continue · Esc to skip');
+    const hint = h('div', 'rb-sub', l.choice ? 'Enter to answer' : 'Enter / click to continue · Esc to skip');
     hint.style.cssText += ';font-size:11px;opacity:.5;margin-top:6px';
     body.append(head, this.textEl, hint);
-    card.append(avatar, body);
+    if (l.who !== 'narrator') card.append(portraitEl(l.who, l.mood ?? 'neutral', 76));
+    card.append(body);
     this.layer?.replaceChildren(card);
     if (l.who === 'switch') this.voice.say(l.text);
     this.type(l.text);
@@ -112,14 +96,54 @@ export class DialogueBox {
   }
 
   private advance(): void {
+    if (this.asking) return;
     if (this.typing !== null) {
       clearInterval(this.typing);
       this.typing = null;
       if (this.textEl) this.textEl.textContent = this.full;
       return;
     }
+    const l = this.lines[this.idx];
+    if (l.choice && !this.answered.has(l)) {
+      this.ask(l);
+      return;
+    }
     if (++this.idx >= this.lines.length) this.finish();
     else this.show();
+  }
+
+  /** Two answer buttons under the question; a pick plays the reply and carries on. */
+  private ask(l: Line): void {
+    const c = l.choice;
+    if (!c) return;
+    this.asking = true;
+    const row = h('div', 'rb-row');
+    row.style.cssText += ';margin-top:10px;justify-content:flex-start';
+    c.options.forEach((opt, k) => {
+      const b = h('button', `rb-btn${k === 0 ? ' hot' : ''}`, opt.label);
+      b.style.minWidth = '0';
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const reply = this.onChoose?.(opt) ?? opt.reply;
+        this.answered.add(l);
+        this.lines = [...this.lines.slice(0, this.idx + 1), ...reply, ...this.lines.slice(this.idx + 1)];
+        this.asking = false;
+        this.advance();
+      });
+      row.append(b);
+    });
+    this.layer?.firstElementChild?.lastElementChild?.append(h('div', 'rb-sub', c.prompt), row);
+  }
+
+  /** Esc: skip ahead, but stop at the next unanswered question. */
+  private skip(): void {
+    if (this.asking) return;
+    const q = this.lines.findIndex((x, i) => i >= this.idx && x.choice && !this.answered.has(x));
+    if (q < 0) this.finish();
+    else if (q > this.idx) {
+      this.idx = q;
+      this.show();
+    }
   }
 
   private finish(): void {
@@ -135,58 +159,6 @@ export class DialogueBox {
     this.layer?.remove();
     this.layer = null;
     this.done = null;
-  }
-}
-
-export interface Caption {
-  at: number;
-  dur: number;
-  text: string;
-  kind: 'switch' | 'lower' | 'title';
-}
-
-/** Timed captions over the opening cinematic, plus one-off subtitle lines (race intro cards). */
-export class Subtitles {
-  private readonly layer = h('div');
-  private readonly timers: number[] = [];
-  private readonly voice: Voice;
-
-  constructor(voice: Voice) {
-    injectCss();
-    this.voice = voice;
-    this.layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:25;font:700 20px system-ui,sans-serif;color:#fff;text-shadow:0 0 10px #000';
-    document.body.appendChild(this.layer);
-  }
-
-  schedule(list: readonly Caption[]): void {
-    this.clear();
-    for (const c of list) {
-      this.timers.push(window.setTimeout(() => this.flash(c.text, c.dur, c.kind), c.at * 1000));
-    }
-  }
-
-  /** Show a single line for `dur` seconds. */
-  flash(text: string, dur: number, kind: Caption['kind'] = 'switch'): void {
-    const el = h('div', '', text);
-    const styles: Record<Caption['kind'], string> = {
-      switch: 'position:absolute;left:0;right:0;bottom:14%;text-align:center;font-size:clamp(18px,3vw,28px);font-style:italic;color:#9fe8ff',
-      lower: 'position:absolute;left:max(24px,4vw);bottom:22%;font-size:clamp(16px,2.4vw,22px);letter-spacing:2px;padding:8px 14px;background:#05060d99;border-left:3px solid #ff2a9d',
-      title: 'position:absolute;left:0;right:0;top:34%;text-align:center;font-size:clamp(40px,9vw,96px);font-style:italic;font-weight:900;text-shadow:0 0 18px #ff2a9d,0 0 50px #18d8ff',
-    };
-    el.style.cssText = `${styles[kind]};opacity:0;transition:opacity .25s`;
-    this.layer.appendChild(el);
-    requestAnimationFrame(() => (el.style.opacity = '1'));
-    if (kind === 'switch') this.voice.say(text.replace(/^DJ SWITCH:\s*/, ''));
-    this.timers.push(
-      window.setTimeout(() => (el.style.opacity = '0'), Math.max(0, dur * 1000 - 250)),
-      window.setTimeout(() => el.remove(), dur * 1000 + 100),
-    );
-  }
-
-  clear(): void {
-    for (const t of this.timers) clearTimeout(t);
-    this.timers.length = 0;
-    this.layer.replaceChildren();
-    this.voice.stop();
+    this.asking = false;
   }
 }

@@ -1,4 +1,5 @@
-import { EVENTS, type StoryEvent } from '../data/story';
+import { EVENTS, type ChoiceOption, type Line, type StoryEvent } from '../data/story';
+import { ALL_EVENTS } from '../data/story2';
 import type { SaveData } from './save';
 
 /** Story progress, stored inside the save. Pure functions over SaveData so they can be tested without a browser. */
@@ -7,16 +8,38 @@ export interface CareerState {
   completed: string[];
   seenIntro: boolean;
   endingSeen: boolean;
+  /** Chapter 2 epilogue card seen. */
+  epilogueSeen: boolean;
+  /** Story flags set by dialogue choices (open, sponsor ...). */
+  flags: Record<string, boolean>;
+  /** Relationship values, -5..5, per character id (mara, cain, dante, nova, brick ...). */
+  rel: Record<string, number>;
 }
 
-export const defaultCareer = (): CareerState => ({ completed: [], seenIntro: false, endingSeen: false });
+export const defaultCareer = (): CareerState => ({ completed: [], seenIntro: false, endingSeen: false, epilogueSeen: false, flags: {}, rel: {} });
 
-/** The next event to play, or null when the chapter is complete. */
+/** The next event to play over both chapters, or null when the story is complete. */
 export function nextEvent(c: CareerState): StoryEvent | null {
-  return EVENTS.find((e) => !c.completed.includes(e.id)) ?? null;
+  return ALL_EVENTS.find((e) => !c.completed.includes(e.id)) ?? null;
 }
 
-export const isDone = (c: CareerState): boolean => nextEvent(c) === null;
+/** Chapter 1 complete (its end card follows). */
+export const isDone = (c: CareerState): boolean => EVENTS.every((e) => c.completed.includes(e.id));
+
+/** Chapter 2 complete: the epilogue follows the flag the player chose. */
+export const storyComplete = (c: CareerState): boolean => nextEvent(c) === null;
+
+/** Drop the lines whose story flag condition is not met. */
+export const playable = (lines: readonly Line[], c: CareerState): Line[] => lines.filter((l) => (!l.if || c.flags[l.if]) && (!l.unless || !c.flags[l.unless]));
+
+export const clampRel = (v: number): number => Math.max(-5, Math.min(5, v));
+
+/** Apply a dialogue choice: set its flags and shift relationship values. Returns the option's reply lines. */
+export function applyChoice(c: CareerState, opt: ChoiceOption): ChoiceOption['reply'] {
+  for (const [k, v] of Object.entries(opt.set ?? {})) c.flags[k] = v;
+  for (const [k, v] of Object.entries(opt.rel ?? {})) c.rel[k] = clampRel((c.rel[k] ?? 0) + v);
+  return opt.reply;
+}
 
 /** An event is playable if it is already passed (replay) or it is the next one. */
 export const isUnlocked = (c: CareerState, id: string): boolean => c.completed.includes(id) || nextEvent(c)?.id === id;

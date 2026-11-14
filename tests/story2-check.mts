@@ -1,0 +1,58 @@
+import { applyChoice, completeEvent, defaultCareer, evaluate, isDone, nextEvent, playable, storyComplete } from '../src/core/career.ts';
+import { defaultSave, SaveStore, type KeyValueStore } from '../src/core/save.ts';
+import { CARS } from '../src/data/cars.ts';
+import { LOOKS } from '../src/data/characters.ts';
+import { RIVALS } from '../src/data/rivals.ts';
+import { EVENTS, SPEAKERS, type Line } from '../src/data/story.ts';
+import { ALL_EVENTS, eventsOf } from '../src/data/story2.ts';
+import { TRACKS } from '../src/data/tracks/index.ts';
+
+let failed = 0;
+const check = (n: string, ok: boolean, i = ''): void => {
+  if (!ok) failed++;
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}  (${i})`);
+};
+const ch2 = eventsOf(2);
+const all = (e: (typeof ALL_EVENTS)[number]): Line[] => [...e.before, ...e.afterWin, ...e.afterLose, ...e.before.flatMap((l) => l.choice?.options.flatMap((o) => o.reply) ?? [])];
+check('chapter 2 has six events after the four of chapter 1', ch2.length === 6 && ALL_EVENTS.length === 10 && eventsOf(1).length === 4, ch2.map((e) => e.id).join());
+check('every chapter 2 event uses real rivals, maps and cars', ch2.every((e) => e.rivals.every((r) => RIVALS.some((x) => x.id === r)) && (!e.trackId || TRACKS.some((t) => t.id === e.trackId)) && e.unlocks.every((u) => CARS.some((c) => c.id === u))), '');
+check('new districts use the new maps', ['neon', 'maze', 'cliff', 'maze-drift'].every((id) => ch2.some((e) => e.trackId === id)), '');
+check('district bosses are on their maps', ch2.find((e) => e.trackId === 'neon')!.rivals.includes('nova') && ch2.find((e) => e.trackId === 'maze')!.rivals.includes('brick') && ch2.find((e) => e.trackId === 'cliff')!.rivals.includes('calloway'), '');
+check('sprint and drift events match their maps', ch2.find((e) => e.trackId === 'cliff')!.laps === 1 && ch2.find((e) => e.trackId === 'maze-drift')!.kind === 'drift', '');
+check('every speaker has a name and a look', ALL_EVENTS.every((e) => all(e).every((l) => SPEAKERS[l.who] && (l.who === 'narrator' || LOOKS[l.who]))), '');
+check('lines are short, PG and non-empty', ALL_EVENTS.every((e) => all(e).every((l) => l.text.length > 3 && l.text.length < 260)), '');
+const fin = ch2[ch2.length - 1];
+const q = fin.before.find((l) => l.choice)!;
+check('the finale asks one question with two answers', !!q && q.choice!.options.length === 2 && q.choice!.options.every((o) => o.label.length > 3 && o.reply.length > 0), '');
+check('answers set exclusive flags', !!q.choice!.options[0].set?.open && !!q.choice!.options[1].set?.sponsor, '');
+check('the epilogue has lines for both branches', fin.afterWin.some((l) => l.if === 'open') && fin.afterWin.some((l) => l.if === 'sponsor'), '');
+// dialogue state
+const c = defaultCareer();
+const open = applyChoice(c, q.choice!.options[0]);
+check('choosing sets flags and relationships', c.flags.open === true && !c.flags.sponsor && c.rel.cain === 2 && c.rel.dante === -2 && open.length > 0, JSON.stringify(c.rel));
+const lines = playable(fin.afterWin, c);
+check('the epilogue follows the choice', lines.some((l) => l.if === 'open') && !lines.some((l) => l.if === 'sponsor') && lines.some((l) => !l.if), `${lines.length} lines`);
+const c2 = defaultCareer();
+applyChoice(c2, q.choice!.options[1]);
+check('the other branch plays the other epilogue', playable(fin.afterWin, c2).some((l) => l.if === 'sponsor') && !playable(fin.afterWin, c2).some((l) => l.if === 'open'), '');
+for (let k = 0; k < 4; k++) applyChoice(c, q.choice!.options[0]);
+check('relationships are clamped to -5..5', c.rel.cain === 5 && c.rel.dante === -5, `${c.rel.cain} ${c.rel.dante}`);
+// career order and save round-trip
+const mem: Record<string, string> = {};
+const kv: KeyValueStore = { getItem: (k) => mem[k] ?? null, setItem: (k, v) => void (mem[k] = v), removeItem: (k) => void delete mem[k] };
+const store = new SaveStore(kv, defaultSave('civic', 0xffffff), CARS.map((x) => x.id));
+for (const e of EVENTS) completeEvent(store.data, e);
+check('chapter 1 done opens chapter 2', isDone(store.data.career) && nextEvent(store.data.career)?.id === 'c2-redline' && !storyComplete(store.data.career), '');
+applyChoice(store.data.career, q.choice!.options[1]);
+store.commit();
+const again = new SaveStore(kv, defaultSave('civic', 0xffffff), CARS.map((x) => x.id));
+check('flags and relationships survive a save', again.data.career.flags.sponsor === true && again.data.career.rel.dante === 2, JSON.stringify(again.data.career));
+const key = Object.keys(mem)[0];
+mem[key] = mem[key].replace('"sponsor":true', '"sponsor":"yes"').replace('"dante":2', '"dante":99');
+const bad = new SaveStore(kv, defaultSave('civic', 0xffffff), CARS.map((x) => x.id));
+check('bad stored flags are ignored and values clamped', !bad.data.career.flags.sponsor && bad.data.career.rel.dante === 5, JSON.stringify(bad.data.career.flags));
+for (const e of ch2) completeEvent(store.data, e);
+check('finishing chapter 2 completes the story and unlocks RX-7 and Evo', storyComplete(store.data.career) && store.owns('rx7') && store.owns('evo'), '');
+check('objectives: finale needs top two, cliff needs the win', evaluate(fin, 2, 0).passed && !evaluate(fin, 3, 0).passed && evaluate(ch2.find((e) => e.id === 'c2-cliff')!, 1, 0).passed && !evaluate(ch2.find((e) => e.id === 'c2-cliff')!, 2, 0).passed, '');
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);
