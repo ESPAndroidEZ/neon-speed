@@ -5,6 +5,7 @@ import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
 import { findEvent } from './data/story';
+import { AudioTestPanel } from './dev/audioTestPanel';
 import { DemoInput } from './dev/demoInput';
 import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
@@ -65,6 +66,7 @@ engine.onFrame((_a, dt) => auto.update(dt, engine));
 applySettings({ store, audio: audio.bus, engine, voice, auto, game });
 void world.applyPropModels();
 
+new AudioTestPanel(document.body, audio);
 const panel = new TuningPanel(document.body);
 panel.add('car', tuning);
 panel.add('chase', game.chase.tuning);

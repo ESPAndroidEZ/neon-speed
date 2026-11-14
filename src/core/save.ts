@@ -15,7 +15,7 @@ export interface SaveData {
   glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number };
   races: number;
   career: CareerState;
 }
@@ -37,7 +37,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   paint: { [starterId]: starterPaint },
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
-  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE' },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55 },
   races: 0,
   career: defaultCareer(),
 });
@@ -77,6 +77,8 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.muted = s.muted === true;
   out.settings.voice = s.voice === true;
   out.settings.autoQuality = s.autoQuality !== false;
+  out.settings.sfxVolume = num(s.sfxVolume, out.settings.sfxVolume, 0, 1);
+  out.settings.musicVolume = num(s.musicVolume, out.settings.musicVolume, 0, 1);
   if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
   const cr = (j.career ?? {}) as Record<string, unknown>;
   if (Array.isArray(cr.completed)) out.career.completed = cr.completed.filter((id): id is string => typeof id === 'string');

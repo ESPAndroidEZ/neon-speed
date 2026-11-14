@@ -5,6 +5,9 @@ export class AudioBus {
   readonly music: GainNode;
   readonly noise: AudioBuffer;
   private readonly master: GainNode;
+  private readonly chase: BiquadFilterNode;
+  private sfxVol = 1;
+  private musicVol = 0.55;
   private vol = 0.7;
   private mutedFlag = false;
 
@@ -18,8 +21,13 @@ export class AudioBus {
     this.master.connect(comp).connect(this.ctx.destination);
     this.sfx = this.ctx.createGain();
     this.music = this.ctx.createGain();
-    this.music.gain.value = 0.55;
-    this.sfx.connect(this.master);
+    this.music.gain.value = this.musicVol;
+    // chase mix: a slight low-pass takes the edge off everything the camera hears from outside the cabin
+    this.chase = this.ctx.createBiquadFilter();
+    this.chase.type = 'lowpass';
+    this.chase.frequency.value = 9500;
+    this.chase.Q.value = 0.5;
+    this.sfx.connect(this.chase).connect(this.master);
     this.music.connect(this.master);
     const len = this.ctx.sampleRate * 2;
     this.noise = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
@@ -49,6 +57,20 @@ export class AudioBus {
   setVolume(v: number): void {
     this.vol = Math.min(1, Math.max(0, v));
     this.apply();
+  }
+
+  setSfxVolume(v: number): void {
+    this.sfxVol = Math.min(1, Math.max(0, v));
+    this.sfx.gain.setTargetAtTime(this.sfxVol, this.ctx.currentTime, 0.03);
+  }
+
+  setMusicVolume(v: number): void {
+    this.musicVol = Math.min(1, Math.max(0, v));
+    this.music.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.03);
+  }
+
+  setChaseCutoff(hz: number): void {
+    this.chase.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.2);
   }
 
   setMuted(m: boolean): void {

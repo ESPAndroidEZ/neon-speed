@@ -41,6 +41,13 @@ export class EventChannel {
     }
   }
 
+  /** A reader that only sees events from now on. */
+  createReader(): EventReader {
+    const r = new EventReader();
+    r.pos = this.total;
+    return r;
+  }
+
   clear(): void {
     this.own.pos = this.total;
   }

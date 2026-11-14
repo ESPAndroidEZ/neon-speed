@@ -1,5 +1,7 @@
+// @ts-nocheck
 import { arpNote, bassNote, chordTones, drumHit, layers, leadNote, midiToHz, STEPS_PER_BAR } from '../src/audio/musicPatterns.ts';
-import { engineHz } from '../src/audio/engineSynth.ts';
+import { EngineDsp } from '../src/audio/engineDsp.ts';
+const engineHz = (rpm: number): number => EngineDsp.firingHz(rpm, 1);
 
 let failed = 0;
 const check = (n: string, ok: boolean, i: string): void => {

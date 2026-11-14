@@ -22,6 +22,8 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   const s = d.store.data.settings;
   d.audio.setVolume(s.volume);
   d.audio.setMuted(s.muted);
+  d.audio.setSfxVolume(s.sfxVolume);
+  d.audio.setMusicVolume(s.musicVolume);
   applyQuality(d.engine, s.quality);
   d.voice.enabled = s.voice;
   d.auto.enabled = s.autoQuality;
@@ -32,19 +34,25 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const s = d.store.data.settings;
   const root = h('div', 'rb-layer dim');
   root.append(h('h2', 'rb-title', 'SETTINGS'));
-  const vol = h('div', 'rb-row', `<span style="width:90px">Volume</span>`);
-  const slider = h('input') as HTMLInputElement;
-  slider.type = 'range';
-  slider.min = '0';
-  slider.max = '1';
-  slider.step = '0.05';
-  slider.value = String(s.volume);
-  slider.addEventListener('input', () => {
-    s.volume = parseFloat(slider.value);
-    applySettings(d);
-  });
-  slider.addEventListener('change', () => d.store.commit());
-  vol.append(slider);
+  const slider = (label: string, key: 'volume' | 'sfxVolume' | 'musicVolume'): HTMLElement => {
+    const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
+    const input = h('input') as HTMLInputElement;
+    input.type = 'range';
+    input.min = '0';
+    input.max = '1';
+    input.step = '0.05';
+    input.value = String(s[key]);
+    input.addEventListener('input', () => {
+      s[key] = parseFloat(input.value);
+      applySettings(d);
+    });
+    input.addEventListener('change', () => d.store.commit());
+    row.append(input);
+    return row;
+  };
+  const vol = slider('Master', 'volume');
+  const sfxVol = slider('Effects', 'sfxVolume');
+  const musVol = slider('Music', 'musicVolume');
 
   const mute = h('label', 'rb-row', '<span style="width:90px">Mute (M)</span>');
   const box = h('input') as HTMLInputElement;
@@ -118,6 +126,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, mute, voice, wp, hint, q, auto, button('Back', d.onBack));
+  root.append(vol, sfxVol, musVol, mute, voice, wp, hint, q, auto, button('Back', d.onBack));
   return root;
 }

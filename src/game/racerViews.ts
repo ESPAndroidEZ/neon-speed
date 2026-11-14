@@ -6,6 +6,7 @@ import type { CarVisual } from '../world/proceduralCar';
 
 export interface RacerView {
   racer: Racer;
+  spec: CarSpec;
   holder: Group;
   visual: CarVisual;
   /** Interpolated world pose, valid after update(). */
@@ -38,7 +39,7 @@ export class RacerViews {
     const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv));
     holder.add(visual.root);
     this.scene.add(holder);
-    v = { racer, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };
+    v = { racer, spec, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };
     this.views.push(v);
     return v;
   }
