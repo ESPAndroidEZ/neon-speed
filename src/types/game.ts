@@ -40,6 +40,16 @@ export interface Disposable {
   dispose(): void;
 }
 
+/**
+ * Stateful modules implement this so a race can be saved and restored exactly. `snapshot()` returns plain JSON-safe
+ * data (numbers, strings, booleans, arrays, objects; Infinity encoded as null); `restore()` puts it back.
+ * Restoring a snapshot and running N steps must give the same result as running those N steps without the save.
+ */
+export interface Serializable<T = unknown> {
+  snapshot(): T;
+  restore(data: T): void;
+}
+
 /** Fixed-step callback. Always receives dt = 1/60. Simulation only. */
 export type FixedUpdate = (dt: number) => void;
 
@@ -128,7 +138,7 @@ export interface AIWorldView {
 }
 
 /** Pure driving policy: reads the world, returns controls. Physics is stepped by the orchestrator. */
-export interface AIRacerAgent {
+export interface AIRacerAgent extends Partial<Serializable> {
   readonly id: string;
   readonly name: string;
   /** 0 (rookie) .. 1 (relentless). Scales pace, braking commitment and aggression. */

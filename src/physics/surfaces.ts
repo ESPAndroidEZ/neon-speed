@@ -41,6 +41,8 @@ const HAZARD: Record<PhysicsLevel, { puddle: number; ice: number; bankDrag: numb
  */
 export class SurfaceMap {
   puddles: Puddle[] = [];
+  /** Seed of the current puddle layout (saved so a restored race has the same puddles). */
+  seed = 1;
   /** Sample indices at the edge of tight corners (snow banks sit there). */
   readonly cornerIndex: number[] = [];
   private weather: Weather = 'CLEAR';
@@ -73,6 +75,7 @@ export class SurfaceMap {
 
   /** New random puddle layout (about 18 per lap on streets, alleys and the dock; none on the start grid). */
   reseed(seed: number): void {
+    this.seed = seed;
     const rnd = createRng(seed * 7919 + 13);
     const t = this.track;
     this.puddles = [];

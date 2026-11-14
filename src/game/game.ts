@@ -19,9 +19,7 @@ import { ShowroomCam } from './showroomCam';
 export class Game {
   state: GameState = 'MENU';
   weather: Weather = 'CLEAR';
-  /** 0..1: rain and snow ramp in over about 20 s after a weather change. */
   weatherIntensity = 1;
-  /** Physics level for rain and snow (setting). */
   physicsLevel: PhysicsLevel = 'AGGRESSIVE';
   private readonly env: PhysicsEnv = fillEnv({ name: 'CLEAR', grip: 1, fogDensity: 0, fogColor: 0, precipitation: 0, roadRoughness: 0, level: 'AGGRESSIVE', yawDampMul: 1, assistMul: 1, rearGripMul: 1, intensity: 1 }, 'CLEAR', 'AGGRESSIVE');
   rm: RaceManager;
@@ -35,15 +33,15 @@ export class Game {
   onCountdown: (() => void) | null = null;
   onWeatherChange: ((w: Weather) => void) | null = null;
   onStartRace: (() => void) | null = null;
-  private plan: { at: number; to: Weather } | null = null;
+  plan: { at: number; to: Weather } | null = null;
   readonly ctl: CarInput = createNeutralInput();
   readonly impact = { strength: 0, x: 0, z: 0 };
-  /** Fired on every hit step with the closing speed (audio). */
   onImpact: ((strength: number) => void) | null = null;
   private readonly d: GameDeps;
   private readonly view: CarState = createViewState();
   private intro: CinematicCam | null = null;
-  private setup: RaceSetup | null = null;
+  setup: RaceSetup | null = null;
+  paused = false;
   readonly showroomCam = new ShowroomCam();
 
   constructor(d: GameDeps) {
@@ -60,6 +58,10 @@ export class Game {
     return this.rm.player;
   }
 
+  get world(): GameDeps['world'] {
+    return this.d.world;
+  }
+
   setWeather(w: Weather): void {
     this.weather = w;
     if (this.state === 'RACING' || this.state === 'CINEMATIC') this.weatherIntensity = w === 'CLEAR' ? 1 : 0.2; // build-up restarts
@@ -69,6 +71,7 @@ export class Game {
   }
 
   startRace(s: RaceSetup): void {
+    this.paused = false;
     this.onStartRace?.();
     this.setup = s;
     this.d.results.hide();
@@ -144,7 +147,8 @@ export class Game {
     this.onCountdown?.();
   }
 
-  private syncView(): void {
+  /** Copy the player pose to the camera target; `snap` jumps the camera there (after a restore). */
+  syncView(snap = false): void {
     const v = this.views.views[0];
     const s = v.racer.car.state;
     this.view.position.x = v.x;
@@ -152,10 +156,11 @@ export class Game {
     this.view.heading = v.heading;
     this.view.speed = s.speed;
     this.view.slipAngle = s.slipAngle;
+    if (snap) this.chase.setTarget(this.view);
   }
 
   private readonly fixed = (dt: number): void => {
-    if (this.state === 'CINEMATIC' || this.state === 'MENU') return;
+    if (this.state === 'CINEMATIC' || this.state === 'MENU' || this.paused) return;
     this.d.input.sample(this.ctl);
     const was = this.rm.phase;
     this.weatherIntensity = Math.min(1, this.weatherIntensity + dt / 20);

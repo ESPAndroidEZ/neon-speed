@@ -10,6 +10,7 @@ import type { Track } from '../world/track';
 import type { AIRacerAgent, AIWorldView, CarInput, CarState, RaceTelemetry, Weather, WeatherProfile } from '../types/game';
 import { createNeutralInput } from '../types/game';
 import { LapCounter } from './lapCounter';
+import { restoreRace, snapshotRace } from './raceSnapshot';
 import { buildResult, positionOf, type RaceResult, type Racer } from './raceResult';
 
 export type { RaceResult, Racer };
@@ -35,7 +36,7 @@ export class RaceManager {
   /** Cumulative closing speed of the latest car-car or wall hit this step, for juice and audio. */
   carImpact = 0;
   result: RaceResult | null = null;
-  private finishCount = 0;
+  finishCount = 0;
   private readonly states: CarState[] = [];
   private readonly view: AIWorldView;
   private readonly track: Track;
@@ -49,6 +50,14 @@ export class RaceManager {
     this.surfaces = surfaces;
     this.totalLaps = totalLaps;
     this.view = { track: track.samples, racers: this.states, playerIndex: 0, grip: 1 };
+  }
+
+  snapshot(): ReturnType<typeof snapshotRace> {
+    return snapshotRace(this);
+  }
+
+  restore(d: ReturnType<typeof snapshotRace>): void {
+    restoreRace(this, d);
   }
 
   get player(): Racer {

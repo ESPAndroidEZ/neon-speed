@@ -9,6 +9,8 @@ import type { StoryEvent } from '../data/story';
 import { buildStoryMenu, buildEnding } from './storyMenu';
 import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
+import type { SaveSlots, SlotId } from '../core/gameSave';
+import { buildLoadMenu, describe } from './saveUi';
 import { buildCrewMenu } from './crewMenu';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
@@ -31,6 +33,9 @@ export interface MenuDeps {
   onSwap: (fn: (() => void) | null) => void;
   /** Launch a free race in this weather against `rivals` opponents (0 = time trial). */
   startRace: (w: Weather, rivals: number) => void;
+  slots: SaveSlots;
+  /** Load a save (slot or autosave) and resume that race. */
+  loadSlot: (id: SlotId) => void;
   /** Start a story event. */
   startEvent: (ev: StoryEvent) => void;
 }
@@ -100,8 +105,18 @@ export class Menu {
     const el = h('div', 'rb-layer');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '10vh';
-    el.append(button('Story', () => this.story(), 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), button('Settings', () => this.settings()));
+    const latest = this.d.slots.latest();
+    if (latest) {
+      const c = button('Continue', () => this.d.loadSlot(latest.id), 'hot');
+      c.title = describe(latest.snap);
+      el.append(c);
+    }
+    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
     this.mount(el, 'main');
+  }
+
+  load(): void {
+    this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other');
   }
 
   crew(): void {

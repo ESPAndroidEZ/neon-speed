@@ -95,7 +95,7 @@ export class Juice {
       this.lastWeather = g.weather;
       this.weatherFx.setProfile(WEATHER[g.weather]);
     }
-    this.weatherFx.setIntensity(g.weatherIntensity);
+    this.weatherFx.setIntensity(g.state === 'MENU' ? 0 : g.weatherIntensity);
     this.weatherFx.update(dt, this.engine.camera, Math.abs(g.rm.player.car.state.speed));
     for (const pool of this.pools) pool.update(dt);
     this.skids.update(dt);

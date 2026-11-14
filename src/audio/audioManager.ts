@@ -84,7 +84,7 @@ export class AudioManager {
     const view = g.views.views.find((v) => v.racer.isPlayer);
     const spec = view?.spec;
     const speed = Math.abs(car.state.speed);
-    const inGame = g.state !== 'MENU';
+    const inGame = g.state !== 'MENU' && !g.paused;
     const pedal = g.state === 'RACING' && g.rm.phase !== 'COUNTDOWN' ? g.ctl.throttle : 0;
 
     // camera velocity for Doppler

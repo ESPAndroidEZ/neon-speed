@@ -9,12 +9,20 @@ export class LapCounter {
   /** Net samples driven since the start line (negative while on the grid behind it). */
   total = 0;
   readonly checkpoints: number;
-  private last = 0;
+  last = 0;
   private readonly n: number;
 
   constructor(track: Track, checkpoints = 8) {
     this.n = track.samples.length;
     this.checkpoints = checkpoints;
+  }
+
+  snapshot(): unknown {
+    return { total: this.total, last: this.last };
+  }
+
+  restore(d: unknown): void {
+    Object.assign(this, d as object);
   }
 
   /** Start on the grid at `index` (indices past halfway count as behind the line). */

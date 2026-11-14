@@ -16,6 +16,8 @@ export interface RaceSetup {
   laps: number;
   /** Play the intro cinematic first (otherwise straight to the countdown). */
   cinematic: boolean;
+  /** What is needed to rebuild this race from a save. */
+  meta?: { rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null };
   agents: { agent: AIRacerAgent; car: CarSpec; paint: number; glow?: number }[];
 }
 

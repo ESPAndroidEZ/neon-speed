@@ -32,7 +32,7 @@ Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, send playtes
 Done by Claude instead: 001 asset loader, 002 AI racers, 004 weather FX.
 
 ## Open contract requests
-None. Contract changes logged: `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
+None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src/types/game.ts and `AIRacerAgent` extends `Partial<Serializable>` (round 3 save system); `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
 
 ## Log (newest last)
 - 2026-11-14 Claude: block 1 done. Tasks 001-003 written.

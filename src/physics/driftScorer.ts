@@ -9,8 +9,16 @@ export class DriftScorer {
   drifting = false;
   chain = 0;
   bank = 0;
-  private chainTime = 0;
-  private calm = 0;
+  chainTime = 0;
+  calm = 0;
+
+  snapshot(): unknown {
+    return { drifting: this.drifting, chain: this.chain, bank: this.bank, chainTime: this.chainTime, calm: this.calm };
+  }
+
+  restore(d: unknown): void {
+    Object.assign(this, d as object);
+  }
 
   reset(): void {
     this.drifting = false;

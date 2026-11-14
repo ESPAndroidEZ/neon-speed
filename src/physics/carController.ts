@@ -5,6 +5,7 @@ import type { CarTuning } from './carTuning';
 import { DriftScorer } from './driftScorer';
 import { Drivetrain } from './drivetrain';
 import { tireLateral } from './tire';
+import { restoreCar, snapshotCar } from './carSnapshot';
 
 const G = 9.81;
 
@@ -40,17 +41,26 @@ export class CarController {
   steerAuthority = 1;
 
   private readonly t: CarTuning;
-  private u = 0;
-  private v = 0;
-  private r = 0;
-  private hbFactor = 1;
-  private prevX = 0;
-  private prevZ = 0;
-  private prevHeading = 0;
+  u = 0;
+  v = 0;
+  r = 0;
+  hbFactor = 1;
+  prevX = 0;
+  prevZ = 0;
+  prevHeading = 0;
 
   constructor(tuning: CarTuning) {
     this.t = tuning;
     this.drivetrain = new Drivetrain(tuning);
+  }
+
+  snapshot(): unknown {
+    return snapshotCar(this);
+  }
+
+  restore(d: unknown): void {
+    restoreCar(this, d as ReturnType<typeof snapshotCar>);
+    this.publish();
   }
 
   reset(x = 0, z = 0, heading = 0): void {

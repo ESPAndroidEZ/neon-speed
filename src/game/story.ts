@@ -3,7 +3,7 @@ import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { buildField, findRival } from '../data/rivals';
-import { EVENTS, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
+import { EVENTS, findEvent, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
 import type { TitleCards } from '../ui/titleCards';
 import { PREVIOUSLY } from '../data/lore';
@@ -42,6 +42,11 @@ export class StoryController {
     };
   }
 
+  /** A restored race belongs to this event (or to none): the results screen then judges it as story. */
+  resume(eventId: string | null): void {
+    this.current = eventId ? findEvent(eventId) : null;
+  }
+
   /** Begin a chapter event: cutscene dialogue first, then the race. */
   start(ev: StoryEvent): void {
     const d = this.d;
@@ -70,6 +75,7 @@ export class StoryController {
     d.game.startRace({
       car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, cinematic,
       weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale, ev.weather !== 'CLEAR'),
+      meta: { rivalIds: ev.rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id },
     });
   }
 

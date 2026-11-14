@@ -63,6 +63,7 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
   let nitroTimer = 0;
   let stuckFor = 0;
   let reverseFor = 0;
+  let pendingGrip = 0; // after a restore: rebuild the speed profile with the saved grip so the driver behaves identically
 
   function buildProfile(track: readonly TrackSample[], grip: number): void {
     const { k, ds } = curvatureOf(track);
@@ -110,6 +111,14 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
     id,
     name,
     skill: sk,
+    snapshot: () => ({ seed, offset, confidence, hint, playerHint, nitroTimer, stuckFor, reverseFor, profileGrip }),
+    restore: (d) => {
+      const x = d as { seed: number; offset: number; confidence: number; hint: number; playerHint: number; nitroTimer: number; stuckFor: number; reverseFor: number; profileGrip: number };
+      ({ seed, offset, confidence, hint, playerHint, nitroTimer, stuckFor, reverseFor } = x);
+      profile = null;
+      pendingGrip = x.profileGrip;
+      profileGrip = x.profileGrip;
+    },
     decide(dt: number, self: CarState, world: AIWorldView): CarInput {
       const track = world.track;
       const n = track.length;
@@ -122,6 +131,7 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       const lat = (self.position.x - tp.position.x) * tp.tangent.z - (self.position.z - tp.position.z) * tp.tangent.x;
       const wide = Math.abs(lat) > tp.width / 2 - 1.8 && Math.abs(speed) > 4;
       confidence = slid || wide ? Math.max(0.5, confidence - dt * 0.6) : Math.min(1, confidence + dt * 0.05);
+      if (!profile && pendingGrip > 0) buildProfile(track, pendingGrip);
       if (!profile || Math.abs(profileGrip - world.grip * confidence) > 0.03) buildProfile(track, world.grip * confidence);
       if (!profile) return out;
 

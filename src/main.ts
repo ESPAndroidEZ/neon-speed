@@ -15,11 +15,15 @@ import { KeyboardInput } from './input/keyboard';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
 import { DialogueBox, Subtitles, Voice } from './ui/dialogue';
-import { RadioDirector } from './game/radio';
+import { PauseController } from './game/pause';
+import { installRadio } from './game/radioHook';
+import { restoreGame } from './game/saveGame';
+import { SaveSlots } from './core/gameSave';
 import { Hud } from './ui/hud';
 import { LoadingCard } from './ui/loadingCard';
 import { TitleCards } from './ui/titleCards';
 import { Menu } from './ui/menu';
+import { PauseMenu } from './ui/pauseMenu';
 import { toast } from './ui/uiKit';
 import { ResultsScreen } from './ui/results';
 import { applySettings } from './ui/settings';
@@ -41,6 +45,7 @@ try {
   kv = null; // blocked storage: play without saving
 }
 preloadCarModels(CARS);
+const slots = new SaveSlots(kv);
 const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map((c) => c.id));
 
 const engine = new Engine({ container });
@@ -78,7 +83,8 @@ panel.build();
 const launchFree = (w: Weather, rivals: number): void => {
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: false, agents: freeRaceField(rivals) });
+  const field = freeRaceField(rivals);
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null } });
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game,
@@ -95,12 +101,51 @@ menu = new Menu({
     launchFree(w, n);
   },
   startEvent: (ev) => story.start(ev),
+  slots,
+  loadSlot: (id) => loadSlot(id),
 });
 const subs = new Subtitles(voice);
 story = new StoryController({
   game, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: () => menu.showEnding(),
 });
+const pause = new PauseController(game, slots, new PauseMenu(slots, {
+  onResume: () => pause.resume(),
+  onRestart: () => {
+    pause.resume();
+    game.restart();
+  },
+  onSave: (id) => void pause.save(id),
+  onSaveQuit: () => {
+    pause.saveAndQuit();
+    leaveToMenu();
+  },
+}), toast);
+const leaveToMenu = (): void => {
+  results.hide();
+  story.endStory();
+  menu.main();
+};
+function loadSlot(id: import('./core/gameSave').SlotId): void {
+  const snap = slots.get(id);
+  if (!snap) return;
+  try {
+    menu.hide();
+    results.hide();
+    restoreGame(game, snap);
+    story.resume(snap.setup.eventId);
+    pause.resume();
+    toast('Loaded');
+  } catch {
+    toast('That save could not be loaded');
+    menu.main();
+  }
+}
+if (slots.corrupt) toast('Some saved games were unreadable and were skipped');
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pause.pause();
+});
+window.addEventListener('pagehide', () => pause.autosave());
 game.onFinish = (r) => {
   const extra = story.finish(r);
   world.setHandprints(store.data.career.completed.length);
@@ -108,36 +153,9 @@ game.onFinish = (r) => {
 };
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
 
-// DJ Switch's radio: reacts to the race a few times per second
-const radio = new RadioDirector(Date.now() & 0xffff);
 const loading = new LoadingCard();
-let radioImpact = 0;
-const baseImpact = game.onImpact;
-game.onImpact = (s) => {
-  baseImpact?.(s);
-  radioImpact = Math.max(radioImpact, s);
-};
-let radioRace: unknown = null;
-let radioClock = 0;
 game.onStartRace = () => loading.show();
-engine.onFrame((_a, dt) => {
-  radioClock += dt;
-  if (radioClock < 0.25) return;
-  radioClock = 0;
-  if (radioRace !== game.rm) {
-    radioRace = game.rm;
-    radio.reset();
-  }
-  const rm = game.rm;
-  const t = game.telemetry;
-  const line = radio.update({
-    racing: game.state === 'RACING' && rm.phase === 'RACING', time: rm.raceTime, position: t.position, count: t.racerCount, lap: t.lap, laps: t.totalLaps,
-    weather: game.weather, impact: radioImpact, driftChain: t.driftScore,
-    rivals: rm.racers.filter((r) => !r.isPlayer).map((r) => ({ name: r.name, position: rm.positionOf(r) })),
-  });
-  radioImpact = 0;
-  if (line) subs.flash(`DJ SWITCH: ${line}`, 4.2, 'switch');
-});
+installRadio(engine, game, subs);
 
 let hudShown = true;
 engine.onFrame(() => {
@@ -151,6 +169,7 @@ engine.onFrame(() => {
 container.addEventListener('pointerdown', () => game.skipIntro());
 window.addEventListener('keydown', (e) => {
   if (e.repeat || game.state === 'MENU') return;
+  if (game.paused && e.code !== 'Escape') return;
   if (e.code === 'KeyR') game.resetToTrack();
   else if (e.code === 'KeyP') toast(juice.toggleShowcase() ? 'Particle showcase ON (P)' : 'Particle showcase off');
   else if (e.code === 'Digit1') game.setWeather('CLEAR');
@@ -158,16 +177,17 @@ window.addEventListener('keydown', (e) => {
   else if (e.code === 'Digit3') game.setWeather('SNOW');
   else if (e.code === 'Enter' && game.state === 'PODIUM' && !story.current) game.restart();
   else if (e.code === 'Escape') {
-    results.hide();
-    story.endStory();
-    menu.main();
+    if (game.state === 'CINEMATIC') game.skipIntro(); // skipping never leaves the race
+    else if (game.state === 'PODIUM') leaveToMenu();
+    else pause.toggle();
   } else if (e.code !== 'Backquote') game.skipIntro();
 });
 
 game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
 if (direct) {
   const car = findCar(q.get('car') ?? store.data.selected);
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: 3, cinematic: false, agents: freeRaceField(Number(q.get('ai') ?? 0)) });
+  const field = freeRaceField(Number(q.get('ai') ?? 0));
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: game.weather !== 'CLEAR', eventId: null } });
   const at = q.get('at'); // dev: start at a zone (tunnel, bridge, dock, plaza, alley) or a sample index
   if (at) {
     const idx = Number.isNaN(Number(at)) ? world.track.zones.indexOf(at as never) + 6 : Number(at);
@@ -176,6 +196,13 @@ if (direct) {
   }
   if (q.has('showcase')) juice.toggleShowcase();
   if (q.has('ff')) game.fastForward(Number(q.get('ff')));
+  if (q.get('pause') === 'menu') pause.pause(); // dev: open the pause menu
+  if (q.get('pause') === 'load') {
+    pause.pause(); // dev: autosave, quit to the menu and open the load screen
+    pause.saveAndQuit();
+    leaveToMenu();
+    menu.load();
+  }
 } else {
   if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car
   menu.title();

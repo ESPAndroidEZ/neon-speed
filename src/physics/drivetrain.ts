@@ -19,15 +19,24 @@ export class Drivetrain {
   /** Turbo boost 0..1 (always 0 for naturally aspirated cars). */
   boost = 0;
   readonly events = new EventChannel();
-  private shiftTimer = 0;
-  private lastPedal = 0;
-  private wasCut = false;
-  private popClock = 0;
+  shiftTimer = 0;
+  lastPedal = 0;
+  wasCut = false;
+  popClock = 0;
   private readonly t: CarTuning;
 
   constructor(t: CarTuning) {
     this.t = t;
     this.rpm = t.idleRpm;
+  }
+
+  snapshot(): unknown {
+    return { gear: this.gear, rpm: this.rpm, nitroLevel: this.nitroLevel, nitroActive: this.nitroActive, driveForce: this.driveForce, brakeCmd: this.brakeCmd, boost: this.boost, shiftTimer: this.shiftTimer, lastPedal: this.lastPedal, wasCut: this.wasCut, popClock: this.popClock };
+  }
+
+  restore(d: unknown): void {
+    Object.assign(this, d as object);
+    this.events.clear();
   }
 
   reset(): void {
