@@ -8,7 +8,7 @@ KeyboardInput.sample -> CarInput (player)
 Engine fixed 1/60 s: Game.fixed -> RaceManager.step: per racer [agent.decide | player input] -> CarController.step
                      -> TrackContact.update (verge, barriers) -> car-car resolveCarPair -> LapCounter -> finish/results
 Engine per frame:    RacerViews.update(alpha) (interpolated poses + wheel/body anim) -> ChaseCam -> Hud
-Game.state: CINEMATIC (CinematicCam, then handover to ChaseCam.pose) -> RACING -> PODIUM (ResultsScreen)
+Game.state: MENU (showroom orbit cam, Menu DOM) -> CINEMATIC (CinematicCam, then handover to ChaseCam.pose) -> RACING -> PODIUM (ResultsScreen)
 RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 ```
 
@@ -16,7 +16,7 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 - `types/game.ts`: ALL shared contracts (CarInput, CarState, WeatherProfile, TrackSample, AIRacerAgent, CameraRig ...).
 - `core/`: `engine` (renderer, bloom, fixed loop), `math`, `rng`, `lapCounter` (sequential progress, no shortcuts),
   `raceManager` (grid, countdown, laps, timing, finish; takes AIRacerAgent[], works with none), `raceResult` (positions, cash).
-- `game/`: `game` (state machine, wiring of race + cameras + HUD), `racerViews` (one visual car per racer).
+- `game/`: `game` (state machine, race + cameras + HUD), `racerViews` (one visual car per racer), `showroomCam` (menu orbit).
 - `physics/` (pure TS, no three): `carController` (bicycle model, friction circle, handbrake, nudge for impacts),
   `drivetrain` (6-speed auto, reverse, nitro), `tire`, `driftScorer`, `weather` (grip multipliers),
   `carCollision` (car-car, 2 circles each), `trackContact` (verge grip loss, barrier bounce with 4 corners, place/reset on track), `carTuning`.
@@ -26,6 +26,9 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   `envMap` (fake neon reflection probe), `worldLook` (WeatherProfile -> materials), `world` (assembler).
 - `data/cars.ts`: car specs (real names only here), CarTuning overrides, BodyShape, prices, paints.
 - `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.
+- `core/save` (SaveStore: cash, owned cars, paint, best lap per weather, settings; sanitising parse, injectable storage),
+  `core/quality` (low/medium/high render scale + bloom).
+- `ui/`: `menu` (title, main, conditions), `garage` (cars, paint, buy), `settings` (volume, mute, quality), `uiKit` (CSS + helpers), `hud`, `results`.
 - `fx/`: `particles` (pooled billboards), `skidMarks` (ring-buffer quads), `speedPass` (radial streaks composer pass),
   `juice` (smoke, skids, sparks, nitro flames, shake, bloom kicks; reads Game.views / Game.impact).
 - `audio/`: `audioBus` (context, volume, mute, noise), `engineSynth` (rpm/load engine, turbo, blow-off), `sfx` (squeal, nitro,
@@ -42,4 +45,4 @@ Physics steps at fixed 1/60 s only; no allocation per step; every .ts file under
 Weather grip in `physics/weather.ts`. Track geometry is the control list in `world/harborLoop.ts`.
 
 ## Dev shortcuts
-`?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.
+`?screen=garage|weather|settings` opens a menu screen; `?skip` / `?demo` bypass the menu. `?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.

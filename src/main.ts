@@ -1,54 +1,107 @@
-import { Engine } from './core/engine';
-import { CARS } from './data/cars';
-import { TuningPanel } from './dev/tuningPanel';
-import { Game } from './game/game';
-import { DemoInput } from './dev/demoInput';
 import { AudioManager } from './audio/audioManager';
+import { defaultSave, SaveStore } from './core/save';
+import { Engine } from './core/engine';
+import { CARS, findCar } from './data/cars';
+import { DemoInput } from './dev/demoInput';
+import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
+import { Game } from './game/game';
 import { KeyboardInput } from './input/keyboard';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
 import { Hud } from './ui/hud';
+import { Menu } from './ui/menu';
 import { ResultsScreen } from './ui/results';
+import { applySettings } from './ui/settings';
 import { buildWorld } from './world/world';
 
-/* Bootstrap: build the engine, world and UI, hand everything to Game. Dev query flags: ?skip  ?w=rain|snow  ?car=350z */
+/* Bootstrap: engine, world, UI, save, audio, then the menu. Dev query flags: ?skip (straight to a race, no menu)
+   ?w=rain|snow  ?car=350z  ?demo (self-driving)  ?ff=seconds (simulate before rendering). */
 
 const container = document.getElementById('app');
 if (!container) throw new Error('#app container missing from index.html');
 const q = new URLSearchParams(location.search);
+const direct = q.has('skip') || q.has('demo');
+
+let kv: Storage | null = null;
+try {
+  kv = window.localStorage;
+} catch {
+  kv = null; // blocked storage: play without saving
+}
+const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map((c) => c.id));
 
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
 const input = q.has('demo') ? new DemoInput() : new KeyboardInput();
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
-let game: Game;
-const results = new ResultsScreen(document.body, { onAgain: () => game.restart() });
-game = new Game({ engine, world, hud, results, input, tuning });
-
+let menu: Menu;
+const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
+const game = new Game({ engine, world, hud, results, input, tuning });
 new Juice(engine, game);
 const audio = new AudioManager(game);
 engine.onFrame((_a, dt) => audio.update(dt));
+applySettings({ store, audio: audio.bus, engine });
+
 const panel = new TuningPanel(document.body);
 panel.add('car', tuning);
 panel.add('chase', game.chase.tuning);
 panel.build();
 
-const car = CARS.find((c) => c.id === q.get('car')) ?? CARS[0];
-const weather = (q.get('w') ?? 'clear').toUpperCase() as Weather;
-game.startRace({ car, paint: car.color, weather, laps: 3, cinematic: !q.has('skip'), agents: [] });
+let firstRace = true;
+const launch = (w: Weather): void => {
+  const car = findCar(q.get('car') ?? store.data.selected);
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, weather: w, laps: 3, cinematic: firstRace && !direct, agents: [] });
+  firstRace = false;
+};
+game.onFinish = (r) => {
+  store.recordRace(r.cash, r.bestLap, game.weather);
+};
+menu = new Menu({
+  store, audio: audio.bus, engine,
+  showroom: (c, p) => game.showroom(c, p),
+  startRace: (w) => {
+    menu.hide();
+    launch(w);
+  },
+});
 
-if (q.has('ff')) game.fastForward(Number(q.get('ff')));
+let hudShown = true;
+engine.onFrame(() => {
+  const show = game.state !== 'MENU';
+  if (show !== hudShown) {
+    hudShown = show;
+    hud.setVisible(show);
+  }
+});
+
 container.addEventListener('pointerdown', () => game.skipIntro());
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
+  const racing = game.state !== 'MENU';
+  if (!racing) return;
   if (e.code === 'KeyR') game.resetToTrack();
   else if (e.code === 'Digit1') game.setWeather('CLEAR');
   else if (e.code === 'Digit2') game.setWeather('RAIN');
   else if (e.code === 'Digit3') game.setWeather('SNOW');
   else if (e.code === 'Enter' && game.state === 'PODIUM') game.restart();
-  else if (e.code !== 'Backquote') game.skipIntro();
+  else if (e.code === 'Escape') {
+    results.hide();
+    menu.main();
+  } else if (e.code !== 'Backquote') game.skipIntro();
 });
+
+game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
+if (direct) {
+  launch(game.weather);
+  if (q.has('ff')) game.fastForward(Number(q.get('ff')));
+} else {
+  menu.title();
+  const scr = q.get('screen'); // dev: open a menu screen directly
+  if (scr === 'garage') menu.garage();
+  else if (scr === 'weather') menu.weather();
+  else if (scr === 'settings') menu.settings();
+}
 
 engine.start();

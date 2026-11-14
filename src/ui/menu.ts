@@ -1,0 +1,109 @@
+import type { Engine } from '../core/engine';
+import type { AudioBus } from '../audio/audioBus';
+import { findCar, type CarSpec } from '../data/cars';
+import type { SaveStore } from '../core/save';
+import { WEATHER } from '../physics/weather';
+import type { Weather } from '../types/game';
+import { buildGarage } from './garage';
+import { buildSettings } from './settings';
+import { button, h, injectCss, lapText, money } from './uiKit';
+
+export interface MenuDeps {
+  store: SaveStore;
+  audio: AudioBus;
+  engine: Engine;
+  /** Show a car as the 3D backdrop. */
+  showroom: (car: CarSpec, paint: number) => void;
+  /** Launch a race in this weather. */
+  startRace: (w: Weather) => void;
+}
+
+const WEATHER_BLURB: Record<Weather, string> = { CLEAR: 'Full grip. Learn the lines.', RAIN: 'Wet tarmac: 72% grip, longer braking.', SNOW: 'Ice and slush: 45% grip. Pure drift.' };
+
+/** Title -> main menu -> weather / garage / settings. All plain DOM over the live 3D scene. */
+export class Menu {
+  private readonly d: MenuDeps;
+  private layer: HTMLElement | null = null;
+  private cash: HTMLElement | null = null;
+  private screen: 'none' | 'title' | 'main' | 'other' = 'none';
+
+  constructor(d: MenuDeps) {
+    injectCss();
+    this.d = d;
+    window.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      if (e.code === 'Enter' && this.screen === 'title') this.main();
+      else if (e.code === 'Escape' && this.screen === 'other') this.main();
+    });
+  }
+
+  get active(): boolean {
+    return this.screen !== 'none';
+  }
+
+  private backdrop(): void {
+    const c = findCar(this.d.store.data.selected);
+    this.d.showroom(c, this.d.store.data.paint[c.id] ?? c.color);
+  }
+
+  private mount(el: HTMLElement, s: 'title' | 'main' | 'other'): void {
+    this.layer?.remove();
+    this.cash?.remove();
+    this.layer = el;
+    this.screen = s;
+    document.body.appendChild(el);
+    if (s !== 'title') {
+      this.cash = h('div', 'rb-cash', money(this.d.store.data.cash));
+      document.body.appendChild(this.cash);
+    }
+    el.querySelector('button')?.focus();
+  }
+
+  hide(): void {
+    this.layer?.remove();
+    this.cash?.remove();
+    this.layer = this.cash = null;
+    this.screen = 'none';
+  }
+
+  title(): void {
+    this.backdrop();
+    const el = h('div', 'rb-layer');
+    el.style.justifyContent = 'flex-end';
+    el.style.paddingBottom = '12vh';
+    el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', 'Chapter 1 · Harbor Loop'), button('Press Enter / Tap', () => this.main(), 'hot'));
+    el.append(h('div', 'rb-sub', 'W/S gas+brake · A/D steer · Space handbrake · Shift nitro · M mute · R reset'));
+    this.mount(el, 'title');
+  }
+
+  main(): void {
+    this.backdrop();
+    const el = h('div', 'rb-layer');
+    el.style.justifyContent = 'flex-end';
+    el.style.paddingBottom = '10vh';
+    el.append(button('Race', () => this.weather(), 'hot'), button('Garage', () => this.garage()), button('Settings', () => this.settings()));
+    this.mount(el, 'main');
+  }
+
+  weather(): void {
+    const el = h('div', 'rb-layer dim');
+    el.append(h('h2', 'rb-title', 'CONDITIONS'));
+    const row = h('div', 'rb-row');
+    for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
+      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${w}</div><div style="opacity:.8;margin:6px 0">${WEATHER_BLURB[w]}</div><div class="rb-sub">Grip ${Math.round(WEATHER[w].grip * 100)}%<br>Best lap ${lapText(this.d.store.data.bestLap[w])}</div>`);
+      card.addEventListener('click', () => this.d.startRace(w));
+      row.append(card);
+    }
+    el.append(row, button('Back', () => this.main()));
+    this.mount(el, 'other');
+  }
+
+  garage(): void {
+    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, onBack: () => this.main() });
+    this.mount(el, 'other');
+  }
+
+  settings(): void {
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, onBack: () => this.main() }), 'other');
+  }
+}

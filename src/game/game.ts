@@ -13,6 +13,7 @@ import type { Hud } from '../ui/hud';
 import type { ResultsScreen } from '../ui/results';
 import type { World } from '../world/world';
 import { RacerViews } from './racerViews';
+import { ShowroomCam } from './showroomCam';
 
 export interface RaceSetup {
   car: CarSpec;
@@ -37,7 +38,7 @@ export interface GameDeps {
 
 /** Race orchestrator: GameState machine, race manager, car views, cameras, HUD. */
 export class Game {
-  state: GameState = 'CINEMATIC';
+  state: GameState = 'MENU';
   weather: Weather = 'CLEAR';
   rm: RaceManager;
   readonly chase: ChaseCam;
@@ -58,6 +59,7 @@ export class Game {
   private intro: CinematicCam | null = null;
   private setup: RaceSetup | null = null;
   private readonly bg = new Color();
+  private readonly showroomCam = new ShowroomCam();
 
   constructor(d: GameDeps) {
     this.d = d;
@@ -113,6 +115,19 @@ export class Game {
     }
   }
 
+  /** Menu / garage backdrop: the car alone on the grid while the camera orbits it. */
+  showroom(car: CarSpec, paint: number): void {
+    this.state = 'MENU';
+    this.d.results.hide();
+    this.views.clear();
+    this.rm = new RaceManager(this.d.world.track, 3);
+    applyTuning(this.d.tuning, car.tuning);
+    this.rm.addRacer('player', 'You', this.d.tuning, null, true);
+    this.views.add(this.rm.player, car, paint);
+    this.rm.place();
+    this.views.update(0, 0);
+  }
+
   restart(): void {
     if (this.setup) this.startRace({ ...this.setup, cinematic: false });
   }
@@ -151,7 +166,7 @@ export class Game {
   }
 
   private readonly fixed = (dt: number): void => {
-    if (this.state === 'CINEMATIC') return;
+    if (this.state === 'CINEMATIC' || this.state === 'MENU') return;
     this.d.input.sample(this.ctl);
     const was = this.rm.phase;
     this.rm.step(dt, this.ctl, this.weather);
@@ -180,6 +195,11 @@ export class Game {
   private readonly frame = (alpha: number, frameDt: number): void => {
     this.views.update(alpha, frameDt);
     this.syncView();
+    if (this.state === 'MENU') {
+      const v = this.views.views[0];
+      this.showroomCam.update(this.d.engine.camera, frameDt, v.x, v.z);
+      return;
+    }
     const p = this.rm.player;
     this.chase.setNitro(p.car.drivetrain.nitroActive);
     if (this.state === 'CINEMATIC') {

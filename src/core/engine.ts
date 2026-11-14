@@ -58,7 +58,7 @@ export class Engine implements Disposable {
   simTime = 0;
 
   private readonly container: HTMLElement;
-  private readonly maxPixelRatio: number;
+  maxPixelRatio: number;
   private readonly updates = new Set<FixedUpdate>();
   private readonly frames = new Set<FrameCallback>();
   private readonly observer: ResizeObserver;

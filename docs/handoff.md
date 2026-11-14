@@ -15,8 +15,10 @@ Race flow (step 3): RaceManager (grid, 3-2-1, 3 laps, timing, positions, cash pa
 
 Juice + audio (step 4): src/fx/ (smoke, skid marks, sparks, nitro flames, speed streaks, shake) and src/audio/ (engine, turbo, squeal, nitro, thump, rain/wind, synthwave music, M mute). Audio is untested by ear: check levels.
 
+Menu + progression (step 5): title, main, conditions, garage (buy/paint), settings, save (localStorage), quality tiers. tests/save-check.
+
 ## Next (Claude, big block in order)
-5 menu + progression, 6 docs + Qwen tasks.
+6 docs + Qwen tasks (then playtest).
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`)
 - 001 `src/world/assetLoader.ts`
@@ -25,7 +27,7 @@ Juice + audio (step 4): src/fx/ (smoke, skid marks, sparks, nitro flames, speed 
 - 004 `src/world/weatherFx.ts` (rain/snow; hook into main.ts after merge)
 
 ## Open contract requests
-None.
+None. Contract change logged: `GameState` gained `'MENU'` (src/types/game.ts), step 5.
 
 ## Log (newest last)
 - 2026-11-14 Claude: block 1 done. Tasks 001-003 written.
@@ -35,3 +37,4 @@ None.
 - 2026-11-14 Claude: step 2 cars done (data/cars.ts, carBody, proceduralCar, applyTuning). smokeScene deleted.
 - 2026-11-14 Claude: step 3 race flow done (raceManager, raceResult, carCollision, results UI, game/game.ts replaces main wiring).
 - 2026-11-14 Claude: step 4 juice + audio done (fx/, audio/, tests/audio-check).
+- 2026-11-14 Claude: step 5 menu + progression done (ui/menu, garage, settings, core/save, quality). Contract: GameState += 'MENU'.

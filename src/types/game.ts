@@ -12,7 +12,7 @@ import type { Group, Object3D, PerspectiveCamera, Vector3 } from 'three';
  *  - Simulation advances only in fixed 1/60 s steps; cameras and visuals run per display frame.
  */
 
-export type GameState = 'CINEMATIC' | 'RACING' | 'PODIUM';
+export type GameState = 'MENU' | 'CINEMATIC' | 'RACING' | 'PODIUM';
 
 export type Weather = 'CLEAR' | 'RAIN' | 'SNOW';
 
