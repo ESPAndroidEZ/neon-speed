@@ -30,11 +30,20 @@ function crane(): Group {
  * Dock strip: water and a chain rail on the left, container stacks flush with the right wall, gantry cranes
  * over the water, mooring bollards. (Left of travel is the water side: the dock leg runs along the harbour edge.)
  */
-export function buildDock(tr: Track): { group: Group; waterMat: MeshStandardMaterial } {
+export interface Dock {
+  group: Group;
+  waterMat: MeshStandardMaterial;
+  /** Procedural container stacks and where each box sits (a container GLB replaces them). */
+  boxes: InstancedMesh | null;
+  containers: { x: number; y: number; z: number; yaw: number }[];
+}
+
+export function buildDock(tr: Track): Dock {
   const group = new Group();
   const waterMat = new MeshStandardMaterial({ color: 0x050c1c, roughness: 0.08, metalness: 0.85 });
   const run = zoneRun(tr, 'dock');
-  if (!run) return { group, waterMat };
+  if (!run) return { group, waterMat, boxes: null, containers: [] };
+  const containers: Dock['containers'] = [];
   const rnd = createRng(21);
   const keep = (i: number): boolean => i >= run[0] && i <= run[1];
   group.add(new Mesh(ribbon(tr, (i) => tr.wall[i] + 0.4, 90, -0.012, 20, (i) => i >= run[0] - 6 && i <= run[1] + 6), waterMat));
@@ -57,6 +66,7 @@ export function buildDock(tr: Track): { group: Group; waterMat: MeshStandardMate
         d.rotation.y = yaw;
         d.updateMatrix();
         boxes.setMatrixAt(n, d.matrix);
+        containers.push({ x: d.position.x, y: d.position.y - 1.3, z: d.position.z, yaw });
         boxes.setColorAt(n, c.setHex(BOX_COLORS[Math.floor(rnd() * BOX_COLORS.length)]));
       }
     }
@@ -85,5 +95,5 @@ export function buildDock(tr: Track): { group: Group; waterMat: MeshStandardMate
     cr.rotation.y = Math.atan2(s.tangent.z, -s.tangent.x) + Math.PI;
     group.add(cr);
   }
-  return { group, waterMat };
+  return { group, waterMat, boxes, containers };
 }

@@ -1,4 +1,4 @@
-import { Color, type MeshBasicMaterial, type MeshStandardMaterial, type Texture } from 'three';
+import { Color, type MeshBasicMaterial, type PointsMaterial, type MeshStandardMaterial, type Texture } from 'three';
 import type { WeatherProfile } from '../types/game';
 
 export interface LookTargets {
@@ -7,6 +7,9 @@ export interface LookTargets {
   groundMat: MeshStandardMaterial;
   waterMat: MeshStandardMaterial;
   poolMat: MeshBasicMaterial;
+  streakMat: MeshBasicMaterial;
+  shaftMat: MeshBasicMaterial;
+  glowMat: PointsMaterial;
   env: Texture;
 }
 
@@ -28,5 +31,8 @@ export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
   t.waterMat.envMap = t.env;
   t.poolMat.opacity = wet ? 0.8 : snow ? 0.25 : 0.38;
   t.waterMat.roughness = snow ? 0.3 : 0.08 + p.precipitation * 0.1;
+  t.streakMat.opacity = wet ? 0.6 : 0;
+  t.shaftMat.opacity = wet ? 0.035 : snow ? 0.03 : 0.015; // fog and falling water scatter the lamp light
+  t.glowMat.opacity = wet ? 0.4 : snow ? 0.35 : 0.25;
   for (const m of [t.roadMat, t.vergeMat, t.groundMat, t.waterMat]) m.needsUpdate = true;
 }

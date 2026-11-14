@@ -11,6 +11,7 @@ const CSS = `
 .rb-card{padding:16px 22px;border:1px solid #18d8ff55;border-radius:10px;background:#0a0d1ccc;min-width:200px;text-align:center;cursor:pointer}
 .rb-card:hover{border-color:#ff2a9d;box-shadow:0 0 20px #ff2a9d55}
 .rb-cash{position:fixed;right:max(18px,env(safe-area-inset-right),2.5vw);top:max(14px,env(safe-area-inset-top),2vh);max-width:60vw;font-size:clamp(16px,2.2vw,24px);white-space:nowrap;text-align:right;color:#7dff9a;z-index:31;text-shadow:0 0 10px #000}
+.rb-toast{position:fixed;left:50%;bottom:max(24px,4vh);transform:translateX(-50%);padding:10px 18px;background:#0a0d1cee;border:1px solid #18d8ff88;border-radius:8px;color:#e8f6ff;font:600 14px system-ui,sans-serif;z-index:60;pointer-events:none}
 .rb-bar{height:7px;width:180px;background:#ffffff22;border-radius:4px;overflow:hidden}
 .rb-bar i{display:block;height:100%;background:linear-gradient(90deg,#18d8ff,#ff2a9d)}
 .rb-sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff6;cursor:pointer}
@@ -42,3 +43,11 @@ export function button(label: string, onClick: () => void, cls = ''): HTMLButton
 
 export const money = (n: number): string => `$${n.toLocaleString('en-US')}`;
 export const lapText = (t: number | null): string => (t === null ? '--' : `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`);
+
+/** Small transient message at the bottom centre. */
+export function toast(text: string, ms = 3500): void {
+  injectCss();
+  const t = h('div', 'rb-toast', text);
+  document.body.appendChild(t);
+  window.setTimeout(() => t.remove(), ms);
+}

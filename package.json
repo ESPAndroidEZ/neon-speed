@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/check-lines.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/check-lines.mjs && node scripts/check-health.mjs && tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "check:lines": "node scripts/check-lines.mjs",
     "preview": "vite preview",

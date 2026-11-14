@@ -1,4 +1,5 @@
 import { DirectionalLight, Group, HemisphereLight, type Scene, type Texture, type WebGLRenderer } from 'three';
+import { qualityNow } from '../core/quality';
 import { ObstacleField } from '../physics/obstacles';
 import type { WeatherProfile } from '../types/game';
 import { buildDock } from './dock';
@@ -9,6 +10,8 @@ import { createKestrelBay, PLAZA } from './kestrelBay';
 import { buildProps } from './props';
 import { buildStage } from './stage';
 import { layoutProps } from './propsLayout';
+import { RoadMirror } from './roadMirror';
+import { instanceProp, loadPropModel } from './propModels';
 import { Steam } from './steam';
 import type { Track } from './track';
 import { buildTrackMeshes } from './trackMesh';
@@ -24,6 +27,8 @@ export interface World {
   /** Re-skin the world for a weather profile (road gloss, snow tint, light pools). */
   setWeather(p: WeatherProfile): void;
   /** Per display frame: animated bits (steam vents). */
+  /** Swap in optional prop GLBs (public/models/props) where present. Safe to call once after build. */
+  applyPropModels(): Promise<void>;
   update(dt: number, camX: number, camZ: number, viewportPx: number): void;
 }
 
@@ -42,13 +47,36 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
   moon.position.set(-60, 90, -40);
   scene.add(root, new HemisphereLight(0x3a4a8a, 0x0a0a12, 0.9), moon);
   const steam = new Steam(scene, layout.vents);
+  const mirror = new RoadMirror(scene, meshes.roadMat);
+  let wet = false;
   const targets: LookTargets = {
     roadMat: meshes.roadMat, vergeMat: meshes.vergeMat, groundMat: meshes.groundMat,
-    waterMat: dock.waterMat, poolMat: furniture.poolMat, env,
+    waterMat: dock.waterMat, poolMat: furniture.poolMat, streakMat: furniture.streakMat, shaftMat: furniture.shaftMat, glowMat: furniture.glowMat, env,
   };
   return {
     track, root, env, obstacles: layout.obstacles,
-    setWeather: (p) => applyWorldLook(targets, p),
-    update: (dt, x, z, px) => steam.update(dt, x, z, px),
+    setWeather: (p) => {
+      wet = p.name === 'RAIN';
+      applyWorldLook(targets, p);
+    },
+    applyPropModels: async () => {
+      const [lamp, container, kiosk] = await Promise.all([loadPropModel('lamp'), loadPropModel('container'), loadPropModel('kiosk')]);
+      if (lamp) {
+        root.add(instanceProp(lamp, furniture.lamps.map((l) => ({ x: l.x, z: l.z, yaw: l.yaw }))));
+        furniture.heads.visible = false;
+      }
+      if (container && dock.boxes) {
+        root.add(instanceProp(container, dock.containers));
+        dock.boxes.visible = false;
+      }
+      if (kiosk) root.add(instanceProp(kiosk, [{ x: PLAZA.x + 6.5, y: 0.4, z: PLAZA.z, yaw: 0 }, { x: PLAZA.x - 6.5, y: 0.4, z: PLAZA.z, yaw: Math.PI }]));
+    },
+    update: (dt, x, z, px) => {
+      const q = qualityNow();
+      furniture.shafts.visible = q.shafts;
+      furniture.glow.visible = q.shafts;
+      mirror.setActive(q.mirror && wet);
+      steam.update(dt, x, z, px);
+    },
   };
 }

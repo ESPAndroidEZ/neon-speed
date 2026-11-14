@@ -1,23 +1,51 @@
-import { BoxGeometry, Color, Mesh, MeshBasicMaterial, PMREMGenerator, Scene, type Texture, type WebGLRenderer } from 'three';
+import { BackSide, BoxGeometry, BufferAttribute, Color, Mesh, MeshBasicMaterial, PMREMGenerator, Scene, SphereGeometry, type Texture, type WebGLRenderer } from 'three';
+import { createRng } from '../core/rng';
 
-/** Fake city reflection probe: dark sky with a ring of bright neon boxes, baked once into a PMREM env map. */
+/**
+ * Procedural night-city environment baked once into a PMREM: a dusk gradient dome (deep blue above, warm haze at the
+ * horizon), a ring of lit building blocks with window bands, and neon sign boxes. No HDR file needed.
+ */
 export function buildNeonEnvMap(renderer: WebGLRenderer): Texture {
+  const rnd = createRng(77);
   const s = new Scene();
-  s.background = new Color(0x0a0f24);
-  const colors = [0xff2a9d, 0x18d8ff, 0xffb347, 0x7a5cff, 0xffffff];
-  for (let i = 0; i < 28; i++) {
-    const a = (i / 28) * Math.PI * 2;
-    const m = new MeshBasicMaterial({ color: new Color(colors[i % colors.length]).multiplyScalar(4) });
-    const b = new Mesh(new BoxGeometry(3 + (i % 3) * 3, 1 + (i % 4), 0.5), m);
-    b.position.set(Math.sin(a) * 40, 4 + (i % 5) * 3, Math.cos(a) * 40);
-    b.lookAt(0, 0, 0);
-    s.add(b);
+  const dome = new SphereGeometry(100, 24, 16);
+  const pos = dome.getAttribute('position');
+  const col = new Float32Array(pos.count * 3);
+  const top = new Color(0x050a24);
+  const mid = new Color(0x1b2a5e);
+  const low = new Color(0x6a3a4a); // warm city haze
+  const c = new Color();
+  for (let i = 0; i < pos.count; i++) {
+    const h = pos.getY(i) / 100; // -1..1
+    if (h > 0.25) c.copy(mid).lerp(top, (h - 0.25) / 0.75);
+    else c.copy(low).lerp(mid, Math.max(0, (h + 0.1) / 0.35));
+    col.set([c.r, c.g, c.b], i * 3);
   }
-  const top = new Mesh(new BoxGeometry(60, 0.5, 60), new MeshBasicMaterial({ color: new Color(0x3b4a8a).multiplyScalar(1.5) }));
-  top.position.y = 30;
-  s.add(top);
+  dome.setAttribute('color', new BufferAttribute(col, 3));
+  s.add(new Mesh(dome, new MeshBasicMaterial({ vertexColors: true, side: BackSide })));
+
+  const neon = [0xff2a9d, 0x18d8ff, 0xffb347, 0x7a5cff, 0x39ff88, 0xffffff];
+  for (let i = 0; i < 44; i++) {
+    const a = (i / 44) * Math.PI * 2 + rnd() * 0.1;
+    const h = 8 + rnd() * 30;
+    const block = new Mesh(new BoxGeometry(6 + rnd() * 8, h, 6), new MeshBasicMaterial({ color: new Color(0x10141f).multiplyScalar(1 + rnd()) }));
+    block.position.set(Math.sin(a) * 55, h / 2 - 4, Math.cos(a) * 55);
+    s.add(block);
+    for (let k = 0; k < 3; k++) { // lit window bands and neon signs on the block face
+      const lit = new Mesh(new BoxGeometry(5, 0.6 + rnd(), 0.4), new MeshBasicMaterial({ color: new Color(neon[Math.floor(rnd() * neon.length)]).multiplyScalar(2 + rnd() * 3) }));
+      lit.position.set(Math.sin(a) * 51.8, 2 + rnd() * (h - 6), Math.cos(a) * 51.8);
+      lit.lookAt(0, lit.position.y, 0);
+      s.add(lit);
+    }
+  }
+  for (let i = 0; i < 10; i++) { // overhead lamps
+    const a = rnd() * Math.PI * 2;
+    const lamp = new Mesh(new BoxGeometry(3, 0.4, 1), new MeshBasicMaterial({ color: new Color(0xffd9a0).multiplyScalar(6) }));
+    lamp.position.set(Math.sin(a) * 25, 14 + rnd() * 6, Math.cos(a) * 25);
+    s.add(lamp);
+  }
   const pm = new PMREMGenerator(renderer);
-  const env = pm.fromScene(s, 0.04).texture;
+  const env = pm.fromScene(s, 0.03).texture;
   pm.dispose();
   return env;
 }

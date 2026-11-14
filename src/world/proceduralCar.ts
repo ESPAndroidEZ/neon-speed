@@ -1,6 +1,7 @@
 import { BoxGeometry, Color, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { damp } from '../core/math';
 import { bodyShell, cabin, roofSpan, type BodyShape } from './carBody';
+import { addLightsAndShadow } from './carLights';
 
 const bright = (hex: number, k: number): Color => new Color(hex).multiplyScalar(k);
 
@@ -60,6 +61,7 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
   for (const x of [-w * 0.34, w * 0.34]) mesh(new BoxGeometry(0.42, 0.11, 0.08), headMat, x, 0.66, zf + 0.01);
   mesh(new BoxGeometry(w * 0.8, 0.09, 0.06), tailMat, 0, shape.beltHeight - 0.2, -zf - 0.01);
 
+  addLightsAndShadow(root, w, shape.length, 0.66);
   const glowMat = new MeshBasicMaterial({ color: bright(0x2a6bff, 1.5), transparent: true, opacity: 0.6 });
   const glowPlane = new Mesh(new BoxGeometry(w * 0.85, 0.02, shape.length * 0.8), glowMat);
   glowPlane.position.y = 0.08;

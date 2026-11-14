@@ -14,7 +14,7 @@ export interface SaveData {
   glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean };
   races: number;
   career: CareerState;
 }
@@ -36,7 +36,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   paint: { [starterId]: starterPaint },
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
-  settings: { volume: 0.7, muted: false, quality: 'high', voice: false },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true },
   races: 0,
   career: defaultCareer(),
 });
@@ -75,6 +75,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.volume = num(s.volume, out.settings.volume, 0, 1);
   out.settings.muted = s.muted === true;
   out.settings.voice = s.voice === true;
+  out.settings.autoQuality = s.autoQuality !== false;
   const cr = (j.career ?? {}) as Record<string, unknown>;
   if (Array.isArray(cr.completed)) out.career.completed = cr.completed.filter((id): id is string => typeof id === 'string');
   out.career.seenIntro = cr.seenIntro === true;

@@ -1,7 +1,9 @@
-import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, type Texture } from 'three';
+import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, Group, Material, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, type Texture } from 'three';
 import { damp } from '../core/math';
 import type { CarModel } from '../types/game';
 import { findBodyMaterial, setModelYaw } from './assetLoader';
+import { addLightsAndShadow } from './carLights';
+import { upgradeCarMaterials } from './materialUpgrade';
 import type { CarVisual } from './proceduralCar';
 
 /**
@@ -17,11 +19,18 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
   const { x: w, z: len } = model.size;
   setModelYaw(model, yaw);
 
-  const bodyMat = findBodyMaterial(model.root) as (Material & { color?: Color }) | null;
+  // material upgrade pass (clearcoat body, dark glass, rubber tyres), then pick the paintable body material
+  const bodies = upgradeCarMaterials(model.root, { env: null });
+  const found = findBodyMaterial(model.root);
+  const bodyMat = (found && bodies.includes(found as never) ? found : bodies.length === 1 ? bodies[0] : null) as (Material & { color?: Color; map?: unknown }) | null;
   const tint = (hex: number): void => {
-    if (bodyMat?.color) bodyMat.color.setHex(hex === factoryColor ? 0xffffff : hex);
+    if (!bodyMat?.color) return;
+    if (hex === factoryColor) bodyMat.color.setHex(0xffffff);
+    else if (bodyMat.map) bodyMat.color.setHex(0xffffff).lerp(new Color(hex), 0.7); // textured body: keep some of the baked detail
+    else bodyMat.color.setHex(hex);
   };
   tint(paintHex);
+  addLightsAndShadow(root, w, len, 0.7);
 
   const glowMat = new MeshBasicMaterial({ color: new Color(0x2a6bff).multiplyScalar(1.5), transparent: true, opacity: 0.6 });
   const glow = new Mesh(new BoxGeometry(w * 0.85, 0.02, len * 0.8), glowMat);
@@ -77,7 +86,7 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
       model.root.traverse((o) => {
         if (o instanceof Mesh && o.material instanceof MeshStandardMaterial) {
           o.material.envMap = env;
-          o.material.envMapIntensity = 0.9;
+          o.material.envMapIntensity = o.material instanceof MeshPhysicalMaterial && o.material.clearcoat > 0.9 ? 1.5 : 1;
           o.material.needsUpdate = true;
         }
       });

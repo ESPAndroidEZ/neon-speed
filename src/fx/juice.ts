@@ -4,7 +4,8 @@ import type { Game } from '../game/game';
 import type { RacerView } from '../game/racerViews';
 import { ParticlePool } from './particles';
 import { SkidMarks } from './skidMarks';
-import { SpeedPass } from './speedPass';
+import { FinalFx } from './finalFx';
+import { HeadlightPool } from './headlights';
 
 /** Visual feedback: tyre smoke, skid marks, barrier sparks, nitro flames, speed streaks, shake and bloom kicks. */
 export class Juice {
@@ -14,7 +15,8 @@ export class Juice {
   private readonly sparks: ParticlePool;
   private readonly flames: ParticlePool;
   private readonly skids: SkidMarks;
-  private readonly speed: SpeedPass;
+  private readonly speed: FinalFx;
+  private readonly lights: HeadlightPool;
   private readonly last = new WeakMap<RacerView, Float32Array>();
   private readonly acc = new WeakMap<RacerView, number>();
   private streak = 0;
@@ -28,7 +30,8 @@ export class Juice {
     this.sparks = new ParticlePool(engine.scene, { max: 300, additive: true, gravity: -9, drag: 0.4 });
     this.flames = new ParticlePool(engine.scene, { max: 300, additive: true, gravity: 0.5, drag: 3 });
     this.skids = new SkidMarks(engine.scene);
-    this.speed = new SpeedPass(engine);
+    this.speed = new FinalFx(engine);
+    this.lights = new HeadlightPool(engine.scene);
     engine.onFrame(this.frame);
   }
 
@@ -48,6 +51,7 @@ export class Juice {
       this.wheels(v, dt, wet);
       this.nitro(v, dt);
     }
+    this.lights.update(this.game.views.views);
     this.hits();
     this.screenFx(dt);
     this.smoke.update(dt);
@@ -136,6 +140,6 @@ export class Juice {
     this.wasNitro = nitro;
     const target = smoothstep(32, 85, Math.abs(p.state.speed)) * 0.55 + (nitro ? 0.4 : 0);
     this.streak = damp(this.streak, target, 3, dt);
-    this.speed.strength = this.streak;
+    this.speed.update(dt, this.streak);
   }
 }

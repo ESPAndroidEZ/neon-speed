@@ -1,0 +1,29 @@
+import type { Engine } from '../core/engine';
+import type { CarSpec } from '../data/cars';
+import type { CarTuning } from '../physics/carTuning';
+import type { AIRacerAgent, InputSource, Weather } from '../types/game';
+import type { Hud } from '../ui/hud';
+import type { ResultsScreen } from '../ui/results';
+import type { World } from '../world/world';
+
+export interface RaceSetup {
+  car: CarSpec;
+  paint: number;
+  glow?: number;
+  weather: Weather;
+  /** Switch weather mid-race after this many seconds of racing. */
+  weatherChange?: { at: number; to: Weather };
+  laps: number;
+  /** Play the intro cinematic first (otherwise straight to the countdown). */
+  cinematic: boolean;
+  agents: { agent: AIRacerAgent; car: CarSpec; paint: number }[];
+}
+
+export interface GameDeps {
+  engine: Engine;
+  world: World;
+  hud: Hud;
+  results: ResultsScreen;
+  input: InputSource;
+  tuning: CarTuning;
+}

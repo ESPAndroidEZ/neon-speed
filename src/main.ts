@@ -1,5 +1,6 @@
 import { AudioManager } from './audio/audioManager';
 import { Engine } from './core/engine';
+import { AutoQuality } from './core/quality';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
@@ -15,6 +16,7 @@ import type { Weather } from './types/game';
 import { DialogueBox, Subtitles, Voice } from './ui/dialogue';
 import { Hud } from './ui/hud';
 import { Menu } from './ui/menu';
+import { toast } from './ui/uiKit';
 import { ResultsScreen } from './ui/results';
 import { applySettings } from './ui/settings';
 import { preloadCarModels } from './world/carFactory';
@@ -53,7 +55,15 @@ engine.onFrame((_a, dt) => {
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
 const voice = new Voice();
-applySettings({ store, audio: audio.bus, engine, voice });
+const auto = new AutoQuality();
+auto.onDowngrade = (tier) => {
+  store.data.settings.quality = tier;
+  store.commit();
+  toast(`Frame rate was low: graphics lowered to ${tier.toUpperCase()}. (Settings: Auto quality)`);
+};
+engine.onFrame((_a, dt) => auto.update(dt, engine));
+applySettings({ store, audio: audio.bus, engine, voice, auto });
+void world.applyPropModels();
 
 const panel = new TuningPanel(document.body);
 panel.add('car', tuning);
@@ -66,7 +76,7 @@ const launchFree = (w: Weather, rivals: number): void => {
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: false, agents: freeRaceField(rivals) });
 };
 menu = new Menu({
-  store, audio: audio.bus, engine, voice,
+  store, audio: audio.bus, engine, voice, auto,
   showroom: (c, p, g) => game.showroom(c, p, g),
   shift: (m) => {
     game.showroomCam.shift = m;

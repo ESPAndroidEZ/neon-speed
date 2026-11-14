@@ -17,6 +17,7 @@ export interface MenuDeps {
   audio: AudioBus;
   engine: Engine;
   voice: Voice;
+  auto: { enabled: boolean };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
   /** Slide the showroom car sideways on screen (garage panel sits on the left). */
@@ -140,6 +141,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, onBack: () => this.main() }), 'other');
   }
 }

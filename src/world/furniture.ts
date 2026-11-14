@@ -1,4 +1,4 @@
-import { AdditiveBlending, BoxGeometry, BufferAttribute, BufferGeometry, Color, Group, InstancedMesh, LineBasicMaterial, LineSegments, MeshBasicMaterial, Object3D, PlaneGeometry } from 'three';
+import { AdditiveBlending, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, DoubleSide, Group, InstancedMesh, LineBasicMaterial, LineSegments, MeshBasicMaterial, Object3D, PlaneGeometry, Points, PointsMaterial } from 'three';
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
@@ -12,6 +12,17 @@ export interface Furniture {
   group: Group;
   /** Additive light pools under the lamps; weather raises their opacity when wet. */
   poolMat: MeshBasicMaterial;
+  /** Neon streaks reflected on the wet road (invisible when dry). */
+  streakMat: MeshBasicMaterial;
+  /** Volumetric light cones under the lamps. */
+  shaftMat: MeshBasicMaterial;
+  shafts: InstancedMesh;
+  /** Lamp head mesh and the wall positions of the lamps (a lamp GLB replaces the procedural head). */
+  heads: InstancedMesh;
+  lamps: { x: number; z: number; yaw: number }[];
+  /** Fog glow sprites around lamps and signs. */
+  glow: Points;
+  glowMat: PointsMaterial;
 }
 
 /**
@@ -48,6 +59,24 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   });
   group.add(heads, pools);
 
+  // light shafts (open cones) and fog glow sprites around each lamp head
+  const shaftMat = new MeshBasicMaterial({ color: new Color(0xffd9a0), transparent: true, opacity: 0.02, depthWrite: false, blending: AdditiveBlending, side: DoubleSide });
+  const shafts = new InstancedMesh(new ConeGeometry(2.4, LAMP_H, 14, 1, true), shaftMat, lampIdx.length);
+  const glowPos: number[] = [];
+  const lamps: { x: number; z: number; yaw: number }[] = [];
+  lampIdx.forEach((i, k) => {
+    const side = k % 2 === 0 ? 1 : -1;
+    lateralPoint(tr, i, side * (tr.wall[i] - 1.0), p);
+    d.position.set(p.x, LAMP_H / 2, p.z);
+    d.rotation.set(0, 0, 0);
+    d.scale.set(1, 1, 1);
+    d.updateMatrix();
+    shafts.setMatrixAt(k, d.matrix);
+    glowPos.push(p.x, LAMP_H, p.z);
+    lamps.push({ x: p.x, z: p.z, yaw: Math.atan2(tr.samples[i].tangent.x, tr.samples[i].tangent.z) });
+  });
+  group.add(shafts);
+
   // neon signs on facades: flat boards on the wall and blades sticking out over the road
   const flat: { i: number; side: number; y: number; w: number; h: number; blade: boolean }[] = [];
   for (let i = 3; i < n; i += 3) {
@@ -73,6 +102,29 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   });
   signs.count = flat.length;
   group.add(signs);
+  // wet-road streaks: each sign casts a long soft smear of its colour down the street
+  const streakMat = new MeshBasicMaterial({ map: makePoolTexture(), color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending });
+  const streaks = new InstancedMesh(new PlaneGeometry(1, 1).rotateX(-Math.PI / 2), streakMat, Math.max(1, flat.length));
+  flat.forEach((f, k) => {
+    const s0 = tr.samples[f.i];
+    d.position.set(s0.position.x + s0.tangent.z * f.side * 0.8, 0.05, s0.position.z - s0.tangent.x * f.side * 0.8);
+    d.rotation.set(0, Math.atan2(s0.tangent.x, s0.tangent.z), 0);
+    d.scale.set(Math.max(2, f.w * 0.6), 1, 18);
+    d.updateMatrix();
+    streaks.setMatrixAt(k, d.matrix);
+    signs.getColorAt(k, col);
+    streaks.setColorAt(k, col.multiplyScalar(0.45));
+    lateralPoint(tr, f.i, f.side * (tr.wall[f.i] - 0.4), p);
+    glowPos.push(p.x, f.y, p.z);
+  });
+  streaks.count = flat.length;
+  group.add(streaks);
+  const glowGeo = new BufferGeometry();
+  glowGeo.setAttribute('position', new BufferAttribute(new Float32Array(glowPos), 3));
+  const glowMat = new PointsMaterial({ map: makePoolTexture(), size: 3.5, sizeAttenuation: true, color: new Color(0xffc890).multiplyScalar(0.7), transparent: true, opacity: 0.3, depthWrite: false, blending: AdditiveBlending });
+  const glow = new Points(glowGeo, glowMat);
+  glow.frustumCulled = false;
+  group.add(glow);
 
   // overhead cables: two sagging wires across the street every ~27 m
   const pts: number[] = [];
@@ -98,5 +150,5 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   const cg = new BufferGeometry();
   cg.setAttribute('position', new BufferAttribute(new Float32Array(pts), 3));
   group.add(new LineSegments(cg, new LineBasicMaterial({ color: 0x1a1c22 })));
-  return { group, poolMat };
+  return { group, poolMat, streakMat, shaftMat, shafts, heads, lamps, glow, glowMat };
 }

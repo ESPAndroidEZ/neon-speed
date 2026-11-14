@@ -10,6 +10,7 @@ export interface SettingsDeps {
   audio: AudioBus;
   engine: Engine;
   voice: Voice;
+  auto: { enabled: boolean };
   onBack: () => void;
 }
 
@@ -20,6 +21,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setMuted(s.muted);
   applyQuality(d.engine, s.quality);
   d.voice.enabled = s.voice;
+  d.auto.enabled = s.autoQuality;
 }
 
 export function buildSettings(d: SettingsDeps): HTMLElement {
@@ -63,6 +65,17 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   voice.append(vbox);
 
+  const auto = h('label', 'rb-row', '<span style="width:90px">Auto quality</span>');
+  const abox = h('input') as HTMLInputElement;
+  abox.type = 'checkbox';
+  abox.checked = s.autoQuality;
+  abox.addEventListener('change', () => {
+    s.autoQuality = abox.checked;
+    applySettings(d);
+    d.store.commit();
+  });
+  auto.append(abox);
+
   const q = h('div', 'rb-row', '<span style="width:90px">Quality</span>');
   (['low', 'medium', 'high'] as Quality[]).forEach((t) => {
     const b = button(t, () => {
@@ -78,6 +91,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     q.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.textContent === s.quality));
   };
   refresh();
-  root.append(vol, mute, voice, q, button('Back', d.onBack));
+  root.append(vol, mute, voice, q, auto, button('Back', d.onBack));
   return root;
 }

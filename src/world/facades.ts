@@ -2,7 +2,7 @@ import { BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMate
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
-import { makeWindowTexture } from './textures';
+import { makeNeonWindowTexture, makeWindowTexture } from './textures';
 
 export interface Plaza {
   x: number;
@@ -76,6 +76,7 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
   const height: [Float32Array, Float32Array] = [new Float32Array(n), new Float32Array(n)];
   const warm = new Strips();
   const cool = new Strips();
+  const neon = new Strips();
   const shops = new Strips();
   const rim = new Strips();
   const inPlaza = (i: number): boolean => {
@@ -110,7 +111,7 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
       const b = Math.min(n, j);
       if (basin) rim.run(tr, side, i, b, h, [0.15, 1.2, 1.8], 0, 0, 0.05);
       else {
-        (rnd() < 0.5 ? warm : cool).run(tr, side, i, b, h, TINTS[Math.floor(rnd() * TINTS.length)], 2);
+        (rnd() < 0.18 ? neon : rnd() < 0.5 ? warm : cool).run(tr, side, i, b, h, TINTS[Math.floor(rnd() * TINTS.length)], 2);
         const c = SHOP[Math.floor(rnd() * SHOP.length)];
         if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07);
       }
@@ -119,13 +120,14 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
     }
   }
   const group = new Group();
-  const addWalls = (s: Strips, isWarm: boolean): void => {
+  const addWalls = (s: Strips, isWarm: boolean, texture?: ReturnType<typeof makeWindowTexture>): void => {
     if (s.idx.length === 0) return;
-    const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1, side: DoubleSide, emissive: 0xffffff, emissiveMap: makeWindowTexture(isWarm), emissiveIntensity: 1.5 });
+    const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1, side: DoubleSide, emissive: 0xffffff, emissiveMap: texture ?? makeWindowTexture(isWarm), emissiveIntensity: 1.5 });
     group.add(new Mesh(s.geometry(), m));
   };
   addWalls(warm, true);
   addWalls(cool, false);
+  addWalls(neon, false, makeNeonWindowTexture());
   const basic = new MeshBasicMaterial({ vertexColors: true, side: DoubleSide });
   if (shops.idx.length > 0) group.add(new Mesh(shops.geometry(), basic));
   if (rim.idx.length > 0) group.add(new Mesh(rim.geometry(), basic));

@@ -1,42 +1,18 @@
 import { ChaseCam } from '../camera/chaseCam';
 import { CinematicCam } from '../camera/cinematicCam';
 import { createIntroShots } from '../camera/shots';
-import type { Engine } from '../core/engine';
 import { RaceManager, type RaceResult, type Racer } from '../core/raceManager';
 import type { CarSpec } from '../data/cars';
-import { applyTuning, type CarTuning } from '../physics/carTuning';
-import type { AIRacerAgent, CarInput, CarState, GameState, InputSource, RaceTelemetry, Weather } from '../types/game';
+import { applyTuning } from '../physics/carTuning';
+import type { CarInput, CarState, GameState, RaceTelemetry, Weather } from '../types/game';
 import { createNeutralInput } from '../types/game';
-import type { Hud } from '../ui/hud';
-import type { ResultsExtra, ResultsScreen } from '../ui/results';
-import type { World } from '../world/world';
+import type { ResultsExtra } from '../ui/results';
 import { STAGE } from '../world/stage';
+import type { GameDeps, RaceSetup } from './gameTypes';
 import { RacerViews } from './racerViews';
 import { createTelemetry, createViewState } from './telemetry';
 import { applyWeather } from './weatherApply';
 import { ShowroomCam } from './showroomCam';
-
-export interface RaceSetup {
-  car: CarSpec;
-  paint: number;
-  glow?: number;
-  weather: Weather;
-  /** Switch weather mid-race after this many seconds of racing. */
-  weatherChange?: { at: number; to: Weather };
-  laps: number;
-  /** Play the intro cinematic first (otherwise straight to the countdown). */
-  cinematic: boolean;
-  agents: { agent: AIRacerAgent; car: CarSpec; paint: number }[];
-}
-
-export interface GameDeps {
-  engine: Engine;
-  world: World;
-  hud: Hud;
-  results: ResultsScreen;
-  input: InputSource;
-  tuning: CarTuning;
-}
 
 /** Race orchestrator: GameState machine, race manager, car views, cameras, HUD. */
 export class Game {
@@ -217,3 +193,5 @@ export class Game {
     this.d.hud.update(this.telemetry);
   };
 }
+
+export type { GameDeps, RaceSetup };

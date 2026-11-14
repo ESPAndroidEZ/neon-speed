@@ -98,3 +98,37 @@ export function makePoolTexture(): CanvasTexture {
   t.minFilter = LinearFilter;
   return t;
 }
+
+/** Soft rounded dark patch for the contact shadow under a car. */
+export function makeShadowTexture(): CanvasTexture {
+  const [c, g] = canvas(128, 128);
+  const grd = g.createRadialGradient(64, 64, 8, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(0,0,0,0.85)');
+  grd.addColorStop(0.55, 'rgba(0,0,0,0.5)');
+  grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 128, 128);
+  const t = new CanvasTexture(c);
+  t.minFilter = LinearFilter;
+  return t;
+}
+
+/** Third window style: mostly dark with a few neon-coloured rooms and bright office floors, for skyline variety. */
+export function makeNeonWindowTexture(): CanvasTexture {
+  const rnd = createRng(8);
+  const [c, g] = canvas(128, 128);
+  g.fillStyle = '#04050a';
+  g.fillRect(0, 0, 128, 128);
+  const tints = ['#ff2a9d', '#18d8ff', '#7a5cff', '#39ff88', '#ffb347'];
+  for (let y = 0; y < 8; y++) {
+    const floorLit = rnd() < 0.2; // whole office floor lit white
+    for (let x = 0; x < 8; x++) {
+      const r = rnd();
+      if (!floorLit && r < 0.7) continue;
+      g.fillStyle = floorLit ? '#e8f0ff' : tints[Math.floor(rnd() * tints.length)];
+      g.globalAlpha = floorLit ? 0.8 : 0.9;
+      g.fillRect(x * 16 + 2, y * 16 + 3, 12, 9);
+    }
+  }
+  return finish(c, true);
+}
