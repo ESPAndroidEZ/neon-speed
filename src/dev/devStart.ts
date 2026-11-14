@@ -66,6 +66,7 @@ if (d.direct) {
   if (scr === 'garage') menu.garage();
   else if (scr === 'weather' || scr === 'maps') menu.maps();
   else if (scr === 'settings') menu.settings();
+  else if (scr === 'tune') menu.tune();
   else if (scr === 'story') menu.story();
   else if (scr === 'crew') menu.crew();
   else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event

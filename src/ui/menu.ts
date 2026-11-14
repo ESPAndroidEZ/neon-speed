@@ -14,6 +14,7 @@ import { buildLoadMenu, describe } from './saveUi';
 import { buildCrewMenu } from './crewMenu';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
+import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
 import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money } from './uiKit';
@@ -115,12 +116,16 @@ export class Menu {
       c.title = describe(latest.snap);
       el.append(c);
     }
-    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.maps()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
+    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.maps()), button('Garage', () => this.garage()), button('Tuning', () => this.tune()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
     this.mount(el, 'main');
   }
 
   load(): void {
     this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other');
+  }
+
+  tune(): void {
+    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other');
   }
 
   crew(): void {
