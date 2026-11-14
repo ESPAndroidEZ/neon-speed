@@ -1,11 +1,11 @@
 # Racer's Blood: project summary
 
-Updated 2026-11-14 (after feedback round 4).
+Updated 2026-11-14 (after session 5).
 
 ## What it is
 A 3D arcade street racer in the browser (TypeScript, Three.js, Vite; Capacitor iOS/Android later). Night city, neon,
 rain and snow that really change grip, drifting, nitro and a turbo. Free Chapter 1 demo first: one tight street
-circuit ("Kestrel Bay Streets", 1.4 km), five cars, AI rivals, a four-event story ("Wet Asphalt").
+circuit ("Kestrel Bay Streets", 1.4 km), five cars, AI rivals, a four-event story ("Wet Asphalt"). Session 5 added four more maps (Neon Strip, Container Maze, Cliffside Run sprint with hills, a drift yard), Chapter 2 "Redline Rising" with a branching choice, portraits and a versus screen, weight-transfer driving with assists, gamepad and touch, and a racing-line AI with four difficulty levels.
 
 ## Status per phase (`docs/plan.md` has the table)
 - 0 Foundation, 1 Drive, 2 Track and city, 3 Cars and AI, 4 Juice and audio: done.
@@ -20,7 +20,7 @@ circuit ("Kestrel Bay Streets", 1.4 km), five cars, AI rivals, a four-event stor
 ## Controls
 W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather,
 M mute, Esc pause (Resume, Restart, Save, Save & Quit), P particle showcase, K audio test panel, backtick tuning panel.
-Dev URL flags: `?skip ?demo ?ai=3 ?car=evo ?w=rain ?at=tunnel ?ff=10 ?screen=garage|story|crew ?showcar=supra&angle=side`.
+Dev URL flags: `?skip ?demo ?ai=3 ?car=evo ?w=rain ?at=tunnel ?ff=10 ?track=neon|maze|cliff|maze-drift ?event=c2-neon ?screen=garage|story|crew|maps ?showcar=supra&angle=side`. Gamepad: left stick + triggers, A/X handbrake, RB/B nitro, Start pause, Y reset.
 
 ## Architecture in 10 lines (details: `docs/architecture.md`)
 1. `src/types/game.ts` holds every shared contract (CarInput, CarState, WeatherProfile, AIRacerAgent, Serializable...).
@@ -52,7 +52,8 @@ Sound is procedural only; no samples without Carlos's yes. Cars: Tripo free tier
 - Sound quality is unjudged by the author (no ears): use the K panel presets. Procedural synthesis has a ceiling.
 - The headless GPU is software (SwiftShader): bloom and fog look different on a real GPU; tune by eye on yours.
 - The repo has no git remote; nothing is pushed.
-- Touch controls, minimap, gamepad and city ambience are not built yet (Qwen task files exist).
+- City ambience, vinyls and extra props are not built (small Qwen tasks 012-019 are queued: radio/tips/barks data, vinyl painters, tram and yard props, AI and dialogue tests). Character GLB loading (Tripo) is a TODO; procedural figures are used.
+- AI in a crowded field still gets pinned now and then (a lift back onto the road after 9 s); tune by watching a 6-rival race.
 
 ## What is next
 Real car models, car upgrades (phase 5), touch controls and Capacitor (phase 6), tutorial and polish (phase 7).

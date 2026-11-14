@@ -1,6 +1,6 @@
 # Architecture
 
-Updated: 2026-11-14 (round 3). Keep this in sync with the code (`/sync-docs`).
+Updated: 2026-11-14 (session 5). Keep this in sync with the code (`/sync-docs`).
 
 ## Data flow
 ```
@@ -8,7 +8,7 @@ KeyboardInput.sample -> CarInput (player)
 Engine fixed 1/60 s: Game.fixed -> RaceManager.step: per racer [agent.decide | player input] -> CarController.step
                      -> TrackContact.update (verge, barriers) -> car-car resolveCarPair -> LapCounter -> finish/results
 Engine per frame:    RacerViews.update(alpha) (interpolated poses + wheel/body anim) -> ChaseCam -> Hud
-AI: rivals pass through each other (no pile-ups); only contact with the player is solid. `AIWorldView.grip` carries the weather grip.
+AI: rivals trade soft bumps (`core/raceContacts`, strength 0.12), contact with the player is a full mass-based crash. `AIWorldView.grip` carries the weather grip. A rival that gains no ground for 9 s is lifted back onto the road.
 Game.state: MENU (showroom orbit cam, Menu DOM) -> CINEMATIC (CinematicCam, then handover to ChaseCam.pose) -> RACING -> PODIUM (ResultsScreen)
 RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 ```
@@ -47,6 +47,13 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   rain/wind beds, thump), `musicPatterns` (pure notes) + `music` (scheduler, layers by speed), `audioManager` (feeds all; M = mute).
 - `camera/`: `cinematicCam` (intro), `chaseCam` (gameplay), shots helpers.
 - `input/keyboard`, `ui/hud`, `ui/results`, `dev/tuningPanel` (backtick), 
+
+## Session 5: driving, maps, story, AI
+- Driving: `physics/loadTransfer` (weight transfer: braking loads the nose, power the tail, roll transfer costs grip per axle via `rollFront`), per-car cgHeight / rollFront / brakeBias / throttleLag / engineBraking in `CarTuning`, `physics/assists` (BEGINNER / STANDARD / PRO + steering sensitivity; STANDARD = the approved handling), `physics/steering`. Input: `input/combinedInput` merges keyboard (speed-sensitive ramps), gamepad (analog, deadzone, d-pad, rumble) and `ui/touchControls`; `game/inputSetup` wires them.
+- Maps: `data/tracks/*.ts` (TrackDef: vertices, start, laps, propsDensity, weather, elevation, sprintEnd, driftTarget), `buildTrack(def)`; `Track` has `heights` (visual elevation: `TrackContact.groundY/pitch`, chase cam follows) and `raceSamples` (sprint distance). `world.load(def)` swaps maps; `world/worldParts` composes a theme (city / port `yard` / cliff `cliffside`). `world/trackValidate` is the headless validator. UI: `ui/trackSelect`, `game/freeRace` (per-map bests in `trackBest`).
+- Story: `data/story2*.ts` (chapter 2), branching `Line.choice`, story flags + relationships in `career` (saved), `ui/portraits` + `data/characters` (2D faces, moods), `ui/versus`, `game/versusGate`, `world/characters` + `game/cast` (3D figures).
+- AI: `physics/aiLine` (apex line by relaxation, speed profile), `aiTraffic` (slipstream, dive-bomb, defence), `aiDifficulty` (ROOKIE..LEGEND, personalities, capped rubber band), `aiRacers` (the agent). Same physics and grip as the player.
+- Tests added: handling, contact, balance (lap-time bands, class order), tracks, ai-tracks, ai-levels, story2, text-data.
 
 ## Visual checks and cars (round 4)
 `core/grade` holds the per-weather look (exposure, bloom, colour grade, glow and spot scales) applied by `game/weatherApply`; `scripts/visual-check.mjs` (Playwright) asserts luminance, clipping and contrast in CLEAR/RAIN/SNOW. Procedural cars are lofted: `world/carLoft` (mirrored cross-sections along Z, smooth normals, material groups), `carBody` (stations from the proportion numbers in `data/cars.ts`), `carDetails` (splitter, skirts, wing, scoop, tips, door lines, mirrors, lamps), `carWheels` (rounded tyres, five-spoke rims, discs, calipers, arches).

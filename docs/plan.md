@@ -1,6 +1,6 @@
 # Plan: making this a great game, not just a working one
 
-Last updated: 2026-11-14 (Claude).
+Last updated: 2026-11-14 (Claude, session 5).
 
 ## 1. What "great" means here
 
@@ -29,10 +29,10 @@ Everything else (more cars, more tracks) is content and comes last.
 | 0 | Foundation (**done**): contracts, engine, bloom, cinematic intro | Claude | Build green, camera checks pass | done |
 | 1 | **Drive**: `carController`, `chaseCam`, keyboard/gamepad input, tuning panel, minimal HUD, flat test arena | Claude | A tester drifts a box car for 5 min and wants to keep going | done |
 | 2 | **Track and city** (now Kestrel Bay Streets): spline track, barriers, checkpoints, lap logic, instanced buildings/lamps, wet-road look | Claude (+ Qwen: track data) | One lap of a good-looking circuit at 60 fps on desktop | done |
-| 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes | done (race flow, collisions, 5 cars, AI rivals) |
+| 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes | done (race flow, mass-based collisions, 5 cars, AI with racing line, 4 difficulty levels, 5 maps) |
 | 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic | done; round 2 added weather particles, tyre/exhaust fx, showcase (P), turbo audio (needs ear tuning) |
-| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | partial: garage, cash, paint, underglow, save, story career done; upgrades and more event types todo |
-| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | todo |
+| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | partial: garage, cash, paint, underglow, save, story chapters 1-2, circuit/sprint/drift events done; upgrades and vinyls todo |
+| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | partial: touch controls and gamepad wired; Capacitor, perf tiers on device todo |
 | 7 | **Ship**: menus, tutorial, settings, TestFlight, crash/perf telemetry | Both | 10 outside testers finish the first race unaided | todo |
 
 ## 4. The pieces that decide quality

@@ -13,7 +13,8 @@ npm test         # headless physics, track and collision checks (tests/*.mts)
 
 Controls: W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather, M mute, Esc pause (Resume, Restart, Save, Save & Quit), P particle showcase, K audio test panel, backtick tuning panel. Main menu: Continue / Load (3 slots + autosave).
 Car models: drop GLBs into `public/models/<id>.glb` (see `docs/assets/tripo-brief.md`); `scripts/optimize-models.sh` shrinks them. Missing files fall back to the procedural cars.
-Dev URL flags: `?skip` (no menu), `?ai=3`, `?car=evo`, `?w=rain`, `?at=tunnel`, `?demo`, `?ff=10`, `?screen=garage|story|weather|settings`.
+Dev URL flags: `?skip` (no menu), `?ai=3`, `?car=evo`, `?w=rain`, `?at=tunnel`, `?demo`, `?ff=10`, `?screen=garage|story|maps|crew|settings`, `?track=neon|maze|cliff|maze-drift|kestrel`, `?event=c2-neon` (a story event).
+More: `node scripts/map-shots.mjs` (screenshots of every map into `logs/maps/`), `scripts/qwen-queue.sh 012 013 ...` (unattended Qwen tasks).
 
 Working with the AI agents: see `CLAUDE.md` (Claude Code) and `AGENTS.md` (Qwen via Aider). Plan: `docs/plan.md`. Story: `docs/story.md`.
 

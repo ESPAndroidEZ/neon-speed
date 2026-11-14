@@ -1,9 +1,9 @@
 # Handoff
 
-Baton: claude
+Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, feedback round 3 done).
+Updated: 2026-11-14 (Claude, session 5 done).
 
 ## Done
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
@@ -24,18 +24,17 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-When usage is back: read logs/qwen/summary.txt, set Baton: claude, /review-qwen each finished task (005, 003, 007, 006, 008), wire accepted modules (touch controls into main, TIPS/CREW/RADIO data into lore/radio, vinyls into the garage, props into the world).
-Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, judge the new sound (K panel presets) and answer whether tiny CC0 samples are allowed. Then: wire Qwen modules (003, 005, 006, 007) after `/review-qwen`; car upgrades (phase 5); Capacitor (phase 6).
+When the queue finishes: read logs/qwen/summary.txt (EMPTY = the model produced nothing), /review-qwen each of 012-019, then wire them: radio2 -> `game/radio` (TRACK_RADIO start/idle per map, RIVAL_RADIO_2), tips2 -> `ui/loadingCard`, barks -> `ui/versus`, vinylDraw -> garage (vinyl choice per car, saved), propTram/propYard -> `world/worldParts` (Neon / Container Maze), qwen tests -> `npm test`.
+Carlos: judge driving feel (questions in the last reply), try the Legend toggle after the story, drop Tripo GLBs for cars (and optionally Dante/Mara, loader hook TODO).
+Backlog: car upgrades (phase 5), Capacitor (phase 6), AI wrong-way recovery (rivals still get pinned in crowded fields), city ambience (011, re-split needed).
 
-## Qwen queue (unattended: `scripts/qwen-queue.sh`; one task file per number in `docs/tasks/`)
-Order: 005 text data (radio, tips, bios), 003 touch controls, 007 vinyl textures, 006 procedural props, 008 extra unit tests.
-Backlog (not queued): 009 minimap, 010 gamepad, 011 city ambience.
-Logs: `logs/qwen/<task>.log`, one result line per task in `logs/qwen/summary.txt`. Watch: `tail -f logs/qwen/queue.log`.
-When Claude resumes: read logs/qwen/summary.txt, set Baton: claude, then /review-qwen each finished task (branches `qwen/<task-file-name>` in the worktree ../racer-qwen; main is never touched by the queue).
-Done by Claude instead: 001 asset loader, 002 AI racers, 004 weather FX.
+## Qwen queue (unattended: `scripts/qwen-queue.sh 012 013 014 015 016 017 018 019`; one task file per number in `docs/tasks/`)
+Small tasks, ONE file each (see docs/tasks/000-readme.md): 012 radio per map, 013 tips per map, 014 rival barks, 015 vinyl painters, 016 tram stop + shelter props, 017 yard props, 018 AI unit tests, 019 dialogue/career tests.
+Logs: `logs/qwen/<task>.log`, one result line per task in `logs/qwen/summary.txt` (state DONE / EMPTY / FAILED / TIMEOUT). Watch: `tail -f logs/qwen/queue.log`.
+Old tasks 003/009/010 (merged), 005 (done by Claude), 006/007/008/011 (output limit, nothing committed) are in docs/tasks/done.
 
 ## Open contract requests
-None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src/types/game.ts and `AIRacerAgent` extends `Partial<Serializable>` (round 3 save system); `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
+None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamples`, `Zone` gained boulevard/yard/cliff, `RaceSetup.trackId`, `StoryEvent.chapter/trackId`, `Line.mood/if/unless/choice`; the AI agent contract is unchanged (options go through `createAIRacer`); `Serializable<T>` (snapshot/restore) added to src/types/game.ts and `AIRacerAgent` extends `Partial<Serializable>` (round 3 save system); `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
 
 ## Log (newest last)
 - 2026-11-14 Claude: block 1 done. Tasks 001-003 written.
@@ -73,3 +72,5 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-14 Claude (session 5): review of the Qwen queue. 003 touch controls merged and wired (CombinedInput: keyboard + gamepad + touch). 009 minimap and 010 gamepad were already on main from Carlos's commits (qwen branches superseded). 005 text data, 006 props, 007 vinyls, 008 tests, 011 ambience: REJECTED, empty (Qwen hit its 8192-token output limit and committed nothing, yet the queue logged DONE). Claude wrote the 005 content itself (tips.ts, 11 crew bios, radio.ts with win/lose). Lesson: Qwen tasks must be small (<4k tokens of output per file); queue script now flags empty results.
 - 2026-11-14 Claude (session 5, step 2): driving. Weight transfer (`physics/loadTransfer`: braking loads the nose, power the tail, roll transfer costs grip per axle via `rollFront`), per-car cgHeight/rollFront/brakeBias/throttleLag/engineBraking, brake-bias friction circle, assists BEGINNER/STANDARD/PRO + sensitivity (`physics/assists`, STANDARD = the approved handling), mass-based car-car collisions with side rub, soft rival bumps, Coulomb wall friction + deflection (no sticking), AI unstick (reverse only at the edge, 8 s lift back), gamepad d-pad/rumble/deadzone, speed-sensitive keyboard ramps. Settings: assists, sensitivity, deadzone, rumble. Tests: handling-check, contact-check, balance-check (lap-time bands + class order Civic > 350Z > RX-7 > Evo > Supra). LOCKED turbo/weather untouched (weather tests green; snow braking ratio -8% inside tolerance).
 - 2026-11-14 Claude (session 5, step 3): maps. `src/data/tracks/*.ts` (TrackDef: vertices, start, laps, propsDensity, weather, elevation, sprintEnd, driftTarget), 5 maps (Kestrel, Neon Strip, Container Maze, Cliffside Run sprint, Container Drift), `world.load(def)` swaps the map, theme builders (city / port yard / cliff terrain+rails), visual elevation (car height + pitch + chase cam), track select screen with outlines + best times, per-map bests in the save (`trackBest`), headless validator (`world/trackValidate`) + tests/tracks-check + tests/ai-tracks-check. Contract note: `Track` gained `heights`, `raceSamples`; `Zone` gained boulevard/yard/cliff; `RaceSetup.trackId`.
+- 2026-11-14 Claude (session 5, steps 4-5): story + characters + AI. Chapter 2 (6 events, 3 bosses, branching choice with flags/relationships saved), Chapter 3 outline in docs/story.md; portraits with 4 moods, versus screen before every race, 3D low-poly figures (Mara in the garage, rivals at the grid, Dante at the finale), crew screen with relationship bars; AI rebuilt (racing line, slipstream/dive-bomb/defence, 4 difficulty levels with personalities, capped rubber band, Legend after the story). Tests: ai-levels, story2, ai-tracks. Known: rivals still get lifted back after 9 s pins ~2-4 times per 8-car race.
+- 2026-11-14 Claude (session 5, step 6): Qwen tasks 012-019 written (small), baton to Qwen, queue started.
