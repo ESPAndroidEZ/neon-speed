@@ -49,6 +49,10 @@ export class Game {
   /** Fires once when the player finishes. */
   onFinish: ((r: RaceResult) => void) | null = null;
   readonly ctl: CarInput = createNeutralInput();
+  /** Strongest hit since the consumer (juice, audio) last cleared it. `strength` is closing speed in m/s. */
+  readonly impact = { strength: 0, x: 0, z: 0 };
+  /** Called every fixed step a hit happens, with the closing speed. For audio. */
+  onImpact: ((strength: number) => void) | null = null;
   private readonly d: GameDeps;
   private readonly view: CarState = { position: { x: 0, y: 0, z: 0 }, heading: 0, velocity: { x: 0, y: 0, z: 0 }, speed: 0, yawRate: 0, slipAngle: 0 };
   private intro: CinematicCam | null = null;
@@ -113,6 +117,12 @@ export class Game {
     if (this.setup) this.startRace({ ...this.setup, cinematic: false });
   }
 
+  /** Dev: run the fixed simulation without rendering (headless checks, `?ff=seconds`). */
+  fastForward(seconds: number): void {
+    if (this.state === 'CINEMATIC') this.goRacing();
+    for (let i = 0; i < seconds * 60; i++) this.fixed(1 / 60);
+  }
+
   skipIntro(): void {
     if (this.state === 'CINEMATIC') this.intro?.skip();
   }
@@ -146,6 +156,20 @@ export class Game {
     const was = this.rm.phase;
     this.rm.step(dt, this.ctl, this.weather);
     this.views.fixedStep(dt);
+    const hit = Math.max(this.rm.player.contact.impact, this.rm.carImpact);
+    if (hit > 0.8) this.onImpact?.(hit);
+    const pc = this.rm.player.contact;
+    if (pc.impact > this.impact.strength) {
+      this.impact.strength = pc.impact;
+      this.impact.x = pc.contact.x;
+      this.impact.z = pc.contact.z;
+    }
+    if (this.rm.carImpact > this.impact.strength) {
+      const ps = this.rm.player.car.state;
+      this.impact.strength = this.rm.carImpact;
+      this.impact.x = ps.position.x;
+      this.impact.z = ps.position.z;
+    }
     if (was === 'RACING' && this.rm.phase === 'FINISHED' && this.rm.result) {
       this.state = 'PODIUM';
       this.d.results.show(this.rm.result);

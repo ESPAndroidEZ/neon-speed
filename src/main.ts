@@ -2,6 +2,9 @@ import { Engine } from './core/engine';
 import { CARS } from './data/cars';
 import { TuningPanel } from './dev/tuningPanel';
 import { Game } from './game/game';
+import { DemoInput } from './dev/demoInput';
+import { AudioManager } from './audio/audioManager';
+import { Juice } from './fx/juice';
 import { KeyboardInput } from './input/keyboard';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
@@ -17,13 +20,16 @@ const q = new URLSearchParams(location.search);
 
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
-const input = new KeyboardInput();
+const input = q.has('demo') ? new DemoInput() : new KeyboardInput();
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let game: Game;
 const results = new ResultsScreen(document.body, { onAgain: () => game.restart() });
 game = new Game({ engine, world, hud, results, input, tuning });
 
+new Juice(engine, game);
+const audio = new AudioManager(game);
+engine.onFrame((_a, dt) => audio.update(dt));
 const panel = new TuningPanel(document.body);
 panel.add('car', tuning);
 panel.add('chase', game.chase.tuning);
@@ -33,6 +39,7 @@ const car = CARS.find((c) => c.id === q.get('car')) ?? CARS[0];
 const weather = (q.get('w') ?? 'clear').toUpperCase() as Weather;
 game.startRace({ car, paint: car.color, weather, laps: 3, cinematic: !q.has('skip'), agents: [] });
 
+if (q.has('ff')) game.fastForward(Number(q.get('ff')));
 container.addEventListener('pointerdown', () => game.skipIntro());
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;

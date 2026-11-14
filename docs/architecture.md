@@ -26,6 +26,10 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   `envMap` (fake neon reflection probe), `worldLook` (WeatherProfile -> materials), `world` (assembler).
 - `data/cars.ts`: car specs (real names only here), CarTuning overrides, BodyShape, prices, paints.
 - `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.
+- `fx/`: `particles` (pooled billboards), `skidMarks` (ring-buffer quads), `speedPass` (radial streaks composer pass),
+  `juice` (smoke, skids, sparks, nitro flames, shake, bloom kicks; reads Game.views / Game.impact).
+- `audio/`: `audioBus` (context, volume, mute, noise), `engineSynth` (rpm/load engine, turbo, blow-off), `sfx` (squeal, nitro,
+  rain/wind beds, thump), `musicPatterns` (pure notes) + `music` (scheduler, layers by speed), `audioManager` (feeds all; M = mute).
 - `camera/`: `cinematicCam` (intro), `chaseCam` (gameplay), shots helpers.
 - `input/keyboard`, `ui/hud`, `ui/results`, `dev/tuningPanel` (backtick), 
 
@@ -38,4 +42,4 @@ Physics steps at fixed 1/60 s only; no allocation per step; every .ts file under
 Weather grip in `physics/weather.ts`. Track geometry is the control list in `world/harborLoop.ts`.
 
 ## Dev shortcuts
-`?skip` skips the intro, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.
+`?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.

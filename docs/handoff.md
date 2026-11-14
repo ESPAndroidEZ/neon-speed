@@ -13,8 +13,10 @@ Cars (step 2): Civic/350Z/Supra in data/cars.ts with tuning overrides (tests/car
 
 Race flow (step 3): RaceManager (grid, 3-2-1, 3 laps, timing, positions, cash payout), car-car collision, results screen, Game orchestrator (src/game/). Zero AI = time trial. tests/race-check uses a test-only pilot as stand-in AI.
 
+Juice + audio (step 4): src/fx/ (smoke, skid marks, sparks, nitro flames, speed streaks, shake) and src/audio/ (engine, turbo, squeal, nitro, thump, rain/wind, synthwave music, M mute). Audio is untested by ear: check levels.
+
 ## Next (Claude, big block in order)
-4 juice + audio, 5 menu + progression, 6 docs + Qwen tasks.
+5 menu + progression, 6 docs + Qwen tasks.
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`)
 - 001 `src/world/assetLoader.ts`
@@ -32,3 +34,4 @@ None.
 - 2026-11-14 Claude: step 1 track + city done (world/, trackContact, lapCounter, tests/track-check, collision-check). architecture.md and sync-docs skill added.
 - 2026-11-14 Claude: step 2 cars done (data/cars.ts, carBody, proceduralCar, applyTuning). smokeScene deleted.
 - 2026-11-14 Claude: step 3 race flow done (raceManager, raceResult, carCollision, results UI, game/game.ts replaces main wiring).
+- 2026-11-14 Claude: step 4 juice + audio done (fx/, audio/, tests/audio-check).

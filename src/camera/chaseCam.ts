@@ -50,6 +50,8 @@ export class ChaseCam implements CameraRig {
   private car: CarState | null = null;
   private nitro = false;
   private ready = false;
+  private shakeAmp = 0;
+  private shakeT = 0;
 
   constructor(camera: PerspectiveCamera) {
     this.camera = camera;
@@ -66,6 +68,11 @@ export class ChaseCam implements CameraRig {
   setTarget(car: CarState): void {
     this.car = car;
     this.ready = false;
+  }
+
+  /** Camera shake impulse (0..1); decays on its own. */
+  addShake(amount: number): void {
+    this.shakeAmp = Math.min(1.2, this.shakeAmp + amount);
   }
 
   setNitro(active: boolean): void {
@@ -104,6 +111,15 @@ export class ChaseCam implements CameraRig {
     this.step(frameDt);
     const c = this.camera;
     c.position.copy(this._pose.position);
+    if (this.shakeAmp > 0.002) {
+      this.shakeT += frameDt;
+      this.shakeAmp *= Math.exp(-7 * frameDt);
+      const a = this.shakeAmp * 0.45;
+      const t = this.shakeT;
+      c.position.x += (Math.sin(t * 61) + Math.sin(t * 37 + 1.3)) * 0.5 * a;
+      c.position.y += (Math.sin(t * 53 + 0.7) + Math.sin(t * 29)) * 0.5 * a;
+      c.position.z += Math.sin(t * 47 + 2.1) * 0.5 * a;
+    }
     c.lookAt(this._pose.lookAt);
     if (Math.abs(c.fov - this._pose.fov) > 0.01) {
       c.fov = this._pose.fov;
