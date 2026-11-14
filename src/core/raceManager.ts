@@ -21,6 +21,7 @@ export const COUNTDOWN_SECONDS = 3;
 const GO_FLASH = 0.8;
 const COAST_BRAKE = 0.6;
 const UNSTICK_AFTER = 8;
+const RIVAL_BUMP = 0.12;
 
 /**
  * Grid start, 3-2-1 countdown, laps, timing, positions and finish. Works with zero AI (time trial).
@@ -158,10 +159,13 @@ export class RaceManager {
       if (!r.isPlayer && !r.finished) this.unstick(r, dt);
       this.carImpact = Math.max(this.carImpact, r.contact.impact);
     }
-    // Arcade rule: rivals pass through each other (no AI pile-ups); only contact with the player is solid.
+    // Contact with the player is a full crash; rivals only trade soft bumps (no pile-ups).
     for (let i = 0; i < this.racers.length; i++)
-      for (let j = i + 1; j < this.racers.length; j++)
-        if (this.racers[i].isPlayer || this.racers[j].isPlayer) this.carImpact = Math.max(this.carImpact, resolveCarPair(this.racers[i].car, this.racers[j].car));
+      for (let j = i + 1; j < this.racers.length; j++) {
+        const hard = this.racers[i].isPlayer || this.racers[j].isPlayer;
+        const c = resolveCarPair(this.racers[i].car, this.racers[j].car, hard ? 1 : RIVAL_BUMP);
+        if (hard) this.carImpact = Math.max(this.carImpact, c);
+      }
     if (live) this.updateLaps();
   }
 

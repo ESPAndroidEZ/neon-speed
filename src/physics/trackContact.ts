@@ -7,7 +7,7 @@ import { createSurfaceHit, type SurfaceHit, type SurfaceMap } from './surfaces';
 const HALF_W = 0.92; // car half width, m
 const HALF_L = 2.1; // car half length (corner points), m
 const RESTITUTION = 0.28;
-const WALL_FRICTION = 0.1;
+const WALL_MU = 0.4; // Coulomb: rubbing drag follows how hard the car presses on the wall, so a gentle scrape slides on
 const MASS = 1300;
 const INERTIA = 1900;
 const VERGE_GRIP = 0.6;
@@ -26,6 +26,8 @@ export class TrackContact {
   readonly hit: TrackHit = createHit();
   /** Closing speed of the latest hit (m/s), 0 when none. Read once per step by juice and audio. */
   impact = 0;
+  /** Speed along the wall (m/s) while rubbing it, 0 when not touching: sparks and scrape sound. */
+  scrape = 0;
   /** World contact point of the latest hit. */
   readonly contact = { x: 0, z: 0 };
   offroad = false;
@@ -64,6 +66,7 @@ export class TrackContact {
     const tr = this.track;
     const st = car.state;
     this.impact = 0;
+    this.scrape = 0;
     locate(tr, st.position.x, st.position.z, this.hit.index, this.hit);
     this.offroad = Math.abs(this.hit.lateral) > halfWidthAt(tr, this.hit.index) + 0.3;
     const sf = this.surface;
@@ -118,21 +121,31 @@ export class TrackContact {
     const vn = st.velocity.x * nx + st.velocity.z * nz;
     let dvx = 0;
     let dvz = 0;
+    let yawPush = 0; // normal impulse x lever arm, plus a quarter of the friction's (rubbing must not spin the car)
+    const armX = this.px - st.position.x;
+    const armZ = this.pz - st.position.z;
     if (vn < 0) {
       const j = -(1 + RESTITUTION) * vn;
       const tx = st.velocity.x - vn * nx;
       const tz = st.velocity.z - vn * nz;
-      const fr = Math.min(1, WALL_FRICTION * (1 + -vn * 0.15));
+      const tl = Math.hypot(tx, tz);
+      const fr = tl > 1e-4 ? Math.min(1, (WALL_MU * j) / tl) : 0;
       dvx = j * nx - tx * fr;
       dvz = j * nz - tz * fr;
+      yawPush = j * (nx * armZ - nz * armX) - 0.25 * fr * (tx * armZ - tz * armX);
       this.impact = -vn;
       this.contact.x = this.px;
       this.contact.z = this.pz;
     }
     // Yaw kick from the off-centre hit (arm x impulse), kept modest so walls never spin the car wildly.
-    const armX = this.px - st.position.x;
-    const armZ = this.pz - st.position.z;
-    const dr = Math.max(-1.5, Math.min(1.5, ((dvx * armZ - dvz * armX) * MASS) / INERTIA));
+    let dr = Math.max(-1.5, Math.min(1.5, (yawPush * MASS) / INERTIA));
+    // Deflection: the nose is turned along the wall so the car slides on instead of sticking to it.
+    const fx = Math.sin(st.heading);
+    const fz = Math.cos(st.heading);
+    const dir = fx * -nz + fz * nx >= 0 ? 1 : -1; // wall direction nearest to the car's heading
+    const e = dir * (-nz * fz - nx * fx); // sin of the angle from heading to that direction (+ = turn toward +heading)
+    dr += Math.max(-0.12, Math.min(0.12, e * (0.03 + Math.min(0.1, Math.max(0, -vn) * 0.02))));
+    this.scrape = Math.abs(st.velocity.x * -nz + st.velocity.z * nx);
     car.nudge(nx * pen, nz * pen, dvx, dvz, dr);
     if (this.impact > 2) car.drift.breakChain();
   }

@@ -47,7 +47,7 @@ export class CarController {
   ayRaw = 0;
   thr = 0;
 
-  private readonly t: CarTuning;
+  readonly t: CarTuning;
   u = 0;
   v = 0;
   r = 0;
