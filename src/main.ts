@@ -14,6 +14,7 @@ import { Juice } from './fx/juice';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
 import { applyDrivingSettings } from './ui/drivingSettings';
+import { registerServiceWorker } from './core/pwa';
 import { createControls } from './game/inputSetup';
 import { installMinimap } from './game/extras';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
@@ -207,4 +208,5 @@ window.addEventListener('keydown', (e) => {
 game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
 runDevStart({ q, direct, game, store, world, menu, story, pause, juice, hud, leaveToMenu });
 
+registerServiceWorker();
 engine.start();

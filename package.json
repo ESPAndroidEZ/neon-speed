@@ -11,9 +11,17 @@
     "preview": "vite preview",
     "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done",
     "smoke": "scripts/smoke.sh",
-    "visual": "node scripts/visual-check.mjs"
+    "visual": "node scripts/visual-check.mjs",
+    "mobile:sync": "npm run build && cap sync",
+    "mobile:android": "npm run mobile:sync && cap open android",
+    "mobile:ios": "npm run mobile:sync && cap open ios",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
     "three": "^0.187.0"
   },
   "devDependencies": {
