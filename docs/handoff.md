@@ -21,8 +21,10 @@ Feedback round 1, steps 1-2 (GLB pipeline, 5 cars): assetLoader (task 001 done b
 
 Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Streets (narrow street circuit with tunnel, bridge, dock, plaza, alleys, props); AI rivals (aiRacers, rivals.ts); story mode Chapter 1 (career, dialogue, captions, objectives, unlocks); safe-margin UI fixes. Tests: `npm test` (19 files).
 
+Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
+
 ## Next (Claude)
-Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, send playtest notes (AI pace, track feel, story text). Then: wire Qwen modules after `/review-qwen`; car upgrades (plan phase 5); Capacitor (phase 6).
+Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, judge the new sound (K panel presets) and answer whether tiny CC0 samples are allowed. Then: wire Qwen modules (003, 005, 006, 007) after `/review-qwen`; car upgrades (phase 5); Capacitor (phase 6).
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`)
 - 003 `src/ui/touchControls.ts` (touch overlay; `setVisible` hidden in menus)
@@ -64,3 +66,4 @@ None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src
 | Emissive window variety | 3 textures (warm, cool, neon) |
 Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded profile), wheel arches, rounded tyres, five-spoke rims with brake discs and calipers, grille, lamp housings and mirrors; the garage stage got key and rim lights.
 - 2026-11-14 Claude: round 3 done: camera shake fixed (wheelspin-driven shake and slip yaw wag; setting Off/Low/Normal; `tests/camera-check`), pause/save/continue with 3 slots + autosave (Serializable contract, determinism round-trip test), model status badge + procedural car upgrade, graphics audit, sound rework (engine DSP voicings, squeal presets, ambience bed, scrape/crash, mix), `npm run smoke`. Fixed a startup crash (signSpots) found by the smoke test. Turbo untouched.
+- 2026-11-14 Claude: checkpoint after round 3; build green, 19 test files + smoke pass; no git remote, nothing pushed.
