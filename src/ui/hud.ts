@@ -1,4 +1,5 @@
 import type { RaceTelemetry, Weather } from '../types/game';
+import { ArcGauge } from './gauge';
 
 const CSS = `
 #hud{position:fixed;inset:0;pointer-events:none;font:700 14px/1.1 system-ui,sans-serif;color:#e8f6ff;text-shadow:0 0 8px #18d8ff;--mr:max(18px,env(safe-area-inset-right),2.5vw);--ml:max(18px,env(safe-area-inset-left),2.5vw);--mt:max(14px,env(safe-area-inset-top),2vh);--mb:max(16px,env(safe-area-inset-bottom),2.5vh)}
@@ -18,20 +19,16 @@ const CSS = `
 /** Plain-DOM HUD. Only touches the DOM when a value actually changes. */
 export class Hud {
   private readonly root = document.createElement('div');
-  private readonly spd = document.createElement('div');
-  private readonly gear = document.createElement('div');
-  private readonly rpm = document.createElement('i');
-  private readonly nit = document.createElement('i');
   private readonly drift = document.createElement('div');
   private readonly weather = document.createElement('div');
   private readonly info = document.createElement('div');
   private readonly banner = document.createElement('div');
+  private readonly gauge = new ArcGauge();
+  private readonly lines = document.createElement('div');
+  private readonly pop = document.createElement('div');
+  private lastTier = 0;
   private lastInfo = '';
-  private lastSpd = -1;
-  private lastGear = 99;
   private lastScore = -1;
-  private lastRpm = -1;
-  private lastNit = -1;
 
   /** HUD size 0.8 .. 1.3 (graphics settings). */
   setScale(s: number): void {
@@ -40,23 +37,18 @@ export class Hud {
 
   constructor(parent: HTMLElement) {
     const style = document.createElement('style');
-    style.textContent = CSS;
+    style.textContent = CSS + ArcGauge.css();
     this.root.id = 'hud';
-    this.spd.className = 'spd';
     this.drift.className = 'ds';
     this.weather.className = 'tl';
     this.info.className = 'info';
     this.banner.className = 'ban';
     const br = document.createElement('div');
     br.className = 'br';
-    const rpmBar = document.createElement('div');
-    rpmBar.className = 'bar';
-    rpmBar.appendChild(this.rpm);
-    const nitBar = document.createElement('div');
-    nitBar.className = 'bar nit';
-    nitBar.appendChild(this.nit);
-    br.append(this.spd, this.gear, rpmBar, nitBar);
-    this.root.append(style, this.weather, this.info, this.banner, this.drift, br);
+    br.append(this.gauge.el);
+    this.lines.className = 'rb-lines';
+    this.pop.className = 'rb-pop';
+    this.root.append(style, this.lines, this.weather, this.info, this.banner, this.drift, this.pop, br);
     parent.appendChild(this.root);
   }
 
@@ -65,6 +57,16 @@ export class Hud {
   }
 
   /** Centre banner: countdown digits and GO. Empty string hides it. */
+  /** A short floating message above the HUD (drift tiers, banked points). */
+  private popUp(text: string, color: string): void {
+    this.pop.textContent = text;
+    this.pop.style.color = color;
+    this.pop.style.textShadow = `0 0 14px ${color}`;
+    this.pop.classList.remove('go');
+    void this.pop.offsetWidth;
+    this.pop.classList.add('go');
+  }
+
   setBanner(text: string): void {
     if (this.banner.textContent !== text) this.banner.textContent = text;
   }
@@ -80,27 +82,14 @@ export class Hud {
       this.lastInfo = info;
       this.info.innerHTML = info;
     }
-    const kph = Math.round(t.speedKph);
-    if (kph !== this.lastSpd) {
-      this.lastSpd = kph;
-      this.spd.textContent = String(kph);
-    }
-    if (t.gear !== this.lastGear) {
-      this.lastGear = t.gear;
-      this.gear.textContent = `km/h   GEAR ${t.gear < 0 ? 'R' : t.gear}`;
-    }
-    const rpm = Math.round((t.rpm / t.redlineRpm) * 50);
-    if (rpm !== this.lastRpm) {
-      this.lastRpm = rpm;
-      this.rpm.style.width = `${rpm * 2}%`;
-      this.rpm.style.background = rpm > 90 ? '#ff2a4a' : '#18d8ff';
-    }
-    const nit = Math.round(t.nitroLevel * 100);
-    if (nit !== this.lastNit) {
-      this.lastNit = nit;
-      this.nit.style.width = `${nit}%`;
-    }
+    this.gauge.update(t.speedKph, t.rpm / t.redlineRpm, t.gear, t.nitroLevel, t.nitroActive);
+    // edge speed lines fade in between 110 and 220 km/h
+    this.lines.style.opacity = String(Math.max(0, Math.min(1, (t.speedKph - 110) / 110)) * 0.85);
     if (t.driftScore !== this.lastScore) {
+      const tier = Math.floor(t.driftScore / 1000);
+      if (tier > this.lastTier) this.popUp(`+${tier * 1000}`, '#ff2a9d');
+      else if (t.driftScore === 0 && this.lastScore > 600) this.popUp(`BANKED ${this.lastScore}`, '#7dff9a');
+      this.lastTier = tier;
       this.lastScore = t.driftScore;
       this.drift.textContent = `DRIFT ${t.driftScore}`;
       this.drift.style.opacity = t.driftScore > 0 ? '1' : '0';
