@@ -1,3 +1,4 @@
+import { RADIO } from '../src/data/radio';
 import { RadioDirector, type RadioSnapshot } from '../src/game/radio.ts';
 
 let failed = 0;
@@ -22,7 +23,7 @@ check('an overtake names the car passed', !!pass && pass.includes('Tank') || !!p
 const lost = d.update(snap({ time: 40, position: 3, rivals: [{ name: 'Jinx', position: 1 }, { name: 'Tank', position: 2 }] }));
 check('losing a place is reported', !!lost && !lost.includes('{'), `"${lost}"`);
 const wx = d.update(snap({ time: 41, weather: 'SNOW' }));
-check('weather change cuts in immediately', !!wx && /snow|tyre|hold/i.test(wx), `"${wx}"`);
+check('weather change cuts in immediately', !!wx && Object.values(RADIO.weather).flat().includes(wx!), `"${wx}"`);
 const lap = d.update(snap({ time: 60, lap: 2 }));
 check('a new lap is announced', !!lap, `"${lap}"`);
 const fin = d.update(snap({ time: 80, lap: 3 }));
@@ -36,7 +37,7 @@ for (let t = 0; t < 400; t += 0.25) {
   const pos = 1 + Math.floor(t / 20) % 3;
   const l = e.update(snap({ time: t, position: pos, lap: 1 + Math.floor(t / 130), impact: t % 97 === 0 ? 10 : 0, driftChain: (t % 60) * 200, weather: t > 200 ? 'SNOW' : 'RAIN', rivals: [{ name: 'Jinx', position: pos === 1 ? 2 : 1 }, { name: 'Dante Voss', position: pos === 3 ? 2 : 3 }] }));
   if (l) {
-    if (t - lastT < 2.9 && !/snow|tyre|rain|sky|grip/i.test(l)) tooFast = true;
+    if (t - lastT < 2.9 && !Object.values(RADIO.weather).flat().includes(l)) tooFast = true;
     lastT = t;
     lines.push(l);
   }
