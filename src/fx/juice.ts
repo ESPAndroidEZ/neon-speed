@@ -91,7 +91,7 @@ export class Juice {
       }
     }
     setLightGlow(grade.glowK);
-    this.lights.update(g.views.views);
+    this.lights.update(g.views.views, g.state !== 'MENU');
     this.hits();
     this.screenFx(dt);
     if (g.weather !== this.lastWeather) {

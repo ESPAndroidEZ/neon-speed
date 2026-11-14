@@ -23,7 +23,7 @@ export function addLightsAndShadow(root: Group, width: number, length: number, l
     glowMats.push(mat);
     for (const sx of [-1, 1]) {
       for (const turn of [0, Math.PI / 2]) { // two crossed quads so the glow reads from the side too
-        const q = new Mesh(new PlaneGeometry(0.8, 0.4), mat);
+        const q = new Mesh(new PlaneGeometry(0.55, 0.28), mat);
         q.position.set(sx * width * 0.33, lampY, z + dir * 0.02);
         q.rotation.y = dir > 0 ? turn : Math.PI + turn;
         root.add(q);

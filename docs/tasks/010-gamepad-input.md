@@ -1,6 +1,6 @@
-# Task 006: gamepad input
+# Task 010: gamepad input
 Files: src/input/gamepad.ts
-Branch: qwen/006-gamepad-input
+Branch: qwen/010-gamepad-input
 Contract (read-only): `InputSource`, `CarInput` in src/types/game.ts. Reference: src/input/keyboard.ts.
 
 ## Export exactly

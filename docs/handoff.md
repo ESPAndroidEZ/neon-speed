@@ -26,11 +26,11 @@ Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + proced
 ## Next (Claude)
 Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, judge the new sound (K panel presets) and answer whether tiny CC0 samples are allowed. Then: wire Qwen modules (003, 005, 006, 007) after `/review-qwen`; car upgrades (phase 5); Capacitor (phase 6).
 
-## Qwen queue (run with `scripts/qwen.sh <number>`)
-- 003 `src/ui/touchControls.ts` (touch overlay; `setVisible` hidden in menus)
-- 005 `src/ui/minimap.ts` (track outline + racer dots, bottom-left)
-- 006 `src/input/gamepad.ts` (Gamepad API input source)
-- 007 `src/audio/cityAmbience.ts` (harbour horn, siren, water, drips, tunnel muffling)
+## Qwen queue (unattended: `scripts/qwen-queue.sh`; one task file per number in `docs/tasks/`)
+Order: 005 text data (radio, tips, bios), 003 touch controls, 007 vinyl textures, 006 procedural props, 008 extra unit tests.
+Backlog (not queued): 009 minimap, 010 gamepad, 011 city ambience.
+Logs: `logs/qwen/<task>.log`, one result line per task in `logs/qwen/summary.txt`. Watch: `tail -f logs/qwen/queue.log`.
+When Claude resumes: read logs/qwen/summary.txt, set Baton: claude, then /review-qwen each finished task (branches `qwen/<task-file-name>` in the worktree ../racer-qwen; main is never touched by the queue).
 Done by Claude instead: 001 asset loader, 002 AI racers, 004 weather FX.
 
 ## Open contract requests

@@ -48,6 +48,9 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 - `camera/`: `cinematicCam` (intro), `chaseCam` (gameplay), shots helpers.
 - `input/keyboard`, `ui/hud`, `ui/results`, `dev/tuningPanel` (backtick), 
 
+## Visual checks and cars (round 4)
+`core/grade` holds the per-weather look (exposure, bloom, colour grade, glow and spot scales) applied by `game/weatherApply`; `scripts/visual-check.mjs` (Playwright) asserts luminance, clipping and contrast in CLEAR/RAIN/SNOW. Procedural cars are lofted: `world/carLoft` (mirrored cross-sections along Z, smooth normals, material groups), `carBody` (stations from the proportion numbers in `data/cars.ts`), `carDetails` (splitter, skirts, wing, scoop, tips, door lines, mirrors, lamps), `carWheels` (rounded tyres, five-spoke rims, discs, calipers, arches).
+
 ## Saving and pause
 `Serializable<T>` (src/types/game.ts): `snapshot()` returns JSON-safe data, `restore()` puts it back. Implemented by CarController (+ Drivetrain incl. boost and nitro, DriftScorer), LapCounter, RaceManager (`core/raceSnapshot`: timers, racers, AI agents with PRNG state and track index), SurfaceMap (puddle seed). `game/saveGame` captures and restores the whole game (setup meta, weather ramp, plan); `core/gameSave` stores 3 slots + autosave in localStorage with validation, version check and a migration table; `game/pause` + `ui/pauseMenu`, `ui/saveUi` (load screen). `tests/save-roundtrip.mts` proves restore + M steps == M uninterrupted steps.
 

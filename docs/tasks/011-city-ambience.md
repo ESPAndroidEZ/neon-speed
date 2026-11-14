@@ -1,6 +1,6 @@
-# Task 007: city ambience (procedural audio)
+# Task 011: city ambience (procedural audio)
 Files: src/audio/cityAmbience.ts
-Branch: qwen/007-city-ambience
+Branch: qwen/011-city-ambience
 Contract (read-only): none. Uses `AudioBus` from src/audio/audioBus.ts (read it first: `ctx`, `sfx`, `noise`, `loopNoise()`).
 
 ## Export exactly

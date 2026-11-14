@@ -132,3 +132,17 @@ export function makeNeonWindowTexture(): CanvasTexture {
   }
   return finish(c, true);
 }
+
+/** Fine random speckle used as a bump map: the metallic flake in the paint. */
+export function flakeTexture(): CanvasTexture {
+  const rnd = createRng(555);
+  const [c, g] = canvas(128, 128);
+  g.fillStyle = '#808080';
+  g.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 2600; i++) {
+    const v = 90 + Math.floor(rnd() * 90);
+    g.fillStyle = `rgb(${v},${v},${v})`;
+    g.fillRect(rnd() * 128, rnd() * 128, 1 + rnd() * 1.4, 1 + rnd() * 1.4);
+  }
+  return finish(c, false);
+}

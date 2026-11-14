@@ -1,6 +1,7 @@
-import { BufferGeometry, ExtrudeGeometry, Shape } from 'three';
+import type { BufferGeometry } from 'three';
+import { loft, type HalfRing } from './carLoft';
 
-/** Side-profile numbers for one body style (metres). Pure data; names and brands live in data/cars.ts. */
+/** Proportion data for one body style (metres). Pure data; names and brands live in data/cars.ts. */
 export interface BodyShape {
   length: number;
   width: number;
@@ -18,62 +19,101 @@ export interface BodyShape {
   wheelbase: number;
   wheelRadius: number;
   spoiler: 'none' | 'lip' | 'wing';
+  /** Rear haunch bulge (0..0.12): wider shoulders over the rear wheels. */
+  haunch: number;
+  /** How far the nose is lowered (m): low sports noses. */
+  noseLow: number;
+  /** Raised hood scoop. */
+  scoop: boolean;
 }
 
-const RIDE = 0.2;
+export const RIDE = 0.2;
+type Poly = readonly (readonly [number, number])[];
 
-/** Chaikin corner cutting: each pass replaces every corner of a closed polygon by two points, rounding the outline. */
-function smooth(pts: readonly (readonly [number, number])[], passes: number): [number, number][] {
-  let p = pts.map((q) => [q[0], q[1]] as [number, number]);
+/** Chaikin corner cutting on an open polyline (endpoints kept). */
+function smoothOpen(p: Poly, passes: number): [number, number][] {
+  let a = p.map((q) => [q[0], q[1]] as [number, number]);
   for (let k = 0; k < passes; k++) {
-    const out: [number, number][] = [];
-    for (let i = 0; i < p.length; i++) {
-      const a = p[i];
-      const b = p[(i + 1) % p.length];
-      out.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]);
+    const o: [number, number][] = [a[0]];
+    for (let i = 0; i < a.length - 1; i++) {
+      o.push([a[i][0] * 0.75 + a[i + 1][0] * 0.25, a[i][1] * 0.75 + a[i + 1][1] * 0.25], [a[i][0] * 0.25 + a[i + 1][0] * 0.75, a[i][1] * 0.25 + a[i + 1][1] * 0.75]);
     }
-    p = out;
+    o.push(a[a.length - 1]);
+    a = o;
   }
-  return p;
+  return a;
 }
 
-/** Extrude a (z, y) profile across `width` (centred on x = 0). Shape x = z, bevelled for a soft low-poly look. */
-function extrudeProfile(pts: readonly (readonly [number, number])[], width: number, bevel: number): BufferGeometry {
-  const s = new Shape();
-  smooth(pts, 2).forEach(([z, y], i) => (i === 0 ? s.moveTo(-z, y) : s.lineTo(-z, y)));
-  s.closePath();
-  const g = new ExtrudeGeometry(s, { depth: width - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3, curveSegments: 1 });
-  g.rotateY(Math.PI / 2); // shape x -> -z... see below: after rotation shape x maps to car z
-  g.translate(-(width - bevel * 2) / 2, 0, 0);
-  return g;
+/** y at z on a polyline sorted by DESCENDING z (nose first). */
+function at(p: Poly, z: number): number {
+  if (z >= p[0][0]) return p[0][1];
+  for (let i = 0; i < p.length - 1; i++) {
+    if (z <= p[i][0] && z >= p[i + 1][0]) {
+      const t = (p[i][0] - z) / (p[i][0] - p[i + 1][0] || 1);
+      return p[i][1] + (p[i + 1][1] - p[i][1]) * t;
+    }
+  }
+  return p[p.length - 1][1];
 }
 
-/** Lower body: bumper to bumper, up to the beltline. */
-export function bodyShell(s: BodyShape): BufferGeometry {
+const ss = (a: number, b: number, x: number): number => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
+/** Station z positions, denser at both ends where the curvature is. */
+function stations(from: number, to: number, n: number): number[] {
+  return Array.from({ length: n }, (_, i) => from + (to - from) * (0.5 - 0.5 * Math.cos((i / (n - 1)) * Math.PI)));
+}
+
+export interface BodyParts {
+  /** Lower body, hood, deck and bumpers: paint. */
+  shell: BufferGeometry;
+  /** Greenhouse: material groups 0 = glass, 1 = painted roof. */
+  cabin: BufferGeometry;
+  /** Z of the windshield base and of the rear end of the cabin (for details). */
+  zWindshield: number;
+  zCabinEnd: number;
+  /** Hood height at z (for the scoop). */
+  hoodY: (z: number) => number;
+  /** Half width of the shell at z. */
+  halfWidth: (z: number) => number;
+}
+
+/**
+ * Lofted body: cross-sections along the length (width, height, roofline and beltline curves), mirrored, with smooth
+ * normals. The silhouette comes from the proportion numbers (hood length, roof and window runs, haunch, nose drop).
+ */
+export function buildBody(s: BodyShape): BodyParts {
   const zf = s.length / 2;
-  const belt = s.beltHeight;
-  return extrudeProfile(
-    [
-      [zf, RIDE + 0.12], [zf, RIDE + 0.45], [zf - 0.45, RIDE + 0.62], [zf - s.hoodLength, belt],
-      [-zf + 0.7, belt - 0.02], [-zf + 0.12, belt - 0.1], [-zf, RIDE + 0.55], [-zf, RIDE + 0.12],
-    ],
-    s.width,
-    0.1,
-  );
-}
-
-/** Greenhouse (glass) above the beltline, narrower than the body. */
-export function cabin(s: BodyShape): BufferGeometry {
-  const z0 = s.length / 2 - s.hoodLength;
-  const z1 = z0 - s.windshieldRun;
-  const z2 = z1 - s.roofLength;
-  const z3 = z2 - s.rearWindowRun;
-  const belt = s.beltHeight - 0.02;
-  return extrudeProfile([[z0, belt], [z1, s.height], [z2, s.height], [z3, belt]], s.width * 0.84, 0.05);
-}
-
-/** Z range of the flat roof, for the painted roof panel. */
-export function roofSpan(s: BodyShape): [number, number] {
-  const z1 = s.length / 2 - s.hoodLength - s.windshieldRun;
-  return [z1, z1 - s.roofLength];
+  const B = s.beltHeight;
+  const zw = zf - s.hoodLength;
+  const zr = zw - s.windshieldRun - s.roofLength - s.rearWindowRun;
+  const d = Math.max(0.12, zr + zf); // length of deck behind the cabin
+  const nt = RIDE + 0.5 - s.noseLow;
+  const shellTop = smoothOpen([
+    [zf, RIDE + 0.3], [zf - 0.1, nt], [zf - s.hoodLength * 0.45, nt + (B - nt) * 0.5], [zw, B - 0.01], [zr, B - 0.01],
+    [zr - d * 0.3, B - 0.03], [zr - d * 0.75, B - 0.1], [-zf, RIDE + 0.46],
+  ], 2);
+  const cabinTop = smoothOpen([[zw, B], [zw - s.windshieldRun, s.height], [zw - s.windshieldRun - s.roofLength, s.height - 0.015], [zr, B + 0.03]], 2);
+  const halfW = (z: number): number => {
+    const nose = 0.6 + 0.4 * ss(0, 0.9, zf - z);
+    const tail = 0.72 + 0.28 * ss(0, 0.7, z + zf);
+    const haunch = 1 + s.haunch * Math.exp(-(((z + s.wheelbase / 2) / 0.9) ** 2));
+    return (s.width / 2) * nose * tail * haunch;
+  };
+  const shell = loft(stations(-zf, zf, 34), (z): HalfRing => {
+    const w = halfW(z);
+    const y0 = RIDE;
+    const h = Math.max(0.1, at(shellTop, z) - y0);
+    return [[0, y0], [w * 0.78, y0], [w * 0.95, y0 + 0.18 * h], [w, y0 + 0.42 * h], [w, y0 + 0.72 * h], [w * 0.95, y0 + 0.93 * h], [w * 0.74, y0 + h], [0, y0 + h]];
+  }, { closed: true, uvScale: 0.3 });
+  const cabin = loft(stations(zr, zw, 22), (z): HalfRing => {
+    const top = at(cabinTop, z);
+    const h = Math.max(0, top - B);
+    const wb = halfW(z) * 0.9;
+    const wt = wb * 0.8;
+    return [[wb, B - 0.02], [wb * 0.97, B + 0.45 * h], [wt, B + 0.85 * h], [wt * 0.72, B + h], [0, B + h]];
+  }, { closed: false, uvScale: 0.3, segmentGroups: [0, 0, 1, 1] });
+  return { shell, cabin, zWindshield: zw, zCabinEnd: zr, hoodY: (z) => at(shellTop, z), halfWidth: halfW };
 }

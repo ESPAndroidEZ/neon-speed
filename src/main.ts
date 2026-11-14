@@ -4,8 +4,8 @@ import { AutoQuality } from './core/quality';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
-import { findEvent } from './data/story';
 import { AudioTestPanel } from './dev/audioTestPanel';
+import { runDevStart } from './dev/devStart';
 import { DemoInput } from './dev/demoInput';
 import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
@@ -184,36 +184,6 @@ window.addEventListener('keydown', (e) => {
 });
 
 game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
-if (direct) {
-  const car = findCar(q.get('car') ?? store.data.selected);
-  const field = freeRaceField(Number(q.get('ai') ?? 0));
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: game.weather !== 'CLEAR', eventId: null } });
-  if (q.has('wi')) game.weatherIntensity = Number(q.get('wi')); // dev: force the rain/snow build-up
-  const at = q.get('at'); // dev: start at a zone (tunnel, bridge, dock, plaza, alley) or a sample index
-  if (at) {
-    const idx = Number.isNaN(Number(at)) ? world.track.zones.indexOf(at as never) + 6 : Number(at);
-    game.rm.player.contact.place(game.rm.player.car, Math.max(0, idx));
-    game.views.update(0, 0);
-  }
-  if (q.has('showcase')) juice.toggleShowcase();
-  if (q.has('ff')) game.fastForward(Number(q.get('ff')));
-  if (q.get('pause') === 'menu') pause.pause(); // dev: open the pause menu
-  if (q.get('pause') === 'load') {
-    pause.pause(); // dev: autosave, quit to the menu and open the load screen
-    pause.saveAndQuit();
-    leaveToMenu();
-    menu.load();
-  }
-} else {
-  if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car
-  menu.title();
-  const scr = q.get('screen');
-  if (scr === 'garage') menu.garage();
-  else if (scr === 'weather') menu.weather();
-  else if (scr === 'settings') menu.settings();
-  else if (scr === 'story') menu.story();
-  else if (scr === 'crew') menu.crew();
-  else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event
-}
+runDevStart({ q, direct, game, store, world, menu, story, pause, juice, hud, leaveToMenu });
 
 engine.start();

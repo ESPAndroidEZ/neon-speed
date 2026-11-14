@@ -21,8 +21,8 @@ export class HeadlightPool {
     }
   }
 
-  update(views: readonly RacerView[]): void {
-    const n = qualityNow().spotLights;
+  update(views: readonly RacerView[], enabled = true): void {
+    const n = enabled ? qualityNow().spotLights : 0;
     const player = views.find((v) => v.racer.isPlayer);
     let rival: RacerView | null = null;
     let best = Infinity;

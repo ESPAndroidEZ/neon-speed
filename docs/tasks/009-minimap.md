@@ -1,6 +1,6 @@
-# Task 005: minimap
+# Task 009: minimap
 Files: src/ui/minimap.ts
-Branch: qwen/005-minimap
+Branch: qwen/009-minimap
 Contract (read-only): `TrackSample`, `CarState`, `Disposable` in src/types/game.ts
 
 ## Export exactly

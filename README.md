@@ -6,6 +6,7 @@ Night street racer in the browser, with rain and snow. TypeScript, Three.js, Vit
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # line check + typecheck + production build
+npm run visual   # Playwright weather screenshots + luminance/contrast assertions (needs npm run dev)
 npm run smoke    # browser smoke test (needs `npm run dev` and Chrome)
 npm test         # headless physics, track and collision checks (tests/*.mts)
 ```
