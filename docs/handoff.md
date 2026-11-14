@@ -9,8 +9,10 @@ Updated: 2026-11-14 (Claude, block 2).
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
 Track + city (Phase 2): Harbor Loop (1.4 km), road/kerbs/barriers, instanced city, lamps, neon, harbour, wet/snow look, barrier + verge contact, lap counter, R = reset to track. Tests: `npm test`.
 
+Cars (step 2): Civic/350Z/Supra in data/cars.ts with tuning overrides (tests/cars-check), procedural body + wheels. C key cycles cars until the garage exists.
+
 ## Next (Claude, big block in order)
-2 procedural cars + data/cars.ts, 3 race flow, 4 juice + audio, 5 menu + progression, 6 docs + Qwen tasks.
+3 race flow, 4 juice + audio, 5 menu + progression, 6 docs + Qwen tasks.
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`)
 - 001 `src/world/assetLoader.ts`
@@ -26,3 +28,4 @@ None.
 - 2026-11-14 Claude: physics build ok, tests/physics-check.mts passes, carTuning tuned (brake force now scales with weather grip).
 - 2026-11-14 Claude: chaseCam, keyboard, hud, tuningPanel, main.ts (Phase 1) built. Task 004 written. Needs playtest.
 - 2026-11-14 Claude: step 1 track + city done (world/, trackContact, lapCounter, tests/track-check, collision-check). architecture.md and sync-docs skill added.
+- 2026-11-14 Claude: step 2 cars done (data/cars.ts, carBody, proceduralCar, applyTuning). smokeScene deleted.

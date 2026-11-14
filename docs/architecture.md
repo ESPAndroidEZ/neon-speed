@@ -20,8 +20,10 @@ CINEMATIC: CinematicCam drives the camera, hands over to ChaseCam.pose; then sta
   `harborLoop` (the circuit), `ribbon`/`trackMesh` (road, kerbs, barriers, neon caps), `city` (instanced
   buildings), `streetFurniture` (lamps, light pools, neon signs), `harbor` (quay, containers, cranes, water),
   `envMap` (fake neon reflection probe), `worldLook` (WeatherProfile -> materials), `world` (assembler).
+- `data/cars.ts`: car specs (real names only here), CarTuning overrides, BodyShape, prices, paints.
+- `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.
 - `camera/`: `cinematicCam` (intro), `chaseCam` (gameplay), shots helpers.
-- `input/keyboard`, `ui/hud`, `dev/tuningPanel` (backtick), `dev/smokeScene` (throwaway).
+- `input/keyboard`, `ui/hud`, `dev/tuningPanel` (backtick), 
 
 ## Contracts and conventions
 Car space +Z nose, +X left, steer > 0 = left, forward = (sin h, 0, cos h). Track lateral offset + = left.

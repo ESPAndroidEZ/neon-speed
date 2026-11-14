@@ -80,3 +80,9 @@ export function createDefaultTuning(): CarTuning {
     nitroDriftRefillPerSec: 0.12,
   };
 }
+
+/** Copy `overrides` onto `into` in place (keeps live references such as the tuning panel valid). */
+export function applyTuning(into: CarTuning, overrides: Partial<CarTuning>): CarTuning {
+  Object.assign(into, createDefaultTuning(), overrides);
+  return into;
+}
