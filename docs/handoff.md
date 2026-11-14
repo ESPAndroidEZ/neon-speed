@@ -1,6 +1,6 @@
 # Handoff
 
-Baton: claude
+Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
 Updated: 2026-11-14 (Claude, feedback round 3 done).
@@ -24,6 +24,7 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
+When usage is back: read logs/qwen/summary.txt, set Baton: claude, /review-qwen each finished task (005, 003, 007, 006, 008), wire accepted modules (touch controls into main, TIPS/CREW/RADIO data into lore/radio, vinyls into the garage, props into the world).
 Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, judge the new sound (K panel presets) and answer whether tiny CC0 samples are allowed. Then: wire Qwen modules (003, 005, 006, 007) after `/review-qwen`; car upgrades (phase 5); Capacitor (phase 6).
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh`; one task file per number in `docs/tasks/`)
@@ -67,3 +68,4 @@ None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src
 Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded profile), wheel arches, rounded tyres, five-spoke rims with brake discs and calipers, grille, lamp housings and mirrors; the garage stage got key and rim lights.
 - 2026-11-14 Claude: round 3 done: camera shake fixed (wheelspin-driven shake and slip yaw wag; setting Off/Low/Normal; `tests/camera-check`), pause/save/continue with 3 slots + autosave (Serializable contract, determinism round-trip test), model status badge + procedural car upgrade, graphics audit, sound rework (engine DSP voicings, squeal presets, ambience bed, scrape/crash, mix), `npm run smoke`. Fixed a startup crash (signSpots) found by the smoke test. Turbo untouched.
 - 2026-11-14 Claude: checkpoint after round 3; build green, 19 test files + smoke pass; no git remote, nothing pushed.
+- 2026-11-14 Claude: round 4 done: weather visibility grade + `npm run visual`, lofted procedural cars, project summary, Qwen queue script and tasks; Baton: qwen, queue started. No git remote.
