@@ -134,9 +134,9 @@ export class TrackContact {
       dvz = j * nz - tz * fr;
       yawPush = j * (nx * armZ - nz * armX) - 0.25 * fr * (tx * armZ - tz * armX);
       this.impact = -vn;
-      this.contact.x = this.px;
-      this.contact.z = this.pz;
     }
+    this.contact.x = this.px;
+    this.contact.z = this.pz;
     // Yaw kick from the off-centre hit (arm x impulse), kept modest so walls never spin the car wildly.
     let dr = Math.max(-1.5, Math.min(1.5, (yawPush * MASS) / INERTIA));
     // Deflection: the nose is turned along the wall so the car slides on instead of sticking to it.

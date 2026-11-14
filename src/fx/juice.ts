@@ -120,6 +120,11 @@ export class Juice {
 
   /** Sparks, shake and bloom for the strongest hit since the last frame. */
   private hits(): void {
+    const rub = this.game.rm.player.contact;
+    if (rub.scrape > 4 && this.game.state === 'RACING') {
+      const v = this.game.rm.player.car.state.velocity;
+      for (let i = 0; i < 2; i++) this.sparks.emit(rub.contact.x, 0.3 + Math.random() * 0.4, rub.contact.z, -v.x * 0.3 + (Math.random() - 0.5) * 4, 1 + Math.random() * 3, -v.z * 0.3 + (Math.random() - 0.5) * 4, 0.25 + Math.random() * 0.3, 0.2, 0.06, 3.2, 1.8, 0.5, 1);
+    }
     const imp = this.game.impact;
     if (imp.strength <= 0.8) {
       imp.strength = 0;
