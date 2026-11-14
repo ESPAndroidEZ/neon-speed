@@ -10,6 +10,7 @@ import { createNeutralInput } from '../types/game';
 import type { Hud } from '../ui/hud';
 import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { World } from '../world/world';
+import { STAGE } from '../world/stage';
 import { RacerViews } from './racerViews';
 import { createTelemetry, createViewState } from './telemetry';
 import { applyWeather } from './weatherApply';
@@ -45,9 +46,8 @@ export class Game {
   readonly chase: ChaseCam;
   readonly views: RacerViews;
   readonly telemetry: RaceTelemetry = createTelemetry();
-  /** Fires once when the player finishes; may return objective text and buttons for the results screen. */
+  /** Fires once at the finish; may return an objective verdict and buttons for the results screen. */
   onFinish: ((r: RaceResult) => ResultsExtra | void) | null = null;
-  /** Story hooks: intro cinematic start/end, and the moment the countdown ends (GO). */
   onIntroStart: (() => void) | null = null;
   onIntroEnd: (() => void) | null = null;
   onCountdown: (() => void) | null = null;
@@ -124,6 +124,7 @@ export class Game {
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     this.views.add(this.rm.player, car, paint, glow);
     this.rm.place();
+    this.rm.player.car.reset(STAGE.x, STAGE.z, 0.5);
     this.views.update(0, 0);
   }
 
@@ -131,7 +132,6 @@ export class Game {
     if (this.setup) this.startRace({ ...this.setup, cinematic: false });
   }
 
-  /** Dev: simulate without rendering (`?ff=seconds`). */
   fastForward(seconds: number): void {
     if (this.state === 'CINEMATIC') this.goRacing();
     for (let i = 0; i < seconds * 60; i++) this.fixed(1 / 60);

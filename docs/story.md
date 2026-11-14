@@ -4,7 +4,7 @@ Tagline: **"Every street remembers who bled for it."**
 
 ## World
 
-Kestrel Bay, a port city that never fully dries out: rain on the cranes, neon on the wet asphalt, and a first snow coming. Street racing runs after midnight on the **Harbor Loop**, controlled by the Redline crew.
+Kestrel Bay, a port city that never fully dries out: rain on the cranes, neon on the wet asphalt, and a first snow coming. Street racing runs after midnight on the **Kestrel Bay Streets** circuit (a tight 1.4 km street course: Main Street, a canal bridge, a plaza hairpin, the dock strip, alleys and a tunnel), nicknamed the **Harbor Loop** and controlled by the Redline crew.
 
 ## Cast
 
@@ -45,3 +45,16 @@ Notes: every hard cut gets a bloom kick (already wired). In rain races the openi
 - Dock Sprint: "Wet road, short fuse. Brake earlier than you think."
 - Drift Night: "First snow. Sideways is the only way."
 - Harbor Loop vs Dante: "Last race. Last chance. Bring everything."
+
+## As implemented (feedback round 1)
+
+Story mode lives in `src/data/story.ts` (text) and `src/game/story.ts` (flow). Events, in order:
+
+| # | Event | Conditions | Objective | Reward |
+|---|-------|-----------|-----------|--------|
+| 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Tank, Pixel, Lola | top 2 | race cash + $1,500 |
+| 2 | Dock Sprint | rain, 2 laps, vs Lola, Rook, Pixel, Tank | top 2 | race cash + $3,000, **350Z unlocked** |
+| 3 | Drift Night | snow, 3 laps, no rivals | bank 6,000 drift points | points / 3 + $4,000 |
+| 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Kilo, Vex, Dante | win | race cash + $8,000, **Supra unlocked** |
+
+Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his Supra on show). After the finale: Dante's key line, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).

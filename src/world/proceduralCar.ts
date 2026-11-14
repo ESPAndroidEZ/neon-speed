@@ -30,7 +30,7 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
   const root = new Group();
   const body = new Group();
   root.add(body);
-  const paint = new MeshPhysicalMaterial({ color: paintHex, metalness: 0.6, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const paint = new MeshPhysicalMaterial({ color: paintHex, metalness: 0.4, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.08 });
   const glass = new MeshStandardMaterial({ color: 0x18223a, metalness: 0.85, roughness: 0.12 });
   const trim = new MeshStandardMaterial({ color: 0x0b0c10, roughness: 0.6, metalness: 0.4 });
   const mesh = (g: BoxGeometry | ReturnType<typeof bodyShell>, m: MeshStandardMaterial | MeshPhysicalMaterial | MeshBasicMaterial, x = 0, y = 0, z = 0): Mesh => {
@@ -109,7 +109,7 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
     },
     setEnv: (env) => {
       paint.envMap = env;
-      paint.envMapIntensity = 1.4;
+      paint.envMapIntensity = 0.65;
       glass.envMap = env;
       paint.needsUpdate = true;
     },

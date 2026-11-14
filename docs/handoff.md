@@ -3,7 +3,7 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, big block done).
+Updated: 2026-11-14 (Claude, feedback round 1 done).
 
 ## Done
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
@@ -19,15 +19,21 @@ Menu + progression (step 5): title, main, conditions, garage (buy/paint), settin
 
 Feedback round 1, steps 1-2 (GLB pipeline, 5 cars): assetLoader (task 001 done by Claude), modelCar, carFactory, garage rewrite (stats, paint, underglow, yaw calibration), scripts/optimize-models.sh, docs/assets/tripo-brief.md.
 
-## Next (Claude)
-Playtest feedback from Carlos: tune `carTuning.ts`, per-car overrides in `data/cars.ts`, chase cam, audio levels. Then wire Qwen's AI, weather FX and touch controls after `/review-qwen`. Upgrades (plan phase 5) and Capacitor (phase 6) still to do.
+Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Streets (narrow street circuit with tunnel, bridge, dock, plaza, alleys, props); AI rivals (aiRacers, rivals.ts); story mode Chapter 1 (career, dialogue, captions, objectives, unlocks); safe-margin UI fixes. Tests: `npm test` (13 files).
 
-## Qwen queue (run with `scripts/qwen.sh <number>`; tasks updated to the final code, in this order)
-- 004 `src/world/weatherFx.ts` (rain streaks, snow flakes; hooked from `Game.setWeather` and the frame loop after review)
+## Next (Claude)
+Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, send playtest notes (AI pace, track feel, story text). Then: wire Qwen modules after `/review-qwen`; car upgrades (plan phase 5); Capacitor (phase 6).
+
+## Qwen queue (run with `scripts/qwen.sh <number>`)
+- 004 `src/world/weatherFx.ts` (rain streaks, snow flakes; I hook it from `Game.setWeather` and the frame loop after review)
 - 003 `src/ui/touchControls.ts` (touch overlay; `setVisible` hidden in menus)
+- 005 `src/ui/minimap.ts` (track outline + racer dots, bottom-left)
+- 006 `src/input/gamepad.ts` (Gamepad API input source)
+- 007 `src/audio/cityAmbience.ts` (harbour horn, siren, water, drips, tunnel muffling)
+Done by Claude instead: 001 asset loader, 002 AI racers.
 
 ## Open contract requests
-None. Contract change logged: `GameState` gained `'MENU'` (src/types/game.ts), step 5.
+None. Contract changes logged: `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
 
 ## Log (newest last)
 - 2026-11-14 Claude: block 1 done. Tasks 001-003 written.
@@ -40,3 +46,4 @@ None. Contract change logged: `GameState` gained `'MENU'` (src/types/game.ts), s
 - 2026-11-14 Claude: step 5 menu + progression done (ui/menu, garage, settings, core/save, quality). Contract: GameState += 'MENU'.
 - 2026-11-14 Claude: step 6 docs done; Qwen tasks 002/004/003/001 updated to final code. Baton stays with Claude.
 - 2026-11-14 Claude: feedback round 1 steps 1+2: GLB pipeline with procedural fallback, 5 cars (Civic, 350Z, RX-7, Evo VIII, Supra), garage with turntable, stats, paint, underglow, yaw calibration.
+- 2026-11-14 Claude: feedback round 1 done: GLB pipeline, 5 cars, Kestrel Bay Streets, AI rivals, story mode chapter 1, UI margins. Contract change: AIWorldView.grip. Qwen queue now 004, 003, 005, 006, 007.

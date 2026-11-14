@@ -16,7 +16,7 @@
 - Real car brand names and logos only in `src/data/cars.ts` (swappable for fictional ones).
 
 ## Map
-`src/types` contracts, `src/core` engine, math, race/lap logic, `src/camera`, `src/physics`, `src/world`, `src/input`, `src/data`, `src/ui`, `src/audio`, `src/dev` (throwaway).
+`src/types` contracts, `src/core` engine, math, race/lap logic, `src/camera`, `src/physics`, `src/world`, `src/input`, `src/data`, `src/game` (orchestration, story), `src/fx`, `src/ui`, `src/audio`, `src/dev` (throwaway).
 `docs/handoff.md` status and next steps. `docs/plan.md` phases. `docs/story.md` story and cinematic. `docs/tasks/` Qwen tasks. `docs/inbox/` owner notes.
 
 ## Session start

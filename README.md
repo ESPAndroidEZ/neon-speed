@@ -9,6 +9,10 @@ npm run build    # line check + typecheck + production build
 npm test         # headless physics, track and collision checks (tests/*.mts)
 ```
 
+Controls: W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather, M mute, Esc menu, backtick tuning panel.
+Car models: drop GLBs into `public/models/<id>.glb` (see `docs/assets/tripo-brief.md`); `scripts/optimize-models.sh` shrinks them. Missing files fall back to the procedural cars.
+Dev URL flags: `?skip` (no menu), `?ai=3`, `?car=evo`, `?w=rain`, `?at=tunnel`, `?demo`, `?ff=10`, `?screen=garage|story|weather|settings`.
+
 Working with the AI agents: see `CLAUDE.md` (Claude Code) and `AGENTS.md` (Qwen via Aider). Plan: `docs/plan.md`. Story: `docs/story.md`.
 
 ## Local Qwen

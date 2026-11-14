@@ -3,6 +3,7 @@ import { Engine } from './core/engine';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
+import { findEvent } from './data/story';
 import { DemoInput } from './dev/demoInput';
 import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
@@ -129,6 +130,7 @@ if (direct) {
   else if (scr === 'weather') menu.weather();
   else if (scr === 'settings') menu.settings();
   else if (scr === 'story') menu.story();
+  else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event
 }
 
 engine.start();

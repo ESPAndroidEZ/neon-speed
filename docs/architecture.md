@@ -8,6 +8,7 @@ KeyboardInput.sample -> CarInput (player)
 Engine fixed 1/60 s: Game.fixed -> RaceManager.step: per racer [agent.decide | player input] -> CarController.step
                      -> TrackContact.update (verge, barriers) -> car-car resolveCarPair -> LapCounter -> finish/results
 Engine per frame:    RacerViews.update(alpha) (interpolated poses + wheel/body anim) -> ChaseCam -> Hud
+AI: rivals pass through each other (no pile-ups); only contact with the player is solid. `AIWorldView.grip` carries the weather grip.
 Game.state: MENU (showroom orbit cam, Menu DOM) -> CINEMATIC (CinematicCam, then handover to ChaseCam.pose) -> RACING -> PODIUM (ResultsScreen)
 RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 ```
@@ -16,7 +17,8 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 - `types/game.ts`: ALL shared contracts (CarInput, CarState, WeatherProfile, TrackSample, AIRacerAgent, CameraRig ...).
 - `core/`: `engine` (renderer, bloom, fixed loop), `math`, `rng`, `lapCounter` (sequential progress, no shortcuts),
   `raceManager` (grid, countdown, laps, timing, finish; takes AIRacerAgent[], works with none), `raceResult` (positions, cash).
-- `game/`: `game` (state machine, race + cameras + HUD), `racerViews` (one visual car per racer), `showroomCam` (menu orbit).
+- `game/`: `game` (state machine, race + cameras + HUD, story hooks), `racerViews` (one visual car per racer), `showroomCam` (menu orbit),
+  `story` (StoryController: chapter flow, dialogue, objectives, rewards, unlocks), `weatherApply`, `telemetry`.
 - `physics/` (pure TS, no three): `carController` (bicycle model, friction circle, handbrake, nudge for impacts),
   `drivetrain` (6-speed auto, reverse, nitro), `tire`, `driftScorer`, `weather` (grip multipliers),
   `carCollision` (car-car, 2 circles each), `obstacles` (static circles by sample), `trackContact` (verge grip loss, wall + obstacle bounce on 12 body points, place/reset on track), `carTuning`.
@@ -26,16 +28,18 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   manholes, crosswalks, steam vents; deterministic).
 - `world/` meshes: `ribbon` (road/wall strips with per-sample offsets), `trackMesh` (worn asphalt, sidewalks, ground), `facades`
   (continuous flush buildings, windows, lit shopfronts, plaza rim), `tunnelBridge`, `dock` (containers, cranes, water),
-  `props`, `furniture` (wall lamps + light pools, neon signs, overhead cables), `steam`, `envMap`, `worldLook` (weather ->
+  `props`, `stage` (garage stage far from the street, used by the showroom), `furniture` (wall lamps + light pools, neon signs, overhead cables), `steam`, `envMap`, `worldLook` (weather ->
   materials), `world` (assembler), `textures`.
+- `data/story.ts` (events, dialogue, opening captions), `data/rivals.ts` (rivals, fields), `physics/aiRacers` (profile-based driver: speed profile from curvature, grip and skill; pure pursuit).
 - `data/cars.ts`: 5 car specs (real names only here), CarTuning overrides, BodyShape, model config, prices, paints, underglow colours.
 - `physics/carStats`: headless 0-100 / top speed / slide measurement used by the garage bars and tests.
 - `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.
 - `world/assetLoader` (GLB normalise: long axis Z, scale, ground, yaw; body-material finder), `modelCar` (CarVisual for baked GLBs, no wheel spin, calibration arrow),
   `carFactory` (procedural first, upgraded to public/models/<id>.glb when it loads), `modelPrefs` (yaw fixes in localStorage).
-- `core/save` (SaveStore: cash, owned cars, paint, best lap per weather, settings; sanitising parse, injectable storage),
+- `core/career` (story progress, objective evaluation, unlocks; pure), `core/save` (SaveStore: cash, owned cars, paint, underglow, best lap per weather, settings, career; sanitising parse, injectable storage),
   `core/quality` (low/medium/high render scale + bloom).
-- `ui/`: `menu` (title, main, conditions), `garage` (cars, paint, buy), `settings` (volume, mute, quality), `uiKit` (CSS + helpers), `hud`, `results`.
+- `ui/`: `menu` (title, main, story, free race, garage, settings), `storyMenu` (chapter cards, ending), `dialogue` (speaker cards, subtitles, optional speech),
+  `garage` (turntable, stats, paint, underglow, buy, GLB yaw calibration), `settings`, `uiKit`, `hud`, `results` (objective verdict + buttons).
 - `fx/`: `particles` (pooled billboards), `skidMarks` (ring-buffer quads), `speedPass` (radial streaks composer pass),
   `juice` (smoke, skids, sparks, nitro flames, shake, bloom kicks; reads Game.views / Game.impact).
 - `audio/`: `audioBus` (context, volume, mute, noise), `engineSynth` (rpm/load engine, turbo, blow-off), `sfx` (squeal, nitro,
@@ -52,4 +56,4 @@ Physics steps at fixed 1/60 s only; no allocation per step; every .ts file under
 Weather grip in `physics/weather.ts`. Track geometry is the control list in `world/harborLoop.ts`.
 
 ## Dev shortcuts
-`?screen=garage|weather|settings` opens a menu screen; `?skip` / `?demo` bypass the menu. `?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.
+`?screen=garage|weather|settings` opens a menu screen; `?skip` / `?demo` bypass the menu. `?ai=N` rivals, `?at=tunnel|bridge|dock|plaza|alley|<index>` start there, `?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.

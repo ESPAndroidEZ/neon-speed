@@ -30,7 +30,7 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   const lampIdx: number[] = [];
   for (let i = 4; i < n; i += LAMP_EVERY) if (tr.zones[i] !== 'tunnel') lampIdx.push(i);
   const heads = new InstancedMesh(new BoxGeometry(1.4, 0.16, 0.45), new MeshBasicMaterial({ color: new Color(0xffd9a0).multiplyScalar(3) }), lampIdx.length);
-  const poolMat = new MeshBasicMaterial({ map: makePoolTexture(), color: new Color(0xffc880).multiplyScalar(1.4), transparent: true, opacity: 0.38, depthWrite: false, blending: AdditiveBlending });
+  const poolMat = new MeshBasicMaterial({ map: makePoolTexture(), color: new Color(0xffc880).multiplyScalar(0.9), transparent: true, opacity: 0.34, depthWrite: false, blending: AdditiveBlending });
   const pools = new InstancedMesh(new PlaneGeometry(1, 1).rotateX(-Math.PI / 2), poolMat, lampIdx.length);
   lampIdx.forEach((i, k) => {
     const side = k % 2 === 0 ? 1 : -1;

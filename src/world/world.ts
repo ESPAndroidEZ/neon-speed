@@ -7,6 +7,7 @@ import { buildFacades } from './facades';
 import { buildFurniture } from './furniture';
 import { createKestrelBay, PLAZA } from './kestrelBay';
 import { buildProps } from './props';
+import { buildStage } from './stage';
 import { layoutProps } from './propsLayout';
 import { Steam } from './steam';
 import type { Track } from './track';
@@ -36,7 +37,7 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
   const layout = layoutProps(track);
   const env = buildNeonEnvMap(renderer);
   const root = new Group();
-  root.add(meshes.group, facades.group, furniture.group, dock.group, buildTunnel(track), buildBridge(track), buildProps(layout, PLAZA));
+  root.add(meshes.group, facades.group, furniture.group, dock.group, buildTunnel(track), buildBridge(track), buildProps(layout, PLAZA), buildStage(env));
   const moon = new DirectionalLight(0x8fa4ff, 0.7);
   moon.position.set(-60, 90, -40);
   scene.add(root, new HemisphereLight(0x3a4a8a, 0x0a0a12, 0.9), moon);
