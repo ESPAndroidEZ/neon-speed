@@ -13,6 +13,8 @@ import type { GameDeps, RaceSetup } from './gameTypes';
 import { RacerViews } from './racerViews';
 import { createTelemetry, createViewState, recordImpact } from './telemetry';
 import { findTrackDef } from '../data/tracks';
+import { applyStance } from '../data/loadout';
+import { getLoadout } from '../world/loadoutStore';
 import { applyWeather } from './weatherApply';
 import { ShowroomCam } from './showroomCam';
 
@@ -80,6 +82,7 @@ export class Game {
     this.d.world.load(findTrackDef(s.trackId ?? 'kestrel'));
     this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles, this.d.world.surfaces);
     applyTuning(this.d.tuning, s.car.tuning);
+    applyStance(this.d.tuning, getLoadout(s.car.id).stance);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
     // views in racer order so index lines up

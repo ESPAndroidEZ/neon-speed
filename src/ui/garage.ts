@@ -4,6 +4,7 @@ import { measureCar, type CarStats } from '../physics/carStats';
 import type { CarVisual } from '../world/proceduralCar';
 import { setYawOverride } from '../world/modelPrefs';
 import { modelStatus, statusListeners } from '../world/carFactory';
+import { lookRows } from './garageLook';
 import { button, h, money } from './uiKit';
 
 export interface GarageDeps {
@@ -39,6 +40,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
   let yaw = 0;
+  let lookOpen = false; // the appearance panel is collapsed until asked for
   let shown = d.store.data.selected; // the menu already put the selected car on show
 
   const paintOf = (c: CarSpec): number => d.store.data.paint[c.id] ?? c.color;
@@ -122,6 +124,13 @@ export function buildGarage(d: GarageDeps): HTMLElement {
         render();
       }),
     );
+    const toggle = small(lookOpen ? 'Appearance ▴' : 'Appearance ▾', () => {
+      lookOpen = !lookOpen;
+      render();
+    });
+    toggle.style.width = '100%';
+    panel.append(toggle);
+    if (lookOpen) panel.append(lookRows(d.store, c.id, owned, (l) => d.visual()?.setAppearance?.(l, paintOf(c)), () => d.preview(c, paintOf(c), glowOf(c))));
     const cal = calibration(c);
     if (cal) panel.append(cal);
     const row = h('div', 'rb-row');

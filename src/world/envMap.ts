@@ -44,6 +44,19 @@ export function buildNeonEnvMap(renderer: WebGLRenderer): Texture {
     lamp.position.set(Math.sin(a) * 25, 14 + rnd() * 6, Math.cos(a) * 25);
     s.add(lamp);
   }
+  // softbox strips and neon tubes: what gives glossy paint its long, streaky highlights (HDR so they stay bright after blur)
+  const tubeCols = [0xff2a9d, 0x18d8ff, 0xffb347, 0x7a5cff, 0xffffff];
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * Math.PI * 2 + 0.2;
+    const tube = new Mesh(new BoxGeometry(0.9, 26 + rnd() * 10, 0.9), new MeshBasicMaterial({ color: new Color(tubeCols[i % tubeCols.length]).multiplyScalar(8) }));
+    tube.position.set(Math.sin(a) * 34, 12, Math.cos(a) * 34);
+    s.add(tube);
+  }
+  for (const [x, z, w] of [[0, -10, 40], [-18, 12, 30], [16, 18, 30]] as const) {
+    const strip = new Mesh(new BoxGeometry(w, 0.8, 2.4), new MeshBasicMaterial({ color: new Color(0xdfe8ff).multiplyScalar(4.5) }));
+    strip.position.set(x, 28, z);
+    s.add(strip);
+  }
   const pm = new PMREMGenerator(renderer);
   const env = pm.fromScene(s, 0.03).texture;
   pm.dispose();

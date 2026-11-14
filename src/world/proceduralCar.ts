@@ -4,7 +4,9 @@ import { buildBody, type BodyShape } from './carBody';
 import { addDetails } from './carDetails';
 import { flakeTexture } from './textures';
 import { addLightsAndShadow } from './carLights';
-import { buildArch, buildWheel } from './carWheels';
+import { buildArch, buildWheel, makeWheelMats } from './carWheels';
+import { applyAppearance, glowAt } from './carAppearance';
+import { defaultLoadout, type Loadout } from '../data/loadout';
 
 const bright = (hex: number, k: number): Color => new Color(hex).multiplyScalar(k);
 
@@ -24,13 +26,15 @@ export interface CarVisual {
   rearWheels: readonly Object3D[];
   setPaint(hex: number): void;
   setUnderglow(hex: number): void;
+  /** Finish, vinyl, tint, headlights, calipers, stance and underglow pattern (rims only at build time). Optional on GLB cars. */
+  setAppearance?(l: Loadout, paintHex: number): void;
   setEnv(env: Texture): void;
   /** Per display frame: wheel spin and steer, brake lights, body pitch/roll from accelerations. */
   update(dt: number, speed: number, steer: number, braking: boolean, longAccel: number, latAccel: number): void;
 }
 
 /** Low-poly procedural car from a BodyShape. Nose +Z, +X left, origin on the ground at the centre. */
-export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisual {
+export function buildProceduralCar(shape: BodyShape, paintHex: number, loadout: Loadout = defaultLoadout()): CarVisual {
   const root = new Group();
   const body = new Group();
   root.add(body);
@@ -58,6 +62,8 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
   glowPlane.position.y = 0.08;
   root.add(glowPlane);
 
+  const wheels = makeWheelMats();
+  const pivots: { pivot: Object3D; side: number }[] = [];
   const wr = shape.wheelRadius;
   const spinners: Object3D[] = [];
   const steerPivots: Object3D[] = [];
@@ -71,7 +77,8 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
       root.add(arch);
       const pivot = new Group();
       pivot.position.set(x, wr, z);
-      const { spin, caliper } = buildWheel(wr, sx);
+      const { spin, caliper } = buildWheel(wr, sx, wheels, loadout.rim.design, loadout.rim.size);
+      pivots.push({ pivot, side: sx });
       pivot.add(spin, caliper);
       root.add(pivot);
       spinners.push(spin);
@@ -87,6 +94,12 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
     exhaust.push(e);
   }
 
+  let glowBase = 0x2a6bff;
+  let pattern = loadout.glowPattern;
+  let clock = 0;
+  const tmp = new Color();
+  const targets = { paint, glass, headMat, glowMat, wheels, body, pivots };
+  applyAppearance(targets, loadout, paintHex);
   let pitch = 0;
   let roll = 0;
   let spin = 0;
@@ -95,8 +108,18 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
     root,
     exhaust,
     rearWheels: rear,
-    setPaint: (hex) => paint.color.setHex(hex),
+    setPaint: (hex) => {
+      paintHex = hex;
+      applyAppearance(targets, loadout, hex);
+    },
+    setAppearance: (l, hex) => {
+      loadout = l;
+      pattern = l.glowPattern;
+      paintHex = hex;
+      applyAppearance(targets, l, hex);
+    },
     setUnderglow: (hex) => {
+      glowBase = hex;
       glowMat.color.copy(bright(hex, 1.5));
     },
     setEnv: (env) => {
@@ -114,6 +137,8 @@ export function buildProceduralCar(shape: BodyShape, paintHex: number): CarVisua
       paint.needsUpdate = true;
     },
     update(dt, speed, steer, braking, longAccel, latAccel) {
+      clock += dt;
+      if (pattern !== 'solid') glowMat.color.copy(glowAt(pattern, clock, glowBase, tmp)).multiplyScalar(1.5);
       spin += (speed / wr) * dt;
       steerVis = damp(steerVis, steer * 0.5, 14, dt);
       for (const s of spinners) s.rotation.x = spin;

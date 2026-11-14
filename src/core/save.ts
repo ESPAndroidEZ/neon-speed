@@ -1,3 +1,5 @@
+import { setLoadout as setLiveLoadout } from '../world/loadoutStore';
+import { sanitizeLoadout, type Loadout } from '../data/loadout';
 import type { LookId } from './looks';
 import type { Difficulty } from '../physics/aiDifficulty';
 import type { AssistLevel } from '../physics/assists';
@@ -20,6 +22,8 @@ export interface SaveData {
   bestLap: Record<Weather, number | null>;
   /** Best race time (seconds) per map and weather, key `trackId:WEATHER`; `trackId:drift` holds the best drift score. */
   trackBest: Record<string, number>;
+  /** Saved appearance per car id (finish, vinyl, rims, tint, lights, stance). */
+  loadouts: Record<string, Loadout>;
   settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId };
   races: number;
   career: CareerState;
@@ -43,6 +47,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
   trackBest: {},
+  loadouts: {},
   settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon' },
   races: 0,
   career: defaultCareer(),
@@ -80,6 +85,9 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   }
   if (typeof j.trackBest === 'object' && j.trackBest !== null) {
     for (const [k, v] of Object.entries(j.trackBest as Record<string, unknown>)) if (typeof v === 'number' && Number.isFinite(v) && v > 0 && k.length < 40) out.trackBest[k] = v;
+  }
+  if (typeof j.loadouts === 'object' && j.loadouts !== null) {
+    for (const [id, l] of Object.entries(j.loadouts as Record<string, unknown>)) if (knownCars.includes(id)) out.loadouts[id] = sanitizeLoadout(l);
   }
   const s = (j.settings ?? {}) as Record<string, unknown>;
   out.settings.volume = num(s.volume, out.settings.volume, 0, 1);
@@ -121,6 +129,7 @@ export class SaveStore {
       raw = null;
     }
     this.data = parseSave(raw, base, knownCars);
+    for (const [id, l] of Object.entries(this.data.loadouts)) setLiveLoadout(id, l);
   }
 
   commit(): void {
@@ -146,6 +155,13 @@ export class SaveStore {
 
   select(id: string): void {
     if (this.owns(id)) this.data.selected = id;
+    this.commit();
+  }
+
+  /** Save and apply a car's appearance. */
+  setLoadout(id: string, l: Loadout): void {
+    this.data.loadouts[id] = l;
+    setLiveLoadout(id, l);
     this.commit();
   }
 

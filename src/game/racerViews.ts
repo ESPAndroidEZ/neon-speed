@@ -2,6 +2,7 @@ import { Group, type Scene, type Texture } from 'three';
 import type { CarSpec } from '../data/cars';
 import type { Racer } from '../core/raceManager';
 import { createCarVisual } from '../world/carFactory';
+import { getLoadout } from '../world/loadoutStore';
 import type { CarVisual } from '../world/proceduralCar';
 
 export interface RacerView {
@@ -36,7 +37,7 @@ export class RacerViews {
   add(racer: Racer, spec: CarSpec, paint: number, glow = 0x2a6bff): RacerView {
     const holder = new Group();
     let v: RacerView;
-    const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv));
+    const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv), racer.isPlayer ? getLoadout(spec.id) : undefined);
     holder.add(visual.root);
     this.scene.add(holder);
     v = { racer, spec, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };
