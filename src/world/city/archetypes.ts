@@ -1,3 +1,4 @@
+import { ARCHETYPES_A } from './archetypesA';
 import type { FacadeKind } from './textures';
 
 /**
@@ -26,13 +27,16 @@ export interface Archetype {
   weight: number;
 }
 
-export const ARCHETYPES: Archetype[] = [
+const BASE: Archetype[] = [
   { id: 'concrete-block', kind: 'concrete', height: [14, 40], tint: [0.5, 0.5, 0.52], shop: true, balcony: 0.08, ac: 0.12, escape: 0.02, roof: 'antenna', districts: ['*'], weight: 3 },
   { id: 'glass-tower', kind: 'glass', height: [34, 70], tint: [0.45, 0.5, 0.62], shop: true, balcony: 0, ac: 0.02, escape: 0, roof: 'billboard', districts: ['neon', 'kestrel'], weight: 2 },
   { id: 'old-apartments', kind: 'brick', height: [12, 28], tint: [0.58, 0.5, 0.38], shop: true, balcony: 0.14, ac: 0.1, escape: 0.08, roof: 'tank', districts: ['kestrel'], weight: 2 },
   { id: 'neon-slab', kind: 'glass', height: [24, 52], tint: [0.45, 0.38, 0.5], shop: true, balcony: 0, ac: 0.03, escape: 0, roof: 'antenna', districts: ['neon'], weight: 2 },
   { id: 'shopfront-tower', kind: 'brick', height: [16, 44], tint: [0.55, 0.45, 0.42], shop: true, balcony: 0.05, ac: 0.09, escape: 0.03, roof: 'tank', districts: ['*'], weight: 3 },
 ];
+
+/** Every archetype in play: the reference set plus the Qwen sets (A, B ...). */
+export const ARCHETYPES: Archetype[] = [...BASE, ...ARCHETYPES_A];
 
 /** Archetypes allowed in a district, in list order. */
 export const archetypesFor = (district: string, all: readonly Archetype[] = ARCHETYPES): Archetype[] => all.filter((a) => a.districts.includes('*') || a.districts.includes(district));
