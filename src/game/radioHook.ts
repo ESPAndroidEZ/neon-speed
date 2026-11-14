@@ -14,6 +14,7 @@ export function installRadio(engine: Engine, game: Game, subs: Subtitles): void 
   };
   let radioRace: unknown = null;
   let radioClock = 0;
+  let finishSaid = false;
   engine.onFrame((_a, dt) => {
     radioClock += dt;
     if (radioClock < 0.25) return;
@@ -23,6 +24,10 @@ export function installRadio(engine: Engine, game: Game, subs: Subtitles): void 
       radio.reset();
     }
     const rm = game.rm;
+    if (rm.phase === 'FINISHED' && !finishSaid && game.state !== 'MENU') {
+      finishSaid = true;
+      subs.flash(`DJ SWITCH: ${radio.finish(game.telemetry.position)}`, 5, 'switch');
+    } else if (rm.phase !== 'FINISHED') finishSaid = false;
     const t = game.telemetry;
     const line = radio.update({
       racing: game.state === 'RACING' && rm.phase === 'RACING' && !game.paused, time: rm.raceTime, position: t.position, count: t.racerCount, lap: t.lap, laps: t.totalLaps,

@@ -32,21 +32,10 @@ export const CREW: CrewEntry[] = [
   { id: 'switch', name: 'DJ Switch', role: 'Pirate radio', color: 0x18d8ff, bio: 'Broadcasts from a crane cab above the docks. Knows every driver, every shortcut and every secret in Kestrel Bay.', revealed: 'Cain Vega. He gave up the wheel and kept the street alive over the air.' },
   { id: 'jinx', name: 'Jinx', role: 'Evo, rain specialist', color: 0x39ff88, bio: 'Aggressive, loves a wet road, and will trade paint to win.' },
   { id: 'tank', name: 'Tank', role: 'Supra, heavy hitter', color: 0x8a8f99, bio: 'A freight train in a sports car. Late on the brakes, impossible to push around.' },
+  { id: 'pixel', name: 'Pixel', role: 'Streamer, hatchback', color: 0x6cf2ff, bio: 'Streams every race to a chat that never sleeps. Drives like someone who is being watched, which is always.' },
+  { id: 'lola', name: 'Lola', role: 'Dock runner', color: 0xff7aa8, bio: 'Grew up on the quays. She knows every puddle, every loose plate and which crane light is broken.' },
+  { id: 'rook', name: 'Rook', role: 'Ex-Redline driver', color: 0x9aa4b2, bio: 'Left Redline Holdings on bad terms and keeps one eye on the black and gold RX-7 at all times.' },
   { id: 'vex', name: 'Vex', role: '350Z, drifter', color: 0x7a2fd6, bio: 'Lives sideways. Redline pays for the tyres.' },
 ];
 
-/** Loading-screen tips: mostly lore, some driving advice. */
-export const TIPS: string[] = [
-  'Every street remembers who bled for it.',
-  'The Red Hand Wall at the finish line: win an event and your hand goes up.',
-  'Cain Vega’s old Civic is light and tail-happy. Use the handbrake to swing it.',
-  'Drifting charges your nitro. Hit a wall and the chain is lost.',
-  'In the rain, brake earlier than you think. Puddles float the front tyres.',
-  'Snow banks at corner edges drag the car. Stay on the line.',
-  'Ice hides in the tunnel and on the bridge when it snows.',
-  'Redline Holdings is buying the docks one block at a time.',
-  'DJ Switch hears everything. Nobody knows where he broadcasts from.',
-  'Turbo cars spool slowly: stay on the throttle through the corner exit.',
-  'The Harbor Loop was born on the empty quays when the container trade left.',
-  'Lifting off with boost makes the blow-off valve sing. Listen for it on every shift.',
-];
+export { TIPS } from './tips';

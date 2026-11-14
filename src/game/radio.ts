@@ -69,6 +69,11 @@ export class RadioDirector {
       .replace('{score}', String(Math.floor(s.driftChain / 10) * 10));
   }
 
+  /** Line for the finish: win (P1) or lose. Call once when the race ends. */
+  finish(position: number): string {
+    return this.pick('finish' + (position === 1 ? 'W' : 'L'), position === 1 ? RADIO.win : RADIO.lose);
+  }
+
   /** Returns a line to show, or null. Call once per frame (or per fixed step). */
   update(s: RadioSnapshot): string | null {
     if (!s.racing) return null;
