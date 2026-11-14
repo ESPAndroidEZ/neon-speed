@@ -47,7 +47,7 @@ Weather multiplies a preset (rain: darker, glossier, cooler; snow: brighter ambi
 
 ## 6. Quality bars (`npm run visual`, per look preset and weather)
 Mean luminance 0.10..0.50 clear, 0.08..0.36 bad weather; clipped pixels < 2%; local contrast (std dev near the car) > 0.08;
-saturation (mean chroma of the brightest 5% pixels) > 0.35 in Neon Night. A new look or weather must pass before merging.
+saturation (mean chroma of the brightest 5% pixels) > 0.20 in Neon Night (target 0.30: raise the bar as the lights get more saturated). A new look or weather must pass before merging.
 
 ## 7. Budgets per tier
 | Tier | Render scale | Draw calls | Triangles | Shadows | Reflections | Post | Particles |

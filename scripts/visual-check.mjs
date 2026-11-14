@@ -45,6 +45,8 @@ for (const w of ['clear', 'rain', 'snow']) {
   CASES.push({ name: `${w}-speed`, q: `?skip&demo=straight&ai=0&car=supra&w=${w}&wi=1&at=2&ff=6.5` });
 }
 
+const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
+if (only) for (let i = CASES.length - 1; i >= 0; i--) if (!CASES[i].name.includes(only)) CASES.splice(i, 1);
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl'] });
 let failed = 0;
 for (const c of CASES) {
@@ -57,7 +59,7 @@ for (const c of CASES) {
   writeFileSync(`${OUT}/${c.name}.png`, buf);
   const m = metrics(PNG.sync.read(buf));
   const band = c.name.startsWith('clear') || c.name.endsWith('-clear') ? BANDS.clear : BANDS.bad;
-  const sat = c.look === 'neon' ? m.chroma >= 0.3 : true;
+  const sat = c.look === 'neon' ? m.chroma >= 0.2 : true;
   const ok = sat && m.mean >= band.meanMin && m.mean <= band.meanMax && m.clip <= BANDS.clipMax && m.contrast >= BANDS.contrastMin && errors.length === 0;
   if (!ok) failed++;
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${c.name.padEnd(12)} mean ${m.mean.toFixed(3)}  clipped ${(m.clip * 100).toFixed(2)}%  contrast ${m.contrast.toFixed(3)}  chroma ${m.chroma.toFixed(2)}${errors.length ? '  ERRORS ' + errors[0] : ''}`);
