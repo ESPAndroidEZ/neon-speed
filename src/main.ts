@@ -82,7 +82,7 @@ auto.onDowngrade = (tier) => {
   toast(`Frame rate was low: graphics lowered to ${tier.toUpperCase()}. (Settings: Auto quality)`);
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
-applySettings({ store, audio: audio.bus, engine, voice, auto, game });
+applySettings({ store, audio: audio.bus, engine, voice, auto, game, hud });
 const applyDriving = (): void => {
   applyDrivingSettings(store, pad);
   game.setWeather(game.weather); // re-grade for the chosen look
@@ -108,7 +108,7 @@ const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({
-  store, audio: audio.bus, engine, voice, auto, game,
+  store, audio: audio.bus, engine, voice, auto, game, hud,
   showroom: (c, p, g) => {
     game.showroom(c, p, g);
     cast.stage('mara');

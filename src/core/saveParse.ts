@@ -1,6 +1,7 @@
 import { sanitizeSetup } from '../data/setup';
 import { sanitizeUpgrades } from '../data/upgrades';
 import { sanitizeLoadout } from '../data/loadout';
+import { sanitizeGraphics } from './graphics';
 import type { Weather } from '../types/game';
 import type { SaveData } from './save';
 
@@ -68,7 +69,8 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.career.epilogueSeen = cr.epilogueSeen === true;
   if (typeof cr.flags === 'object' && cr.flags !== null) for (const [k, v] of Object.entries(cr.flags as Record<string, unknown>)) if (v === true && k.length < 30) out.career.flags[k] = true;
   if (typeof cr.rel === 'object' && cr.rel !== null) for (const [k, v] of Object.entries(cr.rel as Record<string, unknown>)) if (typeof v === 'number' && k.length < 30) out.career.rel[k] = Math.max(-5, Math.min(5, Math.round(v)));
-  if (s.quality === 'low' || s.quality === 'medium' || s.quality === 'high') out.settings.quality = s.quality;
+  if (s.quality === 'low' || s.quality === 'medium' || s.quality === 'high' || s.quality === 'ultra') out.settings.quality = s.quality;
+  out.settings.graphics = sanitizeGraphics(s.graphics, out.settings.quality);
   return out;
 }
 

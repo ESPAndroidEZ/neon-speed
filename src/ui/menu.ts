@@ -25,7 +25,8 @@ export interface MenuDeps {
   engine: Engine;
   voice: Voice;
   auto: { enabled: boolean };
-  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number } } };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number; fovMin: number; fovMax: number } } };
+  hud?: { setScale(s: number): void };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
   /** Slide the showroom car sideways on screen (garage panel sits on the left). */
@@ -177,6 +178,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, onDriving: this.d.onDriving, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, onBack: () => this.main() }), 'other');
   }
 }

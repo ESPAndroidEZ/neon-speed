@@ -33,6 +33,11 @@ export class Hud {
   private lastRpm = -1;
   private lastNit = -1;
 
+  /** HUD size 0.8 .. 1.3 (graphics settings). */
+  setScale(s: number): void {
+    (this.root.style as unknown as { zoom: string }).zoom = String(s);
+  }
+
   constructor(parent: HTMLElement) {
     const style = document.createElement('style');
     style.textContent = CSS;

@@ -64,6 +64,7 @@ export class Engine implements Disposable {
   private readonly observer: ResizeObserver;
   private baseBloomStrength: number;
   private bloomKick = 0;
+  fpsCap = 0; // frame cap, 0 = the display's rate
   private accumulator = 0;
   private lastTime = 0;
   private running = false;
@@ -151,6 +152,24 @@ export class Engine implements Disposable {
     this.bloomKick = Math.max(this.bloomKick, extra);
   }
 
+  /** MSAA samples of the HDR target (0, 2, 4); re-created. */
+  setSamples(n: number): void {
+    for (const rt of [this.composer.renderTarget1, this.composer.renderTarget2]) if (rt.samples !== n) { rt.samples = n; rt.dispose(); }
+  }
+
+  /** Mean ms per frame over `frames` synchronous renders (waits for the GPU): the "Test my device" benchmark. */
+  measureRender(frames: number): number {
+    const gl = this.renderer.getContext();
+    this.composer.render(0.016);
+    gl.finish();
+    const t0 = performance.now();
+    for (let i = 0; i < frames; i++) {
+      this.composer.render(0.016);
+      gl.finish();
+    }
+    return (performance.now() - t0) / frames;
+  }
+
   resize(): void {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
@@ -174,6 +193,7 @@ export class Engine implements Disposable {
   }
 
   private readonly tick = (now: number): void => {
+    if (this.fpsCap > 0 && now - this.lastTime < 1000 / this.fpsCap - 1.5) return; // skip this display frame; dt keeps accumulating
     const frameDt = clamp((now - this.lastTime) / 1000, 0, MAX_FRAME_DT);
     this.lastTime = now;
     this.accumulator += frameDt;

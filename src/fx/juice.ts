@@ -1,4 +1,5 @@
 import type { Engine } from '../core/engine';
+import { GRAPHICS } from '../core/graphics';
 import { clamp, damp, smoothstep } from '../core/math';
 import { grade } from '../core/grade';
 import { qualityNow } from '../core/quality';
@@ -150,6 +151,6 @@ export class Juice {
     const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? 0.4 : 0);
     this.streak = damp(this.streak, target, 3, dt);
     this.post.width = this.engine.renderer.domElement.width;
-    this.post.update(dt, this.streak);
+    this.post.update(dt, this.streak * GRAPHICS.motionBlur);
   }
 }

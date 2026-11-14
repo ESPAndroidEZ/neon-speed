@@ -1,10 +1,12 @@
 import type { AudioBus } from '../audio/audioBus';
 import type { Engine } from '../core/engine';
+import { applyGraphics, GRAPHICS } from '../core/graphics';
 import { applyQuality } from '../core/quality';
-import type { Quality, SaveStore } from '../core/save';
+import type { SaveStore } from '../core/save';
 import { LEVELS, type PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
 import { drivingRows } from './drivingSettings';
+import { graphicsRows } from './graphicsSettings';
 import { button, h } from './uiKit';
 
 export interface SettingsDeps {
@@ -14,7 +16,8 @@ export interface SettingsDeps {
   voice: Voice;
   auto: { enabled: boolean };
   /** Receives the weather physics level. */
-  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number } } };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number; fovMin: number; fovMax: number } } };
+  hud?: { setScale(s: number): void };
   /** Called after a driving setting changes (copies the saved values into physics and the gamepad). */
   onDriving?: () => void;
   onBack: () => void;
@@ -27,7 +30,9 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setMuted(s.muted);
   d.audio.setSfxVolume(s.sfxVolume);
   d.audio.setMusicVolume(s.musicVolume);
-  applyQuality(d.engine, s.quality);
+  Object.assign(GRAPHICS, s.graphics);
+  applyQuality(d.engine, s.quality, true);
+  if (d.hud) applyGraphics(d.engine, { hud: d.hud, chase: d.game.chase });
   d.voice.enabled = s.voice;
   d.auto.enabled = s.autoQuality;
   d.game.physicsLevel = s.weatherPhysics;
@@ -93,21 +98,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   auto.append(abox);
 
-  const q = h('div', 'rb-row', '<span style="width:90px">Quality</span>');
-  (['low', 'medium', 'high'] as Quality[]).forEach((t) => {
-    const b = button(t, () => {
-      s.quality = t;
-      applySettings(d);
-      d.store.commit();
-      refresh();
-    });
-    b.style.minWidth = '90px';
-    q.append(b);
-  });
-  const refresh = (): void => {
-    q.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.textContent === s.quality));
-  };
-  refresh();
   const wp = h('div', 'rb-row', '<span style="width:90px">Rain / snow physics</span>');
   const shake = h('div', 'rb-row', '<span style="width:90px">Camera shake</span>');
   for (const lv of ['OFF', 'LOW', 'NORMAL'] as const) {
@@ -144,6 +134,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), q, auto, button('Back', d.onBack));
+  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, button('Back', d.onBack));
   return root;
 }

@@ -33,7 +33,7 @@ check('round trip restores everything', b.data.selected === '350z' && b.data.pai
 
 check('corrupt JSON -> defaults', parseSave('{not json', base, CARS).cash === 2500, '');
 check('null -> defaults', parseSave(null, base, CARS).owned[0] === 'civic', '');
-const evil = parseSave(JSON.stringify({ cash: -5, owned: ['hacked', 'supra'], selected: 'civic', settings: { volume: 9, quality: 'ultra' }, bestLap: { CLEAR: 'x', RAIN: 3 } }), base, CARS);
+const evil = parseSave(JSON.stringify({ cash: -5, owned: ['hacked', 'supra'], selected: 'civic', settings: { volume: 9, quality: 'turbo' }, bestLap: { CLEAR: 'x', RAIN: 3 } }), base, CARS);
 check('sanitises values', evil.cash === 0 && evil.owned.join() === 'supra' && evil.selected === 'supra' && evil.settings.volume === 1 && evil.settings.quality === 'high' && evil.bestLap.CLEAR === null && evil.bestLap.RAIN === null, JSON.stringify(evil.owned));
 const broken: KeyValueStore = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
 const c = new SaveStore(broken, base, CARS);

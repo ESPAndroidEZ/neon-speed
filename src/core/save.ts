@@ -3,6 +3,7 @@ import { setBuild } from '../data/carBuild';
 import { defaultSetup, type Setup } from '../data/setup';
 import type { UpgradeId, Upgrades } from '../data/upgrades';
 import type { Loadout } from '../data/loadout';
+import { PRESETS, type Graphics } from './graphics';
 import type { LookId } from './looks';
 import type { Difficulty } from '../physics/aiDifficulty';
 import type { AssistLevel } from '../physics/assists';
@@ -10,7 +11,7 @@ import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Weather } from '../types/game';
 import { defaultCareer, type CareerState } from './career';
 
-export type Quality = 'low' | 'medium' | 'high';
+export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 
 export interface SaveData {
   version: 1;
@@ -30,7 +31,7 @@ export interface SaveData {
   /** Installed performance upgrades and the tuning setup per car id. */
   upgrades: Record<string, Upgrades>;
   setups: Record<string, Setup>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics };
   races: number;
   career: CareerState;
 }
@@ -55,7 +56,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   loadouts: {},
   upgrades: {},
   setups: {},
-  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon' },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon', graphics: { ...PRESETS.high } },
   races: 0,
   career: defaultCareer(),
 });

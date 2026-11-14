@@ -1,4 +1,5 @@
 import type { Engine } from './engine';
+import { GRAPHICS, usePreset } from './graphics';
 import { grade } from './grade';
 import type { Quality } from './save';
 
@@ -25,22 +26,31 @@ const TIERS: Record<Quality, QualityParams> = {
   low: { pixelRatio: 1, bloom: false, bloomStrength: 0.5, fx: false, shafts: false, mirror: false, streaks: false, spotLights: 0, particles: 0.5 },
   medium: { pixelRatio: 1.5, bloom: true, bloomStrength: 0.65, fx: true, shafts: true, mirror: false, streaks: false, spotLights: 1, particles: 0.8 },
   high: { pixelRatio: 2, bloom: true, bloomStrength: 0.85, fx: true, shafts: true, mirror: true, streaks: true, spotLights: 2, particles: 1 },
+  ultra: { pixelRatio: 2.5, bloom: true, bloomStrength: 0.95, fx: true, shafts: true, mirror: true, streaks: true, spotLights: 2, particles: 1.4 },
 };
 
 let current: Quality = 'high';
 
-export const qualityNow = (): QualityParams => TIERS[current];
+const merged: QualityParams = { ...TIERS.high };
+/** The tier's parameters with the graphics screen's overrides applied (bloom, reflections, particles, resolution). */
+export function qualityNow(): QualityParams {
+  const t = TIERS[current];
+  Object.assign(merged, t, { bloom: GRAPHICS.bloom, mirror: GRAPHICS.reflections && t.mirror, particles: GRAPHICS.particles });
+  return merged;
+}
 export const qualityTier = (): Quality => current;
 
-export function applyQuality(engine: Engine, q: Quality): void {
+/** Switch tier. `keepCustom` leaves the graphics screen's own values alone (startup); otherwise they follow the tier's preset. */
+export function applyQuality(engine: Engine, q: Quality, keepCustom = false): void {
   current = q;
-  const t = TIERS[q];
-  engine.maxPixelRatio = t.pixelRatio;
+  if (!keepCustom) usePreset(q);
+  const t = qualityNow();
+  engine.maxPixelRatio = t.pixelRatio * GRAPHICS.resScale;
   engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength * grade.bloomK });
   engine.resize();
 }
 
-const ORDER: Quality[] = ['low', 'medium', 'high'];
+const ORDER: Quality[] = ['low', 'medium', 'high', 'ultra'];
 
 /**
  * Drops one tier when the frame rate stays low (never upgrades by itself). Judges 2 s windows of frame time;
