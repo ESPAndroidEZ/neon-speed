@@ -1,9 +1,22 @@
 import { CREW } from '../data/lore';
 import type { SaveStore } from '../core/save';
 import { drawWall } from '../world/wallArt';
+import { portraitEl } from './portraits';
 import { button, h } from './uiKit';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
+/** Characters whose relationship value is shown once Chapter 2 starts. */
+const REL_IDS = ['mara', 'cain', 'dante', 'nova', 'brick'];
+
+/** A -5..+5 meter: how this person feels about you after your choices. */
+function relBar(v: number): HTMLElement {
+  const bar = h('div', 'rb-bar');
+  bar.style.cssText += ';width:100%;margin-top:8px;position:relative';
+  bar.innerHTML = `<i style="position:absolute;left:${v >= 0 ? 50 : 50 + v * 10}%;width:${Math.abs(v) * 10}%;background:${v >= 0 ? '#7dff9a' : '#ff5470'}"></i>`;
+  const wrap = h('div', '', '<div class="rb-sub" style="font-size:11px;margin-top:6px">Relationship</div>');
+  wrap.append(bar);
+  return wrap;
+}
 
 /** Crew screen: bios (with the spoiler gate on Cain and DJ Switch) and the Red Hand Wall. */
 export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement {
@@ -23,7 +36,13 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:default;width:min(270px,88vw);text-align:left;border-color:${hex(c.color)}66`;
     const bio = career.endingSeen && c.revealed ? c.revealed : c.bio;
-    card.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:${hex(c.color)};color:#05060d;font-weight:900;font-size:20px;display:flex;align-items:center;justify-content:center">${c.name[0]}</div><div><div style="font-weight:900">${career.endingSeen && c.id === 'switch' ? 'DJ Switch (Cain)' : c.name}</div><div class="rb-sub">${c.role}</div></div></div><div style="margin-top:8px;font-size:14px;line-height:1.4;opacity:.9">${bio}</div>`;
+    const rel = career.rel[c.id] ?? 0;
+    const mood = rel > 0 ? 'smirk' : rel < 0 ? 'angry' : 'neutral';
+    const top = h('div');
+    top.style.cssText = 'display:flex;gap:10px;align-items:center';
+    top.append(portraitEl(c.id, mood, 52), h('div', '', `<div style="font-weight:900">${c.name}</div><div class="rb-sub" style="letter-spacing:2px">${c.role}</div>`));
+    card.append(top, h('div', '', `<div style="opacity:.85;font-size:14px;line-height:1.4;margin-top:8px">${bio}</div>`));
+    if (REL_IDS.includes(c.id) && career.completed.includes('c2-redline')) card.append(relBar(rel));
     grid.append(card);
   }
   root.append(grid, button('Back', onBack));

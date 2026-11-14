@@ -9,10 +9,13 @@ import type { DialogueBox, Subtitles } from '../ui/dialogue';
 import type { TitleCards } from '../ui/titleCards';
 import { PREVIOUSLY } from '../data/lore';
 import type { ResultsExtra, ResultsScreen } from '../ui/results';
+import type { Cast } from './cast';
 import type { Game } from './game';
 
 export interface StoryDeps {
   game: Game;
+  /** The people beside the showroom car (optional: tests run without it). */
+  cast?: Cast;
   store: SaveStore;
   dialogue: DialogueBox;
   cards: TitleCards;
@@ -64,6 +67,7 @@ export class StoryController {
     // finale cutscene: Dante's car on show while he talks; otherwise your own
     if (ev.id === 'finale' || ev.id === 'c2-final') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
     else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
+    d.cast?.stage(ev.id === 'finale' || ev.id === 'c2-final' ? 'dante' : 'mara');
     const lines = playable(first ? [...INTRO_LINES, ...ev.before] : ev.before, save.career);
     const run = (): void => d.dialogue.play(lines, () => this.launch(ev, first));
     if (first) d.cards.play(PREVIOUSLY, run); // skippable "Previously in Kestrel Bay" cards before the intro
@@ -137,6 +141,7 @@ export class StoryController {
     const c = this.d.store.data;
     const car = findCar(c.selected);
     this.d.game.showroom(car, c.paint[car.id] ?? car.color, c.glow[car.id]);
+    this.d.cast?.stage('mara');
     this.d.showStory();
   }
 

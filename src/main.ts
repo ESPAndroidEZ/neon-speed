@@ -8,16 +8,12 @@ import { findTrackDef } from './data/tracks';
 import { finishFreeRace } from './game/freeRace';
 import { AudioTestPanel } from './dev/audioTestPanel';
 import { runDevStart } from './dev/devStart';
-import { DemoInput } from './dev/demoInput';
 import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
-import { CombinedInput } from './input/combinedInput';
-import { GamepadInput } from './input/gamepad';
-import { KeyboardInput } from './input/keyboard';
 import { applyDrivingSettings } from './ui/drivingSettings';
-import { createTouchControls } from './ui/touchControls';
+import { createControls } from './game/inputSetup';
 import { installMinimap } from './game/extras';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
@@ -33,6 +29,8 @@ import { Menu } from './ui/menu';
 import { PauseMenu } from './ui/pauseMenu';
 import { toast } from './ui/uiKit';
 import { ResultsScreen } from './ui/results';
+import { installVersus } from './game/versusGate';
+import { Cast } from './game/cast';
 import { applySettings } from './ui/settings';
 import { preloadCarModels } from './world/carFactory';
 import { buildWorld } from './world/world';
@@ -57,25 +55,18 @@ const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map
 
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
-const touch = createTouchControls(document.body, { onReset: () => game.resetToTrack(), onPause: () => pause.toggle() });
-const keys = new KeyboardInput();
-const pad = new GamepadInput({ onPause: () => pause.toggle(), onReset: () => game.resetToTrack() });
-const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new CombinedInput([keys, pad, touch]);
+const controls = createControls(q.has('demo') ? (q.get('demo') ?? '') : null, { pause: () => pause.toggle(), reset: () => game.resetToTrack() });
+const { pad, touch } = controls;
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
 let story: StoryController;
 const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
-const game = new Game({ engine, world, hud, results, input, tuning });
+const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
+controls.attach(engine, game);
 const juice = new Juice(engine, game);
-engine.onFrame(() => {
-  keys.speedKph = game.telemetry.speedKph;
-});
-const baseImpact = game.onImpact;
-game.onImpact = (s) => {
-  baseImpact?.(s);
-  pad.rumble(Math.min(1, s / 18), Math.min(1, s / 10), 0.25);
-};
+const cast = new Cast(engine.scene);
+engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
 engine.onFrame((_a, dt) => {
   audio.update(dt);
@@ -109,7 +100,10 @@ const launchFree = (w: Weather, rivals: number, trackId: string): void => {
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game,
-  showroom: (c, p, g) => game.showroom(c, p, g),
+  showroom: (c, p, g) => {
+    game.showroom(c, p, g);
+    cast.stage('mara');
+  },
   shift: (m) => {
     game.showroomCam.shift = m;
   },
@@ -128,7 +122,7 @@ menu = new Menu({
 });
 const subs = new Subtitles(voice);
 story = new StoryController({
-  game, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
+  game, cast, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
@@ -154,7 +148,7 @@ function loadSlot(id: import('./core/gameSave').SlotId): void {
   try {
     menu.hide();
     results.hide();
-    restoreGame(game, snap);
+    versus.bypass(() => restoreGame(game, snap));
     story.resume(snap.setup.eventId);
     pause.resume();
     toast('Loaded');
@@ -176,6 +170,7 @@ game.onFinish = (r) => {
 };
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
 
+const versus = installVersus(game, direct);
 const loading = new LoadingCard();
 game.onStartRace = () => loading.show();
 installRadio(engine, game, subs);
