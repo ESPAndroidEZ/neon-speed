@@ -1,10 +1,13 @@
-import { Color, FogExp2 } from 'three';
+import { Color, FogExp2, Scene } from 'three';
 import { ChaseCam } from './camera/chaseCam';
 import { CinematicCam } from './camera/cinematicCam';
 import { createIntroShots } from './camera/shots';
 import { Engine } from './core/engine';
 import { TuningPanel } from './dev/tuningPanel';
 import { buildSmokeScene } from './dev/smokeScene';
+import { LapCounter } from './core/lapCounter';
+import { TrackContact } from './physics/trackContact';
+import { buildWorld } from './world/world';
 import { KeyboardInput } from './input/keyboard';
 import { CarController } from './physics/carController';
 import { createDefaultTuning } from './physics/carTuning';
@@ -22,9 +25,14 @@ const container = document.getElementById('app');
 if (!container) throw new Error('#app container missing from index.html');
 
 const engine = new Engine({ container });
-const carMesh = buildSmokeScene(engine.scene);
+const world = buildWorld(engine.scene, engine.renderer);
+const carMesh = buildSmokeScene(new Scene()); // TEMP box car until proceduralCar
+engine.scene.add(carMesh);
 const tuning = createDefaultTuning();
 const car = new CarController(tuning);
+const contact = new TrackContact(world.track);
+const laps = new LapCounter(world.track);
+const START = world.track.samples.length - 6;
 const input = new KeyboardInput();
 const chase = new ChaseCam(engine.camera);
 const hud = new Hud(document.body);
@@ -59,6 +67,7 @@ const setWeather = (w: Weather): void => {
   }
   engine.scene.background = fogColor.setHex(p.fogColor);
   hud.setWeather(w);
+  world.setWeather(p);
 };
 setWeather('CLEAR');
 
@@ -77,6 +86,8 @@ engine.onFixedUpdate((dt) => {
   if (state !== 'RACING') return;
   input.sample(ctl);
   car.step(dt, ctl, WEATHER[weather]);
+  contact.update(car);
+  laps.update(contact.hit.index);
 });
 
 engine.onFrame((alpha, frameDt) => {
@@ -105,13 +116,24 @@ const skip = (): void => {
 container.addEventListener('pointerdown', skip);
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
-  if (e.code === 'KeyR') car.reset();
+  if (e.code === 'KeyR') {
+    contact.place(car, contact.nearestIndex(car));
+    laps.teleport(contact.hit.index);
+  }
   else if (e.code === 'Digit1') setWeather('CLEAR');
   else if (e.code === 'Digit2') setWeather('RAIN');
   else if (e.code === 'Digit3') setWeather('SNOW');
   else if (e.code !== 'Backquote') skip();
 });
 
-car.reset();
+const q = new URLSearchParams(location.search); // dev shortcuts: ?skip  ?w=rain|snow
+if (q.get('w') === 'rain') setWeather('RAIN');
+if (q.get('w') === 'snow') setWeather('SNOW');
+contact.place(car, START);
+laps.reset(START);
 intro.start();
+if (q.has('skip')) {
+  intro.skip();
+  intro.skip();
+}
 engine.start();

@@ -1,13 +1,11 @@
 import { clamp, lerp, smoothstep, wrapAngle } from '../core/math';
 import type { CarInput, CarState, RaceTelemetry, Vec3, WeatherProfile } from '../types/game';
 import type { CarTuning } from './carTuning';
+import { DriftScorer } from './driftScorer';
 import { Drivetrain } from './drivetrain';
 import { tireLateral } from './tire';
 
 const G = 9.81;
-const DRIFT_ANGLE = 0.22; // rad of slip before it counts as a drift
-const DRIFT_MIN_SPEED = 10; // m/s
-const DRIFT_BANK_DELAY = 0.8; // s without drifting before the chain banks
 
 export interface CarFlags {
   drifting: boolean;
@@ -33,18 +31,16 @@ export class CarController {
   };
   readonly flags: CarFlags = { drifting: false, wheelspin: false, braking: false, handbrake: false };
   readonly drivetrain: Drivetrain;
-  /** Points in the drift chain currently being built. */
-  driftChain = 0;
-  /** Points banked from finished chains. */
-  driftBank = 0;
+  readonly drift = new DriftScorer();
+  /** Set by the world each step: tyre grip multiplier (verge/grass < 1) and extra drag (1/s). */
+  surfaceGrip = 1;
+  surfaceDrag = 0;
 
   private readonly t: CarTuning;
   private u = 0;
   private v = 0;
   private r = 0;
   private hbFactor = 1;
-  private chainTime = 0;
-  private calmTime = 0;
   private prevX = 0;
   private prevZ = 0;
   private prevHeading = 0;
@@ -64,7 +60,9 @@ export class CarController {
     this.prevHeading = heading;
     this.u = this.v = this.r = 0;
     this.hbFactor = 1;
-    this.driftChain = this.driftBank = this.chainTime = this.calmTime = 0;
+    this.drift.reset();
+    this.surfaceGrip = 1;
+    this.surfaceDrag = 0;
     this.drivetrain.reset();
     this.publish();
   }
@@ -79,7 +77,7 @@ export class CarController {
     dtn.update(dt, this.u, input.throttle, input.brake, input.nitro);
 
     const { u, v, r } = this;
-    const g = weather.grip;
+    const g = weather.grip * this.surfaceGrip;
     const absU = Math.abs(u);
     const dir = u >= 0 ? 1 : -1;
     const wheelbase = t.cgToFront + t.cgToRear;
@@ -117,7 +115,7 @@ export class CarController {
     const fBrake = -dtn.brakeCmd * brakeMax * motion;
     const fHand = input.handbrake ? -Math.min(t.handbrakeForce, g * t.gripRear * fzR) * motion : 0;
     const fDrag = -t.dragCoef * u * absU;
-    const fRoll = -t.rollingResistance * t.mass * G * clamp(u / 0.3, -1, 1);
+    const fRoll = -t.rollingResistance * t.mass * G * clamp(u / 0.3, -1, 1) - this.surfaceDrag * t.mass * u;
     const fScrub = -fyF * Math.sin(delta);
 
     const du = (fxDrive + fBrake + fHand + fDrag + fRoll + fScrub) / t.mass + v * r;
@@ -136,7 +134,8 @@ export class CarController {
     this.flags.wheelspin = Math.abs(wanted) > tractionLimit * 1.02 && Math.abs(this.u) < 40;
     this.flags.braking = dtn.brakeCmd > 0.2 && absU > 2;
     this.flags.handbrake = input.handbrake;
-    this.scoreDrift(dt);
+    this.flags.drifting = this.drift.drifting;
+    this.drift.update(dt, absU, s.slipAngle, dtn, t.nitroDriftRefillPerSec);
   }
 
   /** Interpolated pose for rendering between fixed steps. Writes position, returns heading. */
@@ -157,8 +156,21 @@ export class CarController {
     out.gear = d.gear;
     out.nitroLevel = d.nitroLevel;
     out.nitroActive = d.nitroActive;
-    out.drifting = this.flags.drifting;
-    out.driftScore = Math.floor(this.driftChain);
+    out.drifting = this.drift.drifting;
+    out.driftScore = Math.floor(this.drift.chain);
+  }
+
+  /** Collision response: move by (dx,dz), add a world-space velocity change and a yaw-rate change. */
+  nudge(dx: number, dz: number, dvx: number, dvz: number, dr: number): void {
+    const s = this.state;
+    const sh = Math.sin(s.heading);
+    const ch = Math.cos(s.heading);
+    s.position.x += dx;
+    s.position.z += dz;
+    this.u += dvx * sh + dvz * ch;
+    this.v += dvx * ch - dvz * sh;
+    this.r += dr;
+    this.publish();
   }
 
   /** Local-frame lateral acceleration in m/s^2 (for body roll and camera effects). */
@@ -175,22 +187,5 @@ export class CarController {
     s.speed = this.u;
     s.yawRate = this.r;
     s.slipAngle = Math.abs(this.u) > 1 ? Math.atan2(this.v, Math.abs(this.u)) * Math.sign(this.u) : 0;
-  }
-
-  private scoreDrift(dt: number): void {
-    const s = this.state;
-    const speed = Math.abs(this.u);
-    const slip = Math.abs(s.slipAngle);
-    const drifting = speed > DRIFT_MIN_SPEED && slip > DRIFT_ANGLE;
-    this.flags.drifting = drifting;
-    if (drifting) {
-      this.calmTime = 0;
-      this.chainTime += dt;
-      this.driftChain += speed * slip * dt * 10 * (1 + Math.min(this.chainTime, 10) * 0.2);
-      this.drivetrain.addNitro(this.t.nitroDriftRefillPerSec * dt * Math.min(1, slip / 0.6));
-    } else if (this.driftChain > 0 && (this.calmTime += dt) > DRIFT_BANK_DELAY) {
-      this.driftBank += this.driftChain;
-      this.driftChain = this.chainTime = 0;
-    }
   }
 }

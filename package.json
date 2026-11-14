@@ -8,7 +8,8 @@
     "build": "node scripts/check-lines.mjs && tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "check:lines": "node scripts/check-lines.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done"
   },
   "dependencies": {
     "three": "^0.187.0"

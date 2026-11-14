@@ -6,6 +6,7 @@ Night street racer in the browser, with rain and snow. TypeScript, Three.js, Vit
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # line check + typecheck + production build
+npm test         # headless physics, track and collision checks (tests/*.mts)
 ```
 
 Working with the AI agents: see `CLAUDE.md` (Claude Code) and `AGENTS.md` (Qwen via Aider). Plan: `docs/plan.md`. Story: `docs/story.md`.

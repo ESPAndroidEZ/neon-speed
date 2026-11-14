@@ -24,16 +24,16 @@ Everything else (more cars, more tracks) is content and comes last.
 
 ## 3. Phases (each has an exit test)
 
-| # | Phase | Owner | Exit test |
-|---|-------|-------|-----------|
-| 0 | Foundation (**done**): contracts, engine, bloom, cinematic intro | Claude | Build green, camera checks pass |
-| 1 | **Drive**: `carController`, `chaseCam`, keyboard/gamepad input, tuning panel, minimal HUD, flat test arena | Claude | A tester drifts a box car for 5 min and wants to keep going |
-| 2 | **Track and city**: spline track, barriers, checkpoints, lap logic, instanced buildings/lamps, wet-road look | Claude (+ Qwen: track data) | One lap of a good-looking circuit at 60 fps on desktop |
-| 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes |
-| 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic |
-| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race |
-| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable |
-| 7 | **Ship**: menus, tutorial, settings, TestFlight, crash/perf telemetry | Both | 10 outside testers finish the first race unaided |
+| # | Phase | Owner | Exit test | Status |
+|---|-------|-------|-----------|--------|
+| 0 | Foundation (**done**): contracts, engine, bloom, cinematic intro | Claude | Build green, camera checks pass | done |
+| 1 | **Drive**: `carController`, `chaseCam`, keyboard/gamepad input, tuning panel, minimal HUD, flat test arena | Claude | A tester drifts a box car for 5 min and wants to keep going | done |
+| 2 | **Track and city**: spline track, barriers, checkpoints, lap logic, instanced buildings/lamps, wet-road look | Claude (+ Qwen: track data) | One lap of a good-looking circuit at 60 fps on desktop | done |
+| 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes | in progress |
+| 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic | todo |
+| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | todo |
+| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | todo |
+| 7 | **Ship**: menus, tutorial, settings, TestFlight, crash/perf telemetry | Both | 10 outside testers finish the first race unaided | todo |
 
 ## 4. The pieces that decide quality
 
