@@ -1,7 +1,8 @@
 import { halfWidthAt, type Track } from '../world/track';
 import { createHit, locate, type TrackHit } from '../world/trackQuery';
 import type { CarController } from './carController';
-import { ObstacleField } from './obstacles';
+import type { ObstacleField } from './obstacles';
+import { createSurfaceHit, type SurfaceHit, type SurfaceMap } from './surfaces';
 
 const HALF_W = 0.92; // car half width, m
 const HALF_L = 2.1; // car half length (corner points), m
@@ -29,6 +30,9 @@ export class TrackContact {
   readonly contact = { x: 0, z: 0 };
   offroad = false;
   obstacles: ObstacleField | null = null;
+  surfaces: SurfaceMap | null = null;
+  /** What the tyres are on right now (puddle, ice, snow bank or dry). */
+  readonly surface: SurfaceHit = createSurfaceHit();
   private readonly track: Track;
   private readonly corner: TrackHit = createHit();
   // worst contact found this step
@@ -62,8 +66,17 @@ export class TrackContact {
     this.impact = 0;
     locate(tr, st.position.x, st.position.z, this.hit.index, this.hit);
     this.offroad = Math.abs(this.hit.lateral) > halfWidthAt(tr, this.hit.index) + 0.3;
-    car.surfaceGrip = this.offroad ? VERGE_GRIP : 1;
-    car.surfaceDrag = this.offroad ? VERGE_DRAG : 0;
+    const sf = this.surface;
+    if (this.surfaces) this.surfaces.query(this.hit.index, this.hit.lateral, st.position.x, st.position.z, Math.abs(st.speed), sf);
+    else {
+      sf.kind = 'dry';
+      sf.grip = 1;
+      sf.drag = 0;
+      sf.steer = 1;
+    }
+    car.surfaceGrip = (this.offroad ? VERGE_GRIP : 1) * sf.grip;
+    car.surfaceDrag = (this.offroad ? VERGE_DRAG : 0) + sf.drag;
+    car.steerAuthority = sf.steer;
 
     const sh = Math.sin(st.heading);
     const ch = Math.cos(st.heading);

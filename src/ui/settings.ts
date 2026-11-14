@@ -2,6 +2,7 @@ import type { AudioBus } from '../audio/audioBus';
 import type { Engine } from '../core/engine';
 import { applyQuality } from '../core/quality';
 import type { Quality, SaveStore } from '../core/save';
+import { LEVELS, type PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
 import { button, h } from './uiKit';
 
@@ -11,6 +12,8 @@ export interface SettingsDeps {
   engine: Engine;
   voice: Voice;
   auto: { enabled: boolean };
+  /** Receives the weather physics level. */
+  game: { physicsLevel: PhysicsLevel };
   onBack: () => void;
 }
 
@@ -22,6 +25,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   applyQuality(d.engine, s.quality);
   d.voice.enabled = s.voice;
   d.auto.enabled = s.autoQuality;
+  d.game.physicsLevel = s.weatherPhysics;
 }
 
 export function buildSettings(d: SettingsDeps): HTMLElement {
@@ -91,6 +95,29 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     q.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.textContent === s.quality));
   };
   refresh();
-  root.append(vol, mute, voice, q, auto, button('Back', d.onBack));
+  const wp = h('div', 'rb-row', '<span style="width:90px">Rain / snow physics</span>');
+  const hint = h('div', 'rb-sub', '');
+  const HINT: Record<PhysicsLevel, string> = {
+    NORMAL: 'Rain 72% grip, snow 45%.',
+    AGGRESSIVE: 'Rain 60%, snow 34%, puddles, snow banks, ice, a loose tail.',
+    EXTREME: 'Rain 50%, snow 26%. Brutal. Hold on.',
+  };
+  for (const lv of LEVELS) {
+    const b = button(lv.toLowerCase(), () => {
+      s.weatherPhysics = lv;
+      applySettings(d);
+      d.store.commit();
+      refreshWp();
+    });
+    b.dataset.lv = lv;
+    b.style.minWidth = '100px';
+    wp.append(b);
+  }
+  const refreshWp = (): void => {
+    wp.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.weatherPhysics));
+    hint.textContent = HINT[s.weatherPhysics];
+  };
+  refreshWp();
+  root.append(vol, mute, voice, wp, hint, q, auto, button('Back', d.onBack));
   return root;
 }

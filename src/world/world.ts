@@ -1,7 +1,8 @@
 import { DirectionalLight, Group, HemisphereLight, type Scene, type Texture, type WebGLRenderer } from 'three';
 import { qualityNow } from '../core/quality';
-import { ObstacleField } from '../physics/obstacles';
-import type { WeatherProfile } from '../types/game';
+import type { ObstacleField } from '../physics/obstacles';
+import { SurfaceMap } from '../physics/surfaces';
+import type { Weather, WeatherProfile } from '../types/game';
 import { buildDock } from './dock';
 import { buildNeonEnvMap } from './envMap';
 import { buildFacades } from './facades';
@@ -12,6 +13,7 @@ import { buildStage } from './stage';
 import { layoutProps } from './propsLayout';
 import { RoadMirror } from './roadMirror';
 import { instanceProp, loadPropModel } from './propModels';
+import { SurfaceVisuals } from './surfaceVisuals';
 import { Steam } from './steam';
 import type { Track } from './track';
 import { buildTrackMeshes } from './trackMesh';
@@ -24,9 +26,13 @@ export interface World {
   env: Texture;
   /** Parked cars as collision circles; hand to every TrackContact. */
   obstacles: ObstacleField;
+  /** Rain puddles, snow banks and ice shared by every car. */
+  surfaces: SurfaceMap;
   /** Re-skin the world for a weather profile (road gloss, snow tint, light pools). */
   setWeather(p: WeatherProfile): void;
   /** Per display frame: animated bits (steam vents). */
+  /** Refresh puddle / snow bank / ice visuals (after a reseed or weather change). */
+  syncSurfaces(weather: Weather): void;
   /** Swap in optional prop GLBs (public/models/props) where present. Safe to call once after build. */
   applyPropModels(): Promise<void>;
   update(dt: number, camX: number, camZ: number, viewportPx: number): void;
@@ -40,12 +46,14 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
   const furniture = buildFurniture(track, facades.height);
   const dock = buildDock(track);
   const layout = layoutProps(track);
+  const surfaces = new SurfaceMap(track);
   const env = buildNeonEnvMap(renderer);
   const root = new Group();
   root.add(meshes.group, facades.group, furniture.group, dock.group, buildTunnel(track), buildBridge(track), buildProps(layout, PLAZA), buildStage(env));
   const moon = new DirectionalLight(0x8fa4ff, 0.7);
   moon.position.set(-60, 90, -40);
   scene.add(root, new HemisphereLight(0x3a4a8a, 0x0a0a12, 0.9), moon);
+  const visuals = new SurfaceVisuals(track, surfaces, root, env);
   const steam = new Steam(scene, layout.vents);
   const mirror = new RoadMirror(scene, meshes.roadMat);
   let wet = false;
@@ -54,7 +62,8 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
     waterMat: dock.waterMat, poolMat: furniture.poolMat, streakMat: furniture.streakMat, shaftMat: furniture.shaftMat, glowMat: furniture.glowMat, env,
   };
   return {
-    track, root, env, obstacles: layout.obstacles,
+    track, root, env, obstacles: layout.obstacles, surfaces,
+    syncSurfaces: (w) => visuals.sync(w),
     setWeather: (p) => {
       wet = p.name === 'RAIN';
       applyWorldLook(targets, p);

@@ -4,6 +4,7 @@ import { createIntroShots } from '../camera/shots';
 import { RaceManager, type RaceResult, type Racer } from '../core/raceManager';
 import type { CarSpec } from '../data/cars';
 import { applyTuning } from '../physics/carTuning';
+import { fillEnv, LEVELS, type PhysicsEnv, type PhysicsLevel } from '../physics/weatherLevels';
 import type { CarInput, CarState, GameState, RaceTelemetry, Weather } from '../types/game';
 import { createNeutralInput } from '../types/game';
 import type { ResultsExtra } from '../ui/results';
@@ -20,6 +21,9 @@ export class Game {
   weather: Weather = 'CLEAR';
   /** 0..1: rain and snow ramp in over about 20 s after a weather change. */
   weatherIntensity = 1;
+  /** Physics level for rain and snow (setting). */
+  physicsLevel: PhysicsLevel = 'AGGRESSIVE';
+  private readonly env: PhysicsEnv = fillEnv({ name: 'CLEAR', grip: 1, fogDensity: 0, fogColor: 0, precipitation: 0, roadRoughness: 0, level: 'AGGRESSIVE', yawDampMul: 1, assistMul: 1, rearGripMul: 1, intensity: 1 }, 'CLEAR', 'AGGRESSIVE');
   rm: RaceManager;
   readonly chase: ChaseCam;
   readonly views: RacerViews;
@@ -43,7 +47,7 @@ export class Game {
 
   constructor(d: GameDeps) {
     this.d = d;
-    this.rm = new RaceManager(d.world.track, 3, d.world.obstacles);
+    this.rm = new RaceManager(d.world.track, 3, d.world.obstacles, d.world.surfaces);
     this.chase = new ChaseCam(d.engine.camera);
     this.chase.setTarget(this.view);
     this.views = new RacerViews(d.engine.scene, d.world.env);
@@ -57,22 +61,28 @@ export class Game {
 
   setWeather(w: Weather): void {
     this.weather = w;
+    if (this.state === 'RACING' || this.state === 'CINEMATIC') this.weatherIntensity = w === 'CLEAR' ? 1 : 0.2; // build-up restarts
     applyWeather(this.d.engine, this.d.hud, this.d.world, w);
+    this.d.world.surfaces.setConditions(w, this.physicsLevel, this.weatherIntensity);
+    this.d.world.syncSurfaces(w);
   }
 
   startRace(s: RaceSetup): void {
     this.setup = s;
     this.d.results.hide();
     this.views.clear();
-    this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles);
+    this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles, this.d.world.surfaces);
     applyTuning(this.d.tuning, s.car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
     // views in racer order so index lines up
     this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint)));
     this.setWeather(s.weather);
+    this.weatherIntensity = s.weather === 'CLEAR' ? 1 : 0.25; // rain and snow build up over ~20 s
     this.plan = s.weatherChange ?? null;
-    this.rm.place();
+    this.rm.place((Math.random() * 65535) | 0);
+    this.d.world.surfaces.setConditions(this.weather, this.physicsLevel, this.weatherIntensity);
+    this.d.world.syncSurfaces(this.weather);
     this.views.update(0, 0);
     this.syncView();
     this.chase.setTarget(this.view);
@@ -97,7 +107,7 @@ export class Game {
     this.state = 'MENU';
     this.d.results.hide();
     this.views.clear();
-    this.rm = new RaceManager(this.d.world.track, 3, this.d.world.obstacles);
+    this.rm = new RaceManager(this.d.world.track, 3, this.d.world.obstacles, this.d.world.surfaces);
     applyTuning(this.d.tuning, car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     this.views.add(this.rm.player, car, paint, glow);
@@ -146,7 +156,9 @@ export class Game {
     if (this.state === 'CINEMATIC' || this.state === 'MENU') return;
     this.d.input.sample(this.ctl);
     const was = this.rm.phase;
-    this.rm.step(dt, this.ctl, this.weather);
+    this.weatherIntensity = Math.min(1, this.weatherIntensity + dt / 20);
+    this.d.world.surfaces.setConditions(this.weather, this.physicsLevel, this.weatherIntensity);
+    this.rm.step(dt, this.ctl, fillEnv(this.env, this.weather, this.physicsLevel, this.weatherIntensity));
     if (this.plan && this.rm.phase === 'RACING' && this.rm.raceTime > this.plan.at) {
       const to = this.plan.to;
       this.plan = null;
@@ -176,6 +188,7 @@ export class Game {
   };
 
   private readonly frame = (alpha: number, frameDt: number): void => {
+    this.views.rollScale = this.weather === 'CLEAR' ? 1 : 1.3 + 0.35 * LEVELS.indexOf(this.physicsLevel);
     this.views.update(alpha, frameDt);
     this.syncView();
     if (this.state === 'MENU') {

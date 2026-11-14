@@ -4,8 +4,10 @@ import type { CarTuning } from '../physics/carTuning';
 import type { ObstacleField } from '../physics/obstacles';
 import { TrackContact } from '../physics/trackContact';
 import { WEATHER } from '../physics/weather';
+import type { PhysicsEnv } from '../physics/weatherLevels';
+import type { SurfaceMap } from '../physics/surfaces';
 import type { Track } from '../world/track';
-import type { AIRacerAgent, AIWorldView, CarInput, CarState, RaceTelemetry, Weather } from '../types/game';
+import type { AIRacerAgent, AIWorldView, CarInput, CarState, RaceTelemetry, Weather, WeatherProfile } from '../types/game';
 import { createNeutralInput } from '../types/game';
 import { LapCounter } from './lapCounter';
 import { buildResult, positionOf, type RaceResult, type Racer } from './raceResult';
@@ -38,11 +40,13 @@ export class RaceManager {
   private readonly view: AIWorldView;
   private readonly track: Track;
   private readonly obstacles: ObstacleField | null;
+  private readonly surfaces: SurfaceMap | null;
   private playerIdx = 0;
 
-  constructor(track: Track, totalLaps = 3, obstacles: ObstacleField | null = null) {
+  constructor(track: Track, totalLaps = 3, obstacles: ObstacleField | null = null, surfaces: SurfaceMap | null = null) {
     this.track = track;
     this.obstacles = obstacles;
+    this.surfaces = surfaces;
     this.totalLaps = totalLaps;
     this.view = { track: track.samples, racers: this.states, playerIndex: 0, grip: 1 };
   }
@@ -56,6 +60,7 @@ export class RaceManager {
     const car = new CarController(tuning);
     const contact = new TrackContact(this.track);
     contact.obstacles = this.obstacles;
+    contact.surfaces = this.surfaces;
     const r: Racer = {
       id, name, isPlayer, car, contact, laps: new LapCounter(this.track), agent,
       input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0,
@@ -70,7 +75,8 @@ export class RaceManager {
   }
 
   /** Reset everyone onto the grid (player last). The countdown does not run yet: see begin(). */
-  place(): void {
+  place(seed = 1): void {
+    this.surfaces?.reseed(seed);
     const n = this.track.samples.length;
     const order = this.racers.filter((r) => !r.isPlayer);
     order.push(...this.racers.filter((r) => r.isPlayer));
@@ -111,10 +117,11 @@ export class RaceManager {
     return '';
   }
 
-  step(dt: number, playerInput: CarInput, weather: Weather): void {
+  /** `weather` is a name (full-strength profile) or a ready physics environment (level, ramp-in). */
+  step(dt: number, playerInput: CarInput, weather: Weather | WeatherProfile | PhysicsEnv): void {
     this.carImpact = 0;
     if (this.phase === 'GRID') return;
-    const w = WEATHER[weather];
+    const w = typeof weather === 'string' ? WEATHER[weather] : weather;
     this.view.grip = w.grip;
     if (this.phase === 'COUNTDOWN') {
       this.countdown -= dt;

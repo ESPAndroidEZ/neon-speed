@@ -19,6 +19,8 @@ export interface RacerView {
 /** One visual car per racer, posed by interpolating the physics state between fixed steps. */
 export class RacerViews {
   readonly views: RacerView[] = [];
+  /** Body roll and pitch exaggeration (bad weather makes the cars lean and dive more). */
+  rollScale = 1;
   /** Fired after a GLB replaces a procedural body (the garage re-applies calibration state). */
   onSwap: ((v: RacerView) => void) | null = null;
   private readonly scene: Scene;
@@ -73,7 +75,7 @@ export class RacerViews {
       v.holder.position.set(v.x, 0, v.z);
       v.holder.rotation.y = v.heading;
       const inp = v.racer.input;
-      v.visual.update(frameDt, car.state.speed, inp.steer, inp.brake > 0.1 && car.state.speed > 1, v.longAccel, car.lateralAccel);
+      v.visual.update(frameDt, car.state.speed, inp.steer, inp.brake > 0.1 && car.state.speed > 1, v.longAccel * this.rollScale, car.lateralAccel * this.rollScale);
     }
   }
 }

@@ -7,6 +7,7 @@ import type { Weather } from '../types/game';
 import type { CarVisual } from '../world/proceduralCar';
 import type { StoryEvent } from '../data/story';
 import { buildStoryMenu, buildEnding } from './storyMenu';
+import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
@@ -18,6 +19,7 @@ export interface MenuDeps {
   engine: Engine;
   voice: Voice;
   auto: { enabled: boolean };
+  game: { physicsLevel: PhysicsLevel };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
   /** Slide the showroom car sideways on screen (garage panel sits on the left). */
@@ -141,6 +143,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, onBack: () => this.main() }), 'other');
   }
 }

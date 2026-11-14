@@ -1,5 +1,6 @@
 import { clamp, lerp, smoothstep, wrapAngle } from '../core/math';
 import type { CarInput, CarState, RaceTelemetry, Vec3, WeatherProfile } from '../types/game';
+import type { PhysicsEnv } from './weatherLevels';
 import type { CarTuning } from './carTuning';
 import { DriftScorer } from './driftScorer';
 import { Drivetrain } from './drivetrain';
@@ -35,6 +36,8 @@ export class CarController {
   /** Set by the world each step: tyre grip multiplier (verge/grass < 1) and extra drag (1/s). */
   surfaceGrip = 1;
   surfaceDrag = 0;
+  /** 0..1 front-tyre steering authority (hydroplaning in puddles). */
+  steerAuthority = 1;
 
   private readonly t: CarTuning;
   private u = 0;
@@ -63,11 +66,12 @@ export class CarController {
     this.drift.reset();
     this.surfaceGrip = 1;
     this.surfaceDrag = 0;
+    this.steerAuthority = 1;
     this.drivetrain.reset();
     this.publish();
   }
 
-  step(dt: number, input: CarInput, weather: WeatherProfile): void {
+  step(dt: number, input: CarInput, weather: WeatherProfile | PhysicsEnv): void {
     const t = this.t;
     const s = this.state;
     const dtn = this.drivetrain;
@@ -78,6 +82,10 @@ export class CarController {
 
     const { u, v, r } = this;
     const g = weather.grip * this.surfaceGrip;
+    const env = weather as Partial<PhysicsEnv>;
+    const yawMul = env.yawDampMul ?? 1;
+    const assistMul = env.assistMul ?? 1;
+    const rearMul = env.rearGripMul ?? 1;
     const absU = Math.abs(u);
     const dir = u >= 0 ? 1 : -1;
     const wheelbase = t.cgToFront + t.cgToRear;
@@ -89,14 +97,14 @@ export class CarController {
     // Steering: less lock at speed, plus auto counter-steer when the stick is released mid-slide.
     const lock = lerp(1, t.minSteerScale, smoothstep(5, t.steerFalloffSpeed, absU));
     const beta = Math.atan2(v, slipDen);
-    const assist = t.driftAssist * smoothstep(3, 9, u) * (1 - Math.abs(input.steer));
-    const delta = input.steer * t.maxSteer * lock + assist * clamp(beta, -0.6, 0.6);
+    const assist = t.driftAssist * assistMul * smoothstep(3, 9, u) * (1 - Math.abs(input.steer));
+    const delta = input.steer * t.maxSteer * lock * this.steerAuthority + assist * clamp(beta, -0.6, 0.6);
 
     // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
     this.hbFactor = lerp(this.hbFactor, input.handbrake ? t.handbrakeGrip : 1, Math.min(1, dt * (input.handbrake ? 14 : 3)));
 
     // Rear axle: drive force is capped by traction, and what it uses is taken from sideways grip.
-    const muR = t.gripRear * g * this.hbFactor;
+    const muR = t.gripRear * g * this.hbFactor * rearMul;
     const tractionLimit = muR * fzR;
     const wanted = dtn.driveForce;
     const fxDrive = clamp(wanted, -tractionLimit, tractionLimit);
@@ -120,7 +128,7 @@ export class CarController {
 
     const du = (fxDrive + fBrake + fHand + fDrag + fRoll + fScrub) / t.mass + v * r;
     const dv = (fyF * cd + fyR) / t.mass - u * r;
-    const dr = (t.cgToFront * fyF * cd - t.cgToRear * fyR - t.yawDamping * r) / t.inertia;
+    const dr = (t.cgToFront * fyF * cd - t.cgToRear * fyR - t.yawDamping * yawMul * r) / t.inertia;
     this.u += du * dt;
     this.v += dv * dt;
     this.r += dr * dt;

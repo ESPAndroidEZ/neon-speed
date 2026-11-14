@@ -62,7 +62,7 @@ auto.onDowngrade = (tier) => {
   toast(`Frame rate was low: graphics lowered to ${tier.toUpperCase()}. (Settings: Auto quality)`);
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
-applySettings({ store, audio: audio.bus, engine, voice, auto });
+applySettings({ store, audio: audio.bus, engine, voice, auto, game });
 void world.applyPropModels();
 
 const panel = new TuningPanel(document.body);
@@ -76,7 +76,7 @@ const launchFree = (w: Weather, rivals: number): void => {
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: false, agents: freeRaceField(rivals) });
 };
 menu = new Menu({
-  store, audio: audio.bus, engine, voice, auto,
+  store, audio: audio.bus, engine, voice, auto, game,
   showroom: (c, p, g) => game.showroom(c, p, g),
   shift: (m) => {
     game.showroomCam.shift = m;

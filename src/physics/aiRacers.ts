@@ -67,7 +67,7 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
   function buildProfile(track: readonly TrackSample[], grip: number): void {
     const { k, ds } = curvatureOf(track);
     const n = track.length;
-    const aLat = (7.4 + 5.2 * sk) * grip * confidence;
+    const aLat = (7.4 + 5.2 * sk) * grip * confidence * Math.min(1, 0.55 + 0.6 * grip); // extra margin when grip is very low
     const aBrake = (6.5 + 3.5 * sk) * Math.max(0.5, grip);
     const aAccel = (4.5 + 2.5 * sk) * Math.max(0.6, grip);
     if (!profile || profile.length !== n) profile = new Float32Array(n);
@@ -117,7 +117,11 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       hint = nearest(track, self.position.x, self.position.z, hint);
       // the profile is recomputed when the weather grip or the driver's confidence changed noticeably
       const slid = Math.abs(self.slipAngle) > 0.3 && Math.abs(speed) > 8;
-      confidence = slid ? Math.max(0.65, confidence - dt * 0.6) : Math.min(1, confidence + dt * 0.05);
+      // lateral offset from the centre line: running wide means the front tyres are not turning the car (understeer)
+      const tp = track[hint];
+      const lat = (self.position.x - tp.position.x) * tp.tangent.z - (self.position.z - tp.position.z) * tp.tangent.x;
+      const wide = Math.abs(lat) > tp.width / 2 - 1.8 && Math.abs(speed) > 4;
+      confidence = slid || wide ? Math.max(0.5, confidence - dt * 0.6) : Math.min(1, confidence + dt * 0.05);
       if (!profile || Math.abs(profileGrip - world.grip * confidence) > 0.03) buildProfile(track, world.grip * confidence);
       if (!profile) return out;
 
@@ -130,7 +134,7 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
         const lap = n * ds;
         const diff = ((((hint - playerHint) * ds + lap / 2) % lap) + lap) % lap - lap / 2; // metres ahead of the player (negative = behind)
         const band = diff < 0 ? Math.min(1, -diff / 150) * 0.06 : -Math.min(1, diff / 200) * 0.08;
-        pace += band * (0.4 + 0.6 * sk);
+        pace += band * (0.4 + 0.6 * sk) * Math.min(1, world.grip + 0.2); // weaker help when the road is slick
       }
 
       // spread away from a car just ahead
@@ -177,8 +181,9 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       // unstick: if the car sits (or has been pinned) for a while, reverse away from the wall, then drive on
       stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
       if (stuckFor > 1.2) {
-        reverseFor = 1.3;
+        reverseFor = 2;
         stuckFor = 0;
+        confidence = Math.max(0.5, confidence - 0.15);
       }
       if (reverseFor > 0) {
         reverseFor -= dt;
