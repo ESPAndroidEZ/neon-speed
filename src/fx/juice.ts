@@ -149,6 +149,7 @@ export class Juice {
     this.wasNitro = nitro;
     const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? 0.4 : 0);
     this.streak = damp(this.streak, target, 3, dt);
+    this.post.width = this.engine.renderer.domElement.width;
     this.post.update(dt, this.streak);
   }
 }

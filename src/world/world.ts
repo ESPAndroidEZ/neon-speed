@@ -4,7 +4,10 @@ import { findTrackDef, buildTrack, type TrackDef } from '../data/tracks';
 import type { ObstacleField } from '../physics/obstacles';
 import { SurfaceMap } from '../physics/surfaces';
 import type { Weather, WeatherProfile } from '../types/game';
+import { look } from '../core/looks';
+import { paletteOf } from '../data/palettes';
 import { buildNeonEnvMap } from './envMap';
+import { buildSky } from './sky';
 import { instanceProp, loadPropModel } from './propModels';
 import { layoutProps } from './propsLayout';
 import { RedHandWall } from './redHandWall';
@@ -51,7 +54,11 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const moon = new DirectionalLight(0x8fa4ff, open ? 1.6 : 0.7);
   moon.position.set(-60, 90, -40);
   const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : 0.9);
-  scene.add(root, hemi, moon);
+  const pal = paletteOf(def.id);
+  const sky = buildSky(pal);
+  sky.setLook(look, pal);
+  let clock = 0;
+  scene.add(root, hemi, moon, sky.group);
   const visuals = new SurfaceVisuals(track, surfaces, root, env);
   const wall = new RedHandWall(track);
   root.add(wall.mesh);
@@ -69,6 +76,7 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
     setHandprints: (n) => wall.setHandprints(n),
     setWeather: (p) => {
       wet = p.name === 'RAIN';
+      sky.setLook(look, pal);
       applyWorldLook(targets, p);
     },
     applyPropModels: async () => {
@@ -92,10 +100,13 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
       }
       mirror.setActive(q.mirror && wet && def.theme !== 'cliff');
       steam.update(dt, x, z, px);
+      clock += dt;
+      sky.update(x, z, clock);
     },
     dispose: () => {
       mirror.setActive(false);
-      scene.remove(root, hemi, moon);
+      scene.remove(root, hemi, moon, sky.group);
+      sky.dispose();
       root.traverse((o) => {
         const m = o as Mesh;
         m.geometry?.dispose();

@@ -15,14 +15,16 @@ export interface QualityParams {
   mirror: boolean;
   /** Pooled headlight spot lights (0, 1 or 2). */
   spotLights: number;
+  /** Anamorphic light streaks in the final pass (14 extra taps). */
+  streaks: boolean;
   /** Multiplier on particle budgets and emission rates. */
   particles: number;
 }
 
 const TIERS: Record<Quality, QualityParams> = {
-  low: { pixelRatio: 1, bloom: false, bloomStrength: 0.5, fx: false, shafts: false, mirror: false, spotLights: 0, particles: 0.5 },
-  medium: { pixelRatio: 1.5, bloom: true, bloomStrength: 0.65, fx: true, shafts: true, mirror: false, spotLights: 1, particles: 0.8 },
-  high: { pixelRatio: 2, bloom: true, bloomStrength: 0.85, fx: true, shafts: true, mirror: true, spotLights: 2, particles: 1 },
+  low: { pixelRatio: 1, bloom: false, bloomStrength: 0.5, fx: false, shafts: false, mirror: false, streaks: false, spotLights: 0, particles: 0.5 },
+  medium: { pixelRatio: 1.5, bloom: true, bloomStrength: 0.65, fx: true, shafts: true, mirror: false, streaks: false, spotLights: 1, particles: 0.8 },
+  high: { pixelRatio: 2, bloom: true, bloomStrength: 0.85, fx: true, shafts: true, mirror: true, streaks: true, spotLights: 2, particles: 1 },
 };
 
 let current: Quality = 'high';

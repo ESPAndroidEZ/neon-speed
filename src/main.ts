@@ -83,8 +83,15 @@ auto.onDowngrade = (tier) => {
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
 applySettings({ store, audio: audio.bus, engine, voice, auto, game });
-const applyDriving = (): void => applyDrivingSettings(store, pad);
+const applyDriving = (): void => {
+  applyDrivingSettings(store, pad);
+  game.setWeather(game.weather); // re-grade for the chosen look
+};
 applyDriving();
+if (q.get('look')) {
+  store.data.settings.look = q.get('look') as 'neon';
+  applyDriving();
+}
 void world.applyPropModels();
 
 new AudioTestPanel(document.body, audio);

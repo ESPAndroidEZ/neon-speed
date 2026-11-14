@@ -1,3 +1,4 @@
+import type { LookId } from './looks';
 import type { Difficulty } from '../physics/aiDifficulty';
 import type { AssistLevel } from '../physics/assists';
 import type { PhysicsLevel } from '../physics/weatherLevels';
@@ -19,7 +20,7 @@ export interface SaveData {
   bestLap: Record<Weather, number | null>;
   /** Best race time (seconds) per map and weather, key `trackId:WEATHER`; `trackId:drift` holds the best drift score. */
   trackBest: Record<string, number>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId };
   races: number;
   career: CareerState;
 }
@@ -42,7 +43,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
   trackBest: {},
-  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET' },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon' },
   races: 0,
   career: defaultCareer(),
 });
@@ -92,6 +93,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;
   out.settings.steerSens = num(s.steerSens, 1, 0.6, 1.4);
   out.settings.rumble = s.rumble !== false;
+  if (s.look === 'neon' || s.look === 'dusk' || s.look === 'grit') out.settings.look = s.look;
   if (s.difficulty === 'ROOKIE' || s.difficulty === 'STREET' || s.difficulty === 'PRO' || s.difficulty === 'LEGEND') out.settings.difficulty = s.difficulty;
   out.settings.padDeadzone = num(s.padDeadzone, 0.12, 0.02, 0.4);
   const cr = (j.career ?? {}) as Record<string, unknown>;

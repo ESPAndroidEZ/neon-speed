@@ -1,4 +1,5 @@
 import type { SaveStore } from '../core/save';
+import { LOOK_IDS, LOOKS, setLook } from '../core/looks';
 import { storyComplete } from '../core/career';
 import { AI_SETTING, DIFFICULTIES, type Difficulty } from '../physics/aiDifficulty';
 import { DRIVING, type AssistLevel } from '../physics/assists';
@@ -15,6 +16,7 @@ export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number;
   const s = store.data.settings;
   DRIVING.level = s.assist;
   DRIVING.sens = s.steerSens;
+  setLook(s.look);
   AI_SETTING.level = s.difficulty === 'LEGEND' && !storyComplete(store.data.career) ? 'STREET' : s.difficulty;
   if (pad) {
     pad.deadZone = s.padDeadzone;
@@ -46,6 +48,19 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
     assist.append(b);
   }
   refresh();
+  const lookRow = h('div', 'rb-row', '<span style="width:90px">Look</span>');
+  const refreshLook = (): void => lookRow.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.look));
+  for (const id of LOOK_IDS) {
+    const b = button(LOOKS[id].name.toLowerCase(), () => {
+      s.look = id;
+      save();
+      refreshLook();
+    });
+    b.dataset.lv = id;
+    b.style.minWidth = '130px';
+    lookRow.append(b);
+  }
+  refreshLook();
   const diff = h('div', 'rb-row', '<span style="width:90px">Opponents</span>');
   const diffHint = h('div', 'rb-sub', '');
   const DIFF_HINT: Record<Difficulty, string> = { ROOKIE: 'Gentler rivals who make mistakes and help you catch up.', STREET: 'The default field.', PRO: 'Cleaner, braver, defend their line.', LEGEND: 'No mistakes, no rubber band. Unlocked after the story.' };
@@ -92,5 +107,5 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
     save();
   });
   rumble.append(box);
-  return [assist, hint, diff, diffHint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
+  return [lookRow, assist, hint, diff, diffHint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
 }
