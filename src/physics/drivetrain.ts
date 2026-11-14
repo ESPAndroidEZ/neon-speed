@@ -1,4 +1,5 @@
-import { clamp } from '../core/math';
+import { clamp, smoothstep } from '../core/math';
+import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventChannel } from './driveEvents';
 import { GEAR_RATIOS, REVERSE_RATIO, type CarTuning } from './carTuning';
 
 const RAD_S_TO_RPM = 60 / (2 * Math.PI);
@@ -15,7 +16,13 @@ export class Drivetrain {
   driveForce = 0;
   /** 0..1 service-brake demand from the last update (accounts for reverse). */
   brakeCmd = 0;
+  /** Turbo boost 0..1 (always 0 for naturally aspirated cars). */
+  boost = 0;
+  readonly events = new EventChannel();
   private shiftTimer = 0;
+  private lastPedal = 0;
+  private wasCut = false;
+  private popClock = 0;
   private readonly t: CarTuning;
 
   constructor(t: CarTuning) {
@@ -31,6 +38,10 @@ export class Drivetrain {
     this.driveForce = 0;
     this.brakeCmd = 0;
     this.shiftTimer = 0;
+    this.boost = 0;
+    this.lastPedal = 0;
+    this.wasCut = false;
+    this.events.clear();
   }
 
   /** u = signed forward speed (m/s). */
@@ -53,9 +64,12 @@ export class Drivetrain {
       if (this.rpm > t.redlineRpm * t.upshiftFrac && this.gear < GEAR_RATIOS.length && pedal > 0.15) {
         this.gear++;
         this.shiftTimer = t.shiftTime;
+        this.events.push(EV_UPSHIFT, this.boost);
+        if (this.rpm > t.redlineRpm * 0.7) this.events.push(EV_BACKFIRE, 0.4 + 0.5 * this.boost);
       } else if (this.rpm < t.redlineRpm * t.downshiftFrac && this.gear > 1) {
         this.gear--;
         this.shiftTimer = t.shiftTime * 0.5;
+        this.events.push(EV_DOWNSHIFT, 0);
       }
     }
 
@@ -63,10 +77,30 @@ export class Drivetrain {
     this.nitroActive = wantNitro;
     if (wantNitro) this.nitroLevel = Math.max(0, this.nitroLevel - t.nitroBurnPerSec * dt);
 
+    // Turbo: boost builds with throttle x rpm after a lag and drops quickly when the pedal lifts or the shift cuts power.
+    if (t.turboTorque > 0) {
+      const want = this.shiftTimer > 0 ? 0 : pedal * smoothstep(t.turboRpm, t.turboRpm + 1800, this.rpm);
+      const tc = want > this.boost ? t.turboLag : 0.22;
+      this.boost = clamp(this.boost + ((want - this.boost) * dt) / tc, 0, 1);
+      if (this.lastPedal > 0.6 && pedal < 0.25 && this.boost > 0.2 && this.shiftTimer <= 0) this.events.push(EV_LIFT, this.boost);
+    } else if (this.lastPedal > 0.6 && pedal < 0.2) this.events.push(EV_LIFT, 0);
+    this.lastPedal = pedal;
+    // deceleration burble: small pops while coasting at high rpm
+    if (pedal < 0.05 && this.rpm > t.redlineRpm * 0.55 && Math.abs(u) > 8) {
+      this.popClock += dt;
+      if (this.popClock > 0.13) {
+        this.popClock = 0;
+        this.events.push(EV_BACKFIRE, 0.25);
+      }
+    }
     const x = (this.rpm - t.peakRpm) / t.torqueWidth;
     let torque = t.engineTorque * Math.max(0.3, 1 - x * x) * pedal;
     if (wantNitro) torque *= t.nitroTorqueMul;
-    const cut = this.shiftTimer > 0 || this.rpm >= t.redlineRpm;
+    torque *= 1 + t.turboTorque * this.boost;
+    const limiter = this.rpm >= t.redlineRpm;
+    if (limiter && !this.wasCut) this.events.push(EV_CUT, 1);
+    this.wasCut = limiter;
+    const cut = this.shiftTimer > 0 || limiter;
     let force = cut ? 0 : (torque * ratio * t.driveEfficiency) / t.wheelRadius;
     if (reversing) force = u < -MAX_REVERSE_SPEED ? 0 : -force;
     this.driveForce = force;

@@ -39,6 +39,12 @@ export interface CarTuning {
   nitroTorqueMul: number;
   nitroBurnPerSec: number;
   nitroDriftRefillPerSec: number;
+  /** Turbo: extra torque multiplier at full boost (0 = naturally aspirated). */
+  turboTorque: number;
+  /** Seconds to spool from idle to full boost. */
+  turboLag: number;
+  /** Rpm above which the turbo starts to build boost. */
+  turboRpm: number;
 }
 
 export const GEAR_RATIOS: readonly number[] = [3.6, 2.2, 1.55, 1.2, 0.97, 0.8];
@@ -78,6 +84,9 @@ export function createDefaultTuning(): CarTuning {
     nitroTorqueMul: 1.55,
     nitroBurnPerSec: 0.22,
     nitroDriftRefillPerSec: 0.12,
+    turboTorque: 0,
+    turboLag: 0.6,
+    turboRpm: 2800,
   };
 }
 

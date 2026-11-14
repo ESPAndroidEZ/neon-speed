@@ -48,7 +48,7 @@ let menu: Menu;
 let story: StoryController;
 const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
 const game = new Game({ engine, world, hud, results, input, tuning });
-new Juice(engine, game);
+const juice = new Juice(engine, game);
 const audio = new AudioManager(game);
 engine.onFrame((_a, dt) => {
   audio.update(dt);
@@ -110,6 +110,7 @@ container.addEventListener('pointerdown', () => game.skipIntro());
 window.addEventListener('keydown', (e) => {
   if (e.repeat || game.state === 'MENU') return;
   if (e.code === 'KeyR') game.resetToTrack();
+  else if (e.code === 'KeyP') toast(juice.toggleShowcase() ? 'Particle showcase ON (P)' : 'Particle showcase off');
   else if (e.code === 'Digit1') game.setWeather('CLEAR');
   else if (e.code === 'Digit2') game.setWeather('RAIN');
   else if (e.code === 'Digit3') game.setWeather('SNOW');
@@ -131,6 +132,7 @@ if (direct) {
     game.rm.player.contact.place(game.rm.player.car, Math.max(0, idx));
     game.views.update(0, 0);
   }
+  if (q.has('showcase')) juice.toggleShowcase();
   if (q.has('ff')) game.fastForward(Number(q.get('ff')));
 } else {
   if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car

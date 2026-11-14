@@ -18,6 +18,8 @@ import { ShowroomCam } from './showroomCam';
 export class Game {
   state: GameState = 'MENU';
   weather: Weather = 'CLEAR';
+  /** 0..1: rain and snow ramp in over about 20 s after a weather change. */
+  weatherIntensity = 1;
   rm: RaceManager;
   readonly chase: ChaseCam;
   readonly views: RacerViews;

@@ -1,33 +1,37 @@
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial, type Scene } from 'three';
 
-const WIDTH = 0.28;
+const WIDTH = 0.3;
+/** Seconds a mark takes to fade out completely. */
+export const SKID_LIFE = 28;
 
-/** Ring buffer of dark quads laid on the road behind sliding tyres. One mesh, no per-frame allocation. */
+/** Ring buffer of dark quads laid behind sliding tyres; each fades with age in the shader. No per-frame allocation. */
 export class SkidMarks {
   readonly mesh: Mesh;
   private readonly pos: Float32Array;
-  private readonly alpha: Float32Array;
+  private readonly strength: Float32Array;
+  private readonly birth: Float32Array;
   private readonly geo = new BufferGeometry();
   private readonly max: number;
+  private readonly uTime = { value: 0 };
   private head = 0;
   private dirty = false;
+  private now = 0;
 
-  constructor(scene: Scene, maxQuads = 1800) {
+  constructor(scene: Scene, maxQuads = 2200) {
     this.max = maxQuads;
-    this.pos = new Float32Array(maxQuads * 4 * 3);
-    this.alpha = new Float32Array(maxQuads * 4);
+    this.pos = new Float32Array(maxQuads * 12);
+    this.strength = new Float32Array(maxQuads * 4);
+    this.birth = new Float32Array(maxQuads * 4).fill(-1e6);
     const idx = new Uint32Array(maxQuads * 6);
-    for (let q = 0; q < maxQuads; q++) {
-      const v = q * 4;
-      idx.set([v, v + 1, v + 2, v + 1, v + 3, v + 2], q * 6);
-    }
+    for (let q = 0; q < maxQuads; q++) idx.set([q * 4, q * 4 + 1, q * 4 + 2, q * 4 + 1, q * 4 + 3, q * 4 + 2], q * 6);
     this.geo.setAttribute('position', new BufferAttribute(this.pos, 3));
-    this.geo.setAttribute('alpha', new BufferAttribute(this.alpha, 1));
+    this.geo.setAttribute('strength', new BufferAttribute(this.strength, 1));
+    this.geo.setAttribute('birth', new BufferAttribute(this.birth, 1));
     this.geo.setIndex(new BufferAttribute(idx, 1));
-    const mat = new MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
-    // per-quad fade via vertex alpha, injected into the standard basic shader
+    const mat = new MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.85, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
     mat.onBeforeCompile = (sh) => {
-      sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute float alpha; varying float vA;\nvoid main() { vA = alpha;');
+      sh.uniforms.uTime = this.uTime;
+      sh.vertexShader = sh.vertexShader.replace('void main() {', 'attribute float strength; attribute float birth; uniform float uTime; varying float vA;\nvoid main() { vA = strength * clamp(1.0 - (uTime - birth) / ' + SKID_LIFE.toFixed(1) + ', 0.0, 1.0);');
       sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'varying float vA;\nvoid main() {').replace('#include <opaque_fragment>', '#include <opaque_fragment>\n gl_FragColor.a *= vA;');
     };
     this.mesh = new Mesh(this.geo, mat);
@@ -51,21 +55,26 @@ export class SkidMarks {
     p[o + 3] = x0 - nx; p[o + 4] = y; p[o + 5] = z0 - nz;
     p[o + 6] = x1 + nx; p[o + 7] = y; p[o + 8] = z1 + nz;
     p[o + 9] = x1 - nx; p[o + 10] = y; p[o + 11] = z1 - nz;
-    this.alpha.fill(strength, this.head * 4, this.head * 4 + 4);
+    this.strength.fill(strength, this.head * 4, this.head * 4 + 4);
+    this.birth.fill(this.now, this.head * 4, this.head * 4 + 4);
     this.head = (this.head + 1) % this.max;
     this.dirty = true;
   }
 
-  flush(): void {
+  /** Advance the fade clock; upload buffers if new marks were added. */
+  update(dt: number): void {
+    this.now += dt;
+    this.uTime.value = this.now;
     if (!this.dirty) return;
     this.geo.attributes.position.needsUpdate = true;
-    this.geo.attributes.alpha.needsUpdate = true;
+    this.geo.attributes.strength.needsUpdate = true;
+    this.geo.attributes.birth.needsUpdate = true;
     this.dirty = false;
   }
 
   clear(): void {
     this.pos.fill(0);
-    this.alpha.fill(0);
+    this.strength.fill(0);
     this.dirty = true;
   }
 }
