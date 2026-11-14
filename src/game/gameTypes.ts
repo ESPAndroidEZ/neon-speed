@@ -16,7 +16,7 @@ export interface RaceSetup {
   laps: number;
   /** Play the intro cinematic first (otherwise straight to the countdown). */
   cinematic: boolean;
-  agents: { agent: AIRacerAgent; car: CarSpec; paint: number }[];
+  agents: { agent: AIRacerAgent; car: CarSpec; paint: number; glow?: number }[];
 }
 
 export interface GameDeps {

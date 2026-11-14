@@ -2,9 +2,11 @@ import { completeEvent, driftCash, evaluate, isDone } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
-import { buildField } from '../data/rivals';
+import { buildField, findRival } from '../data/rivals';
 import { EVENTS, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
+import type { TitleCards } from '../ui/titleCards';
+import { PREVIOUSLY } from '../data/lore';
 import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { Game } from './game';
 
@@ -12,6 +14,7 @@ export interface StoryDeps {
   game: Game;
   store: SaveStore;
   dialogue: DialogueBox;
+  cards: TitleCards;
   results: ResultsScreen;
   subs: Subtitles;
   /** Close any menu overlay before the cutscene or race starts. */
@@ -37,9 +40,6 @@ export class StoryController {
     g.onCountdown = () => {
       if (this.current) d.subs.flash(this.current.card, 3.2);
     };
-    g.onWeatherChange = (w) => {
-      if (this.current) d.subs.flash(w === 'SNOW' ? 'The rain turns to snow. Grip just fell off a cliff.' : 'The weather is turning.', 3.5);
-    };
   }
 
   /** Begin a chapter event: cutscene dialogue first, then the race. */
@@ -51,10 +51,12 @@ export class StoryController {
     const first = !save.career.seenIntro && save.career.completed.length === 0 && ev.id === EVENTS[0].id;
     const player = findCar(ev.carId ?? save.selected);
     // finale cutscene: Dante's car on show while he talks; otherwise your own
-    if (ev.id === 'finale') d.game.showroom(findCar('supra'), 0x14141a);
+    if (ev.id === 'finale') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
     else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
     const lines = first ? [...INTRO_LINES, ...ev.before] : ev.before;
-    d.dialogue.play(lines, () => this.launch(ev, first));
+    const run = (): void => d.dialogue.play(lines, () => this.launch(ev, first));
+    if (first) d.cards.play(PREVIOUSLY, run); // skippable "Previously in Kestrel Bay" cards before the intro
+    else run();
   }
 
   private launch(ev: StoryEvent, cinematic: boolean): void {
@@ -67,7 +69,7 @@ export class StoryController {
     }
     d.game.startRace({
       car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, cinematic,
-      weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale),
+      weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale, ev.weather !== 'CLEAR'),
     });
   }
 

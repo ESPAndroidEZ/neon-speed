@@ -40,6 +40,7 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   `core/quality` (low/medium/high render scale + bloom).
 - `ui/`: `menu` (title, main, story, free race, garage, settings), `storyMenu` (chapter cards, ending), `dialogue` (speaker cards, subtitles, optional speech),
   `garage` (turntable, stats, paint, underglow, buy, GLB yaw calibration), `settings`, `uiKit`, `hud`, `results` (objective verdict + buttons).
+- Round 2 additions: `fx/` tyreFx (smoke / spray / powder by weather + fading skid marks), exhaustFx (nitro cone, backfire on lift and shifts, from `physics/driveEvents`), headlights (2 pooled SpotLights), finalFx (speed blur, aberration, vignette, grain); `world/weatherFx` (rain, ripples, snow, wind lines), `world/materialUpgrade`, `carLights`, `roadMirror` (High tier, rain), `propModels` (optional prop GLBs), `surfaceVisuals`, `redHandWall`, `wallArt`; `physics/weatherLevels` (grip per level, PhysicsEnv), `surfaces` (puddles, banks, ice), `driveEvents`; `core/quality` (tiers, AutoQuality); `game/radio` (RadioDirector), `data/lore`, `data/radio`; `ui/titleCards`, `crewMenu`, `loadingCard`; `audio/engineDsp` (pure synth, shipped to an AudioWorklet as text), `engineVoice`, `turboSound`, `rivalEngines`, `audioParams`; `dev/audioTestPanel` (K).
 - `fx/`: `particles` (pooled billboards), `skidMarks` (ring-buffer quads), `speedPass` (radial streaks composer pass),
   `juice` (smoke, skids, sparks, nitro flames, shake, bloom kicks; reads Game.views / Game.impact).
 - `audio/`: `audioBus` (context, volume, mute, noise), `engineSynth` (rpm/load engine, turbo, blow-off), `sfx` (squeal, nitro,
@@ -56,4 +57,4 @@ Physics steps at fixed 1/60 s only; no allocation per step; every .ts file under
 Weather grip in `physics/weather.ts`. Track geometry is the control list in `world/harborLoop.ts`.
 
 ## Dev shortcuts
-`?screen=garage|weather|settings` opens a menu screen; `?skip` / `?demo` bypass the menu. `?ai=N` rivals, `?at=tunnel|bridge|dock|plaza|alley|<index>` start there, `?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.
+`?screen=garage|weather|settings` opens a menu screen; `?skip` / `?demo` bypass the menu. `?ai=N` rivals, `?at=tunnel|bridge|dock|plaza|alley|<index>` start there, P = particle showcase, K = audio test panel, `?showcase`, `?hands=N`, `?screen=crew`, `?skip` skips the intro, `?demo` self-driving input, `?ff=N` simulates N s before rendering, `?w=rain|snow` starts in that weather, `?car=350z|supra`. `npm test` runs every `tests/*.mts`.

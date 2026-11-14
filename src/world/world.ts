@@ -11,6 +11,7 @@ import { createKestrelBay, PLAZA } from './kestrelBay';
 import { buildProps } from './props';
 import { buildStage } from './stage';
 import { layoutProps } from './propsLayout';
+import { RedHandWall } from './redHandWall';
 import { RoadMirror } from './roadMirror';
 import { instanceProp, loadPropModel } from './propModels';
 import { SurfaceVisuals } from './surfaceVisuals';
@@ -31,6 +32,8 @@ export interface World {
   /** Re-skin the world for a weather profile (road gloss, snow tint, light pools). */
   setWeather(p: WeatherProfile): void;
   /** Per display frame: animated bits (steam vents). */
+  /** Redraw the Red Hand Wall at the finish line with this many red hands. */
+  setHandprints(n: number): void;
   /** Refresh puddle / snow bank / ice visuals (after a reseed or weather change). */
   syncSurfaces(weather: Weather): void;
   /** Swap in optional prop GLBs (public/models/props) where present. Safe to call once after build. */
@@ -54,6 +57,8 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
   moon.position.set(-60, 90, -40);
   scene.add(root, new HemisphereLight(0x3a4a8a, 0x0a0a12, 0.9), moon);
   const visuals = new SurfaceVisuals(track, surfaces, root, env);
+  const wall = new RedHandWall(track);
+  root.add(wall.mesh);
   const steam = new Steam(scene, layout.vents);
   const mirror = new RoadMirror(scene, meshes.roadMat);
   let wet = false;
@@ -64,6 +69,7 @@ export function buildWorld(scene: Scene, renderer: WebGLRenderer): World {
   return {
     track, root, env, obstacles: layout.obstacles, surfaces,
     syncSurfaces: (w) => visuals.sync(w),
+    setHandprints: (n) => wall.setHandprints(n),
     setWeather: (p) => {
       wet = p.name === 'RAIN';
       applyWorldLook(targets, p);

@@ -12,17 +12,21 @@ export interface Rival {
   color: number;
   /** 0 (rookie) .. 1 (relentless). */
   skill: number;
+  /** Extra skill in rain and snow (rain specialists). */
+  rain?: number;
+  /** Underglow colour. */
+  glow?: number;
   bio: string;
 }
 
 export const RIVALS: readonly Rival[] = [
-  { id: 'tank', name: 'Tank', crew: 'street', carId: 'civic', color: 0x2fa84f, skill: 0.22, bio: 'Heavy foot, light brain.' },
-  { id: 'pixel', name: 'Pixel', crew: 'street', carId: 'civic', color: 0xff2a9d, skill: 0.3, bio: 'Streams every race. Mostly brakes late.' },
-  { id: 'lola', name: 'Lola', crew: 'street', carId: '350z', color: 0x7a2fd6, skill: 0.4, bio: 'Dock rat. Knows every puddle.' },
-  { id: 'rook', name: 'Rook', crew: 'street', carId: 'rx7', color: 0xf2c200, skill: 0.5, bio: 'Ex-Redline. Left on bad terms.' },
-  { id: 'vex', name: 'Vex', crew: 'redline', carId: 'evo', color: 0x14141a, skill: 0.7, bio: 'Redline enforcer. Never lifts.' },
-  { id: 'kilo', name: 'Kilo', crew: 'redline', carId: 'rx7', color: 0xc41a2b, skill: 0.78, bio: 'Redline lieutenant. Counts your mistakes.' },
-  { id: 'dante', name: 'Dante Voss', crew: 'redline', carId: 'supra', color: 0x14141a, skill: 0.92, bio: 'Calm, polite, ruthless. Owns the Loop.' },
+  { id: 'pixel', name: 'Pixel', crew: 'street', carId: 'civic', color: 0xff2a9d, skill: 0.28, bio: 'Streams every race. Mostly brakes late.' },
+  { id: 'lola', name: 'Lola', crew: 'street', carId: 'rx7', color: 0xf2c200, skill: 0.4, bio: 'Dock rat. Knows every puddle.' },
+  { id: 'rook', name: 'Rook', crew: 'street', carId: 'civic', color: 0x2fa84f, skill: 0.5, bio: 'Ex-Redline. Left on bad terms.' },
+  { id: 'tank', name: 'Tank', crew: 'street', carId: 'supra', color: 0x8a8f99, skill: 0.58, bio: 'Heavy, late on the brakes, impossible to push around.' },
+  { id: 'vex', name: 'Vex', crew: 'redline', carId: '350z', color: 0x7a2fd6, glow: 0xff2a9d, skill: 0.72, bio: 'Redline drifter. Lives sideways.' },
+  { id: 'jinx', name: 'Jinx', crew: 'street', carId: 'evo', color: 0x39ff88, glow: 0x39ff88, skill: 0.66, rain: 0.16, bio: 'Aggressive rain specialist. Born in a puddle.' },
+  { id: 'dante', name: 'Dante Voss', crew: 'redline', carId: 'rx7', color: 0x14110a, glow: 0xffb347, skill: 0.93, bio: 'Calm, polite, ruthless. Black and gold RX-7. Owns the Loop.' },
 ];
 
 export const findRival = (id: string): Rival => RIVALS.find((r) => r.id === id) ?? RIVALS[0];
@@ -31,13 +35,15 @@ export interface FieldEntry {
   agent: AIRacerAgent;
   car: CarSpec;
   paint: number;
+  glow?: number;
 }
 
 /** Turn rival ids into race entries (agent + car + paint). `skillScale` lets story events make a field easier or harder. */
-export function buildField(ids: readonly string[], skillScale = 1): FieldEntry[] {
+export function buildField(ids: readonly string[], skillScale = 1, wet = false): FieldEntry[] {
   return ids.map((id) => {
     const r = findRival(id);
-    return { agent: createAIRacer(r.id, r.name, Math.min(1, r.skill * skillScale)), car: findCar(r.carId), paint: r.color };
+    const skill = Math.min(1, (r.skill + (wet ? r.rain ?? 0 : 0)) * skillScale);
+    return { agent: createAIRacer(r.id, r.name, skill), car: findCar(r.carId), paint: r.color, glow: r.glow };
   });
 }
 

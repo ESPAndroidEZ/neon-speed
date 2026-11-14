@@ -2,16 +2,28 @@
 
 Tagline: **"Every street remembers who bled for it."**
 
+## Lore (round 2)
+
+- **Kestrel Bay** is a port city. When the container trade left, the docks emptied and night races started on the empty yards and quays. Kids spray-painted the **Harbor Loop**.
+- **Racer's Blood** is the **Red Hand Wall** at the finish line. Winners press a red-painted hand on it. The saying: *"every street remembers who bled for it"* (sweat, risk, wrecks; PG).
+- **Cain Vega**, the Loop's first legend, vanished after a crash at the docks 12 years ago. Everyone thinks he is gone. His sister **Mara** runs **Gearhead Garage**. The beat-up Civic was Cain's first car; Mara rebuilt it and gives the Rookie the keys.
+- **Dante Voss**, Cain's protege and rival, turned the Redline crew into **Redline Holdings**. He is buying the docks and the debt on Mara's garage to turn the Loop into a private sponsored circuit and erase the street scene.
+- **The Rookie** arrives with nothing but the car. Mara sees Cain's feel in how they drive.
+- **DJ Switch** broadcasts pirate radio from a crane cab above the docks and knows everything. Secretly he is **Cain** (revealed after the Chapter 1 finale).
+- Chapter 1 rivals: **Jinx** (Evo, aggressive, rain specialist), **Tank** (Supra, heavy), **Vex** (350Z, drifter), **Dante** (black and gold RX-7). Street rookies Pixel, Lola and Rook fill the early grids.
+
+Where it appears in the game: skippable "Previously in Kestrel Bay" title cards before the first intro cinematic (`data/lore.ts` PREVIOUSLY); the Crew screen with bios and the Red Hand Wall (one red handprint unlocked per event, also painted on a wall at the start line); loading-screen tips from the lore; in-race radio chatter from Switch (overtakes, crashes, drift combos, weather, laps, rival names: `data/radio.ts`, `game/radio.ts`); after beating Dante a final radio message reveals that Switch is Cain.
+
 ## World
 
 Kestrel Bay, a port city that never fully dries out: rain on the cranes, neon on the wet asphalt, and a first snow coming. Street racing runs after midnight on the **Kestrel Bay Streets** circuit (a tight 1.4 km street course: Main Street, a canal bridge, a plaza hairpin, the dock strip, alleys and a tunnel), nicknamed the **Harbor Loop** and controlled by the Redline crew.
 
 ## Cast
 
-- **You (the Rookie).** New in town, silent, drives a beaten-up used Civic.
-- **Mara.** Owns Gearhead Garage, your mentor. Appears as phone calls. Her garage is three days from foreclosure.
-- **Dante Voss.** Leader of Redline. Calm, polite, ruthless. Redline money is buying the street block by block.
-- **DJ Switch.** Pirate radio voice of the city. Narrates the cinematic and the race intros. Cheap to produce (text or a few voice lines) and gives the city a personality.
+- **You (the Rookie).** New in town, silent, drives Cain's beaten-up Civic.
+- **Mara Vega.** Owns Gearhead Garage, your mentor, Cain's sister. Appears as phone calls. Her garage is three days from foreclosure.
+- **Dante Voss.** Leader of Redline Holdings. Calm, polite, ruthless.
+- **DJ Switch.** Pirate radio voice of the city. Narrates the cinematic, the race intros and live chatter. Secretly Cain Vega.
 
 ## Chapter 1: "Wet Asphalt" (the demo)
 
@@ -52,9 +64,9 @@ Story mode lives in `src/data/story.ts` (text) and `src/game/story.ts` (flow). E
 
 | # | Event | Conditions | Objective | Reward |
 |---|-------|-----------|-----------|--------|
-| 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Tank, Pixel, Lola | top 2 | race cash + $1,500 |
-| 2 | Dock Sprint | rain, 2 laps, vs Lola, Rook, Pixel, Tank | top 2 | race cash + $3,000, **350Z unlocked** |
+| 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Pixel, Lola, Rook | top 2 | race cash + $1,500 |
+| 2 | Dock Sprint | rain, 2 laps, vs Jinx, Tank, Rook, Pixel | top 2 | race cash + $3,000, **350Z unlocked** |
 | 3 | Drift Night | snow, 3 laps, no rivals | bank 6,000 drift points | points / 3 + $4,000 |
-| 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Kilo, Vex, Dante | win | race cash + $8,000, **Supra unlocked** |
+| 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Vex, Jinx, Tank, Dante | win | race cash + $8,000, **Supra unlocked** |
 
-Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his Supra on show). After the finale: Dante's key line, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).
+Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his black and gold RX-7 on show). After the finale: Dante's key line, then Switch's radio message revealing he is Cain, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).

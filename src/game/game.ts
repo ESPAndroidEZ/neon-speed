@@ -34,6 +34,7 @@ export class Game {
   onIntroEnd: (() => void) | null = null;
   onCountdown: (() => void) | null = null;
   onWeatherChange: ((w: Weather) => void) | null = null;
+  onStartRace: (() => void) | null = null;
   private plan: { at: number; to: Weather } | null = null;
   readonly ctl: CarInput = createNeutralInput();
   readonly impact = { strength: 0, x: 0, z: 0 };
@@ -68,6 +69,7 @@ export class Game {
   }
 
   startRace(s: RaceSetup): void {
+    this.onStartRace?.();
     this.setup = s;
     this.d.results.hide();
     this.views.clear();
@@ -76,7 +78,7 @@ export class Game {
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
     // views in racer order so index lines up
-    this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint)));
+    this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint, s.agents[i - 1].glow)));
     this.setWeather(s.weather);
     this.weatherIntensity = s.weather === 'CLEAR' ? 1 : 0.25; // rain and snow build up over ~20 s
     this.plan = s.weatherChange ?? null;

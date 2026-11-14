@@ -176,7 +176,7 @@ export class Subtitles {
     el.style.cssText = `${styles[kind]};opacity:0;transition:opacity .25s`;
     this.layer.appendChild(el);
     requestAnimationFrame(() => (el.style.opacity = '1'));
-    if (kind === 'switch') this.voice.say(text);
+    if (kind === 'switch') this.voice.say(text.replace(/^DJ SWITCH:\s*/, ''));
     this.timers.push(
       window.setTimeout(() => (el.style.opacity = '0'), Math.max(0, dur * 1000 - 250)),
       window.setTimeout(() => el.remove(), dur * 1000 + 100),

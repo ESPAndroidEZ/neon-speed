@@ -3,7 +3,7 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, feedback round 1 done).
+Updated: 2026-11-14 (Claude, feedback round 2 done).
 
 ## Done
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
@@ -25,12 +25,11 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, send playtest notes (AI pace, track feel, story text). Then: wire Qwen modules after `/review-qwen`; car upgrades (plan phase 5); Capacitor (phase 6).
 
 ## Qwen queue (run with `scripts/qwen.sh <number>`)
-- 004 `src/world/weatherFx.ts` (rain streaks, snow flakes; I hook it from `Game.setWeather` and the frame loop after review)
 - 003 `src/ui/touchControls.ts` (touch overlay; `setVisible` hidden in menus)
 - 005 `src/ui/minimap.ts` (track outline + racer dots, bottom-left)
 - 006 `src/input/gamepad.ts` (Gamepad API input source)
 - 007 `src/audio/cityAmbience.ts` (harbour horn, siren, water, drips, tunnel muffling)
-Done by Claude instead: 001 asset loader, 002 AI racers.
+Done by Claude instead: 001 asset loader, 002 AI racers, 004 weather FX.
 
 ## Open contract requests
 None. Contract changes logged: `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
@@ -48,3 +47,4 @@ None. Contract changes logged: `GameState` gained `'MENU'` (step 5); `AIWorldVie
 - 2026-11-14 Claude: feedback round 1 steps 1+2: GLB pipeline with procedural fallback, 5 cars (Civic, 350Z, RX-7, Evo VIII, Supra), garage with turntable, stats, paint, underglow, yaw calibration.
 - 2026-11-14 Claude: feedback round 1 done: GLB pipeline, 5 cars, Kestrel Bay Streets, AI rivals, story mode chapter 1, UI margins. Contract change: AIWorldView.grip. Qwen queue now 004, 003, 005, 006, 007.
 - 2026-11-14 Claude: round 2 steps 1-3: graphics pass (material upgrade, glow, headlight spots, env, shafts, FinalFx, tiers + auto quality, prop GLB pipeline), particles (weatherFx, tyre/exhaust/skid fx, showcase P), weather physics levels (NORMAL/AGGRESSIVE/EXTREME, puddles, snow banks, ice, ramp-in), turbo model + drive events.
+- 2026-11-14 Claude: round 2 done: graphics pass, particles, weather physics levels, turbo + audio rebuild (worklet), lore, radio, crew screen, Red Hand Wall. Qwen queue unchanged except 004 (done by Claude). Code-health check added to the build.

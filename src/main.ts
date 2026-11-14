@@ -15,7 +15,10 @@ import { KeyboardInput } from './input/keyboard';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
 import { DialogueBox, Subtitles, Voice } from './ui/dialogue';
+import { RadioDirector } from './game/radio';
 import { Hud } from './ui/hud';
+import { LoadingCard } from './ui/loadingCard';
+import { TitleCards } from './ui/titleCards';
 import { Menu } from './ui/menu';
 import { toast } from './ui/uiKit';
 import { ResultsScreen } from './ui/results';
@@ -93,11 +96,48 @@ menu = new Menu({
   },
   startEvent: (ev) => story.start(ev),
 });
+const subs = new Subtitles(voice);
 story = new StoryController({
-  game, store, results, dialogue: new DialogueBox(voice), subs: new Subtitles(voice),
+  game, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: () => menu.showEnding(),
 });
-game.onFinish = (r) => story.finish(r);
+game.onFinish = (r) => {
+  const extra = story.finish(r);
+  world.setHandprints(store.data.career.completed.length);
+  return extra;
+};
+world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
+
+// DJ Switch's radio: reacts to the race a few times per second
+const radio = new RadioDirector(Date.now() & 0xffff);
+const loading = new LoadingCard();
+let radioImpact = 0;
+const baseImpact = game.onImpact;
+game.onImpact = (s) => {
+  baseImpact?.(s);
+  radioImpact = Math.max(radioImpact, s);
+};
+let radioRace: unknown = null;
+let radioClock = 0;
+game.onStartRace = () => loading.show();
+engine.onFrame((_a, dt) => {
+  radioClock += dt;
+  if (radioClock < 0.25) return;
+  radioClock = 0;
+  if (radioRace !== game.rm) {
+    radioRace = game.rm;
+    radio.reset();
+  }
+  const rm = game.rm;
+  const t = game.telemetry;
+  const line = radio.update({
+    racing: game.state === 'RACING' && rm.phase === 'RACING', time: rm.raceTime, position: t.position, count: t.racerCount, lap: t.lap, laps: t.totalLaps,
+    weather: game.weather, impact: radioImpact, driftChain: t.driftScore,
+    rivals: rm.racers.filter((r) => !r.isPlayer).map((r) => ({ name: r.name, position: rm.positionOf(r) })),
+  });
+  radioImpact = 0;
+  if (line) subs.flash(`DJ SWITCH: ${line}`, 4.2, 'switch');
+});
 
 let hudShown = true;
 engine.onFrame(() => {
@@ -144,6 +184,7 @@ if (direct) {
   else if (scr === 'weather') menu.weather();
   else if (scr === 'settings') menu.settings();
   else if (scr === 'story') menu.story();
+  else if (scr === 'crew') menu.crew();
   else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event
 }
 

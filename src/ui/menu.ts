@@ -9,6 +9,7 @@ import type { StoryEvent } from '../data/story';
 import { buildStoryMenu, buildEnding } from './storyMenu';
 import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
+import { buildCrewMenu } from './crewMenu';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { button, h, injectCss, lapText, money } from './uiKit';
@@ -74,7 +75,7 @@ export class Menu {
       this.cash = h('div', 'rb-cash', money(this.d.store.data.cash));
       document.body.appendChild(this.cash);
     }
-    el.querySelector('button')?.focus();
+    el.querySelector('button')?.focus({ preventScroll: true });
   }
 
   hide(): void {
@@ -99,8 +100,12 @@ export class Menu {
     const el = h('div', 'rb-layer');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '10vh';
-    el.append(button('Story', () => this.story(), 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Settings', () => this.settings()));
+    el.append(button('Story', () => this.story(), 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), button('Settings', () => this.settings()));
     this.mount(el, 'main');
+  }
+
+  crew(): void {
+    this.mount(buildCrewMenu(this.d.store, () => this.main()), 'other');
   }
 
   story(): void {

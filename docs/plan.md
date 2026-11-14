@@ -30,7 +30,7 @@ Everything else (more cars, more tracks) is content and comes last.
 | 1 | **Drive**: `carController`, `chaseCam`, keyboard/gamepad input, tuning panel, minimal HUD, flat test arena | Claude | A tester drifts a box car for 5 min and wants to keep going | done |
 | 2 | **Track and city** (now Kestrel Bay Streets): spline track, barriers, checkpoints, lap logic, instanced buildings/lamps, wet-road look | Claude (+ Qwen: track data) | One lap of a good-looking circuit at 60 fps on desktop | done |
 | 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes | done (race flow, collisions, 5 cars, AI rivals) |
-| 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic | done (needs ear tuning) |
+| 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic | done; round 2 added weather particles, tyre/exhaust fx, showcase (P), turbo audio (needs ear tuning) |
 | 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | partial: garage, cash, paint, underglow, save, story career done; upgrades and more event types todo |
 | 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | todo |
 | 7 | **Ship**: menus, tutorial, settings, TestFlight, crash/perf telemetry | Both | 10 outside testers finish the first race unaided | todo |
@@ -113,6 +113,8 @@ Everything else (more cars, more tracks) is content and comes last.
 
 7. **Car models (2026-11-14, supersedes 5):** FREE Tripo3D tier only (about 13 generations, web UI). Carlos generates the GLBs and drops them in `public/models/{civic,350z,supra,evo,rx7}.glb`; the loader normalises them and falls back to the procedural car when a file is missing. Brief: `docs/assets/tripo-brief.md`.
 8. **Feedback round 1:** five cars, a narrow street circuit (Kestrel Bay Streets), AI rivals, Chapter 1 story mode, UI margin fixes.
+
+9. **Round 2 (2026-11-14):** graphics pass on top of Tripo models, obvious particles, aggressive weather physics (setting), turbo and procedural audio, lore and radio. Props via Meshy free tier, optional.
 
 Story and cinematic script: `docs/story.md`.
 
