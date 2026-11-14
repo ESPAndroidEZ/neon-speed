@@ -170,7 +170,7 @@ export class CarController {
   readPose(alpha: number, out: Vec3): number {
     const s = this.state;
     out.x = lerp(this.prevX, s.position.x, alpha);
-    out.y = 0;
+    out.y = s.position.y;
     out.z = lerp(this.prevZ, s.position.z, alpha);
     return this.prevHeading + wrapAngle(s.heading - this.prevHeading) * alpha;
   }

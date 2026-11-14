@@ -21,7 +21,7 @@ export class RedHandWall {
     const i = 7;
     const s = tr.samples[i];
     const off = -(tr.wall[i] - 0.06); // right-hand wall, a hair in front of the facade
-    this.mesh.position.set(s.position.x + s.tangent.z * off, 3.0, s.position.z - s.tangent.x * off);
+    this.mesh.position.set(s.position.x + s.tangent.z * off, 3.0 + tr.heights[i], s.position.z - s.tangent.x * off);
     // plane normal must point at the road: the left normal (tz, -tx)
     this.mesh.rotation.y = Math.atan2(s.tangent.z, -s.tangent.x);
   }

@@ -14,6 +14,8 @@ import { buildLoadMenu, describe } from './saveUi';
 import { buildCrewMenu } from './crewMenu';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
+import { buildTrackSelect } from './trackSelect';
+import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money } from './uiKit';
 
 export interface MenuDeps {
@@ -32,7 +34,7 @@ export interface MenuDeps {
   /** Hook for when a GLB replaces the procedural body. */
   onSwap: (fn: (() => void) | null) => void;
   /** Launch a free race in this weather against `rivals` opponents (0 = time trial). */
-  startRace: (w: Weather, rivals: number) => void;
+  startRace: (w: Weather, rivals: number, trackId: string) => void;
   slots: SaveSlots;
   /** Re-read the saved driving preferences (assists, sensitivity, gamepad). */
   onDriving?: () => void;
@@ -113,7 +115,7 @@ export class Menu {
       c.title = describe(latest.snap);
       el.append(c);
     }
-    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
+    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.maps()), button('Garage', () => this.garage()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
     this.mount(el, 'main');
   }
 
@@ -133,9 +135,13 @@ export class Menu {
     this.mount(buildEnding(() => this.main()), 'other');
   }
 
-  weather(): void {
+  maps(): void {
+    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other');
+  }
+
+  weather(def: TrackDef): void {
     const el = h('div', 'rb-layer dim');
-    el.append(h('h2', 'rb-title', 'FREE RACE'));
+    el.append(h('h2', 'rb-title', def.name.toUpperCase()));
     const riv = h('div', 'rb-row');
     const setRivals = (n: number): void => {
       this.rivals = n;
@@ -147,15 +153,16 @@ export class Menu {
       b.style.minWidth = '130px';
       riv.append(b);
     }
-    el.append(riv);
+    if (def.type === 'circuit') el.append(riv);
     setRivals(this.rivals);
     const row = h('div', 'rb-row');
     for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
-      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${w}</div><div style="opacity:.8;margin:6px 0">${WEATHER_BLURB[w]}</div><div class="rb-sub">Grip ${Math.round(WEATHER[w].grip * 100)}%<br>Best lap ${lapText(this.d.store.data.bestLap[w])}</div>`);
-      card.addEventListener('click', () => this.d.startRace(w, this.rivals));
+      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${w}</div><div style="opacity:.8;margin:6px 0">${WEATHER_BLURB[w]}</div><div class="rb-sub">Grip ${Math.round(WEATHER[w].grip * 100)}%<br>Best ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
+      card.addEventListener('click', () => this.d.startRace(w, def.type === 'circuit' ? this.rivals : 0, def.id));
+      if (def.recommendedWeather.includes(w)) card.style.borderColor = '#ff2a9d';
       row.append(card);
     }
-    el.append(row, button('Back', () => this.main()));
+    el.append(row, h('div', 'rb-sub', 'Pink outline: suits this map'), button('Back', () => this.maps()));
     this.mount(el, 'other');
   }
 

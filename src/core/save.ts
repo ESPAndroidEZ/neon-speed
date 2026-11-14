@@ -16,6 +16,8 @@ export interface SaveData {
   glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
+  /** Best race time (seconds) per map and weather, key `trackId:WEATHER`; `trackId:drift` holds the best drift score. */
+  trackBest: Record<string, number>;
   settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number };
   races: number;
   career: CareerState;
@@ -38,6 +40,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   paint: { [starterId]: starterPaint },
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
+  trackBest: {},
   settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12 },
   races: 0,
   career: defaultCareer(),
@@ -72,6 +75,9 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   if (typeof j.bestLap === 'object' && j.bestLap !== null) {
     const b = j.bestLap as Record<string, unknown>;
     for (const w of WEATHERS) out.bestLap[w] = typeof b[w] === 'number' && (b[w] as number) > 5 ? (b[w] as number) : null;
+  }
+  if (typeof j.trackBest === 'object' && j.trackBest !== null) {
+    for (const [k, v] of Object.entries(j.trackBest as Record<string, unknown>)) if (typeof v === 'number' && Number.isFinite(v) && v > 0 && k.length < 40) out.trackBest[k] = v;
   }
   const s = (j.settings ?? {}) as Record<string, unknown>;
   out.settings.volume = num(s.volume, out.settings.volume, 0, 1);
@@ -144,6 +150,17 @@ export class SaveStore {
   setGlow(id: string, color: number): void {
     this.data.glow[id] = color;
     this.commit();
+  }
+
+  /** Keep the best time (or best drift score, `lowerIsBetter` false) for a map; returns true on a record. */
+  recordTrack(key: string, value: number, lowerIsBetter = true): boolean {
+    const prev = this.data.trackBest[key];
+    const record = Number.isFinite(value) && value > 0 && (prev === undefined || (lowerIsBetter ? value < prev : value > prev));
+    if (record) {
+      this.data.trackBest[key] = value;
+      this.commit();
+    }
+    return record;
   }
 
   /** Bank a finished race: cash and best lap for the weather. Returns true if the lap is a new record. */

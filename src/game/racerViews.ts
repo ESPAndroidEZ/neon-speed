@@ -73,8 +73,10 @@ export class RacerViews {
       v.heading = car.readPose(alpha, this.tmp);
       v.x = this.tmp.x;
       v.z = this.tmp.z;
-      v.holder.position.set(v.x, 0, v.z);
+      v.holder.position.set(v.x, this.tmp.y, v.z);
+      v.holder.rotation.order = 'YXZ';
       v.holder.rotation.y = v.heading;
+      v.holder.rotation.x = -v.racer.contact.pitch;
       const inp = v.racer.input;
       v.visual.update(frameDt, car.state.speed, inp.steer, inp.brake > 0.1 && car.state.speed > 1, v.longAccel * this.rollScale, car.lateralAccel * this.rollScale);
     }

@@ -1,0 +1,96 @@
+import type { SaveStore } from '../core/save';
+import { buildTrack, TRACKS, type TrackDef } from '../data/tracks';
+import type { Weather } from '../types/game';
+import { button, h, lapText } from './uiKit';
+
+const TYPE_LABEL = { circuit: 'Circuit', sprint: 'Sprint', drift: 'Drift event' } as const;
+const WEATHER_ICON: Record<Weather, string> = { CLEAR: '☀ clear', RAIN: '☂ rain', SNOW: '❄ snow' };
+
+/** Draw the road outline of a map (north up) on a small canvas; the start line is the white bar, a sprint's finish the pink one. */
+export function drawOutline(c: HTMLCanvasElement, def: TrackDef): void {
+  const tr = buildTrack(def);
+  const g = c.getContext('2d');
+  if (!g) return;
+  let x0 = Infinity;
+  let x1 = -Infinity;
+  let z0 = Infinity;
+  let z1 = -Infinity;
+  for (const s of tr.samples) {
+    x0 = Math.min(x0, s.position.x);
+    x1 = Math.max(x1, s.position.x);
+    z0 = Math.min(z0, s.position.z);
+    z1 = Math.max(z1, s.position.z);
+  }
+  const pad = 14;
+  const k = Math.min((c.width - pad * 2) / (x1 - x0 || 1), (c.height - pad * 2) / (z1 - z0 || 1));
+  const px = (x: number): number => pad + (x - x0) * k + (c.width - pad * 2 - (x1 - x0) * k) / 2;
+  const pz = (z: number): number => pad + (z - z0) * k + (c.height - pad * 2 - (z1 - z0) * k) / 2;
+  g.clearRect(0, 0, c.width, c.height);
+  g.lineWidth = 3;
+  g.lineJoin = 'round';
+  const path = (from: number, to: number): void => {
+    g.beginPath();
+    for (let i = from; i <= to; i++) {
+      const p = tr.samples[i % tr.samples.length].position;
+      if (i === from) g.moveTo(px(p.x), pz(p.z));
+      else g.lineTo(px(p.x), pz(p.z));
+    }
+  };
+  if (def.type === 'sprint') {
+    g.strokeStyle = 'rgba(24,216,255,.25)';
+    path(tr.raceSamples - 1, tr.samples.length);
+    g.stroke();
+  }
+  g.strokeStyle = '#18d8ff';
+  path(0, def.type === 'sprint' ? tr.raceSamples - 1 : tr.samples.length);
+  g.stroke();
+  const mark = (i: number, color: string): void => {
+    const p = tr.samples[i % tr.samples.length].position;
+    g.fillStyle = color;
+    g.beginPath();
+    g.arc(px(p.x), pz(p.z), 5, 0, Math.PI * 2);
+    g.fill();
+  };
+  mark(0, '#ffffff');
+  if (def.type === 'sprint') mark(tr.raceSamples - 1, '#ff2a9d');
+}
+
+export interface TrackSelectDeps {
+  store: SaveStore;
+  onPick: (def: TrackDef) => void;
+  onBack: () => void;
+}
+
+/** Choose a map: outline, event type, length, best times and the weather it suits. */
+export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
+  const root = h('div', 'rb-layer dim');
+  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
+  root.append(h('h2', 'rb-title', 'SELECT MAP'));
+  const row = h('div', 'rb-row');
+  for (const def of TRACKS) {
+    const tr = buildTrack(def);
+    const km = (tr.raceSamples * tr.spacing) / 1000;
+    const climb = Math.max(...tr.heights) - Math.min(...tr.heights);
+    const best = d.store.data.trackBest;
+    const times = def.type === 'drift'
+      ? `Best score <b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b> (target ${def.driftTarget?.toLocaleString()})`
+      : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${w.toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}`).join(' · ');
+    const card = h('div', 'rb-card');
+    card.style.cssText += ';width:min(300px,86vw);text-align:left';
+    const cv = document.createElement('canvas');
+    cv.width = 270;
+    cv.height = 150;
+    cv.style.cssText = 'width:100%;height:auto;background:#05060d99;border-radius:8px';
+    drawOutline(cv, def);
+    card.append(cv);
+    card.append(h('div', '', `<div style="font-size:22px;font-weight:900;margin-top:8px">${def.name}</div>
+      <div class="rb-sub">${TYPE_LABEL[def.type]} · ${def.type === 'sprint' ? 'one run' : `${def.laps} laps`} · ${km.toFixed(1)} km${climb > 1 ? ` · climb ${climb.toFixed(0)} m` : ''}</div>
+      <div style="opacity:.85;margin:6px 0;font-size:14px;line-height:1.35">${def.blurb}</div>
+      <div style="font-size:13px;opacity:.9">Suits: ${def.recommendedWeather.map((w) => WEATHER_ICON[w]).join(' · ')}</div>
+      <div style="font-size:12px;opacity:.75;margin-top:4px">${times}</div>`));
+    card.addEventListener('click', () => d.onPick(def));
+    row.append(card);
+  }
+  root.append(row, button('Back', d.onBack));
+  return root;
+}

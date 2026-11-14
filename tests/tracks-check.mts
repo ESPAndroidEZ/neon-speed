@@ -15,6 +15,35 @@ for (const def of TRACKS) {
   check(`${def.id}: valid (${tr.length.toFixed(0)} m, ${tr.samples.length} samples, climb ${Math.max(...tr.heights).toFixed(0)} m)`, problems.length === 0, problems.map((p) => `${p.check}: ${p.detail}`).join('; '));
   check(`${def.id}: rules for its event type`, (def.type === 'drift' ? def.driftTarget! > 0 : true) && (sprint ? !!def.sprintEnd && def.laps === 1 : def.laps >= 2) && def.recommendedWeather.length > 0, def.type);
 }
+// elevation: the car's visual height follows the road and pitches up on a climb
+import { CarController } from '../src/physics/carController.ts';
+import { createDefaultTuning } from '../src/physics/carTuning.ts';
+import { TrackContact } from '../src/physics/trackContact.ts';
+import { WEATHER } from '../src/physics/weather.ts';
+import { createNeutralInput } from '../src/types/game.ts';
+{
+  const cliff = TRACKS.find((t) => t.id === 'cliff')!;
+  const tr = buildTrack(cliff);
+  const car = new CarController(createDefaultTuning());
+  const tc = new TrackContact(tr);
+  tc.place(car, 0);
+  const inp = createNeutralInput();
+  inp.throttle = 1;
+  let maxErr = 0;
+  let maxPitch = 0;
+  let minPitch = 0;
+  for (let i = 0; i < 60 * 14; i++) {
+    car.step(1 / 60, inp, WEATHER.CLEAR);
+    tc.update(car);
+    maxErr = Math.max(maxErr, Math.abs(car.state.position.y - tr.heights[tc.hit.index]));
+    maxPitch = Math.max(maxPitch, tc.pitch);
+    minPitch = Math.min(minPitch, tc.pitch);
+  }
+  check('car height follows the road surface', maxErr < 1.0 && car.state.position.y > 5, `max error ${maxErr.toFixed(2)} m, now at ${car.state.position.y.toFixed(1)} m`);
+  check('car pitches up on climbs and down on descents', maxPitch > 0.03 && minPitch < -0.01, `pitch ${minPitch.toFixed(2)}..${maxPitch.toFixed(2)} rad`);
+  check('flat maps stay flat', Math.max(...buildTrack(TRACKS[0]).heights) === 0, '');
+}
+
 // the validator must catch bad maps
 import { buildStreetPath } from '../src/world/streetPath.ts';
 import { createTrackFromPath } from '../src/world/track.ts';

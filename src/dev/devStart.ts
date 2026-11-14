@@ -1,3 +1,4 @@
+import { findTrackDef } from '../data/tracks';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { freeRaceField } from '../data/rivals';
@@ -34,7 +35,7 @@ export function runDevStart(d: DevStartDeps): void {
 if (d.direct) {
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = freeRaceField(Number(q.get('ai') ?? 0));
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: game.weather !== 'CLEAR', eventId: null } });
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: findTrackDef(q.get('track') ?? 'kestrel').laps, trackId: q.get('track') ?? undefined, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: game.weather !== 'CLEAR', eventId: null } });
   if (q.has('wi')) game.weatherIntensity = Number(q.get('wi')); // dev: force the rain/snow build-up
   const at = q.get('at'); // dev: start at a zone (tunnel, bridge, dock, plaza, alley) or a sample index
   if (at) {
@@ -63,7 +64,7 @@ if (d.direct) {
   } else menu.title();
   const scr = q.get('screen');
   if (scr === 'garage') menu.garage();
-  else if (scr === 'weather') menu.weather();
+  else if (scr === 'weather' || scr === 'maps') menu.maps();
   else if (scr === 'settings') menu.settings();
   else if (scr === 'story') menu.story();
   else if (scr === 'crew') menu.crew();

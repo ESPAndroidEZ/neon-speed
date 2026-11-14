@@ -29,7 +29,7 @@ function at(tr: Track, i: number, off: number, side = 1): Placed {
 }
 
 /** Deterministic placement of parked cars (with collision circles), cones, manholes, crosswalks and steam vents. */
-export function layoutProps(tr: Track, seed = 17): PropsLayout {
+export function layoutProps(tr: Track, seed = 17, density = 1): PropsLayout {
   const rnd = createRng(seed);
   const n = tr.samples.length;
   const out: PropsLayout = { parked: [], cones: [], manholes: [], crosswalks: [], vents: [], obstacles: new ObstacleField(n) };
@@ -44,7 +44,7 @@ export function layoutProps(tr: Track, seed = 17): PropsLayout {
   let cooldown = 0;
   for (let i = 10; i < n - 26; i++) {
     if (--cooldown > 0 || tr.zones[i] !== 'street' || tr.samples[i].width < 9.5 || !straight(i, 8)) continue;
-    if (rnd() > 0.1) continue;
+    if (rnd() > 0.1 * density) continue;
     const side = rnd() < 0.5 ? 1 : -1;
     const count = 1 + Math.floor(rnd() * 3);
     for (let c = 0; c < count; c++) {
@@ -68,7 +68,7 @@ export function layoutProps(tr: Track, seed = 17): PropsLayout {
     out.cones.push(at(tr, i, side * (halfWidthAt(tr, i) - 0.45), side));
   }
 
-  for (let m = 0; m < 30; m++) {
+  for (let m = 0; m < Math.round(30 * density); m++) {
     const i = 12 + Math.floor(rnd() * (n - 40));
     out.manholes.push(at(tr, i, (rnd() - 0.5) * halfWidthAt(tr, i) * 1.4));
   }

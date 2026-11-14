@@ -11,6 +11,8 @@ export interface RaceSetup {
   paint: number;
   glow?: number;
   weather: Weather;
+  /** Which map (src/data/tracks); Kestrel Bay when omitted. */
+  trackId?: string;
   /** Switch weather mid-race after this many seconds of racing. */
   weatherChange?: { at: number; to: Weather };
   laps: number;

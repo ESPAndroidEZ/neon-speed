@@ -12,7 +12,7 @@ export interface TrackMeshes {
 }
 
 /** Worn asphalt, raised sidewalk strips between road edge and wall, and the big ground plane. */
-export function buildTrackMeshes(tr: Track): TrackMeshes {
+export function buildTrackMeshes(tr: Track, groundY = -0.02): TrackMeshes {
   const group = new Group();
   const hw = (i: number): number => halfWidthAt(tr, i);
   const roadMat = new MeshStandardMaterial({ map: makeRoadTexture(), roughness: 0.4, metalness: 0.3, side: DoubleSide });
@@ -32,7 +32,7 @@ export function buildTrackMeshes(tr: Track): TrackMeshes {
   const groundMat = new MeshStandardMaterial({ color: 0x14161c, roughness: 0.9, metalness: 0.05 });
   const ground = new Mesh(new PlaneGeometry(2000, 2000), groundMat);
   ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.02;
+  ground.position.y = groundY;
   ground.receiveShadow = true;
   group.add(ground);
   return { group, roadMat, groundMat, vergeMat };

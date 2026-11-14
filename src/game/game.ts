@@ -11,7 +11,8 @@ import type { ResultsExtra } from '../ui/results';
 import { STAGE } from '../world/stage';
 import type { GameDeps, RaceSetup } from './gameTypes';
 import { RacerViews } from './racerViews';
-import { createTelemetry, createViewState } from './telemetry';
+import { createTelemetry, createViewState, recordImpact } from './telemetry';
+import { findTrackDef } from '../data/tracks';
 import { applyWeather } from './weatherApply';
 import { ShowroomCam } from './showroomCam';
 
@@ -76,6 +77,7 @@ export class Game {
     this.setup = s;
     this.d.results.hide();
     this.views.clear();
+    this.d.world.load(findTrackDef(s.trackId ?? 'kestrel'));
     this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles, this.d.world.surfaces);
     applyTuning(this.d.tuning, s.car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
@@ -153,6 +155,7 @@ export class Game {
     const s = v.racer.car.state;
     this.view.position.x = v.x;
     this.view.position.z = v.z;
+    this.view.position.y = v.holder.position.y;
     this.view.heading = v.heading;
     this.view.speed = s.speed;
     this.view.slipAngle = s.slipAngle;
@@ -176,17 +179,9 @@ export class Game {
     const hit = Math.max(this.rm.player.contact.impact, this.rm.carImpact);
     if (hit > 0.8) this.onImpact?.(hit);
     const pc = this.rm.player.contact;
-    if (pc.impact > this.impact.strength) {
-      this.impact.strength = pc.impact;
-      this.impact.x = pc.contact.x;
-      this.impact.z = pc.contact.z;
-    }
-    if (this.rm.carImpact > this.impact.strength) {
-      const ps = this.rm.player.car.state;
-      this.impact.strength = this.rm.carImpact;
-      this.impact.x = ps.position.x;
-      this.impact.z = ps.position.z;
-    }
+    const ps = this.rm.player.car.state;
+    recordImpact(this.impact, pc.impact, pc.contact.x, pc.contact.z);
+    recordImpact(this.impact, this.rm.carImpact, ps.position.x, ps.position.z);
     if (was === 'RACING' && this.rm.phase === 'FINISHED' && this.rm.result) {
       this.state = 'PODIUM';
       const extra = this.onFinish?.(this.rm.result) ?? undefined;

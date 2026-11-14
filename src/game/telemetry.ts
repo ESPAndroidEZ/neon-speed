@@ -8,3 +8,11 @@ export const createTelemetry = (): RaceTelemetry => ({
 export const createViewState = (): CarState => ({
   position: { x: 0, y: 0, z: 0 }, heading: 0, velocity: { x: 0, y: 0, z: 0 }, speed: 0, yawRate: 0, slipAngle: 0,
 });
+
+/** Keep the strongest hit of the frame (for sparks, shake and bloom). */
+export function recordImpact(into: { strength: number; x: number; z: number }, strength: number, x: number, z: number): void {
+  if (strength <= into.strength) return;
+  into.strength = strength;
+  into.x = x;
+  into.z = z;
+}

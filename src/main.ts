@@ -4,6 +4,8 @@ import { AutoQuality } from './core/quality';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
+import { findTrackDef } from './data/tracks';
+import { finishFreeRace } from './game/freeRace';
 import { AudioTestPanel } from './dev/audioTestPanel';
 import { runDevStart } from './dev/devStart';
 import { DemoInput } from './dev/demoInput';
@@ -98,11 +100,12 @@ panel.add('car', tuning);
 panel.add('chase', game.chase.tuning);
 panel.build();
 
-const launchFree = (w: Weather, rivals: number): void => {
+const launchFree = (w: Weather, rivals: number, trackId: string): void => {
+  const def = findTrackDef(q.get('track') ?? trackId);
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = freeRaceField(rivals);
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null } });
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null } });
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game,
@@ -114,9 +117,9 @@ menu = new Menu({
   onSwap: (fn) => {
     game.views.onSwap = fn ? () => fn() : null;
   },
-  startRace: (w, n) => {
+  startRace: (w, n, trackId) => {
     menu.hide();
-    launchFree(w, n);
+    launchFree(w, n, trackId);
   },
   startEvent: (ev) => story.start(ev),
   slots,
@@ -166,7 +169,8 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', () => pause.autosave());
 game.onFinish = (r) => {
-  const extra = story.finish(r);
+  const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
+  const extra = story.finish(r) ?? free;
   world.setHandprints(store.data.career.completed.length);
   return extra;
 };

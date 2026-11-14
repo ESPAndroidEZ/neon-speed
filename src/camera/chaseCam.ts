@@ -51,6 +51,8 @@ export class ChaseCam implements CameraRig {
   private yaw = 0;
   private dist: number;
   private height: number;
+  /** Smoothed road height under the car: the camera climbs hills with it. */
+  private gy = 0;
   private fov: number;
   private kick = 0;
   private car: CarState | null = null;
@@ -110,6 +112,7 @@ export class ChaseCam implements CameraRig {
       this.yaw = targetYaw;
       this.dist = t.distance;
       this.height = t.height;
+      this.gy = car.position.y;
       this.fov = t.fovMin;
       this.ready = true;
     }
@@ -119,11 +122,12 @@ export class ChaseCam implements CameraRig {
     this.kick = damp(this.kick, this.nitro ? t.nitroKick : 0, this.nitro ? 4 : 2, frameDt);
     this.fov = damp(this.fov, lerp(t.fovMin, t.fovMax, sp) + this.kick, 4, frameDt);
 
+    this.gy = damp(this.gy, car.position.y, 5, frameDt);
     const sy = Math.sin(this.yaw);
     const cy = Math.cos(this.yaw);
     const p = car.position;
-    this._pose.position.set(p.x - sy * this.dist, this.height, p.z - cy * this.dist);
-    this._pose.lookAt.set(p.x + sy * 4, 1.0, p.z + cy * 4);
+    this._pose.position.set(p.x - sy * this.dist, this.height + this.gy, p.z - cy * this.dist);
+    this._pose.lookAt.set(p.x + sy * 4, 1.0 + this.gy, p.z + cy * 4);
     this._pose.fov = this.fov;
   }
 

@@ -20,7 +20,7 @@ function instanced(geo: ConstructorParameters<typeof InstancedMesh>[0], mat: Con
 }
 
 /** Visible props: parked cars, cones, manhole covers, zebra crossings, steam-vent grates, plaza fountain. */
-export function buildProps(layout: PropsLayout, plaza: Plaza): Group {
+export function buildProps(layout: PropsLayout, plaza: Plaza | null): Group {
   const rnd = createRng(5);
   const g = new Group();
   const c = new Color();
@@ -52,6 +52,7 @@ export function buildProps(layout: PropsLayout, plaza: Plaza): Group {
   zebra.count = n;
   g.add(zebra);
 
+  if (!plaza) return g;
   // fountain: stone basin, glowing rim, water disc and a lit column in the island of the plaza hairpin
   const basin = new Mesh(new CylinderGeometry(plaza.r - 6.2, plaza.r - 6.0, 0.4, 28), new MeshStandardMaterial({ color: 0x3a3e48, roughness: 0.8 }));
   basin.position.set(plaza.x, 0.2, plaza.z);

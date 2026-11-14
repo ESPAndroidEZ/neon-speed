@@ -5,10 +5,17 @@ import type { Game } from './game';
 
 /** HUD extras tied to the current track: the minimap (hidden outside races). */
 export function installMinimap(game: Game, world: World, onFrame: (fn: () => void) => void): void {
-  const map = createMinimap(document.body, world.track.samples);
+  let track = world.track;
+  let map = createMinimap(document.body, track.samples);
   const states: CarState[] = [];
   let shown = true;
   onFrame(() => {
+    if (world.track !== track) {
+      track = world.track;
+      map.dispose();
+      map = createMinimap(document.body, track.samples);
+      shown = true;
+    }
     const show = game.state === 'RACING' || game.state === 'PODIUM';
     if (show !== shown) {
       shown = show;

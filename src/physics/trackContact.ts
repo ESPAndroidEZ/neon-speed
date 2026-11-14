@@ -31,6 +31,9 @@ export class TrackContact {
   /** World contact point of the latest hit. */
   readonly contact = { x: 0, z: 0 };
   offroad = false;
+  /** Road height under the car and the nose-up angle of the road along its heading (visual only). */
+  groundY = 0;
+  pitch = 0;
   obstacles: ObstacleField | null = null;
   surfaces: SurfaceMap | null = null;
   /** What the tyres are on right now (puddle, ice, snow bank or dry). */
@@ -68,6 +71,13 @@ export class TrackContact {
     this.impact = 0;
     this.scrape = 0;
     locate(tr, st.position.x, st.position.z, this.hit.index, this.hit);
+    const hs = tr.heights;
+    const hn = hs.length;
+    const slope = (hs[(this.hit.index + 1) % hn] - hs[(this.hit.index + hn - 1) % hn]) / (2 * tr.spacing);
+    this.groundY = hs[this.hit.index] + slope * (this.hit.along - this.hit.index * tr.spacing);
+    const tg = tr.samples[this.hit.index].tangent;
+    this.pitch = Math.atan(slope * (Math.sin(st.heading) * tg.x + Math.cos(st.heading) * tg.z));
+    st.position.y = this.groundY;
     this.offroad = Math.abs(this.hit.lateral) > halfWidthAt(tr, this.hit.index) + 0.3;
     const sf = this.surface;
     if (this.surfaces) this.surfaces.query(this.hit.index, this.hit.lateral, st.position.x, st.position.z, Math.abs(st.speed), sf);

@@ -6,7 +6,7 @@ import { zoneRun } from './tunnelBridge';
 
 const BOX_COLORS = [0xb3262b, 0x2459a8, 0xd8a31a, 0x2f8f5b, 0x8a8f99, 0xe0662b];
 
-function crane(): Group {
+export function crane(): Group {
   const g = new Group();
   const steel = new MeshStandardMaterial({ color: 0xd0451b, roughness: 0.6, metalness: 0.5 });
   const dark = new MeshStandardMaterial({ color: 0x2b3038, roughness: 0.7, metalness: 0.6 });
