@@ -27,6 +27,7 @@ export function applyAppearance(t: AppearanceTargets, l: Loadout, paintHex: numb
   p.iridescenceThicknessRange = [200, 520];
   p.sheen = l.finish === 'pearl' ? 1 : 0;
   p.sheenColor.set(0xffffff);
+  p.envMapIntensity = l.finish === 'shift' ? 0.7 : l.finish === 'chrome' ? 1.1 : l.finish === 'matte' ? 0.5 : 1.4;
   p.bumpScale = l.finish === 'chrome' || l.finish === 'matte' ? 0 : 0.35;
   const vinyl = l.vinyl.kind || l.vinyl.number;
   p.map?.dispose();

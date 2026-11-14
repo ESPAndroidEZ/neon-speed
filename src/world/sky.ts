@@ -61,7 +61,7 @@ export function buildSky(p: Palette, seed = 12): Sky {
   if (p.skyline.count > 0) {
     for (const [ring, dist, shade] of [[0, 520, 0.55], [1, 420, 0.85]] as const) {
       const n = p.skyline.count;
-      const m = new InstancedMesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ color: new Color(p.fog).multiplyScalar(shade * 1.5), fog: true }), n);
+      const m = new InstancedMesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ color: new Color(p.fog).multiplyScalar(shade * 0.9), fog: true }), n);
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2 + rnd() * 0.05 + ring * 0.03;
         const h = p.skyline.min + rnd() * (p.skyline.max - p.skyline.min) * (ring ? 0.7 : 1);
