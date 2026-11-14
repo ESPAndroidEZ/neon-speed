@@ -1,6 +1,6 @@
 # Handoff
 
-Baton: qwen
+Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
 Updated: 2026-11-14 (Claude, feedback round 3 done).
