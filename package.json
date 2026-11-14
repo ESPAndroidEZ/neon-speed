@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done",
     "smoke": "scripts/smoke.sh",
+    "handling": "tsx tests/lab/handling-lab.mts",
     "visual": "node scripts/visual-check.mjs",
     "mobile:sync": "npm run build && cap sync",
     "mobile:android": "npm run mobile:sync && cap open android",

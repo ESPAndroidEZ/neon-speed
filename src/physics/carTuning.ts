@@ -57,6 +57,17 @@ export interface CarTuning {
   throttleLag: number;
   /** Engine braking when lifting, in g at the redline. */
   engineBraking: number;
+  /** Slide stability (physics/stability): extra yaw damping at full slide, extra yaw damping under braking. */
+  slideDamp: number;
+  brakeStab: number;
+  /** Slide angle (rad) past which a restoring yaw moment builds, and its strength (rad/s^2 per rad; 0 = off). */
+  slideCap: number;
+  slideGain: number;
+  /** How much using the rear tyres for drive or braking costs sideways grip (0..1), and the least sideways grip left. */
+  powerSlide: number;
+  powerFloor: number;
+  /** Extra steering lock below ~30 km/h as a fraction of `maxSteer` (tight U-turns and parking). */
+  parkSteer: number;
 }
 
 export const GEAR_RATIOS: readonly number[] = [3.6, 2.2, 1.55, 1.2, 0.97, 0.8];
@@ -102,9 +113,16 @@ export function createDefaultTuning(): CarTuning {
     cgHeight: 0.42,
     rollFront: 0.5,
     loadSens: 0.22,
-    brakeBias: 0.6,
+    brakeBias: 0.68,
     throttleLag: 0,
     engineBraking: 0.06,
+    slideDamp: 1.2,
+    brakeStab: 5,
+    slideCap: 0.58,
+    slideGain: 14,
+    powerSlide: 0.72,
+    powerFloor: 0.45,
+    parkSteer: 0.3,
   };
 }
 

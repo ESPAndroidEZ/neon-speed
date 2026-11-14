@@ -8,6 +8,7 @@ import { tireLateral } from './tire';
 import { restoreCar, snapshotCar } from './carSnapshot';
 import { steerAngle } from './steering';
 import { LoadTransfer } from './loadTransfer';
+import { slideDamping, slideYaw } from './stability';
 import { createAssist, type Assist } from './assists';
 
 const G = 9.81;
@@ -105,7 +106,7 @@ export class CarController {
     const { u, v, r } = this;
     const g = weather.grip * this.surfaceGrip;
     const env = weather as Partial<PhysicsEnv>;
-    const yawMul = (env.yawDampMul ?? 1) * (1 + 0.4 * as.steer);
+    const yawMul = (env.yawDampMul ?? 1) * (1 + 0.4 * as.steer) * slideDamping(t, u, v, dtn.brakeCmd, this.hbFactor);
     const assistMul = env.assistMul ?? 1;
     const rearMul = env.rearGripMul ?? 1;
     const absU = Math.abs(u);
@@ -129,7 +130,7 @@ export class CarController {
     const useF = (bk * t.brakeBias * (1 - 0.45 * as.brake)) / (t.gripFront * fzF);
     const useBR = (bk * (1 - t.brakeBias)) / (t.gripRear * fzR);
     const usage = Math.max(Math.abs(fxDrive) / (tractionLimit + 1), useBR);
-    const latScale = Math.max(0.45, Math.sqrt(Math.max(0, 1 - usage * usage * 0.72)));
+    const latScale = Math.max(t.powerFloor, Math.sqrt(Math.max(0, 1 - usage * usage * t.powerSlide)));
     const latScaleF = Math.max(0.5, Math.sqrt(Math.max(0, 1 - useF * useF * 0.55)));
     const alphaF = Math.atan2(v + t.cgToFront * r, slipDen) - (u >= 0 ? 1 : -1) * delta;
     const alphaR = Math.atan2(v - t.cgToRear * r, slipDen);
@@ -148,12 +149,11 @@ export class CarController {
     this.ayRaw = (fyF * cd + fyR) / t.mass;
     const du = this.axRaw + v * r;
     const dv = this.ayRaw - u * r;
-    const dr = (t.cgToFront * fyF * cd - t.cgToRear * fyR - t.yawDamping * yawMul * r) / t.inertia;
+    const dr = (t.cgToFront * fyF * cd - t.cgToRear * fyR - t.yawDamping * yawMul * r) / t.inertia + slideYaw(t, u, v, this.hbFactor);
     this.u += du * dt;
     this.v += dv * dt;
     this.r += dr * dt;
     if (absU < 3 && !input.handbrake) this.v *= Math.exp(-5 * dt * (1 - sf));
-
     s.heading = wrapAngle(s.heading + this.r * dt);
     this.publish();
     s.position.x += s.velocity.x * dt;
