@@ -43,7 +43,10 @@ const results = new ResultsScreen(document.body, { onAgain: () => game.restart()
 const game = new Game({ engine, world, hud, results, input, tuning });
 new Juice(engine, game);
 const audio = new AudioManager(game);
-engine.onFrame((_a, dt) => audio.update(dt));
+engine.onFrame((_a, dt) => {
+  audio.update(dt);
+  world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
+});
 applySettings({ store, audio: audio.bus, engine });
 
 const panel = new TuningPanel(document.body);
@@ -104,6 +107,12 @@ window.addEventListener('keydown', (e) => {
 game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
 if (direct) {
   launch(game.weather);
+  const at = q.get('at'); // dev: start at a zone (tunnel, bridge, dock, plaza, alley) or a sample index
+  if (at) {
+    const idx = Number.isNaN(Number(at)) ? world.track.zones.indexOf(at as never) + 6 : Number(at);
+    game.rm.player.contact.place(game.rm.player.car, Math.max(0, idx));
+    game.views.update(0, 0);
+  }
   if (q.has('ff')) game.fastForward(Number(q.get('ff')));
 } else {
   if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car

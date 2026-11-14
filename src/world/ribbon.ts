@@ -1,9 +1,17 @@
 import { BufferAttribute, BufferGeometry } from 'three';
 import type { Track } from './track';
 
-/** Position on the ground at lateral offset `off` from sample i (left of travel = positive). */
-const px = (tr: Track, i: number, off: number): number => tr.samples[i % tr.samples.length].position.x + tr.samples[i % tr.samples.length].tangent.z * off;
-const pz = (tr: Track, i: number, off: number): number => tr.samples[i % tr.samples.length].position.z - tr.samples[i % tr.samples.length].tangent.x * off;
+/** A lateral offset from the centre line: constant, or per sample (left of travel = positive). */
+export type Off = number | ((i: number) => number);
+const val = (o: Off, i: number): number => (typeof o === 'number' ? o : o(i));
+const wrap = (tr: Track, i: number): number => i % tr.samples.length;
+
+/** Ground position at lateral offset `off` from sample i. */
+export function lateralPoint(tr: Track, i: number, off: number, out: { x: number; z: number }): void {
+  const s = tr.samples[wrap(tr, i)];
+  out.x = s.position.x + s.tangent.z * off;
+  out.z = s.position.z - s.tangent.x * off;
+}
 
 function finish(pos: number[], uv: number[], idx: number[], col?: number[]): BufferGeometry {
   const g = new BufferGeometry();
@@ -15,49 +23,40 @@ function finish(pos: number[], uv: number[], idx: number[], col?: number[]): Buf
   return g;
 }
 
+/** Predicate over sample index: only quads whose two end samples both pass are emitted. */
+export type Keep = (i: number) => boolean;
+
 /** Flat strip between two lateral offsets at height y. V runs along the lap in `vScale` metre tiles. */
-export function ribbon(tr: Track, offA: number, offB: number, y: number, vScale = 16): BufferGeometry {
+export function ribbon(tr: Track, offA: Off, offB: Off, y: number, vScale = 16, keep: Keep = () => true): BufferGeometry {
   const n = tr.samples.length;
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
+  const p = { x: 0, z: 0 };
   for (let i = 0; i <= n; i++) {
-    pos.push(px(tr, i, offA), y, pz(tr, i, offA), px(tr, i, offB), y, pz(tr, i, offB));
+    lateralPoint(tr, i, val(offA, wrap(tr, i)), p);
+    pos.push(p.x, y, p.z);
+    lateralPoint(tr, i, val(offB, wrap(tr, i)), p);
+    pos.push(p.x, y, p.z);
     uv.push(0, (i * tr.spacing) / vScale, 1, (i * tr.spacing) / vScale);
-    if (i < n) {
-      const a = i * 2;
-      idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-    }
+    if (i < n && keep(i) && keep(wrap(tr, i + 1))) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
   }
   return finish(pos, uv, idx);
 }
 
-/**
- * Striped kerb or wall block: a ribbon with alternating vertex colours every `stripe` samples.
- * Wall: vertical inside face plus top. `height` 0 gives a flat kerb.
- */
-export function stripedBand(tr: Track, offA: number, offB: number, y: number, height: number, ca: readonly number[], cb: readonly number[], stripe = 2): BufferGeometry {
+/** Vertical wall at lateral offset `off`, from y0 to y1 (y1 may vary per sample). UV in metres / tile. */
+export function wallStrip(tr: Track, off: Off, y0: number, y1: number | ((i: number) => number), tile = 16, keep: Keep = () => true): BufferGeometry {
   const n = tr.samples.length;
   const pos: number[] = [];
-  const col: number[] = [];
+  const uv: number[] = [];
   const idx: number[] = [];
-  const rings = height > 0 ? 3 : 2; // inner-bottom, inner-top, outer-top (or inner/outer flat)
+  const p = { x: 0, z: 0 };
   for (let i = 0; i <= n; i++) {
-    const c = Math.floor(i / stripe) % 2 === 0 ? ca : cb;
-    if (height > 0) pos.push(px(tr, i, offA), y, pz(tr, i, offA), px(tr, i, offA), y + height, pz(tr, i, offA), px(tr, i, offB), y + height, pz(tr, i, offB));
-    else pos.push(px(tr, i, offA), y, pz(tr, i, offA), px(tr, i, offB), y, pz(tr, i, offB));
-    for (let k = 0; k < rings; k++) col.push(c[0], c[1], c[2]);
-    if (i < n) {
-      for (let k = 0; k < rings - 1; k++) {
-        const a = i * rings + k;
-        const b = a + rings;
-        idx.push(a, a + 1, b, a + 1, b + 1, b);
-      }
-    }
+    const top = typeof y1 === 'number' ? y1 : y1(wrap(tr, i));
+    lateralPoint(tr, i, val(off, wrap(tr, i)), p);
+    pos.push(p.x, y0, p.z, p.x, top, p.z);
+    uv.push((i * tr.spacing) / tile, 0, (i * tr.spacing) / tile, (top - y0) / tile);
+    if (i < n && keep(i) && keep(wrap(tr, i + 1))) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
   }
-  const uv = new Array<number>((pos.length / 3) * 2).fill(0);
-  const g = finish(pos, uv, idx, col);
-  return g;
+  return finish(pos, uv, idx);
 }
-
-export { px as lateralX, pz as lateralZ };

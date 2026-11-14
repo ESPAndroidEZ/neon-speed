@@ -26,7 +26,7 @@ export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
   t.groundMat.color.setHex(snow ? 0x8f99ad : 0x14161c);
   t.groundMat.roughness = snow ? 0.95 : 0.9;
   t.waterMat.envMap = t.env;
-  t.poolMat.opacity = wet ? 0.95 : snow ? 0.3 : 0.5;
+  t.poolMat.opacity = wet ? 0.8 : snow ? 0.25 : 0.38;
   t.waterMat.roughness = snow ? 0.3 : 0.08 + p.precipitation * 0.1;
   for (const m of [t.roadMat, t.vergeMat, t.groundMat, t.waterMat]) m.needsUpdate = true;
 }

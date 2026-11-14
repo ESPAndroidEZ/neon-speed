@@ -19,11 +19,15 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 - `game/`: `game` (state machine, race + cameras + HUD), `racerViews` (one visual car per racer), `showroomCam` (menu orbit).
 - `physics/` (pure TS, no three): `carController` (bicycle model, friction circle, handbrake, nudge for impacts),
   `drivetrain` (6-speed auto, reverse, nitro), `tire`, `driftScorer`, `weather` (grip multipliers),
-  `carCollision` (car-car, 2 circles each), `trackContact` (verge grip loss, barrier bounce with 4 corners, place/reset on track), `carTuning`.
-- `world/`: `track` (pure Catmull-Rom closed track, even spacing), `trackQuery` (nearest sample, lateral offset),
-  `harborLoop` (the circuit), `ribbon`/`trackMesh` (road, kerbs, barriers, neon caps), `city` (instanced
-  buildings), `streetFurniture` (lamps, light pools, neon signs), `harbor` (quay, containers, cranes, water),
-  `envMap` (fake neon reflection probe), `worldLook` (WeatherProfile -> materials), `world` (assembler).
+  `carCollision` (car-car, 2 circles each), `obstacles` (static circles by sample), `trackContact` (verge grip loss, wall + obstacle bounce on 12 body points, place/reset on track), `carTuning`.
+- `world/` track (pure): `streetPath` (street polygon with rounded corners -> dense path tagged by zone and width), `track`
+  (even resampling, per-sample width, wall offset and zone, rotated so index 0 is the start line), `kestrelBay` (the circuit:
+  vertex list + plaza), `trackQuery` (nearest sample, lateral offset), `propsLayout` (parked cars with collision circles, cones,
+  manholes, crosswalks, steam vents; deterministic).
+- `world/` meshes: `ribbon` (road/wall strips with per-sample offsets), `trackMesh` (worn asphalt, sidewalks, ground), `facades`
+  (continuous flush buildings, windows, lit shopfronts, plaza rim), `tunnelBridge`, `dock` (containers, cranes, water),
+  `props`, `furniture` (wall lamps + light pools, neon signs, overhead cables), `steam`, `envMap`, `worldLook` (weather ->
+  materials), `world` (assembler), `textures`.
 - `data/cars.ts`: 5 car specs (real names only here), CarTuning overrides, BodyShape, model config, prices, paints, underglow colours.
 - `physics/carStats`: headless 0-100 / top speed / slide measurement used by the garage bars and tests.
 - `world/carBody` + `proceduralCar`: low-poly body from a BodyShape, spinning/steering wheels, lights, underglow, pitch/roll.

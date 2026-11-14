@@ -1,75 +1,74 @@
 import type { TrackSample } from '../types/game';
+import type { DensePath, Zone } from './streetPath';
 
 /** Pure track data (no three). Samples are evenly spaced along the closed centre line. */
 export interface Track {
   readonly name: string;
   readonly samples: TrackSample[];
+  /** Zone of each sample (street, alley, plaza, tunnel, bridge, dock). */
+  readonly zones: Zone[];
+  /** Lateral distance from the centre line to the wall, per sample, metres. */
+  readonly wall: Float32Array;
   readonly spacing: number;
   readonly length: number;
-  /** Half of the drivable width, metres. */
-  readonly halfWidth: number;
-  /** Lateral distance from the centre line to the barrier, metres. */
-  readonly barrierOffset: number;
 }
 
-export type Ctrl = readonly (readonly [number, number])[];
+const WALL_GAP: Record<Zone, number> = { street: 0.7, alley: 0.6, plaza: 0.9, tunnel: 0.8, bridge: 1.0, dock: 1.0 };
 
-/** Centripetal Catmull-Rom point (Barry-Goldman) for t in [0,1] between p1 and p2. */
-function crPoint(p0: readonly number[], p1: readonly number[], p2: readonly number[], p3: readonly number[], t: number, out: number[]): void {
-  const knot = (a: readonly number[], b: readonly number[]): number => Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1])) || 1e-4;
-  const t0 = 0;
-  const t1 = t0 + knot(p0, p1);
-  const t2 = t1 + knot(p1, p2);
-  const t3 = t2 + knot(p2, p3);
-  const tt = t1 + (t2 - t1) * t;
-  for (let k = 0; k < 2; k++) {
-    const a1 = ((t1 - tt) / (t1 - t0)) * p0[k] + ((tt - t0) / (t1 - t0)) * p1[k];
-    const a2 = ((t2 - tt) / (t2 - t1)) * p1[k] + ((tt - t1) / (t2 - t1)) * p2[k];
-    const a3 = ((t3 - tt) / (t3 - t2)) * p2[k] + ((tt - t2) / (t3 - t2)) * p3[k];
-    const b1 = ((t2 - tt) / (t2 - t0)) * a1 + ((tt - t0) / (t2 - t0)) * a2;
-    const b2 = ((t3 - tt) / (t3 - t1)) * a2 + ((tt - t1) / (t3 - t1)) * a3;
-    out[k] = ((t2 - tt) / (t2 - t1)) * b1 + ((tt - t1) / (t2 - t1)) * b2;
-  }
-}
+/** Half of the drivable width at sample i. */
+export const halfWidthAt = (tr: Track, i: number): number => tr.samples[i].width / 2;
 
-/** Build a closed track from control points, resampled to uniform arc length. */
-export function createTrack(name: string, ctrl: Ctrl, width: number, spacing = 3, barrierOffset = width / 2 + 2): Track {
-  const n = ctrl.length;
-  const dense: number[][] = [];
-  const tmp = [0, 0];
-  for (let i = 0; i < n; i++) {
-    for (let s = 0; s < 48; s++) {
-      crPoint(ctrl[(i + n - 1) % n], ctrl[i], ctrl[(i + 1) % n], ctrl[(i + 2) % n], s / 48, tmp);
-      dense.push([tmp[0], tmp[1]]);
-    }
-  }
-  const m = dense.length;
+/** Resample a dense street path to even spacing, smoothing width changes over about 36 m. */
+export function createTrackFromPath(name: string, path: DensePath, spacing = 3, start?: readonly [number, number]): Track {
+  const pts = path.pts;
+  const m = pts.length;
   const cum: number[] = [0];
-  for (let i = 1; i <= m; i++) {
-    const a = dense[i - 1];
-    const b = dense[i % m];
-    cum.push(cum[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1]));
-  }
+  for (let i = 1; i <= m; i++) cum.push(cum[i - 1] + Math.hypot(pts[i % m][0] - pts[i - 1][0], pts[i % m][1] - pts[i - 1][1]));
   const total = cum[m];
   const count = Math.round(total / spacing);
   const step = total / count;
-  const pts: number[][] = [];
+  const xy: [number, number][] = [];
+  const zones: Zone[] = [];
+  const rawW: number[] = [];
   let j = 0;
   for (let i = 0; i < count; i++) {
     const d = i * step;
     while (cum[j + 1] < d) j++;
-    const f = (d - cum[j]) / (cum[j + 1] - cum[j]);
-    const a = dense[j];
-    const b = dense[(j + 1) % m];
-    pts.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+    const f = (d - cum[j]) / (cum[j + 1] - cum[j] || 1);
+    const a = pts[j];
+    const b = pts[(j + 1) % m];
+    xy.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+    zones.push(f < 0.5 ? path.zone[j] : path.zone[(j + 1) % m]);
+    rawW.push(path.width[j]);
   }
-  const samples: TrackSample[] = pts.map((p, i) => {
-    const a = pts[(i + count - 1) % count];
-    const b = pts[(i + 1) % count];
+  // Rotate so index 0 is the sample nearest `start` (the start/finish line).
+  if (start) {
+    let best = 0;
+    let bd = Infinity;
+    xy.forEach((p, i) => {
+      const d = Math.hypot(p[0] - start[0], p[1] - start[1]);
+      if (d < bd) {
+        bd = d;
+        best = i;
+      }
+    });
+    const rot = <T>(a: T[]): T[] => a.slice(best).concat(a.slice(0, best));
+    xy.splice(0, count, ...rot(xy));
+    zones.splice(0, count, ...rot(zones));
+    rawW.splice(0, count, ...rot(rawW));
+  }
+  const win = Math.max(1, Math.round(18 / step));
+  const samples: TrackSample[] = xy.map((p, i) => {
+    const a = xy[(i + count - 1) % count];
+    const b = xy[(i + 1) % count];
     const len = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    return { position: { x: p[0], y: 0, z: p[1] }, tangent: { x: (b[0] - a[0]) / len, y: 0, z: (b[1] - a[1]) / len }, width };
+    let w = 0;
+    for (let k = -win; k <= win; k++) w += rawW[(i + k + count * 4) % count];
+    return { position: { x: p[0], y: 0, z: p[1] }, tangent: { x: (b[0] - a[0]) / len, y: 0, z: (b[1] - a[1]) / len }, width: w / (win * 2 + 1) };
   });
-  return { name, samples, spacing: step, length: total, halfWidth: width / 2, barrierOffset };
+  const wall = new Float32Array(count);
+  for (let i = 0; i < count; i++) wall[i] = samples[i].width / 2 + WALL_GAP[zones[i]];
+  return { name, samples, zones, wall, spacing: step, length: total };
 }
 
 /** Signed curvature (1/m) at sample i; positive = turning left (heading increases). */
@@ -84,3 +83,6 @@ export function curvatureAt(track: Track, i: number): number {
   while (d < -Math.PI) d += 2 * Math.PI;
   return d / (2 * track.spacing);
 }
+
+/** Index of the first sample whose zone is `zone` (or -1). */
+export const firstOfZone = (tr: Track, zone: Zone): number => tr.zones.indexOf(zone);

@@ -2,7 +2,7 @@ import { RaceManager } from '../src/core/raceManager.ts';
 import { resolveCarPair } from '../src/physics/carCollision.ts';
 import { CarController } from '../src/physics/carController.ts';
 import { createDefaultTuning } from '../src/physics/carTuning.ts';
-import { createHarborLoop } from '../src/world/harborLoop.ts';
+import { createKestrelBay } from '../src/world/kestrelBay.ts';
 import { curvatureAt } from '../src/world/track.ts';
 import { createNeutralInput } from '../src/types/game.ts';
 import type { AIRacerAgent, CarInput, CarState, AIWorldView } from '../src/types/game.ts';
@@ -12,7 +12,7 @@ const check = (n: string, ok: boolean, i: string): void => {
   if (!ok) failed++;
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}  (${i})`);
 };
-const track = createHarborLoop();
+const track = createKestrelBay();
 const N = track.samples.length;
 const D = 1 / 60;
 const curv = Array.from({ length: N }, (_, i) => Math.abs(curvatureAt(track, i)));
@@ -68,7 +68,7 @@ const none = createNeutralInput();
   while (rm.phase !== 'FINISHED' && steps++ < 60 * 400) rm.step(D, wrap.decide(D, p.car.state, world), 'CLEAR');
   check('time trial finishes 3 laps', rm.phase === 'FINISHED' && !!rm.result, `${rm.raceTime.toFixed(1)} s, laps ${p.laps.laps}`);
   check('single racer is P1 with cash', rm.result?.position === 1 && (rm.result?.cash ?? 0) > 0, `cash ${rm.result?.cash}`);
-  check('best lap recorded & plausible', p.bestLap > 20 && p.bestLap < 90, `${p.bestLap.toFixed(1)} s`);
+  check('best lap recorded & plausible', p.bestLap > 40 && p.bestLap < 140, `${p.bestLap.toFixed(1)} s`);
   check('lap time sums to total', Math.abs(rm.result!.totalTime - rm.raceTime) < 0.1, `${rm.result?.totalTime.toFixed(1)}`);
 }
 

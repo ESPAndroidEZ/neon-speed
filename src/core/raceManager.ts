@@ -1,6 +1,7 @@
 import { CarController } from '../physics/carController';
 import { resolveCarPair } from '../physics/carCollision';
 import type { CarTuning } from '../physics/carTuning';
+import type { ObstacleField } from '../physics/obstacles';
 import { TrackContact } from '../physics/trackContact';
 import { WEATHER } from '../physics/weather';
 import type { Track } from '../world/track';
@@ -36,10 +37,12 @@ export class RaceManager {
   private readonly states: CarState[] = [];
   private readonly view: AIWorldView;
   private readonly track: Track;
+  private readonly obstacles: ObstacleField | null;
   private playerIdx = 0;
 
-  constructor(track: Track, totalLaps = 3) {
+  constructor(track: Track, totalLaps = 3, obstacles: ObstacleField | null = null) {
     this.track = track;
+    this.obstacles = obstacles;
     this.totalLaps = totalLaps;
     this.view = { track: track.samples, racers: this.states, playerIndex: 0 };
   }
@@ -51,8 +54,10 @@ export class RaceManager {
   /** Add a racer. Call before `start`. The player's tuning object is used as given (live-tunable). */
   addRacer(id: string, name: string, tuning: CarTuning, agent: AIRacerAgent | null, isPlayer = false): Racer {
     const car = new CarController(tuning);
+    const contact = new TrackContact(this.track);
+    contact.obstacles = this.obstacles;
     const r: Racer = {
-      id, name, isPlayer, car, contact: new TrackContact(this.track), laps: new LapCounter(this.track), agent,
+      id, name, isPlayer, car, contact, laps: new LapCounter(this.track), agent,
       input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0,
     };
     if (isPlayer) {

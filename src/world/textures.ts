@@ -1,4 +1,5 @@
 import { CanvasTexture, LinearFilter, RepeatWrapping, SRGBColorSpace } from 'three';
+import { createRng } from '../core/rng';
 
 const canvas = (w: number, h: number): [HTMLCanvasElement, CanvasRenderingContext2D] => {
   const c = document.createElement('canvas');
@@ -17,35 +18,68 @@ const finish = (c: HTMLCanvasElement, srgb: boolean): CanvasTexture => {
   return t;
 };
 
-/** Asphalt with centre dashes and edge lines. U across the road (0..1), V along it (one tile = 16 m). */
+/**
+ * Worn city asphalt: grain, patched repairs, cracks, oil stains and faded tyre lines. No lane markings:
+ * this is a street, not a highway. U across the road (0..1), V along it (one tile = 16 m).
+ */
 export function makeRoadTexture(): CanvasTexture {
-  const [c, g] = canvas(256, 512);
-  g.fillStyle = '#17181f';
-  g.fillRect(0, 0, 256, 512);
-  for (let i = 0; i < 9000; i++) {
-    const v = 20 + Math.random() * 28;
-    g.fillStyle = `rgba(${v},${v},${v + 4},0.5)`;
-    g.fillRect(Math.random() * 256, Math.random() * 512, 2, 2);
+  const rnd = createRng(99);
+  const [c, g] = canvas(512, 1024);
+  g.fillStyle = '#1a1b21';
+  g.fillRect(0, 0, 512, 1024);
+  for (let i = 0; i < 26000; i++) {
+    const v = 18 + rnd() * 30;
+    g.fillStyle = `rgba(${v},${v},${v + 5},0.55)`;
+    g.fillRect(rnd() * 512, rnd() * 1024, 1 + rnd() * 2, 1 + rnd() * 2);
   }
-  g.fillStyle = '#d8dce8';
-  g.fillRect(8, 0, 5, 512);
-  g.fillRect(243, 0, 5, 512);
-  g.fillStyle = '#e8c85a';
-  for (let y = 0; y < 512; y += 128) g.fillRect(125, y, 6, 64);
+  for (let i = 0; i < 14; i++) { // repaired patches: slightly different tone, hard edges
+    const v = 14 + rnd() * 16;
+    g.fillStyle = `rgb(${v},${v},${v + 4})`;
+    g.fillRect(rnd() * 440, rnd() * 960, 40 + rnd() * 120, 30 + rnd() * 110);
+  }
+  g.strokeStyle = 'rgba(0,0,0,0.6)';
+  g.lineWidth = 1.2;
+  for (let i = 0; i < 40; i++) { // cracks
+    let x = rnd() * 512;
+    let y = rnd() * 1024;
+    g.beginPath();
+    g.moveTo(x, y);
+    for (let k = 0; k < 8; k++) {
+      x += (rnd() - 0.5) * 30;
+      y += rnd() * 26;
+      g.lineTo(x, y);
+    }
+    g.stroke();
+  }
+  for (let i = 0; i < 10; i++) { // oil stains
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, 40);
+    gr.addColorStop(0, 'rgba(6,6,10,0.7)');
+    gr.addColorStop(1, 'rgba(6,6,10,0)');
+    g.save();
+    g.translate(60 + rnd() * 390, rnd() * 1024);
+    g.scale(1, 1.8);
+    g.fillStyle = gr;
+    g.fillRect(-40, -40, 80, 80);
+    g.restore();
+  }
+  g.fillStyle = 'rgba(0,0,0,0.25)'; // two faded wheel tracks
+  g.fillRect(150, 0, 34, 1024);
+  g.fillRect(328, 0, 34, 1024);
   return finish(c, true);
 }
 
-/** Window grid for building facades. `warm` picks the lit-window tint. */
+/** Window grid for building facades. `warm` picks the lit-window tint. One tile = 8 x 8 windows. */
 export function makeWindowTexture(warm: boolean): CanvasTexture {
+  const rnd = createRng(warm ? 3 : 4);
   const [c, g] = canvas(128, 128);
   g.fillStyle = '#05060a';
   g.fillRect(0, 0, 128, 128);
   const tints = warm ? ['#ffd890', '#ffb060', '#fff0c0'] : ['#8fd8ff', '#c0a0ff', '#ffffff'];
   for (let y = 0; y < 8; y++)
     for (let x = 0; x < 8; x++) {
-      if (Math.random() < 0.45) continue;
-      g.fillStyle = tints[Math.floor(Math.random() * tints.length)];
-      g.globalAlpha = 0.5 + Math.random() * 0.5;
+      if (rnd() < 0.5) continue;
+      g.fillStyle = tints[Math.floor(rnd() * tints.length)];
+      g.globalAlpha = 0.5 + rnd() * 0.5;
       g.fillRect(x * 16 + 3, y * 16 + 4, 10, 8);
     }
   return finish(c, true);

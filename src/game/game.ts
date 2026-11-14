@@ -64,7 +64,7 @@ export class Game {
 
   constructor(d: GameDeps) {
     this.d = d;
-    this.rm = new RaceManager(d.world.track, 3);
+    this.rm = new RaceManager(d.world.track, 3, d.world.obstacles);
     this.chase = new ChaseCam(d.engine.camera);
     this.chase.setTarget(this.view);
     this.views = new RacerViews(d.engine.scene, d.world.env);
@@ -93,7 +93,7 @@ export class Game {
     this.setup = s;
     this.d.results.hide();
     this.views.clear();
-    this.rm = new RaceManager(this.d.world.track, s.laps);
+    this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles);
     applyTuning(this.d.tuning, s.car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
@@ -121,7 +121,7 @@ export class Game {
     this.state = 'MENU';
     this.d.results.hide();
     this.views.clear();
-    this.rm = new RaceManager(this.d.world.track, 3);
+    this.rm = new RaceManager(this.d.world.track, 3, this.d.world.obstacles);
     applyTuning(this.d.tuning, car.tuning);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
     this.views.add(this.rm.player, car, paint, glow);
