@@ -1,5 +1,8 @@
 import { setLoadout as setLiveLoadout } from '../world/loadoutStore';
-import { sanitizeLoadout, type Loadout } from '../data/loadout';
+import { setBuild } from '../data/carBuild';
+import { defaultSetup, type Setup } from '../data/setup';
+import type { UpgradeId, Upgrades } from '../data/upgrades';
+import type { Loadout } from '../data/loadout';
 import type { LookId } from './looks';
 import type { Difficulty } from '../physics/aiDifficulty';
 import type { AssistLevel } from '../physics/assists';
@@ -24,6 +27,9 @@ export interface SaveData {
   trackBest: Record<string, number>;
   /** Saved appearance per car id (finish, vinyl, rims, tint, lights, stance). */
   loadouts: Record<string, Loadout>;
+  /** Installed performance upgrades and the tuning setup per car id. */
+  upgrades: Record<string, Upgrades>;
+  setups: Record<string, Setup>;
   settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId };
   races: number;
   career: CareerState;
@@ -36,7 +42,6 @@ export interface KeyValueStore {
 }
 
 const KEY = 'racers-blood-save-v1';
-const WEATHERS: readonly Weather[] = ['CLEAR', 'RAIN', 'SNOW'];
 
 export const defaultSave = (starterId: string, starterPaint: number): SaveData => ({
   version: 1,
@@ -48,72 +53,15 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
   trackBest: {},
   loadouts: {},
+  upgrades: {},
+  setups: {},
   settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon' },
   races: 0,
   career: defaultCareer(),
 });
 
-const num = (v: unknown, fallback: number, lo: number, hi: number): number => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback);
-
-/** Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field; never throws. */
-export function parseSave(raw: string | null, base: SaveData, knownCars: readonly string[]): SaveData {
-  const out: SaveData = JSON.parse(JSON.stringify(base)) as SaveData;
-  if (!raw) return out;
-  let j: Record<string, unknown>;
-  try {
-    j = JSON.parse(raw) as Record<string, unknown>;
-  } catch {
-    return out;
-  }
-  if (typeof j !== 'object' || j === null) return out;
-  out.cash = Math.floor(num(j.cash, out.cash, 0, 1e9));
-  out.races = Math.floor(num(j.races, 0, 0, 1e6));
-  if (Array.isArray(j.owned)) {
-    const owned = j.owned.filter((id): id is string => typeof id === 'string' && knownCars.includes(id));
-    if (owned.length > 0) out.owned = [...new Set(owned)];
-  }
-  out.selected = typeof j.selected === 'string' && out.owned.includes(j.selected) ? j.selected : out.owned[0];
-  if (typeof j.paint === 'object' && j.paint !== null) {
-    for (const [id, c] of Object.entries(j.paint as Record<string, unknown>)) if (knownCars.includes(id)) out.paint[id] = num(c, 0xffffff, 0, 0xffffff);
-  }
-  if (typeof j.glow === 'object' && j.glow !== null) {
-    for (const [id, c] of Object.entries(j.glow as Record<string, unknown>)) if (knownCars.includes(id)) out.glow[id] = num(c, 0x2a6bff, 0, 0xffffff);
-  }
-  if (typeof j.bestLap === 'object' && j.bestLap !== null) {
-    const b = j.bestLap as Record<string, unknown>;
-    for (const w of WEATHERS) out.bestLap[w] = typeof b[w] === 'number' && (b[w] as number) > 5 ? (b[w] as number) : null;
-  }
-  if (typeof j.trackBest === 'object' && j.trackBest !== null) {
-    for (const [k, v] of Object.entries(j.trackBest as Record<string, unknown>)) if (typeof v === 'number' && Number.isFinite(v) && v > 0 && k.length < 40) out.trackBest[k] = v;
-  }
-  if (typeof j.loadouts === 'object' && j.loadouts !== null) {
-    for (const [id, l] of Object.entries(j.loadouts as Record<string, unknown>)) if (knownCars.includes(id)) out.loadouts[id] = sanitizeLoadout(l);
-  }
-  const s = (j.settings ?? {}) as Record<string, unknown>;
-  out.settings.volume = num(s.volume, out.settings.volume, 0, 1);
-  out.settings.muted = s.muted === true;
-  out.settings.voice = s.voice === true;
-  out.settings.autoQuality = s.autoQuality !== false;
-  if (s.cameraShake === 'OFF' || s.cameraShake === 'LOW' || s.cameraShake === 'NORMAL') out.settings.cameraShake = s.cameraShake;
-  out.settings.sfxVolume = num(s.sfxVolume, out.settings.sfxVolume, 0, 1);
-  out.settings.musicVolume = num(s.musicVolume, out.settings.musicVolume, 0, 1);
-  if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
-  if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;
-  out.settings.steerSens = num(s.steerSens, 1, 0.6, 1.4);
-  out.settings.rumble = s.rumble !== false;
-  if (s.look === 'neon' || s.look === 'dusk' || s.look === 'grit') out.settings.look = s.look;
-  if (s.difficulty === 'ROOKIE' || s.difficulty === 'STREET' || s.difficulty === 'PRO' || s.difficulty === 'LEGEND') out.settings.difficulty = s.difficulty;
-  out.settings.padDeadzone = num(s.padDeadzone, 0.12, 0.02, 0.4);
-  const cr = (j.career ?? {}) as Record<string, unknown>;
-  if (Array.isArray(cr.completed)) out.career.completed = cr.completed.filter((id): id is string => typeof id === 'string');
-  out.career.seenIntro = cr.seenIntro === true;
-  out.career.endingSeen = cr.endingSeen === true;
-  out.career.epilogueSeen = cr.epilogueSeen === true;
-  if (typeof cr.flags === 'object' && cr.flags !== null) for (const [k, v] of Object.entries(cr.flags as Record<string, unknown>)) if (v === true && k.length < 30) out.career.flags[k] = true;
-  if (typeof cr.rel === 'object' && cr.rel !== null) for (const [k, v] of Object.entries(cr.rel as Record<string, unknown>)) if (typeof v === 'number' && k.length < 30) out.career.rel[k] = Math.max(-5, Math.min(5, Math.round(v)));
-  if (s.quality === 'low' || s.quality === 'medium' || s.quality === 'high') out.settings.quality = s.quality;
-  return out;
-}
+export { parseSave } from './saveParse';
+import { parseSave } from './saveParse';
 
 /** Save game state with explicit commit(); tolerant of missing or blocked storage. */
 export class SaveStore {
@@ -130,6 +78,7 @@ export class SaveStore {
     }
     this.data = parseSave(raw, base, knownCars);
     for (const [id, l] of Object.entries(this.data.loadouts)) setLiveLoadout(id, l);
+    this.syncBuilds();
   }
 
   commit(): void {
@@ -155,6 +104,27 @@ export class SaveStore {
 
   select(id: string): void {
     if (this.owns(id)) this.data.selected = id;
+    this.commit();
+  }
+
+  private syncBuilds(): void {
+    for (const id of new Set([...Object.keys(this.data.upgrades), ...Object.keys(this.data.setups)])) setBuild(id, this.data.upgrades[id] ?? {}, this.data.setups[id] ?? defaultSetup());
+  }
+
+  /** Buy the next level of an upgrade if the cash is there. Returns false when it cannot be bought. */
+  buyUpgrade(carId: string, id: UpgradeId, price: number): boolean {
+    const have = this.data.upgrades[carId] ?? {};
+    if (this.data.cash < price || (have[id] ?? 0) >= 3) return false;
+    this.data.cash -= price;
+    this.data.upgrades[carId] = { ...have, [id]: (have[id] ?? 0) + 1 };
+    this.syncBuilds();
+    this.commit();
+    return true;
+  }
+
+  setSetup(carId: string, s: Setup): void {
+    this.data.setups[carId] = s;
+    this.syncBuilds();
     this.commit();
   }
 

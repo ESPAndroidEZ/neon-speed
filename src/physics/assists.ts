@@ -26,7 +26,7 @@ export function setAssist(into: Assist, level: AssistLevel): void {
 export const clampSensitivity = (s: number): number => Math.min(1.4, Math.max(0.6, s));
 
 /** Player driving preferences (settings screen). Read by the race manager for the player's car only; rivals always use STANDARD. */
-export const DRIVING: { level: AssistLevel; sens: number } = { level: 'STANDARD', sens: 1 };
+export const DRIVING: { level: AssistLevel; sens: number; carMul: number } = { level: 'STANDARD', sens: 1, carMul: 1 };
 
 /** Copy the preferences onto a car. Allocation free, safe to call every step. */
 export function applyDriving(car: { assist: Assist; sensitivity: number }): void {
@@ -34,5 +34,5 @@ export function applyDriving(car: { assist: Assist; sensitivity: number }): void
   car.assist.steer = a.steer;
   car.assist.brake = a.brake;
   car.assist.counter = a.counter;
-  car.sensitivity = clampSensitivity(DRIVING.sens);
+  car.sensitivity = clampSensitivity(DRIVING.sens * DRIVING.carMul);
 }
