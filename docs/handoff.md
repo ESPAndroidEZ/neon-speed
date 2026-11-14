@@ -12,6 +12,7 @@ Scaffold, `src/types/game.ts` contracts (now with `Weather`, `WeatherProfile`), 
 `src/physics/`: `carController.ts` (bicycle model, friction circle, handbrake, drift scoring), `drivetrain.ts` (6-speed auto, reverse, nitro), `tire.ts`, `carTuning.ts` (all tunable numbers), `weather.ts` (CLEAR 1.0 / RAIN 0.72 / SNOW 0.45 grip).
 
 ## Next (Claude)
+Phase 1 code is done, awaiting the owner's playtest feedback. Then tune carTuning.ts / chase cam from the panel's "Copy values" JSON.
 1. Build `src/camera/chaseCam.ts`, `src/input/keyboard.ts`, `src/ui/hud.ts`, `src/dev/tuningPanel.ts` (live sliders, backtick key), real `src/main.ts` (keys: R reset, 1/2/3 weather).
 Exit test: drifting a box car for 5 minutes is fun. Then phase 2 (see `docs/plan.md`).
 
@@ -19,6 +20,7 @@ Exit test: drifting a box car for 5 minutes is fun. Then phase 2 (see `docs/plan
 - 001 `src/world/assetLoader.ts`
 - 002 `src/physics/aiRacers.ts`
 - 003 `src/ui/touchControls.ts`
+- 004 `src/world/weatherFx.ts` (rain/snow; hook into main.ts after merge)
 
 ## Open contract requests
 None.
@@ -26,3 +28,4 @@ None.
 ## Log (newest last)
 - 2026-11-14 Claude: block 1 done. Tasks 001-003 written.
 - 2026-11-14 Claude: physics build ok, tests/physics-check.mts passes, carTuning tuned (brake force now scales with weather grip).
+- 2026-11-14 Claude: chaseCam, keyboard, hud, tuningPanel, main.ts (Phase 1) built. Task 004 written. Needs playtest.
