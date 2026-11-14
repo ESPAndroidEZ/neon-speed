@@ -3,7 +3,7 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, feedback round 2 done).
+Updated: 2026-11-14 (Claude, feedback round 3 done).
 
 ## Done
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
@@ -19,7 +19,7 @@ Menu + progression (step 5): title, main, conditions, garage (buy/paint), settin
 
 Feedback round 1, steps 1-2 (GLB pipeline, 5 cars): assetLoader (task 001 done by Claude), modelCar, carFactory, garage rewrite (stats, paint, underglow, yaw calibration), scripts/optimize-models.sh, docs/assets/tripo-brief.md.
 
-Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Streets (narrow street circuit with tunnel, bridge, dock, plaza, alleys, props); AI rivals (aiRacers, rivals.ts); story mode Chapter 1 (career, dialogue, captions, objectives, unlocks); safe-margin UI fixes. Tests: `npm test` (13 files).
+Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Streets (narrow street circuit with tunnel, bridge, dock, plaza, alleys, props); AI rivals (aiRacers, rivals.ts); story mode Chapter 1 (career, dialogue, captions, objectives, unlocks); safe-margin UI fixes. Tests: `npm test` (19 files).
 
 ## Next (Claude)
 Carlos: drop GLBs in `public/models/`, calibrate yaw in the garage, send playtest notes (AI pace, track feel, story text). Then: wire Qwen modules after `/review-qwen`; car upgrades (plan phase 5); Capacitor (phase 6).
@@ -63,3 +63,4 @@ None. Contract changes logged: `Serializable<T>` (snapshot/restore) added to src
 | Props pipeline | lamp, container, kiosk and now sign GLBs are picked up from `public/models/props/`; procedural fallback otherwise |
 | Emissive window variety | 3 textures (warm, cool, neon) |
 Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded profile), wheel arches, rounded tyres, five-spoke rims with brake discs and calipers, grille, lamp housings and mirrors; the garage stage got key and rim lights.
+- 2026-11-14 Claude: round 3 done: camera shake fixed (wheelspin-driven shake and slip yaw wag; setting Off/Low/Normal; `tests/camera-check`), pause/save/continue with 3 slots + autosave (Serializable contract, determinism round-trip test), model status badge + procedural car upgrade, graphics audit, sound rework (engine DSP voicings, squeal presets, ambience bed, scrape/crash, mix), `npm run smoke`. Fixed a startup crash (signSpots) found by the smoke test. Turbo untouched.

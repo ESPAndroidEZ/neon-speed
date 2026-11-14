@@ -6,10 +6,11 @@ Night street racer in the browser, with rain and snow. TypeScript, Three.js, Vit
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # line check + typecheck + production build
+npm run smoke    # browser smoke test (needs `npm run dev` and Chrome)
 npm test         # headless physics, track and collision checks (tests/*.mts)
 ```
 
-Controls: W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather, M mute, Esc menu, backtick tuning panel.
+Controls: W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather, M mute, Esc pause (Resume, Restart, Save, Save & Quit), P particle showcase, K audio test panel, backtick tuning panel. Main menu: Continue / Load (3 slots + autosave).
 Car models: drop GLBs into `public/models/<id>.glb` (see `docs/assets/tripo-brief.md`); `scripts/optimize-models.sh` shrinks them. Missing files fall back to the procedural cars.
 Dev URL flags: `?skip` (no menu), `?ai=3`, `?car=evo`, `?w=rain`, `?at=tunnel`, `?demo`, `?ff=10`, `?screen=garage|story|weather|settings`.
 

@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "check:lines": "node scripts/check-lines.mjs",
     "preview": "vite preview",
-    "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done"
+    "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done",
+    "smoke": "scripts/smoke.sh"
   },
   "dependencies": {
     "three": "^0.187.0"

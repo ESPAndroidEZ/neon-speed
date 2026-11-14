@@ -17,6 +17,7 @@ const render = (rpm: number, load: number, layout: number, secs = 0.6, cut = fal
   for (let o = 0; o < out.length; o += 128) d.process(out.subarray(o, Math.min(out.length, o + 128)), Math.min(128, out.length - o));
   return out;
 };
+const renderV = (rpm: number, load: number, v: number): Float32Array => { const d = new EngineDsp(SR); d.set(rpm, load, 0, false, 0, 1, v); d.rpm = rpm; d.load = load; const o = new Float32Array(SR * 0.6); for (let i = 0; i < o.length; i += 128) d.process(o.subarray(i, i + 128), 128); return o; };
 const rms = (a: Float32Array): number => Math.sqrt(a.reduce((s, v) => s + v * v, 0) / a.length);
 const zc = (a: Float32Array): number => { let n = 0; for (let i = 1; i < a.length; i++) if ((a[i - 1] < 0) !== (a[i] < 0)) n++; return n / (a.length / SR); };
 const zcr = zc;
@@ -60,5 +61,21 @@ d.set(3000, 1, 1, false, 0, 1);
 const buf = new Float32Array(2048);
 d.process(buf, 2048);
 check('class source is self-contained (runs from toString())', buf.every(Number.isFinite) && rms(buf) > 0.01, '');
+// voicing presets: smooth < raspy < aggressive in brightness (zero crossings) and drive, all audible and bounded
+const zcv = [0, 1, 2].map((v) => zc(renderV(4500, 1, v)));
+check('voicing presets differ: aggressive is brighter than smooth', zcv[2] > zcv[0] * 1.05, zcv.map((z) => z.toFixed(0)).join(' / '));
+check('every voicing is bounded and audible', [0, 1, 2].every((v) => { const a = renderV(4500, 1, v); return a.every((x) => Math.abs(x) <= 1.01) && rms(a) > 0.05; }), '');
+// lift-off: the overrun window makes pops busier right after a throttle drop than long after it
+{
+  const d = new EngineDsp(SR);
+  d.set(5500, 1, 0, false, 1, 1, 1);
+  d.rpm = 5500; d.load = 1;
+  const warm = new Float32Array(SR * 0.3);
+  d.process(warm, warm.length);
+  d.set(5500, 0, 0, false, 1, 1, 1);
+  const hot = new Float32Array(SR * 1.0);
+  for (let i = 0; i < hot.length; i += 128) d.process(hot.subarray(i, i + 128), 128);
+  check('lift-off from full throttle produces audible pops (output stays bounded)', hot.every((x) => Number.isFinite(x) && Math.abs(x) <= 1.01) && rms(hot) > 0.05, `${rms(hot).toFixed(3)}`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

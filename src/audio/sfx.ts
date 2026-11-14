@@ -39,6 +39,7 @@ export class Sfx {
   private readonly wind: NoiseVoice;
   private readonly roar: GainNode;
   private readonly roarOsc: OscillatorNode;
+  private readonly scrapeV: NoiseVoice;
   private lastHit = 0;
   private wasNitro = false;
 
@@ -52,6 +53,7 @@ export class Sfx {
     this.whoosh = new NoiseVoice(bus, 'bandpass', 700, 1.2);
     this.rain = new NoiseVoice(bus, 'highpass', 2600, 0.5);
     this.wind = new NoiseVoice(bus, 'lowpass', 300, 0.7);
+    this.scrapeV = new NoiseVoice(bus, 'bandpass', 1900, 1.4);
     // nitro roar: a growling distorted saw under the whoosh
     const ctx = bus.ctx;
     this.roarOsc = ctx.createOscillator();
@@ -71,20 +73,28 @@ export class Sfx {
   update(slide: number, speed: number, surface: Weather, nitro: boolean, precipitation: number, active: boolean): void {
     const t = this.bus.ctx.currentTime;
     const on = active ? 1 : 0;
+    const soft = AUDIO.squealVoicing === 0;
     const v = AUDIO.tyreVolume * slide * on;
     const f = 1100 + speed * 14;
-    this.dry.set(f, surface === 'CLEAR' ? v * 0.2 : 0, t);
-    this.dryHi.set(f * 2.05, surface === 'CLEAR' ? v * 0.12 : 0, t);
+    this.dry.filter.Q.setTargetAtTime(soft ? 3.5 : 9, t, 0.1); // soft = wide and warm, sharp = narrow and shrill
+    this.dryHi.filter.Q.setTargetAtTime(soft ? 5 : 14, t, 0.1);
+    this.dry.set(soft ? f * 0.85 : f, surface === 'CLEAR' ? v * (soft ? 0.26 : 0.2) : 0, t);
+    this.dryHi.set(f * 2.05, surface === 'CLEAR' ? v * (soft ? 0.03 : 0.12) : 0, t);
     this.wet.set(3600 + speed * 20, surface === 'RAIN' ? v * 0.16 : 0, t); // hissy spray
     this.wetHi.set(700 + speed * 8, surface === 'RAIN' ? v * 0.14 : 0, t);
     this.snow.set(700 + speed * 10, surface === 'SNOW' ? v * 0.3 * (0.7 + 0.3 * Math.sin(t * 17)) : 0, t); // crunchy
     this.whoosh.set(500 + speed * 9 + (nitro ? 900 : 0), nitro ? 0.22 * on : 0, t);
     this.roar.gain.setTargetAtTime(nitro ? 0.16 * on : 0, t, 0.08);
     this.roarOsc.frequency.setTargetAtTime(60 + speed * 0.5, t, 0.1);
-    this.rain.set(2600, precipitation * 0.11 * on, t);
-    this.wind.set(250 + speed * 7, Math.min(1, speed / 80) * 0.16 * on, t);
+    this.rain.set(2600, precipitation * 0.11 * on * AUDIO.ambienceVolume, t);
+    this.wind.set(250 + speed * 7, Math.min(1, speed / 80) * 0.16 * on * AUDIO.ambienceVolume, t);
     if (nitro && !this.wasNitro) this.burst(0.3, 1800, 0.5);
     this.wasNitro = nitro;
+  }
+
+  /** Sustained scraping along a wall or another car. */
+  scrape(on: boolean, speed: number): void {
+    this.scrapeV.set(1500 + speed * 12, on ? Math.min(0.3, 0.08 + speed * 0.004) * AUDIO.crashVolume : 0, this.bus.ctx.currentTime);
   }
 
   /** Collision crunch: low thump, metallic ring and a noise burst. Rate limited. */
@@ -99,7 +109,8 @@ export class Sfx {
     o.frequency.setValueAtTime(150, t);
     o.frequency.exponentialRampToValueAtTime(38, t + 0.28);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.55 * k + 0.12, t);
+    const cv = AUDIO.crashVolume;
+    g.gain.setValueAtTime((0.55 * k + 0.12) * cv, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
     o.connect(g).connect(this.bus.sfx);
     o.start(t);
@@ -109,13 +120,14 @@ export class Sfx {
       r.type = 'square';
       r.frequency.value = f * (0.95 + k * 0.1);
       const rg = ctx.createGain();
-      rg.gain.setValueAtTime(0.05 + 0.08 * k, t);
+      rg.gain.setValueAtTime((0.05 + 0.08 * k) * cv, t);
       rg.gain.exponentialRampToValueAtTime(0.001, t + 0.25 + 0.2 * k);
       r.connect(rg).connect(this.bus.sfx);
       r.start(t);
       r.stop(t + 0.5);
     }
-    this.burst(0.35 + 0.5 * k, 1200 + k * 3000, 0.3);
+    this.burst((0.35 + 0.5 * k) * cv, 1200 + k * 3000, 0.3);
+    if (k > 0.5) this.burst(0.18 * cv * k, 7000, 0.45); // glass and trim bits on a big hit
   }
 
   /** Splash of a car through a puddle. */

@@ -10,7 +10,12 @@ const CSS = `#ap{position:fixed;right:0;top:0;bottom:0;width:300px;overflow:auto
 #ap h4{margin:10px 0 4px;color:#ff2a9d}#ap button{margin:2px 3px 2px 0;padding:6px 9px}#ap label{display:flex;gap:6px;align-items:center;margin:3px 0}#ap label span{width:100px}#ap input{flex:1;min-width:0}#ap output{width:44px;text-align:right}`;
 
 const SLIDERS: [keyof AudioParams, number, number][] = [
-  ['turboVolume', 0, 3], ['whistlePitch', 0.5, 1.8], ['bovLength', 0.3, 3], ['engineVolume', 0, 2.5], ['clunkVolume', 0, 3], ['popVolume', 0, 3], ['tyreVolume', 0, 3], ['rivalVolume', 0, 3],
+  ['engineVolume', 0, 2.5], ['turboVolume', 0, 3], ['tyreVolume', 0, 3], ['ambienceVolume', 0, 3], ['crashVolume', 0, 3], ['musicVolume', 0, 2], ['rivalVolume', 0, 3],
+  ['whistlePitch', 0.5, 1.8], ['bovLength', 0.3, 3], ['clunkVolume', 0, 3], ['popVolume', 0, 3],
+];
+const PRESETS: { key: 'engineVoicing' | 'squealVoicing'; title: string; options: string[] }[] = [
+  { key: 'engineVoicing', title: 'Engine voicing', options: ['Smooth', 'Raspy', 'Aggressive'] },
+  { key: 'squealVoicing', title: 'Tyre squeal', options: ['Soft', 'Sharp'] },
 ];
 const BUTTONS: [AudioTest, string][] = [
   ['sweep', 'Rev sweep'], ['upshift', 'Upshift (BOV + clunk + pop)'], ['lift', 'Lift-off BOV'], ['flutter', 'Compressor flutter'], ['backfire', 'Backfire'], ['squeal', 'Tyre squeal (current weather)'], ['nitro', 'Nitro'], ['crash', 'Crash'],
@@ -39,8 +44,26 @@ export class AudioTestPanel {
       b.onclick = () => audio.play(k);
       this.root.append(b);
     }
+    for (const p of PRESETS) {
+      const hh = document.createElement('h4');
+      hh.textContent = p.title;
+      this.root.append(hh);
+      const row: HTMLButtonElement[] = [];
+      p.options.forEach((label, i) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.onclick = () => {
+          AUDIO[p.key] = i;
+          row.forEach((x, j) => (x.style.outline = j === i ? '2px solid #ff2a9d' : ''));
+          audio.play(p.key === 'engineVoicing' ? 'sweep' : 'squeal');
+        };
+        b.style.outline = AUDIO[p.key] === i ? '2px solid #ff2a9d' : '';
+        row.push(b);
+        this.root.append(b);
+      });
+    }
     const h2 = document.createElement('h4');
-    h2.textContent = 'Tune';
+    h2.textContent = 'Mix (category volumes)';
     this.root.append(h2);
     for (const [key, lo, hi] of SLIDERS) {
       const l = document.createElement('label');

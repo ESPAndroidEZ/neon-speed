@@ -5,6 +5,7 @@ import { WEATHER } from '../physics/weather';
 import { AudioBus } from './audioBus';
 import { AUDIO } from './audioParams';
 import { createOscillatorVoice, createWorkletVoice, type EngineVoice } from './engineVoice';
+import { AmbienceBed } from './bed';
 import { Music } from './music';
 import { RivalEngines } from './rivalEngines';
 import { Sfx } from './sfx';
@@ -23,6 +24,9 @@ export class AudioManager {
   private readonly turbo: TurboSound;
   private readonly music: Music;
   private readonly rivals: RivalEngines;
+  private readonly bed: AmbienceBed;
+  private lastHit = -9;
+  private clock = 0;
   private readonly game: Game;
   private level = 0;
   private reader = new EventReader();
@@ -42,7 +46,11 @@ export class AudioManager {
     this.turbo = new TurboSound(this.bus);
     this.music = new Music(this.bus);
     this.rivals = new RivalEngines(this.bus);
-    game.onImpact = (s) => this.sfx.crash(s);
+    this.bed = new AmbienceBed(this.bus);
+    game.onImpact = (s) => {
+      this.lastHit = this.clock;
+      this.sfx.crash(s);
+    };
     void this.initEngine();
     window.addEventListener('keydown', (e) => {
       if (e.code === 'KeyM' && !e.repeat) this.bus.toggleMute();
@@ -76,6 +84,7 @@ export class AudioManager {
 
   /** Per display frame. */
   update(dt: number): void {
+    this.clock += dt;
     const g = this.game;
     const t = g.telemetry;
     const racer = g.rm.player;
@@ -116,7 +125,7 @@ export class AudioManager {
 
     if (this.voice) {
       const layout = spec ? LAYOUT[spec.sound.layout] : 0;
-      this.voice.set(rpm, load, layout, rpm >= t.redlineRpm * 0.995 && load > 0.5, pedal < 0.05 && speed > 8 ? 1 : 0, (inGame ? 1 : 0) * AUDIO.engineVolume);
+      this.voice.set(rpm, load, layout, rpm >= t.redlineRpm * 0.995 && load > 0.5, pedal < 0.05 && speed > 8 ? 1 : 0, (inGame ? 1 : 0) * AUDIO.engineVolume, AUDIO.engineVoicing);
     }
     this.turbo.setKind(spec?.sound.turbo ?? 'none');
     this.turbo.update(boost, rpm, inGame);
@@ -147,6 +156,9 @@ export class AudioManager {
     const surf = racer.contact.surface.kind;
     if (surf === 'puddle' && this.lastSurface !== 'puddle' && speed > 6) this.sfx.splash(speed);
     this.lastSurface = surf;
+    this.sfx.scrape(this.clock - this.lastHit < 0.15 && inGame, speed);
+    this.bed.update(g.state === 'MENU' ? 0.6 : 1, this.bus);
+    this.bus.setMusicMul(AUDIO.musicVolume);
     this.sfx.update(slide, speed, g.weather, nitro, WEATHER[g.weather].precipitation * g.weatherIntensity, inGame);
     this.rivals.update(g.views.views, this.game.chase.camera, this.vel, g.state === 'RACING' || g.state === 'PODIUM');
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);

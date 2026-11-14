@@ -43,7 +43,7 @@ export class Music {
   private play(step: number, t: number): void {
     const L = layers(this.intensity);
     const b = bassNote(step);
-    if (b !== null) this.tone('sawtooth', midiToHz(b), t, SECONDS_PER_STEP * 1.7, 0.2, this.lp);
+    if (b !== null) this.tone('sawtooth', midiToHz(b), t, SECONDS_PER_STEP * 1.7, 0.14, this.lp);
     if (step % STEPS_PER_BAR === 0) for (const n of chordTones(step, 2)) this.tone('sawtooth', midiToHz(n + 12), t, SECONDS_PER_STEP * 15, 0.035, this.lp, 7);
     const d = drumHit(step);
     if (L.kick && d.kick) this.kick(t);
@@ -75,7 +75,7 @@ export class Music {
     o.frequency.setValueAtTime(130, t);
     o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.55, t);
+    g.gain.setValueAtTime(0.4, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
     o.connect(g).connect(this.bus.music);
     o.start(t);

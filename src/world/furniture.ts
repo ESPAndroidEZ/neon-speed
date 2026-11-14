@@ -91,6 +91,7 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   }
   const signs = new InstancedMesh(new BoxGeometry(1, 1, 0.2), new MeshBasicMaterial({ color: 0xffffff }), Math.max(1, flat.length));
   const col = new Color();
+  const signSpots: { x: number; y: number; z: number; yaw: number }[] = [];
   flat.forEach((f, k) => {
     const s = tr.samples[f.i];
     const yaw = Math.atan2(s.tangent.x, s.tangent.z);
@@ -103,7 +104,6 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
     if (!f.blade && k % 4 === 0) signSpots.push({ x: p.x, y: f.y - 1.6, z: p.z, yaw: f.side > 0 ? yaw + Math.PI : yaw });
     signs.setColorAt(k, col.setHex(NEON[Math.floor(rnd() * NEON.length)]).multiplyScalar(1.7));
   });
-  const signSpots: { x: number; y: number; z: number; yaw: number }[] = [];
   signs.count = flat.length;
   group.add(signs);
   // wet-road streaks: each sign casts a long soft smear of its colour down the street

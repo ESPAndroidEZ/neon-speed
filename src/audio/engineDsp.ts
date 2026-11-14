@@ -10,7 +10,7 @@
 export class EngineDsp {
   sr: number; N: number; tables: Float32Array[][]; phase: number; rpm: number; rpmT: number; load: number; loadT: number;
   layout: number; cut: number; burble: number; volume: number; seed: number; lp: number; lp2: number; cutPh: number;
-  pop: number; popPh: number; z1a: number; z2a: number; z1b: number; z2b: number; coefA: number[]; coefB: number[];
+  pop: number; popPh: number; z: number[]; coef: number[][]; voicing: number; voicingBuilt: number; jit: number; overrun: number; prevLoad: number; ik1: number; ik2: number;
 
   constructor(sampleRate: number) {
     this.sr = sampleRate;
@@ -62,9 +62,23 @@ export class EngineDsp {
     this.cutPh = 0;
     this.pop = 0;
     this.popPh = 0;
-    this.z1a = 0; this.z2a = 0; this.z1b = 0; this.z2b = 0;
-    this.coefA = this.band(180, 1.4);
-    this.coefB = this.band(900, 1.1);
+    this.z = [0, 0, 0, 0, 0, 0];
+    this.voicing = 1;
+    this.voicingBuilt = -1;
+    this.coef = [[], [], []];
+    this.jit = 0;
+    this.overrun = 0;
+    this.prevLoad = 0;
+    this.ik1 = 0;
+    this.ik2 = 0;
+    this.build(1);
+  }
+
+  /** Exhaust formants for a voicing (0 smooth, 1 raspy, 2 aggressive): three resonances, sharper and hotter as it gets angrier. */
+  build(voicing: number): void {
+    const q = [1, 1.35, 1.9][voicing];
+    this.coef = [this.band(140, 1.2 * q), this.band(430, 1.6 * q), this.band(1150, 1.1 * q)];
+    this.voicingBuilt = voicing;
   }
 
   /** RBJ band-pass-ish peaking helper: returns [b0, b2, a1, a2] normalised (constant skirt gain). */
@@ -81,13 +95,15 @@ export class EngineDsp {
   }
 
   /** Set the target state (cheap; call once per block). `cut`: rev limiter engaged. `burble`: 0..1 pops on overrun. */
-  set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number): void {
+  set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number, voicing = 1): void {
     this.rpmT = Math.max(300, rpm);
     this.loadT = Math.min(1, Math.max(0, load));
     this.layout = layout | 0;
     this.cut = cut ? 1 : 0;
     this.burble = burble;
     this.volume = volume;
+    this.voicing = Math.min(2, Math.max(0, voicing | 0));
+    if (this.voicing !== this.voicingBuilt) this.build(this.voicing);
   }
 
   /** Firing frequency in Hz for a layout and rpm (4-stroke: cylinders / 2 firings per revolution). */
@@ -100,10 +116,22 @@ export class EngineDsp {
     const sr = this.sr;
     const tabs = this.tables[this.layout];
     const N = this.N;
+    const v = this.voicing;
+    const drive = [0.95, 1.35, 2.0][v];
+    const roarMix = [0.3, 0.55, 0.85][v];
+    const gains = [[0.8, 0.45, 0.2], [0.95, 0.75, 0.5], [1.05, 1.0, 0.9]][v];
+    const bright = [0, 0.12, 0.25][v];
     for (let i = 0; i < n; i++) {
-      this.rpm += (this.rpmT - this.rpm) * 0.002;
-      this.load += (this.loadT - this.load) * 0.004;
-      const f = EngineDsp.firingHz(this.rpm, this.layout);
+      this.rpm += (this.rpmT - this.rpm) * 0.0015; // smooth rpm: no zipper noise when the telemetry steps
+      this.load += (this.loadT - this.load) * 0.003;
+      // lift-off detection: a fast drop from high load opens an "overrun" window where the exhaust pops and burbles
+      if (this.prevLoad - this.load > 0.0008 && this.load < 0.5) this.overrun = Math.min(1, this.overrun + 0.0006 * (this.prevLoad - this.load) * 1000);
+      this.prevLoad = this.load;
+      this.overrun *= 0.99998;
+      // lumpy idle: firing irregularity that fades out as the engine revs
+      this.jit += (this.rand() * 0.03 - this.jit) * 0.0008;
+      const lump = 1 + this.jit * Math.max(0, 1 - this.rpm / 2600);
+      const f = EngineDsp.firingHz(this.rpm, this.layout) * lump;
       this.phase += f / sr;
       if (this.phase >= 1) this.phase -= 1;
       const pos = this.phase * N;
@@ -111,41 +139,43 @@ export class EngineDsp {
       const fr = pos - i0;
       const lo = tabs[0][i0] + (tabs[0][i0 + 1] - tabs[0][i0]) * fr;
       const hi = tabs[1][i0] + (tabs[1][i0 + 1] - tabs[1][i0]) * fr;
-      const tone = lo + (hi - lo) * this.load;
-      // intake roar: noise through two one-poles, louder with load and rpm
+      const tone = lo + (hi - lo) * Math.min(1, this.load + bright);
+      // intake roar: band-limited noise whose centre rises with rpm and whose level follows load^1.5
       const w = this.rand();
-      this.lp += (w - this.lp) * 0.12;
-      this.lp2 += (this.lp - this.lp2) * 0.25;
-      const roar = (this.lp - this.lp2) * 6 * this.load * Math.min(1, this.rpm / 5000);
-      let x = tone * (0.55 + 0.25 * this.load) + roar * 0.5;
-      // exhaust resonance: add two band-passed copies back in (body of the exhaust note)
-      const a = this.coefA;
-      const ya = a[0] * x + this.z1a;
-      this.z1a = this.z2a - a[2] * ya;
-      this.z2a = a[1] * x - a[3] * ya;
-      const b = this.coefB;
-      const yb = b[0] * x + this.z1b;
-      this.z1b = this.z2b - b[2] * yb;
-      this.z2b = b[1] * x - b[3] * yb;
-      x += ya * 0.9 + yb * 0.6;
+      const fc = 0.04 + 0.22 * Math.min(1, this.rpm / 7500);
+      this.ik1 += (w - this.ik1) * fc;
+      this.ik2 += (this.ik1 - this.ik2) * fc * 0.7;
+      const roar = (this.ik1 - this.ik2) * 9 * Math.pow(this.load, 1.5) * (0.35 + 0.65 * Math.min(1, this.rpm / 5000));
+      let x = tone * (0.55 + 0.25 * this.load) + roar * roarMix;
+      // exhaust formants: three band-passed copies add the body of the pipe
+      let add = 0;
+      for (let k = 0; k < 3; k++) {
+        const c = this.coef[k];
+        const zi = k * 2;
+        const y = c[0] * x + this.z[zi];
+        this.z[zi] = this.z[zi + 1] - c[2] * y;
+        this.z[zi + 1] = c[1] * x - c[3] * y;
+        add += y * gains[k];
+      }
+      x += add;
       // rev limiter: hard stutter gate
       if (this.cut) {
         this.cutPh += 16 / sr;
         if (this.cutPh >= 1) this.cutPh -= 1;
         x *= this.cutPh < 0.5 ? 1 : 0.06;
       }
-      // overrun burble: random pops while off the throttle at high rpm
-      if (this.load < 0.12 && this.burble > 0 && this.rpm > 3200 && this.pop < 0.04 && Math.abs(this.rand()) < (9 * this.burble * (this.rpm / 6000)) / sr * 2) {
-        this.pop = 1;
+      // overrun pops: crackle while off the throttle at high rpm, busier right after a lift-off
+      const rate = (6 + 22 * this.overrun) * this.burble * (this.rpm / 6000);
+      if (this.load < 0.15 && this.burble > 0 && this.rpm > 2800 && this.pop < 0.04 && Math.abs(this.rand()) < (rate / sr) * 2) {
+        this.pop = 0.6 + 0.4 * Math.abs(this.rand());
         this.popPh = 0;
       }
       if (this.pop > 0.001) {
-        this.popPh += 95 / sr;
-        x += (this.rand() * 1.1 + Math.sin(2 * Math.PI * this.popPh) * 1.2) * this.pop * 1.3;
-        this.pop *= 0.9975;
+        this.popPh += (80 + 40 * v) / sr;
+        x += (this.rand() * 1.2 + Math.sin(2 * Math.PI * this.popPh) * 1.1) * this.pop * 1.3;
+        this.pop *= 0.9972;
       }
-      const y = Math.tanh(x * (1.1 + 0.9 * this.load)) * 0.7 * this.volume;
-      out[i] = y;
+      out[i] = Math.tanh(x * (drive + 0.9 * this.load)) * 0.7 * this.volume;
     }
   }
 }

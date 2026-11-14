@@ -60,7 +60,7 @@ export class RivalEngines {
       const v = rivals[i] ?? null;
       s.view = v;
       if (!v || !active) {
-        s.voice.set(900, 0, 0, false, 0, 0);
+        s.voice.set(900, 0, 0, false, 0, 0, 1);
         continue;
       }
       const car = v.racer.car;
@@ -76,7 +76,7 @@ export class RivalEngines {
       const vr = ((st.velocity.x - listenerVel.x) * dx + (st.velocity.z - listenerVel.z) * dz) / d; // + = approaching
       const pitch = Math.min(1.25, Math.max(0.8, SOUND_SPEED / (SOUND_SPEED - Math.max(-120, Math.min(120, vr)))));
       const dtn = car.drivetrain;
-      s.voice.set(dtn.rpm * pitch, Math.min(1, 0.25 + Math.abs(st.speed) * 0.01 + (car.flags.wheelspin ? 0.5 : 0)), LAYOUT[sound.layout], dtn.rpm >= 7400, 0.5, 0.75 * AUDIO.rivalVolume * AUDIO.engineVolume);
+      s.voice.set(dtn.rpm * pitch, Math.min(1, 0.25 + Math.abs(st.speed) * 0.01 + (car.flags.wheelspin ? 0.5 : 0)), LAYOUT[sound.layout], dtn.rpm >= 7400, 0.5, 0.6 * AUDIO.rivalVolume * AUDIO.engineVolume, AUDIO.engineVoicing);
     }
   }
 }

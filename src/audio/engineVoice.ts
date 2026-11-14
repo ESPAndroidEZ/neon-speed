@@ -4,7 +4,7 @@ import { EngineDsp } from './engineDsp';
 export interface EngineVoice {
   /** Connect this to the mix. */
   readonly out: AudioNode;
-  set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number): void;
+  set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number, voicing: number): void;
   dispose(): void;
 }
 
@@ -17,12 +17,12 @@ function workletSource(): string {
 const EngineDsp = ${EngineDsp.toString()};
 registerProcessor('${NAME}', class extends AudioWorkletProcessor {
   static get parameterDescriptors() {
-    return ['rpm', 'load', 'layout', 'cut', 'burble', 'vol'].map((name) => ({ name, defaultValue: name === 'rpm' ? 1000 : name === 'vol' ? 1 : 0, automationRate: 'k-rate' }));
+    return ['rpm', 'load', 'layout', 'cut', 'burble', 'vol', 'voicing'].map((name) => ({ name, defaultValue: name === 'rpm' ? 1000 : name === 'vol' || name === 'voicing' ? 1 : 0, automationRate: 'k-rate' }));
   }
   constructor() { super(); this.d = new EngineDsp(sampleRate); }
   process(_in, out, p) {
     const o = out[0][0];
-    this.d.set(p.rpm[0], p.load[0], p.layout[0], p.cut[0] > 0.5, p.burble[0], p.vol[0]);
+    this.d.set(p.rpm[0], p.load[0], p.layout[0], p.cut[0] > 0.5, p.burble[0], p.vol[0], p.voicing[0]);
     this.d.process(o, o.length);
     for (let c = 1; c < out[0].length; c++) out[0][c].set(o);
     return true;
@@ -43,16 +43,17 @@ export async function createWorkletVoice(ctx: AudioContext): Promise<EngineVoice
   try {
     const node = new AudioWorkletNode(ctx, NAME, { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] });
     const prm = (n: string): AudioParam => node.parameters.get(n) as AudioParam;
-    const [rpm, load, layout, cut, burble, vol] = ['rpm', 'load', 'layout', 'cut', 'burble', 'vol'].map(prm);
+    const [rpm, load, layout, cut, burble, vol, voicing] = ['rpm', 'load', 'layout', 'cut', 'burble', 'vol', 'voicing'].map(prm);
     return {
       out: node,
-      set(r, l, lay, c, b, v) {
+      set(r, l, lay, c, b, v, vc) {
         rpm.value = r;
         load.value = l;
         layout.value = lay;
         cut.value = c ? 1 : 0;
         burble.value = b;
         vol.value = v;
+        voicing.value = vc;
       },
       dispose() {
         node.disconnect();
@@ -87,11 +88,11 @@ export function createOscillatorVoice(ctx: AudioContext): EngineVoice {
   shaper.connect(filter).connect(gain);
   return {
     out: gain,
-    set(rpm, load, layout, _cut, _burble, volume) {
+    set(rpm, load, layout, _cut, _burble, volume, voicing) {
       const t = ctx.currentTime;
       const hz = EngineDsp.firingHz(rpm, layout);
       for (const { o, mul } of oscs) o.frequency.setTargetAtTime(hz * mul, t, 0.03);
-      filter.frequency.setTargetAtTime(350 + rpm * 0.45 + Math.max(0.2, load) * 1300, t, 0.05);
+      filter.frequency.setTargetAtTime(350 + rpm * 0.45 + Math.max(0.2, load) * 1300 + voicing * 500, t, 0.05);
       gain.gain.setTargetAtTime((0.1 + Math.max(0.2, load) * 0.14) * volume, t, 0.08);
     },
     dispose() {

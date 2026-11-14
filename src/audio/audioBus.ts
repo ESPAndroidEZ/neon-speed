@@ -8,6 +8,7 @@ export class AudioBus {
   private readonly chase: BiquadFilterNode;
   private sfxVol = 1;
   private musicVol = 0.55;
+  private musicMul = 0.7;
   private vol = 0.7;
   private mutedFlag = false;
 
@@ -21,7 +22,7 @@ export class AudioBus {
     this.master.connect(comp).connect(this.ctx.destination);
     this.sfx = this.ctx.createGain();
     this.music = this.ctx.createGain();
-    this.music.gain.value = this.musicVol;
+    this.music.gain.value = this.musicVol * this.musicMul;
     // chase mix: a slight low-pass takes the edge off everything the camera hears from outside the cabin
     this.chase = this.ctx.createBiquadFilter();
     this.chase.type = 'lowpass';
@@ -66,7 +67,14 @@ export class AudioBus {
 
   setMusicVolume(v: number): void {
     this.musicVol = Math.min(1, Math.max(0, v));
-    this.music.gain.setTargetAtTime(this.musicVol, this.ctx.currentTime, 0.03);
+    this.music.gain.setTargetAtTime(this.musicVol * this.musicMul, this.ctx.currentTime, 0.03);
+  }
+
+  /** Mix multiplier on top of the music setting (K panel). */
+  setMusicMul(m: number): void {
+    if (m === this.musicMul) return;
+    this.musicMul = m;
+    this.music.gain.setTargetAtTime(this.musicVol * m, this.ctx.currentTime, 0.1);
   }
 
   setChaseCutoff(hz: number): void {

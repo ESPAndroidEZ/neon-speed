@@ -1,6 +1,6 @@
 # Architecture
 
-Updated: 2026-11-14. Keep this in sync with the code (`/sync-docs`).
+Updated: 2026-11-14 (round 3). Keep this in sync with the code (`/sync-docs`).
 
 ## Data flow
 ```
@@ -47,6 +47,9 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
   rain/wind beds, thump), `musicPatterns` (pure notes) + `music` (scheduler, layers by speed), `audioManager` (feeds all; M = mute).
 - `camera/`: `cinematicCam` (intro), `chaseCam` (gameplay), shots helpers.
 - `input/keyboard`, `ui/hud`, `ui/results`, `dev/tuningPanel` (backtick), 
+
+## Saving and pause
+`Serializable<T>` (src/types/game.ts): `snapshot()` returns JSON-safe data, `restore()` puts it back. Implemented by CarController (+ Drivetrain incl. boost and nitro, DriftScorer), LapCounter, RaceManager (`core/raceSnapshot`: timers, racers, AI agents with PRNG state and track index), SurfaceMap (puddle seed). `game/saveGame` captures and restores the whole game (setup meta, weather ramp, plan); `core/gameSave` stores 3 slots + autosave in localStorage with validation, version check and a migration table; `game/pause` + `ui/pauseMenu`, `ui/saveUi` (load screen). `tests/save-roundtrip.mts` proves restore + M steps == M uninterrupted steps.
 
 ## Contracts and conventions
 Car space +Z nose, +X left, steer > 0 = left, forward = (sin h, 0, cos h). Track lateral offset + = left.
