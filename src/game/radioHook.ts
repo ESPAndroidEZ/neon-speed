@@ -31,7 +31,7 @@ export function installRadio(engine: Engine, game: Game, subs: Subtitles): void 
     const t = game.telemetry;
     const line = radio.update({
       racing: game.state === 'RACING' && rm.phase === 'RACING' && !game.paused, time: rm.raceTime, position: t.position, count: t.racerCount, lap: t.lap, laps: t.totalLaps,
-      weather: game.weather, impact: radioImpact, driftChain: t.driftScore,
+      trackId: game.setup?.trackId, weather: game.weather, impact: radioImpact, driftChain: t.driftScore,
       rivals: rm.racers.filter((r) => !r.isPlayer).map((r) => ({ name: r.name, position: rm.positionOf(r) })),
     });
     radioImpact = 0;

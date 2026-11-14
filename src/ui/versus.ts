@@ -4,6 +4,7 @@ import { findRival } from '../data/rivals';
 import type { TrackDef } from '../data/tracks';
 import { measureCar, type CarStats } from '../physics/carStats';
 import type { Weather } from '../types/game';
+import { BARKS } from '../data/barks';
 import { portraitEl } from './portraits';
 import { drawOutline } from './trackSelect';
 import { h, injectCss } from './uiKit';
@@ -52,12 +53,14 @@ export function showVersus(d: { player: CarSpec; weather: Weather; def: TrackDef
   mid.append(h('div', '', '<div style="font-size:clamp(40px,8vw,80px);font-weight:900;font-style:italic;color:#ff2a9d;text-shadow:0 0 30px #ff2a9d">VS</div>'), cv, h('div', 'rb-sub', `${d.def.name} · ${d.weather.toLowerCase()}`));
   row.append(side('rookie', 'You', d.player, 'left', '#18d8ff', 'Driver'));
   row.append(mid);
+  const bark = lead ? BARKS[lead.id]?.[Math.floor(Math.random() * 4)] : undefined;
   if (lead) row.append(side(lead.id, lead.name, findCar(lead.carId), 'right', '#ff2a9d', lead.style.replace('-', ' ')));
   else {
     const clock = h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${d.def.type === 'drift' ? 'Target' : 'Against'}</div><div style="font-size:clamp(24px,4vw,36px);font-weight:900;font-style:italic">${d.def.type === 'drift' ? `${(d.def.driftTarget ?? 0).toLocaleString()} points` : 'The clock'}</div><div class="rb-sub">${d.def.blurb.slice(0, 80)}…</div>`);
     clock.style.cssText = 'width:min(260px,40vw);text-align:right';
     row.append(clock);
   }
+  if (bark && lead) layer.append(h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${lead.name} says</div><div style="font-size:20px;font-style:italic;max-width:min(620px,88vw);text-align:center">“${bark}”</div>`));
   const others = d.rivalIds.filter((id) => id !== lead?.id);
   layer.append(row);
   if (others.length) {

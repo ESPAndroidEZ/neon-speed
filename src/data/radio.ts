@@ -1,3 +1,5 @@
+import { RIVAL_RADIO_2 } from './radio2';
+
 /** DJ Switch's in-race radio lines. Placeholders: {name} rival, {pos} {n} position, {lap} {laps}, {score} drift points. */
 export const RADIO = {
   start: ['Green light on the Loop! {n} cars, and the Rookie is on the back row.', 'Engines up, Kestrel Bay! {name} on pole tonight.', 'This is DJ Switch, and the street is open. Do not waste it.', 'Three, two, one. Make the neighbours regret this.'],
@@ -28,3 +30,5 @@ export const RADIO = {
     Rook: ['Rook used to run with Redline. Bad terms.', 'Rook has a long memory and a short temper.', 'Rook drives angry and he is right to.'],
   } as Record<string, string[]>,
 };
+
+for (const [name, lines] of Object.entries(RIVAL_RADIO_2)) RADIO.rival[name] = lines;

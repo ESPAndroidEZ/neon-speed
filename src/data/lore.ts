@@ -41,4 +41,8 @@ export const CREW: CrewEntry[] = [
   { id: 'vex', name: 'Vex', role: '350Z, drifter', color: 0x7a2fd6, bio: 'Lives sideways. Redline pays for the tyres.' },
 ];
 
-export { TIPS } from './tips';
+import { TIPS as BASE_TIPS } from './tips';
+import { TIPS_2 } from './tips2';
+
+/** Loading-screen tips: the base set plus the new maps. */
+export const TIPS: string[] = [...BASE_TIPS, ...TIPS_2];

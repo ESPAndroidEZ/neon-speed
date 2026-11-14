@@ -1,4 +1,5 @@
 import { RADIO } from '../data/radio';
+import { TRACK_RADIO } from '../data/radio2';
 import { createRng } from '../core/rng';
 import type { Weather } from '../types/game';
 
@@ -16,6 +17,8 @@ export interface RadioSnapshot {
   impact: number;
   /** Points in the drift chain being built. */
   driftChain: number;
+  /** Map id: picks the map's own start and idle lines. */
+  trackId?: string;
   /** Rivals with their current position. */
   rivals: readonly { name: string; position: number }[];
 }
@@ -89,7 +92,7 @@ export class RadioDirector {
       this.lastPos = s.position;
       this.lastLap = s.lap;
       this.lastWeather = s.weather;
-      out = s.rivals.length > 0 ? say('start', RADIO.start, rivalAt(1), 0) : null;
+      out = s.rivals.length > 0 ? say('start', TRACK_RADIO[s.trackId ?? '']?.start ?? RADIO.start, rivalAt(1), 0) : null;
       if (out) return out;
     }
     if (s.weather !== this.lastWeather) {
@@ -121,7 +124,7 @@ export class RadioDirector {
       if (s.position === 1) out = say('leading', RADIO.leading, rivalAt(2));
       else if (s.position === s.count) out = say('last', RADIO.last, rivalAt(s.position - 1));
       else if (specific && this.rnd() < 0.6) out = say('rival' + r.name, specific, r.name);
-      else out = say('idle', RADIO.idle, r.name);
+      else out = say('idle', [...RADIO.idle, ...(TRACK_RADIO[s.trackId ?? '']?.idle ?? [])], r.name);
     }
     return out;
   }
