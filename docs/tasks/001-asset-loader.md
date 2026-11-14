@@ -1,4 +1,4 @@
-# Task 001: car model loader
+# Task 001: car model loader (optional)
 Files: src/world/assetLoader.ts
 Branch: qwen/001-asset-loader
 Contract (read-only): `CarModel` in src/types/game.ts
@@ -8,6 +8,9 @@ Contract (read-only): `CarModel` in src/types/game.ts
 export function loadCarModel(url: string, opts?: { targetLength?: number; yawOffset?: number }): Promise<CarModel>;
 export function disposeCarModel(model: CarModel): void;
 ```
+
+## Context
+All cars are procedural today (`src/world/proceduralCar.ts`), which is also the permanent fallback. This loader is only for the day a generated `.glb` body is added; nothing imports it yet, so do not touch other files.
 
 ## Behaviour
 - Use `GLTFLoader` from `three/addons/loaders/GLTFLoader.js`. Cache the loaded glTF per URL (a `Map`); each call returns an independent clone (`scene.clone(true)`).
