@@ -25,6 +25,9 @@ export interface Level {
   smartNitro: boolean;
 }
 
+/** The level the player chose in settings (Legend is only honoured after the story: see ui/drivingSettings). */
+export const AI_SETTING: { level: Difficulty } = { level: 'STREET' };
+
 /** The hard cap on any rubber band, asserted by tests/ai-levels-check. */
 export const RUBBER_MAX = 0.09;
 

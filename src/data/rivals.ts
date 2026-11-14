@@ -1,6 +1,6 @@
 import type { CarSpec } from './cars';
 import { findCar } from './cars';
-import type { Difficulty, DriveStyle } from '../physics/aiDifficulty';
+import { AI_SETTING, type Difficulty, type DriveStyle } from '../physics/aiDifficulty';
 import { createAIRacer } from '../physics/aiRacers';
 import type { AIRacerAgent } from '../types/game';
 
@@ -48,7 +48,7 @@ export interface FieldEntry {
 }
 
 /** Turn rival ids into race entries (agent + car + paint). `skillScale` lets story events make a field easier or harder. */
-export function buildField(ids: readonly string[], skillScale = 1, wet = false, level: Difficulty = 'STREET'): FieldEntry[] {
+export function buildField(ids: readonly string[], skillScale = 1, wet = false, level: Difficulty = AI_SETTING.level): FieldEntry[] {
   return ids.map((id) => {
     const r = findRival(id);
     const skill = Math.min(1, (r.skill + (wet ? (r.rain ?? 0) + (r.snow ?? 0) : 0)) * skillScale);
@@ -57,7 +57,7 @@ export function buildField(ids: readonly string[], skillScale = 1, wet = false, 
 }
 
 /** A mixed free-race field of `count` rivals, weakest first so the front of the grid is the strongest. */
-export function freeRaceField(count: number, level: Difficulty = 'STREET'): FieldEntry[] {
+export function freeRaceField(count: number, level: Difficulty = AI_SETTING.level): FieldEntry[] {
   if (count <= 0) return [];
   const pool = RIVALS.filter((r) => r.id !== 'dante' && r.id !== 'calloway');
   const pick = [...pool].sort((a, b) => a.skill - b.skill);

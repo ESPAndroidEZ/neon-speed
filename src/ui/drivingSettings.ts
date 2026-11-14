@@ -1,4 +1,6 @@
 import type { SaveStore } from '../core/save';
+import { storyComplete } from '../core/career';
+import { AI_SETTING, DIFFICULTIES, type Difficulty } from '../physics/aiDifficulty';
 import { DRIVING, type AssistLevel } from '../physics/assists';
 import { button, h } from './uiKit';
 
@@ -13,6 +15,7 @@ export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number;
   const s = store.data.settings;
   DRIVING.level = s.assist;
   DRIVING.sens = s.steerSens;
+  AI_SETTING.level = s.difficulty === 'LEGEND' && !storyComplete(store.data.career) ? 'STREET' : s.difficulty;
   if (pad) {
     pad.deadZone = s.padDeadzone;
     pad.rumbleOn = s.rumble;
@@ -43,6 +46,27 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
     assist.append(b);
   }
   refresh();
+  const diff = h('div', 'rb-row', '<span style="width:90px">Opponents</span>');
+  const diffHint = h('div', 'rb-sub', '');
+  const DIFF_HINT: Record<Difficulty, string> = { ROOKIE: 'Gentler rivals who make mistakes and help you catch up.', STREET: 'The default field.', PRO: 'Cleaner, braver, defend their line.', LEGEND: 'No mistakes, no rubber band. Unlocked after the story.' };
+  const refreshDiff = (): void => {
+    diff.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('hot', b.dataset.lv === s.difficulty);
+      (b as HTMLButtonElement).disabled = b.dataset.lv === 'LEGEND' && !storyComplete(store.data.career);
+    });
+    diffHint.textContent = DIFF_HINT[s.difficulty];
+  };
+  for (const lv of DIFFICULTIES) {
+    const b = button(lv.toLowerCase(), () => {
+      s.difficulty = lv;
+      save();
+      refreshDiff();
+    });
+    b.dataset.lv = lv;
+    b.style.minWidth = '90px';
+    diff.append(b);
+  }
+  refreshDiff();
   const range = (label: string, key: 'steerSens' | 'padDeadzone', min: number, max: number, step: number): HTMLElement => {
     const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
     const input = h('input') as HTMLInputElement;
@@ -68,5 +92,5 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
     save();
   });
   rumble.append(box);
-  return [assist, hint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
+  return [assist, hint, diff, diffHint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
 }

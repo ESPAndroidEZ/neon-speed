@@ -1,0 +1,1 @@
+Finished or superseded tasks. 003, 009, 010 merged; 005 written by the architect (tips.ts, bios in lore.ts, radio.ts); 006, 007, 008, 011 hit the model's 8192-token output limit and committed nothing: they were re-split into the small tasks 012-019 (see ../000-readme.md).

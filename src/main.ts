@@ -5,6 +5,7 @@ import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { freeRaceField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
+import { AI_SETTING } from './physics/aiDifficulty';
 import { finishFreeRace } from './game/freeRace';
 import { AudioTestPanel } from './dev/audioTestPanel';
 import { runDevStart } from './dev/devStart';
@@ -96,7 +97,7 @@ const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = freeRaceField(rivals);
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null } });
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game,

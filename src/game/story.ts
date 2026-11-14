@@ -3,6 +3,7 @@ import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { buildField, findRival } from '../data/rivals';
+import { AI_SETTING } from '../physics/aiDifficulty';
 import { EVENTS, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
 import { findAnyEvent as findEvent } from '../data/story2';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
@@ -85,7 +86,7 @@ export class StoryController {
     d.game.startRace({
       car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, trackId: ev.trackId, cinematic,
       weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale, ev.weather !== 'CLEAR'),
-      meta: { rivalIds: ev.rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id },
+      meta: { rivalIds: ev.rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id, level: AI_SETTING.level },
     });
   }
 
