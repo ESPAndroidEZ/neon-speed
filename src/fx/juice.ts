@@ -3,7 +3,6 @@ import { clamp, damp, smoothstep } from '../core/math';
 import { qualityNow } from '../core/quality';
 import type { Game } from '../game/game';
 import { WEATHER } from '../physics/weather';
-import { LEVELS } from '../physics/weatherLevels';
 import { createWeatherFx, type WeatherFx } from '../world/weatherFx';
 import { ExhaustFx } from './exhaustFx';
 import { FinalFx } from './finalFx';
@@ -81,11 +80,7 @@ export class Juice {
       this.exhaust.update(v, dt);
     }
     if (this.shown && player) this.showcase(player, dt);
-    if (player) {
-      // camera shake in slides grows with the weather level; puddles throw water
-      const lv = g.weather === 'CLEAR' ? 0 : 1 + LEVELS.indexOf(g.physicsLevel);
-      g.chase.addShake(TyreFx.slide(player) * 0.012 * (1 + lv));
-    }
+    if (player) g.chase.feedSlide(player.racer.car.state.slipAngle, player.racer.car.state.speed, dt); // big slides only
     for (const v of g.views.views) {
       const sp = Math.abs(v.racer.car.state.speed);
       if (v.racer.contact.surface.kind === 'puddle' && sp > 6) {

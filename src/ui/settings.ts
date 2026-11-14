@@ -13,7 +13,7 @@ export interface SettingsDeps {
   voice: Voice;
   auto: { enabled: boolean };
   /** Receives the weather physics level. */
-  game: { physicsLevel: PhysicsLevel };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number } } };
   onBack: () => void;
 }
 
@@ -28,11 +28,13 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.voice.enabled = s.voice;
   d.auto.enabled = s.autoQuality;
   d.game.physicsLevel = s.weatherPhysics;
+  d.game.chase.tuning.shake = { OFF: 0, LOW: 0.5, NORMAL: 1 }[s.cameraShake];
 }
 
 export function buildSettings(d: SettingsDeps): HTMLElement {
   const s = d.store.data.settings;
   const root = h('div', 'rb-layer dim');
+  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
   root.append(h('h2', 'rb-title', 'SETTINGS'));
   const slider = (label: string, key: 'volume' | 'sfxVolume' | 'musicVolume'): HTMLElement => {
     const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
@@ -104,6 +106,19 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   };
   refresh();
   const wp = h('div', 'rb-row', '<span style="width:90px">Rain / snow physics</span>');
+  const shake = h('div', 'rb-row', '<span style="width:90px">Camera shake</span>');
+  for (const lv of ['OFF', 'LOW', 'NORMAL'] as const) {
+    const b = button(lv.toLowerCase(), () => {
+      s.cameraShake = lv;
+      applySettings(d);
+      d.store.commit();
+      shake.querySelectorAll('button').forEach((x) => x.classList.toggle('hot', x.dataset.lv === s.cameraShake));
+    });
+    b.dataset.lv = lv;
+    b.classList.toggle('hot', lv === s.cameraShake);
+    b.style.minWidth = '90px';
+    shake.append(b);
+  }
   const hint = h('div', 'rb-sub', '');
   const HINT: Record<PhysicsLevel, string> = {
     NORMAL: 'Rain 72% grip, snow 45%.',
@@ -126,6 +141,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, sfxVol, musVol, mute, voice, wp, hint, q, auto, button('Back', d.onBack));
+  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, q, auto, button('Back', d.onBack));
   return root;
 }

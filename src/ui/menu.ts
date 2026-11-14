@@ -20,7 +20,7 @@ export interface MenuDeps {
   engine: Engine;
   voice: Voice;
   auto: { enabled: boolean };
-  game: { physicsLevel: PhysicsLevel };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number } } };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
   /** Slide the showroom car sideways on screen (garage panel sits on the left). */

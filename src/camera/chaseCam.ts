@@ -16,7 +16,12 @@ export interface ChaseTuning {
   yawLag: number;
   /** Speed (m/s) at which the "fast" values are fully reached. */
   fullSpeed: number;
+  /** Camera shake multiplier (settings: Off 0, Low 0.5, Normal 1). Shake comes only from impacts and big slides. */
+  shake: number;
 }
+
+/** Hard cap on the shake displacement per axis, metres. */
+const MAX_OFFSET = 0.3;
 
 export function createChaseTuning(): ChaseTuning {
   return {
@@ -30,6 +35,7 @@ export function createChaseTuning(): ChaseTuning {
     slipFollow: 0.5,
     yawLag: 5,
     fullSpeed: 65,
+    shake: 0.5,
   };
 }
 
@@ -52,6 +58,8 @@ export class ChaseCam implements CameraRig {
   private ready = false;
   private shakeAmp = 0;
   private shakeT = 0;
+  private slideAmp = 0;
+  private slipFilt = 0;
 
   constructor(camera: PerspectiveCamera) {
     this.camera = camera;
@@ -72,7 +80,16 @@ export class ChaseCam implements CameraRig {
 
   /** Camera shake impulse (0..1); decays on its own. */
   addShake(amount: number): void {
-    this.shakeAmp = Math.min(1.2, this.shakeAmp + amount);
+    this.shakeAmp = Math.min(1, this.shakeAmp + amount * this.tuning.shake);
+  }
+
+  /**
+   * Feed the slip angle every display frame. Only a LARGE slide (> ~0.5 rad at speed) shakes the camera, and the
+   * amplitude is low-passed and capped: plain acceleration, wheelspin or a small slip never does.
+   */
+  feedSlide(slip: number, speed: number, dt: number): void {
+    const big = smoothstep(0.5, 0.95, Math.abs(slip)) * smoothstep(10, 25, Math.abs(speed));
+    this.slideAmp = damp(this.slideAmp, big * 0.22 * this.tuning.shake, 3, dt);
   }
 
   setNitro(active: boolean): void {
@@ -84,7 +101,10 @@ export class ChaseCam implements CameraRig {
     if (!car) return;
     const t = this.tuning;
     const sp = smoothstep(0, t.fullSpeed, Math.abs(car.speed));
-    const slip = clamp(car.slipAngle, -1.1, 1.1);
+    // camera yaw follows a filtered slip: a dead zone ignores wheelspin wag, and a low-pass removes oscillation
+    const raw = clamp(car.slipAngle, -1.1, 1.1);
+    this.slipFilt = damp(this.slipFilt, Math.sign(raw) * Math.max(0, Math.abs(raw) - 0.1), 4, frameDt);
+    const slip = this.slipFilt;
     const targetYaw = car.heading + t.slipFollow * slip * smoothstep(3, 10, Math.abs(car.speed));
     if (!this.ready) {
       this.yaw = targetYaw;
@@ -111,18 +131,19 @@ export class ChaseCam implements CameraRig {
     this.step(frameDt);
     const c = this.camera;
     c.position.copy(this._pose.position);
-    if (this.shakeAmp > 0.002) {
+    const amp = Math.min(MAX_OFFSET, this.shakeAmp * 0.45 + this.slideAmp);
+    if (amp > 0.002) {
       this.shakeT += frameDt;
       this.shakeAmp *= Math.exp(-7 * frameDt);
-      const a = this.shakeAmp * 0.45;
       const t = this.shakeT;
-      c.position.x += (Math.sin(t * 61) + Math.sin(t * 37 + 1.3)) * 0.5 * a;
-      c.position.y += (Math.sin(t * 53 + 0.7) + Math.sin(t * 29)) * 0.5 * a;
-      c.position.z += Math.sin(t * 47 + 2.1) * 0.5 * a;
+      // low-frequency wobble (about 1 to 1.5 Hz plus a little 4 Hz): a camera sway, not a vibration
+      c.position.x += clamp((Math.sin(t * 9) + Math.sin(t * 5.3 + 1.3)) * 0.5 * amp, -MAX_OFFSET, MAX_OFFSET);
+      c.position.y += clamp((Math.sin(t * 7.4 + 0.7) + Math.sin(t * 4.1)) * 0.5 * amp, -MAX_OFFSET, MAX_OFFSET);
+      c.position.z += clamp(Math.sin(t * 6.2 + 2.1) * 0.5 * amp, -MAX_OFFSET, MAX_OFFSET);
     }
     c.lookAt(this._pose.lookAt);
-    if (Math.abs(c.fov - this._pose.fov) > 0.01) {
-      c.fov = this._pose.fov;
+    if (c.fov !== this._pose.fov) {
+      c.fov = this._pose.fov; // every frame: a dead band would turn the smooth zoom into visible steps
       c.updateProjectionMatrix();
     }
   }
