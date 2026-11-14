@@ -34,6 +34,8 @@ export interface MenuDeps {
   /** Launch a free race in this weather against `rivals` opponents (0 = time trial). */
   startRace: (w: Weather, rivals: number) => void;
   slots: SaveSlots;
+  /** Re-read the saved driving preferences (assists, sensitivity, gamepad). */
+  onDriving?: () => void;
   /** Load a save (slot or autosave) and resume that race. */
   loadSlot: (id: SlotId) => void;
   /** Start a story event. */
@@ -163,6 +165,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, onDriving: this.d.onDriving, onBack: () => this.main() }), 'other');
   }
 }

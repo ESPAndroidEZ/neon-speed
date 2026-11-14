@@ -1,5 +1,6 @@
+import { applyDriving } from '../physics/assists';
 import { CarController } from '../physics/carController';
-import { resolveCarPair } from '../physics/carCollision';
+import { resolveField, unstick } from './raceContacts';
 import type { CarTuning } from '../physics/carTuning';
 import type { ObstacleField } from '../physics/obstacles';
 import { TrackContact } from '../physics/trackContact';
@@ -20,8 +21,6 @@ export type RacePhase = 'GRID' | 'COUNTDOWN' | 'RACING' | 'FINISHED';
 export const COUNTDOWN_SECONDS = 3;
 const GO_FLASH = 0.8;
 const COAST_BRAKE = 0.6;
-const UNSTICK_AFTER = 8;
-const RIVAL_BUMP = 0.12;
 
 /**
  * Grid start, 3-2-1 countdown, laps, timing, positions and finish. Works with zero AI (time trial).
@@ -151,31 +150,17 @@ export class RaceManager {
         inp.throttle = 0; inp.brake = r.car.state.speed > 1.5 ? COAST_BRAKE : 0; inp.steer = 0; inp.handbrake = false; inp.nitro = false;
       } else if (r.isPlayer) {
         Object.assign(inp, playerInput);
+        applyDriving(r.car);
       } else if (r.agent) {
         Object.assign(inp, r.agent.decide(dt, r.car.state, this.view));
       }
       r.car.step(dt, inp, w);
       r.contact.update(r.car);
-      if (!r.isPlayer && !r.finished) this.unstick(r, dt);
+      if (!r.isPlayer && !r.finished) unstick(r, dt);
       this.carImpact = Math.max(this.carImpact, r.contact.impact);
     }
-    // Contact with the player is a full crash; rivals only trade soft bumps (no pile-ups).
-    for (let i = 0; i < this.racers.length; i++)
-      for (let j = i + 1; j < this.racers.length; j++) {
-        const hard = this.racers[i].isPlayer || this.racers[j].isPlayer;
-        const c = resolveCarPair(this.racers[i].car, this.racers[j].car, hard ? 1 : RIVAL_BUMP);
-        if (hard) this.carImpact = Math.max(this.carImpact, c);
-      }
+    this.carImpact = Math.max(this.carImpact, resolveField(this.racers));
     if (live) this.updateLaps();
-  }
-
-  /** A rival pinned against a wall or prop for too long is lifted back onto the road (the player has R). */
-  private unstick(r: Racer, dt: number): void {
-    r.stuck = Math.abs(r.car.state.speed) < 0.8 ? r.stuck + dt : Math.max(0, r.stuck - dt * 2);
-    if (r.stuck < UNSTICK_AFTER) return;
-    r.stuck = 0;
-    r.contact.place(r.car, r.contact.nearestIndex(r.car));
-    r.laps.teleport(r.contact.hit.index);
   }
 
   private updateLaps(): void {

@@ -4,6 +4,7 @@ import { applyQuality } from '../core/quality';
 import type { Quality, SaveStore } from '../core/save';
 import { LEVELS, type PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
+import { drivingRows } from './drivingSettings';
 import { button, h } from './uiKit';
 
 export interface SettingsDeps {
@@ -14,6 +15,8 @@ export interface SettingsDeps {
   auto: { enabled: boolean };
   /** Receives the weather physics level. */
   game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number } } };
+  /** Called after a driving setting changes (copies the saved values into physics and the gamepad). */
+  onDriving?: () => void;
   onBack: () => void;
 }
 
@@ -141,6 +144,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, q, auto, button('Back', d.onBack));
+  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), q, auto, button('Back', d.onBack));
   return root;
 }

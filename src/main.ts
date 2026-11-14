@@ -14,6 +14,7 @@ import { StoryController } from './game/story';
 import { CombinedInput } from './input/combinedInput';
 import { GamepadInput } from './input/gamepad';
 import { KeyboardInput } from './input/keyboard';
+import { applyDrivingSettings } from './ui/drivingSettings';
 import { createTouchControls } from './ui/touchControls';
 import { installMinimap } from './game/extras';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
@@ -55,7 +56,9 @@ const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
 const touch = createTouchControls(document.body, { onReset: () => game.resetToTrack(), onPause: () => pause.toggle() });
-const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new CombinedInput([new KeyboardInput(), new GamepadInput(), touch]);
+const keys = new KeyboardInput();
+const pad = new GamepadInput({ onPause: () => pause.toggle(), onReset: () => game.resetToTrack() });
+const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new CombinedInput([keys, pad, touch]);
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
@@ -63,6 +66,14 @@ let story: StoryController;
 const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
 const game = new Game({ engine, world, hud, results, input, tuning });
 const juice = new Juice(engine, game);
+engine.onFrame(() => {
+  keys.speedKph = game.telemetry.speedKph;
+});
+const baseImpact = game.onImpact;
+game.onImpact = (s) => {
+  baseImpact?.(s);
+  pad.rumble(Math.min(1, s / 18), Math.min(1, s / 10), 0.25);
+};
 const audio = new AudioManager(game);
 engine.onFrame((_a, dt) => {
   audio.update(dt);
@@ -77,6 +88,8 @@ auto.onDowngrade = (tier) => {
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
 applySettings({ store, audio: audio.bus, engine, voice, auto, game });
+const applyDriving = (): void => applyDrivingSettings(store, pad);
+applyDriving();
 void world.applyPropModels();
 
 new AudioTestPanel(document.body, audio);
@@ -107,6 +120,7 @@ menu = new Menu({
   },
   startEvent: (ev) => story.start(ev),
   slots,
+  onDriving: applyDriving,
   loadSlot: (id) => loadSlot(id),
 });
 const subs = new Subtitles(voice);

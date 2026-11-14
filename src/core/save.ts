@@ -1,3 +1,4 @@
+import type { AssistLevel } from '../physics/assists';
 import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Weather } from '../types/game';
 import { defaultCareer, type CareerState } from './career';
@@ -15,7 +16,7 @@ export interface SaveData {
   glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL' };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; steerSens: number; rumble: boolean; padDeadzone: number };
   races: number;
   career: CareerState;
 }
@@ -37,7 +38,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   paint: { [starterId]: starterPaint },
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
-  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW' },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 1, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', steerSens: 1, rumble: true, padDeadzone: 0.12 },
   races: 0,
   career: defaultCareer(),
 });
@@ -81,6 +82,10 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.sfxVolume = num(s.sfxVolume, out.settings.sfxVolume, 0, 1);
   out.settings.musicVolume = num(s.musicVolume, out.settings.musicVolume, 0, 1);
   if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
+  if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;
+  out.settings.steerSens = num(s.steerSens, 1, 0.6, 1.4);
+  out.settings.rumble = s.rumble !== false;
+  out.settings.padDeadzone = num(s.padDeadzone, 0.12, 0.02, 0.4);
   const cr = (j.career ?? {}) as Record<string, unknown>;
   if (Array.isArray(cr.completed)) out.career.completed = cr.completed.filter((id): id is string => typeof id === 'string');
   out.career.seenIntro = cr.seenIntro === true;
