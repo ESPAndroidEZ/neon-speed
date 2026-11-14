@@ -1,6 +1,6 @@
 # Rules for Qwen (Aider): Racer's Blood
 
-Do ONE task from `docs/tasks/` at a time. Edit only the files on its `Files:` line. Work on branch `qwen/<task>`, never `main`.
+Only work when `docs/handoff.md` says `Baton: qwen`; otherwise stop and tell the owner. Do ONE task from `docs/tasks/` at a time. Edit only the files on its `Files:` line. Work on branch `qwen/<task>`, never `main`.
 
 ## Rules (the build enforces the first three)
 - Every `.ts` file under 220 lines.

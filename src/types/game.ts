@@ -14,6 +14,21 @@ import type { Group, Object3D, PerspectiveCamera, Vector3 } from 'three';
 
 export type GameState = 'CINEMATIC' | 'RACING' | 'PODIUM';
 
+export type Weather = 'CLEAR' | 'RAIN' | 'SNOW';
+
+/** Everything weather changes. Physics reads `grip`; visuals read the rest. */
+export interface WeatherProfile {
+  readonly name: Weather;
+  /** Multiplies tyre grip and braking force. 1 = dry tarmac. */
+  readonly grip: number;
+  readonly fogDensity: number;
+  readonly fogColor: number;
+  /** 0..1 particle intensity (rain streaks or snow flakes). 0 = none. */
+  readonly precipitation: number;
+  /** 0..1 target roughness of the road material (wet = low = mirror-like). */
+  readonly roadRoughness: number;
+}
+
 /** Structural vector type; three's Vector3 satisfies it. */
 export interface Vec3 {
   x: number;
