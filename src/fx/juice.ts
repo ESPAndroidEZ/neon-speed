@@ -1,6 +1,8 @@
 import type { Engine } from '../core/engine';
 import { clamp, damp, smoothstep } from '../core/math';
+import { grade } from '../core/grade';
 import { qualityNow } from '../core/quality';
+import { setLightGlow } from '../world/carLights';
 import type { Game } from '../game/game';
 import { WEATHER } from '../physics/weather';
 import { createWeatherFx, type WeatherFx } from '../world/weatherFx';
@@ -88,6 +90,7 @@ export class Juice {
         this.splashAt(v.x + Math.sin(v.heading) * 1.5, v.z + Math.cos(v.heading) * 1.5, s.velocity.x, s.velocity.z, Math.ceil(sp * dt * 14 * qualityNow().particles) + 1);
       }
     }
+    setLightGlow(grade.glowK);
     this.lights.update(g.views.views);
     this.hits();
     this.screenFx(dt);

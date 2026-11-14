@@ -9,3 +9,4 @@ dist/
 .aider.tags.cache.v*/
 .aider.llm.history
 assets-src/
+logs/

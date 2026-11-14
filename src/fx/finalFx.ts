@@ -1,11 +1,12 @@
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import type { Engine } from '../core/engine';
+import { grade } from '../core/grade';
 import { qualityNow } from '../core/quality';
 
 const shader = {
-  uniforms: { tDiffuse: { value: null }, blur: { value: 0 }, vignette: { value: 0.4 }, aberration: { value: 0.0014 }, grain: { value: 0.035 }, time: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, blur: { value: 0 }, vignette: { value: 0.4 }, aberration: { value: 0.0014 }, grain: { value: 0.03 }, time: { value: 0 }, sat: { value: 1 }, tint: { value: [1, 1, 1] } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float blur, vignette, aberration, grain, time; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float blur, vignette, aberration, grain, time, sat; uniform vec3 tint; varying vec2 vUv;
   float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time) * 43758.5453); }
   void main(){
     vec2 d = vUv - 0.5;
@@ -17,6 +18,9 @@ const shader = {
     vec3 acc = c;
     for (int i = 1; i <= 6; i++) acc += texture2D(tDiffuse, vUv - d * k * 0.06 * float(i)).rgb;
     c = mix(c, acc / 7.0, min(1.0, blur * 1.2));
+    // weather colour grade: desaturate and tint (cool in snow) without touching the highlights' shape
+    float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    c = mix(vec3(lum), c, sat) * tint;
     c *= 1.0 - vignette * smoothstep(0.35, 0.95, r * 1.35);
     c += (hash(vUv * 1000.0) - 0.5) * grain;
     gl_FragColor = vec4(c, 1.0);
@@ -39,5 +43,7 @@ export class FinalFx {
     this.t = (this.t + dt) % 100;
     u.time.value = this.t;
     u.blur.value = blur;
+    u.sat.value = grade.saturation;
+    u.tint.value = grade.tint;
   }
 }

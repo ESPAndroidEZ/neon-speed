@@ -14,7 +14,7 @@ export interface LookTargets {
 }
 
 const ROAD_DRY = new Color(0xffffff);
-const ROAD_SNOW = new Color(0xc9d2e4);
+const ROAD_SNOW = new Color(0x6f7889);
 
 /** Pushes a WeatherProfile into the world's materials: wet = glossy and reflective, snow = pale and matte. */
 export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
@@ -23,16 +23,16 @@ export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
   t.roadMat.roughness = p.roadRoughness;
   t.roadMat.metalness = wet ? 0.55 : snow ? 0.05 : 0.35;
   t.roadMat.envMap = t.env;
-  t.roadMat.envMapIntensity = wet ? 1.6 : snow ? 0.15 : 0.5;
+  t.roadMat.envMapIntensity = wet ? 1.0 : snow ? 0.1 : 0.5;
   t.roadMat.color.copy(snow ? ROAD_SNOW : ROAD_DRY);
-  t.vergeMat.color.setHex(snow ? 0xaab4c8 : 0x1d2128);
-  t.groundMat.color.setHex(snow ? 0x8f99ad : 0x14161c);
+  t.vergeMat.color.setHex(snow ? 0x5b6577 : 0x1d2128);
+  t.groundMat.color.setHex(snow ? 0x3f4858 : 0x14161c);
   t.groundMat.roughness = snow ? 0.95 : 0.9;
   t.waterMat.envMap = t.env;
-  t.poolMat.opacity = wet ? 0.8 : snow ? 0.25 : 0.38;
+  t.poolMat.opacity = wet ? 0.5 : snow ? 0.18 : 0.34;
   t.waterMat.roughness = snow ? 0.3 : 0.08 + p.precipitation * 0.1;
-  t.streakMat.opacity = wet ? 0.6 : 0;
-  t.shaftMat.opacity = wet ? 0.035 : snow ? 0.03 : 0.015; // fog and falling water scatter the lamp light
-  t.glowMat.opacity = wet ? 0.4 : snow ? 0.35 : 0.25;
+  t.streakMat.opacity = wet ? 0.28 : 0;
+  t.shaftMat.opacity = wet ? 0.02 : snow ? 0.014 : 0.015; // fog and falling water scatter the lamp light
+  t.glowMat.opacity = wet ? 0.24 : snow ? 0.18 : 0.25;
   for (const m of [t.roadMat, t.vergeMat, t.groundMat, t.waterMat]) m.needsUpdate = true;
 }

@@ -40,7 +40,7 @@ export function createWeatherFx(scene: Scene): WeatherFx {
   const rainPos = new Float32Array(RAIN * 6);
   const rainGeo = new BufferGeometry();
   rainGeo.setAttribute('position', new BufferAttribute(rainPos, 3).setUsage(35048));
-  const rain = new LineSegments(rainGeo, new LineBasicMaterial({ color: new Color(0xb8ccff).multiplyScalar(1.4), transparent: true, opacity: 0.55, depthWrite: false, blending: AdditiveBlending }));
+  const rain = new LineSegments(rainGeo, new LineBasicMaterial({ color: new Color(0xaabfe8), transparent: true, opacity: 0.3, depthWrite: false, blending: AdditiveBlending }));
   rain.frustumCulled = false;
   rain.visible = false;
 
@@ -54,7 +54,7 @@ export function createWeatherFx(scene: Scene): WeatherFx {
   const snowPos = new Float32Array(SNOW * 3);
   const snowGeo = new BufferGeometry();
   snowGeo.setAttribute('position', new BufferAttribute(snowPos, 3).setUsage(35048));
-  const snow = new Points(snowGeo, new PointsMaterial({ map: makePoolTexture(), color: 0xffffff, size: 0.42, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false }));
+  const snow = new Points(snowGeo, new PointsMaterial({ map: makePoolTexture(), color: 0xffffff, size: 0.27, sizeAttenuation: true, transparent: true, opacity: 0.72, depthWrite: false }));
   snow.frustumCulled = false;
   snow.visible = false;
 
@@ -147,10 +147,10 @@ export function createWeatherFx(scene: Scene): WeatherFx {
           const a = ra[i];
           const live = a < 1;
           dummy.position.set(rx[i], 0.05, rz[i]);
-          dummy.scale.setScalar(live ? 1 + a * 5 : 0.0001);
+          dummy.scale.setScalar(live ? 0.7 + a * 3.2 : 0.0001);
           dummy.updateMatrix();
           ripples.setMatrixAt(i, dummy.matrix);
-          ripples.setColorAt(i, rc.setScalar(live ? (1 - a) * 1.6 : 0));
+          ripples.setColorAt(i, rc.setScalar(live ? (1 - a) * 0.9 : 0));
         }
         ripples.instanceMatrix.needsUpdate = true;
         if (ripples.instanceColor) ripples.instanceColor.needsUpdate = true;

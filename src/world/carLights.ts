@@ -1,6 +1,13 @@
 import { AdditiveBlending, Color, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
 import { makePoolTexture, makeShadowTexture } from './textures';
 
+const glowMats: MeshBasicMaterial[] = [];
+
+/** Scale every car's lamp glow (bad weather: fog would turn big halos into a white-out). */
+export function setLightGlow(k: number): void {
+  for (const m of glowMats) m.opacity = Math.min(1, k);
+}
+
 let pool: ReturnType<typeof makePoolTexture> | null = null;
 let shadow: ReturnType<typeof makeShadowTexture> | null = null;
 
@@ -13,6 +20,7 @@ export function addLightsAndShadow(root: Group, width: number, length: number, l
   shadow ??= makeShadowTexture();
   const glow = (color: number, k: number, z: number, dir: number): void => {
     const mat = new MeshBasicMaterial({ map: pool, color: new Color(color).multiplyScalar(k), transparent: true, depthWrite: false, blending: AdditiveBlending });
+    glowMats.push(mat);
     for (const sx of [-1, 1]) {
       for (const turn of [0, Math.PI / 2]) { // two crossed quads so the glow reads from the side too
         const q = new Mesh(new PlaneGeometry(0.8, 0.4), mat);

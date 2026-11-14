@@ -7,9 +7,9 @@ import type { SkidMarks } from './skidMarks';
 
 /** Per-surface look of tyre clouds: colour, size, lift and how many per second at full slide. */
 const LOOK: Record<Weather, { r: number; g: number; b: number; a: number; s0: number; s1: number; rise: number; rate: number; speedKick: number }> = {
-  CLEAR: { r: 0.9, g: 0.9, b: 0.95, a: 0.42, s0: 0.8, s1: 3.4, rise: 0.8, rate: 95, speedKick: 0.15 },
-  RAIN: { r: 0.72, g: 0.82, b: 1.0, a: 0.45, s0: 0.5, s1: 2.2, rise: 2.4, rate: 130, speedKick: 0.45 }, // fine water spray, thrown up and back
-  SNOW: { r: 1.0, g: 1.0, b: 1.0, a: 0.7, s0: 1.0, s1: 4.0, rise: 1.4, rate: 110, speedKick: 0.3 }, // powder kicked up
+  CLEAR: { r: 0.88, g: 0.88, b: 0.92, a: 0.3, s0: 0.7, s1: 2.6, rise: 0.7, rate: 85, speedKick: 0.15 },
+  RAIN: { r: 0.7, g: 0.8, b: 0.95, a: 0.3, s0: 0.45, s1: 1.8, rise: 2.0, rate: 100, speedKick: 0.45 }, // fine water spray, thrown up and back // fine water spray, thrown up and back
+  SNOW: { r: 0.82, g: 0.88, b: 0.98, a: 0.36, s0: 0.6, s1: 2.3, rise: 1.0, rate: 70, speedKick: 0.3 }, // powder kicked up // powder kicked up
 };
 
 /** Smoke / water spray / snow powder from the tyres, and skid marks. Rates follow the quality tier. */

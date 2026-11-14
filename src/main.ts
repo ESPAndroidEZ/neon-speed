@@ -50,7 +50,7 @@ const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map
 
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
-const input = q.has('demo') ? new DemoInput() : new KeyboardInput();
+const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new KeyboardInput();
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
@@ -188,6 +188,7 @@ if (direct) {
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = freeRaceField(Number(q.get('ai') ?? 0));
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: game.weather, laps: 3, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: game.weather !== 'CLEAR', eventId: null } });
+  if (q.has('wi')) game.weatherIntensity = Number(q.get('wi')); // dev: force the rain/snow build-up
   const at = q.get('at'); // dev: start at a zone (tunnel, bridge, dock, plaza, alley) or a sample index
   if (at) {
     const idx = Number.isNaN(Number(at)) ? world.track.zones.indexOf(at as never) + 6 : Number(at);

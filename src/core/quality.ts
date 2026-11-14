@@ -1,4 +1,5 @@
 import type { Engine } from './engine';
+import { grade } from './grade';
 import type { Quality } from './save';
 
 /** Everything a quality tier switches. Systems read `qualityNow()` each frame, so changes apply instantly. */
@@ -33,7 +34,7 @@ export function applyQuality(engine: Engine, q: Quality): void {
   current = q;
   const t = TIERS[q];
   engine.maxPixelRatio = t.pixelRatio;
-  engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength });
+  engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength * grade.bloomK });
   engine.resize();
 }
 

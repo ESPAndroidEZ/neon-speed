@@ -1,4 +1,5 @@
 import { Object3D, SpotLight, type Scene } from 'three';
+import { grade } from '../core/grade';
 import { qualityNow } from '../core/quality';
 import type { RacerView } from '../game/racerViews';
 
@@ -34,6 +35,10 @@ export class HeadlightPool {
           rival = v;
         }
       }
+    }
+    for (const l of this.lights) {
+      l.intensity = 300 * grade.spotK;
+      l.angle = grade.spotAngle;
     }
     this.assign(0, n >= 1 ? player ?? null : null);
     this.assign(1, n >= 2 ? rival : null);
