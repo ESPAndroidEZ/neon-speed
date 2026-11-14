@@ -1,0 +1,27 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm install)",
+      "Bash(npx tsc *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git switch *)",
+      "Bash(git merge *)",
+      "Bash(wc -l *)",
+      "Bash(ls *)"
+    ],
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./dist/**)",
+      "Read(./package-lock.json)",
+      "Read(./.env*)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)"
+    ]
+  }
+}
