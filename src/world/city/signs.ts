@@ -1,3 +1,5 @@
+import { SIGNS_A } from './signsA';
+import { SIGNS_B } from './signsB';
 import { BoxGeometry, CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
 /** A shop sign design. Brands are FICTIONAL (docs/art-direction.md): never use a real company name. */
@@ -22,6 +24,8 @@ export const SIGNS: readonly SignSpec[] = [
   { text: 'HEXA MOTORS', sub: 'TUNING', color: '#ff9a2e', alt: '#ffffff', style: 'solid', icon: 'ring' },
   { text: 'DRIP', sub: 'COFFEE + NOODLES', color: '#ff4fa3', alt: '#ffd27d', style: 'bar', icon: 'cup' },
   { text: 'OCTO BAR', sub: 'LIVE DJ', color: '#c8f4ff', alt: '#ff2a9d', style: 'tube', icon: 'ring' },
+  ...SIGNS_A,
+  ...SIGNS_B,
 ];
 
 const CELL_W = 256;

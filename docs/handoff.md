@@ -1,6 +1,6 @@
 # Handoff
 
-Baton: qwen
+Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
 Updated: 2026-11-14 (Claude, session 6: design overhaul).
@@ -75,3 +75,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-14 Claude (session 6, end): HUD gauge, container sheet, port lighting, screenshots, visual check per look (chroma bar 0.20). Qwen 020 (archetypes A) merged; 021+ in the queue, merge as they finish (see Next). Build, tests (all files), smoke green; baton stays qwen.
 - 2026-11-14 Claude (checkpoint 19:05): queue at 029. Done by Qwen so far: 020 (merged), 021, 024, 025, 026, 027 (to review); 022, 023, 028 EMPTY (re-run smaller). Build green.
 - 2026-11-14 Claude (22:05): wrote docs/next-session.md. Queue 016-044 finished its list: 15 files DONE to review, 13 EMPTY to re-split. Build green.
+- 2026-11-14 Claude (session 7, step 0): Qwen review. Merged + wired: 017 yard props (into PROPS), 021 archetypes B, 024 graffiti C, 025/026 signs (23 designs now), 027 facade variants (data, not yet used), 030-033 parts (roof-fin widened to pass the fit test), 035 vinyls B, 036/039 props, 041 catalog (`data/partsCatalogAll`), 043 loadout list (not yet linked from a menu). Dropped: 015 (duplicate of vinylLayer). Superseded: 003/009/010/012/013/014/020. EMPTY, to re-split smaller: 005-008, 011, 016, 018, 019, 022, 023, 028, 029, 034, 037, 038, 040, 042, 044.

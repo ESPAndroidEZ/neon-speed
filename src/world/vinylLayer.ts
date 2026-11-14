@@ -1,3 +1,4 @@
+import { VINYLS_B } from './vinylB';
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from 'three';
 import type { Vinyl } from '../data/loadout';
 
@@ -30,6 +31,7 @@ export const VINYL_PAINTERS: Record<string, VinylPainter> = {
   },
 };
 
+Object.assign(VINYL_PAINTERS, VINYLS_B);
 export const VINYL_IDS = Object.keys(VINYL_PAINTERS);
 const css = (c: number): string => `#${c.toString(16).padStart(6, '0')}`;
 

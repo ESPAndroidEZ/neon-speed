@@ -1,4 +1,5 @@
 import { ARCHETYPES_A } from './archetypesA';
+import { ARCHETYPES_B } from './archetypesB';
 import type { FacadeKind } from './textures';
 
 /**
@@ -36,7 +37,7 @@ const BASE: Archetype[] = [
 ];
 
 /** Every archetype in play: the reference set plus the Qwen sets (A, B ...). */
-export const ARCHETYPES: Archetype[] = [...BASE, ...ARCHETYPES_A];
+export const ARCHETYPES: Archetype[] = [...BASE, ...ARCHETYPES_A, ...ARCHETYPES_B];
 
 /** Archetypes allowed in a district, in list order. */
 export const archetypesFor = (district: string, all: readonly Archetype[] = ARCHETYPES): Archetype[] => all.filter((a) => a.districts.includes('*') || a.districts.includes(district));

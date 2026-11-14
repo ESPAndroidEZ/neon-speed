@@ -37,7 +37,7 @@ for (const def of TRACKS.filter((t) => t.theme === 'city')) {
 check('every district has a palette with a skyline rule', TRACKS.every((t) => PALETTES[t.id] !== undefined), '');
 check('cliff has an open horizon, cities have skylines', PALETTES.cliff.skyline.count === 0 && PALETTES.neon.skyline.count > 50, '');
 check('three look presets with sane values', LOOK_IDS.length === 3 && LOOK_IDS.every((id) => { const l = LOOKS[id]; return l.exposure > 0.5 && l.exposure < 2 && l.saturation > 0.5 && l.contrast >= 1 && l.bloomK > 0 && l.streak >= 0 && l.stars >= 0 && l.stars <= 1; }), '');
-check('eight fictional sign designs, none with a real brand', SIGNS.length >= 8 && SIGNS.every((s) => !/(coca|pepsi|nike|adidas|sony|mcdonald|starbucks|shell|bp |esso|toyota|nissan|honda|mazda)/i.test(s.text + (s.sub ?? ''))), SIGNS.map((s) => s.text).join(', '));
+check('fictional sign designs, none with a real brand', SIGNS.length >= 8 && SIGNS.every((s) => !/(coca|pepsi|nike|adidas|sony|mcdonald|starbucks|shell|bp |esso|toyota|nissan|honda|mazda)/i.test(s.text + (s.sub ?? ''))), SIGNS.map((s) => s.text).join(', '));
 
 // parts: every reference part builds a sensible object at the right place for a small car and a big one
 const a1 = { length: 4.25, width: 1.72, height: 1.4, belt: 0.84, wheelbase: 2.62 };

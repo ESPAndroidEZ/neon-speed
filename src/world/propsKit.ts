@@ -1,3 +1,6 @@
+import { PROPS_A } from './propsA';
+import { PROPS_D } from './propsD';
+import { buildBarrel, buildFloodlight, buildForklift, buildPallet } from './propYard';
 import { BoxGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial, type Material } from 'three';
 
 /** A street prop: a small Group at ground level, facing +Z, built from primitives and a few materials (no textures, no allocation after the call). */
@@ -22,3 +25,4 @@ export const PROPS: Record<string, PropBuilder> = {
     return g;
   },
 };
+Object.assign(PROPS, PROPS_A, PROPS_D, { barrel: buildBarrel, pallet: buildPallet, forklift: buildForklift, floodlight: buildFloodlight });

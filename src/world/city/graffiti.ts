@@ -1,3 +1,4 @@
+import { GRAFFITI_C } from './graffitiC';
 import { CanvasTexture, SRGBColorSpace } from 'three';
 import { createRng } from '../../core/rng';
 
@@ -37,6 +38,7 @@ export const GRAFFITI: Record<string, GraffitiPainter> = {
     for (let i = 0; i < 3; i++) g.fillRect(w * (0.2 + rnd() * 0.6), h * 0.55, 3, h * (0.1 + rnd() * 0.25));
   },
 };
+Object.assign(GRAFFITI, GRAFFITI_C);
 
 /** Paint one design into a texture (transparent background, so it can decal onto any wall). */
 export function makeGraffitiTexture(painter: GraffitiPainter, seed = 1, w = 512, h = 256): CanvasTexture {

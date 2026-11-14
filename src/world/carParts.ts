@@ -1,3 +1,7 @@
+import { SPOILER_MORE } from './partsSpoilers';
+import { SPLITTER_MORE } from './partsSplitters';
+import { SKIRTS_MORE } from './partsSkirts';
+import { HOOD_MORE } from './partsHoods';
 import { BoxGeometry, Group, Mesh, type Material, type Object3D } from 'three';
 
 /** Body parts a car can wear. Procedural cars and GLB cars take the same add-on parts at anchors computed from their size. */
@@ -55,6 +59,10 @@ export const PARTS: Record<PartSlot, Record<string, PartBuilder>> = {
     vent: (a, _paint, trim) => box(a.width * 0.34, 0.05, 0.5, trim, 0, a.belt - 0.02, a.length * 0.24),
   },
 };
+Object.assign(PARTS.spoiler, SPOILER_MORE);
+Object.assign(PARTS.splitter, SPLITTER_MORE);
+Object.assign(PARTS.skirts, SKIRTS_MORE);
+Object.assign(PARTS.hood, HOOD_MORE);
 
 export type PartChoice = Partial<Record<PartSlot, string>>;
 
