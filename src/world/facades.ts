@@ -1,8 +1,8 @@
-import { BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three';
+import { Color, BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three';
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
-import { makeNeonWindowTexture, makeWindowTexture } from './textures';
+import { makeFacadeSheet, makeShopfrontTexture, type FacadeSheet } from './city/textures';
 
 export interface Plaza {
   x: number;
@@ -24,7 +24,7 @@ class Strips {
   readonly idx: number[] = [];
 
   /** One vertical (and optionally roofed) run of samples a..b on one side. */
-  run(tr: Track, side: number, a: number, b: number, h: number, tint: readonly number[], roof: number, y0 = 0, inset = 0): void {
+  run(tr: Track, side: number, a: number, b: number, h: number, tint: readonly number[], roof: number, y0 = 0, inset = 0, uTile = 16, vSpan = 16): void {
     const n = tr.samples.length;
     const p = { x: 0, z: 0 };
     const per = roof > 0 ? 3 : 2;
@@ -34,8 +34,8 @@ class Strips {
       const o = side * (tr.wall[k] + 0.02 - inset);
       lateralPoint(tr, k, o, p);
       this.pos.push(p.x, y0, p.z, p.x, h, p.z);
-      const u = (i * tr.spacing) / 16;
-      this.uv.push(u, 0, u, (h - y0) / 16);
+      const u = (i * tr.spacing) / uTile;
+      this.uv.push(u, 0, u, (h - y0) / vSpan);
       this.col.push(tint[0], tint[1], tint[2], tint[0], tint[1], tint[2]);
       if (roof > 0) {
         lateralPoint(tr, k, o + side * roof, p);
@@ -113,23 +113,27 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
       else {
         (rnd() < 0.18 ? neon : rnd() < 0.5 ? warm : cool).run(tr, side, i, b, h, TINTS[Math.floor(rnd() * TINTS.length)], 2);
         const c = SHOP[Math.floor(rnd() * SHOP.length)];
-        if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07);
+        if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07, 6, 2.65);
       }
       for (let k = i; k <= b; k++) height[hi][k % n] = h;
       i = b;
     }
   }
   const group = new Group();
-  const addWalls = (s: Strips, isWarm: boolean, texture?: ReturnType<typeof makeWindowTexture>): void => {
+  const sheets = { brick: makeFacadeSheet('brick', 1), concrete: makeFacadeSheet('concrete', 2), glass: makeFacadeSheet('glass', 3) };
+  const addWalls = (s: Strips, sheet: FacadeSheet): void => {
     if (s.idx.length === 0) return;
-    const m = new MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1, side: DoubleSide, emissive: 0xffffff, emissiveMap: texture ?? makeWindowTexture(isWarm), emissiveIntensity: 1.5 });
+    const m = new MeshStandardMaterial({
+      vertexColors: true, roughness: 1, metalness: 0.15, side: DoubleSide, map: sheet.map, roughnessMap: sheet.roughnessMap, normalMap: sheet.normalMap,
+      emissive: 0xffffff, emissiveMap: sheet.emissiveMap, emissiveIntensity: 0.95, envMapIntensity: 0.25,
+    });
     group.add(new Mesh(s.geometry(), m));
   };
-  addWalls(warm, true);
-  addWalls(cool, false);
-  addWalls(neon, false, makeNeonWindowTexture());
+  addWalls(warm, sheets.brick);
+  addWalls(cool, sheets.concrete);
+  addWalls(neon, sheets.glass);
   const basic = new MeshBasicMaterial({ vertexColors: true, side: DoubleSide });
-  if (shops.idx.length > 0) group.add(new Mesh(shops.geometry(), basic));
+  if (shops.idx.length > 0) group.add(new Mesh(shops.geometry(), new MeshBasicMaterial({ vertexColors: true, side: DoubleSide, map: makeShopfrontTexture(), color: new Color(1.5, 1.5, 1.5) })));
   if (rim.idx.length > 0) group.add(new Mesh(rim.geometry(), basic));
   return { group, height };
 }

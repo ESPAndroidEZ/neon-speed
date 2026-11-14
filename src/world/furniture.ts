@@ -1,10 +1,11 @@
 import { AdditiveBlending, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, DoubleSide, Group, InstancedMesh, LineBasicMaterial, LineSegments, MeshBasicMaterial, Object3D, PlaneGeometry, Points, PointsMaterial } from 'three';
+import { makeSignAtlas, SIGNS, signGeometry } from './city/signs';
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
 import { makePoolTexture } from './textures';
 
-const NEON = [0xff2a9d, 0x18d8ff, 0xffb347, 0x7a5cff, 0x39ff88];
+const SIGN_GLOW = SIGNS.map((x) => Number.parseInt(x.color.slice(1), 16));
 const LAMP_EVERY = 9; // samples
 const LAMP_H = 6.5;
 
@@ -89,23 +90,28 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
       flat.push({ i, side, y: 3.4 + rnd() * 4.5, w: blade ? 0.3 : 3.5 + rnd() * 4, h: blade ? 1.4 + rnd() * 1.2 : 0.9 + rnd() * 1.3, blade });
     }
   }
-  const signs = new InstancedMesh(new BoxGeometry(1, 1, 0.2), new MeshBasicMaterial({ color: 0xffffff }), Math.max(1, flat.length));
+  const atlas = makeSignAtlas();
+  const signMat = new MeshBasicMaterial({ map: atlas, color: new Color(1.15, 1.15, 1.15) });
   const col = new Color();
   const signSpots: { x: number; y: number; z: number; yaw: number }[] = [];
+  const cells: InstancedMesh[] = SIGNS.map((_, c) => new InstancedMesh(signGeometry(c), signMat, Math.max(1, flat.filter((_f, k) => k % SIGNS.length === c).length)));
+  const fill = new Array<number>(SIGNS.length).fill(0);
+  const signColor: Color[] = [];
   flat.forEach((f, k) => {
+    const cell = k % SIGNS.length;
     const s = tr.samples[f.i];
     const yaw = Math.atan2(s.tangent.x, s.tangent.z);
     lateralPoint(tr, f.i, f.side * (tr.wall[f.i] - (f.blade ? 0.7 : 0.08)), p);
-    d.position.set(p.x, f.y, p.z);
+    d.position.set(p.x, f.y + s.position.y, p.z);
     d.rotation.set(0, f.blade ? yaw + Math.PI / 2 : yaw, 0);
     d.scale.set(f.w, f.h, f.blade ? 1.4 : 1);
     d.updateMatrix();
-    signs.setMatrixAt(k, d.matrix);
+    cells[cell].setMatrixAt(fill[cell]++, d.matrix);
     if (!f.blade && k % 4 === 0) signSpots.push({ x: p.x, y: f.y - 1.6, z: p.z, yaw: f.side > 0 ? yaw + Math.PI : yaw });
-    signs.setColorAt(k, col.setHex(NEON[Math.floor(rnd() * NEON.length)]).multiplyScalar(1.7));
+    signColor[k] = new Color(SIGN_GLOW[cell]).multiplyScalar(1.7);
   });
-  signs.count = flat.length;
-  group.add(signs);
+  cells.forEach((m, c) => { m.count = fill[c]; group.add(m); });
+  const signs = { getColorAt: (k: number, out: Color): void => void out.copy(signColor[k]) };
   // wet-road streaks: each sign casts a long soft smear of its colour down the street
   const streakMat = new MeshBasicMaterial({ map: makePoolTexture(), color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending });
   const streaks = new InstancedMesh(new PlaneGeometry(1, 1).rotateX(-Math.PI / 2), streakMat, Math.max(1, flat.length));
@@ -125,7 +131,7 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   group.add(streaks);
   const glowGeo = new BufferGeometry();
   glowGeo.setAttribute('position', new BufferAttribute(new Float32Array(glowPos), 3));
-  const glowMat = new PointsMaterial({ map: makePoolTexture(), size: 3.5, sizeAttenuation: true, color: new Color(0xffc890).multiplyScalar(0.7), transparent: true, opacity: 0.3, depthWrite: false, blending: AdditiveBlending });
+  const glowMat = new PointsMaterial({ map: makePoolTexture(), size: 2.2, sizeAttenuation: true, color: new Color(0xffc890).multiplyScalar(0.7), transparent: true, opacity: 0.3, depthWrite: false, blending: AdditiveBlending });
   const glow = new Points(glowGeo, glowMat);
   glow.frustumCulled = false;
   group.add(glow);

@@ -48,17 +48,22 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const layout = layoutProps(track, 17, def.propsDensity);
   const surfaces = new SurfaceMap(track);
   const parts = buildParts(track, def, layout, env);
-  const { meshes, furniture, dock } = parts;
+  const { meshes, furniture, dock, details } = parts;
   const root = parts.group;
   const open = def.theme === 'cliff'; // no street lamps or buildings: lean on moonlight
   const moon = new DirectionalLight(0x8fa4ff, open ? 1.6 : 0.7);
   moon.position.set(-60, 90, -40);
-  const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : 0.9);
+  const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : 1.3);
   const pal = paletteOf(def.id);
   const sky = buildSky(pal);
   sky.setLook(look, pal);
   let clock = 0;
-  scene.add(root, hemi, moon, sky.group);
+  // coloured rim lights from the district palette: key from one side, accent from the other (what makes facades and cars read)
+  const keyL = new DirectionalLight(pal.key, open ? 0.2 : 0.6);
+  keyL.position.set(-90, 38, 30);
+  const accL = new DirectionalLight(pal.accent[0], open ? 0.2 : 0.22);
+  accL.position.set(70, 30, -60);
+  scene.add(root, hemi, moon, sky.group, keyL, accL);
   const visuals = new SurfaceVisuals(track, surfaces, root, env);
   const wall = new RedHandWall(track);
   root.add(wall.mesh);
@@ -102,11 +107,13 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
       steam.update(dt, x, z, px);
       clock += dt;
       sky.update(x, z, clock);
+      details?.update(clock);
     },
     dispose: () => {
       mirror.setActive(false);
-      scene.remove(root, hemi, moon, sky.group);
+      scene.remove(root, hemi, moon, sky.group, keyL, accL);
       sky.dispose();
+      details?.dispose();
       root.traverse((o) => {
         const m = o as Mesh;
         m.geometry?.dispose();
