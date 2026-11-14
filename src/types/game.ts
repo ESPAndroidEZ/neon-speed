@@ -123,6 +123,8 @@ export interface AIWorldView {
   racers: readonly CarState[];
   /** Index of the player in `racers`. */
   playerIndex: number;
+  /** Current weather grip multiplier (1 dry, 0.72 rain, 0.45 snow). Updated by the race manager every step. */
+  grip: number;
 }
 
 /** Pure driving policy: reads the world, returns controls. Physics is stepped by the orchestrator. */

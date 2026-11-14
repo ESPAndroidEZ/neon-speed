@@ -44,7 +44,7 @@ export class RaceManager {
     this.track = track;
     this.obstacles = obstacles;
     this.totalLaps = totalLaps;
-    this.view = { track: track.samples, racers: this.states, playerIndex: 0 };
+    this.view = { track: track.samples, racers: this.states, playerIndex: 0, grip: 1 };
   }
 
   get player(): Racer {
@@ -115,6 +115,7 @@ export class RaceManager {
     this.carImpact = 0;
     if (this.phase === 'GRID') return;
     const w = WEATHER[weather];
+    this.view.grip = w.grip;
     if (this.phase === 'COUNTDOWN') {
       this.countdown -= dt;
       if (this.countdown <= 0) {
@@ -139,8 +140,10 @@ export class RaceManager {
       r.contact.update(r.car);
       this.carImpact = Math.max(this.carImpact, r.contact.impact);
     }
+    // Arcade rule: rivals pass through each other (no AI pile-ups); only contact with the player is solid.
     for (let i = 0; i < this.racers.length; i++)
-      for (let j = i + 1; j < this.racers.length; j++) this.carImpact = Math.max(this.carImpact, resolveCarPair(this.racers[i].car, this.racers[j].car));
+      for (let j = i + 1; j < this.racers.length; j++)
+        if (this.racers[i].isPlayer || this.racers[j].isPlayer) this.carImpact = Math.max(this.carImpact, resolveCarPair(this.racers[i].car, this.racers[j].car));
     if (live) this.updateLaps();
   }
 

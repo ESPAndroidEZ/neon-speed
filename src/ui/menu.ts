@@ -5,6 +5,9 @@ import type { SaveStore } from '../core/save';
 import { WEATHER } from '../physics/weather';
 import type { Weather } from '../types/game';
 import type { CarVisual } from '../world/proceduralCar';
+import type { StoryEvent } from '../data/story';
+import { buildStoryMenu, buildEnding } from './storyMenu';
+import type { Voice } from './dialogue';
 import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { button, h, injectCss, lapText, money } from './uiKit';
@@ -13,6 +16,7 @@ export interface MenuDeps {
   store: SaveStore;
   audio: AudioBus;
   engine: Engine;
+  voice: Voice;
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
   /** Slide the showroom car sideways on screen (garage panel sits on the left). */
@@ -21,8 +25,10 @@ export interface MenuDeps {
   visual: () => CarVisual | null;
   /** Hook for when a GLB replaces the procedural body. */
   onSwap: (fn: (() => void) | null) => void;
-  /** Launch a race in this weather. */
-  startRace: (w: Weather) => void;
+  /** Launch a free race in this weather against `rivals` opponents (0 = time trial). */
+  startRace: (w: Weather, rivals: number) => void;
+  /** Start a story event. */
+  startEvent: (ev: StoryEvent) => void;
 }
 
 const WEATHER_BLURB: Record<Weather, string> = { CLEAR: 'Full grip. Learn the lines.', RAIN: 'Wet tarmac: 72% grip, longer braking.', SNOW: 'Ice and slush: 45% grip. Pure drift.' };
@@ -32,6 +38,7 @@ export class Menu {
   private readonly d: MenuDeps;
   private layer: HTMLElement | null = null;
   private cash: HTMLElement | null = null;
+  private rivals = 3;
   private screen: 'none' | 'title' | 'main' | 'other' = 'none';
 
   constructor(d: MenuDeps) {
@@ -89,17 +96,38 @@ export class Menu {
     const el = h('div', 'rb-layer');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '10vh';
-    el.append(button('Race', () => this.weather(), 'hot'), button('Garage', () => this.garage()), button('Settings', () => this.settings()));
+    el.append(button('Story', () => this.story(), 'hot'), button('Free Race', () => this.weather()), button('Garage', () => this.garage()), button('Settings', () => this.settings()));
     this.mount(el, 'main');
+  }
+
+  story(): void {
+    this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other');
+  }
+
+  showEnding(): void {
+    this.mount(buildEnding(() => this.main()), 'other');
   }
 
   weather(): void {
     const el = h('div', 'rb-layer dim');
-    el.append(h('h2', 'rb-title', 'CONDITIONS'));
+    el.append(h('h2', 'rb-title', 'FREE RACE'));
+    const riv = h('div', 'rb-row');
+    const setRivals = (n: number): void => {
+      this.rivals = n;
+      riv.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.n === String(n)));
+    };
+    for (const [n, label] of [[0, 'Time trial'], [3, '3 rivals'], [5, '5 rivals']] as const) {
+      const b = button(label, () => setRivals(n));
+      b.dataset.n = String(n);
+      b.style.minWidth = '130px';
+      riv.append(b);
+    }
+    el.append(riv);
+    setRivals(this.rivals);
     const row = h('div', 'rb-row');
     for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
       const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${w}</div><div style="opacity:.8;margin:6px 0">${WEATHER_BLURB[w]}</div><div class="rb-sub">Grip ${Math.round(WEATHER[w].grip * 100)}%<br>Best lap ${lapText(this.d.store.data.bestLap[w])}</div>`);
-      card.addEventListener('click', () => this.d.startRace(w));
+      card.addEventListener('click', () => this.d.startRace(w, this.rivals));
       row.append(card);
     }
     el.append(row, button('Back', () => this.main()));
@@ -112,6 +140,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, onBack: () => this.main() }), 'other');
   }
 }

@@ -2,12 +2,14 @@ import type { AudioBus } from '../audio/audioBus';
 import type { Engine } from '../core/engine';
 import { applyQuality } from '../core/quality';
 import type { Quality, SaveStore } from '../core/save';
+import type { Voice } from './dialogue';
 import { button, h } from './uiKit';
 
 export interface SettingsDeps {
   store: SaveStore;
   audio: AudioBus;
   engine: Engine;
+  voice: Voice;
   onBack: () => void;
 }
 
@@ -17,6 +19,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setVolume(s.volume);
   d.audio.setMuted(s.muted);
   applyQuality(d.engine, s.quality);
+  d.voice.enabled = s.voice;
 }
 
 export function buildSettings(d: SettingsDeps): HTMLElement {
@@ -48,6 +51,18 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   mute.append(box);
 
+  const voice = h('label', 'rb-row', '<span style="width:90px">Switch voice</span>');
+  const vbox = h('input') as HTMLInputElement;
+  vbox.type = 'checkbox';
+  vbox.checked = s.voice;
+  vbox.addEventListener('change', () => {
+    s.voice = vbox.checked;
+    applySettings(d);
+    d.store.commit();
+    if (s.voice) d.voice.say('Kestrel Bay. Two a.m.');
+  });
+  voice.append(vbox);
+
   const q = h('div', 'rb-row', '<span style="width:90px">Quality</span>');
   (['low', 'medium', 'high'] as Quality[]).forEach((t) => {
     const b = button(t, () => {
@@ -63,6 +78,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     q.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.textContent === s.quality));
   };
   refresh();
-  root.append(vol, mute, q, button('Back', d.onBack));
+  root.append(vol, mute, voice, q, button('Back', d.onBack));
   return root;
 }

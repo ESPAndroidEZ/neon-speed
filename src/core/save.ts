@@ -1,4 +1,5 @@
 import type { Weather } from '../types/game';
+import { defaultCareer, type CareerState } from './career';
 
 export type Quality = 'low' | 'medium' | 'high';
 
@@ -13,8 +14,9 @@ export interface SaveData {
   glow: Record<string, number>;
   /** Best lap in seconds per weather, null = none yet. */
   bestLap: Record<Weather, number | null>;
-  settings: { volume: number; muted: boolean; quality: Quality };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean };
   races: number;
+  career: CareerState;
 }
 
 /** Minimal storage shape so tests can pass an in-memory object. localStorage satisfies it. */
@@ -34,8 +36,9 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   paint: { [starterId]: starterPaint },
   glow: {},
   bestLap: { CLEAR: null, RAIN: null, SNOW: null },
-  settings: { volume: 0.7, muted: false, quality: 'high' },
+  settings: { volume: 0.7, muted: false, quality: 'high', voice: false },
   races: 0,
+  career: defaultCareer(),
 });
 
 const num = (v: unknown, fallback: number, lo: number, hi: number): number => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback);
@@ -71,6 +74,11 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   const s = (j.settings ?? {}) as Record<string, unknown>;
   out.settings.volume = num(s.volume, out.settings.volume, 0, 1);
   out.settings.muted = s.muted === true;
+  out.settings.voice = s.voice === true;
+  const cr = (j.career ?? {}) as Record<string, unknown>;
+  if (Array.isArray(cr.completed)) out.career.completed = cr.completed.filter((id): id is string => typeof id === 'string');
+  out.career.seenIntro = cr.seenIntro === true;
+  out.career.endingSeen = cr.endingSeen === true;
   if (s.quality === 'low' || s.quality === 'medium' || s.quality === 'high') out.settings.quality = s.quality;
   return out;
 }

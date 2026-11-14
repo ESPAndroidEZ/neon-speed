@@ -1,4 +1,3 @@
-import { Color, FogExp2 } from 'three';
 import { ChaseCam } from '../camera/chaseCam';
 import { CinematicCam } from '../camera/cinematicCam';
 import { createIntroShots } from '../camera/shots';
@@ -6,13 +5,14 @@ import type { Engine } from '../core/engine';
 import { RaceManager, type RaceResult, type Racer } from '../core/raceManager';
 import type { CarSpec } from '../data/cars';
 import { applyTuning, type CarTuning } from '../physics/carTuning';
-import { WEATHER } from '../physics/weather';
 import type { AIRacerAgent, CarInput, CarState, GameState, InputSource, RaceTelemetry, Weather } from '../types/game';
 import { createNeutralInput } from '../types/game';
 import type { Hud } from '../ui/hud';
-import type { ResultsScreen } from '../ui/results';
+import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { World } from '../world/world';
 import { RacerViews } from './racerViews';
+import { createTelemetry, createViewState } from './telemetry';
+import { applyWeather } from './weatherApply';
 import { ShowroomCam } from './showroomCam';
 
 export interface RaceSetup {
@@ -20,10 +20,11 @@ export interface RaceSetup {
   paint: number;
   glow?: number;
   weather: Weather;
+  /** Switch weather mid-race after this many seconds of racing. */
+  weatherChange?: { at: number; to: Weather };
   laps: number;
   /** Play the intro cinematic first (otherwise straight to the countdown). */
   cinematic: boolean;
-  /** Opponents. Empty = time trial. */
   agents: { agent: AIRacerAgent; car: CarSpec; paint: number }[];
 }
 
@@ -33,7 +34,6 @@ export interface GameDeps {
   hud: Hud;
   results: ResultsScreen;
   input: InputSource;
-  /** The player's live tuning object (shared with the dev panel). */
   tuning: CarTuning;
 }
 
@@ -44,22 +44,23 @@ export class Game {
   rm: RaceManager;
   readonly chase: ChaseCam;
   readonly views: RacerViews;
-  readonly telemetry: RaceTelemetry = {
-    speedKph: 0, rpm: 0, redlineRpm: 7500, gear: 1, nitroLevel: 1, nitroActive: false, drifting: false,
-    driftScore: 0, lap: 1, totalLaps: 3, position: 1, racerCount: 1, raceTime: 0,
-  };
-  /** Fires once when the player finishes. */
-  onFinish: ((r: RaceResult) => void) | null = null;
+  readonly telemetry: RaceTelemetry = createTelemetry();
+  /** Fires once when the player finishes; may return objective text and buttons for the results screen. */
+  onFinish: ((r: RaceResult) => ResultsExtra | void) | null = null;
+  /** Story hooks: intro cinematic start/end, and the moment the countdown ends (GO). */
+  onIntroStart: (() => void) | null = null;
+  onIntroEnd: (() => void) | null = null;
+  onCountdown: (() => void) | null = null;
+  onWeatherChange: ((w: Weather) => void) | null = null;
+  private plan: { at: number; to: Weather } | null = null;
   readonly ctl: CarInput = createNeutralInput();
-  /** Strongest hit since the consumer (juice, audio) last cleared it. `strength` is closing speed in m/s. */
   readonly impact = { strength: 0, x: 0, z: 0 };
-  /** Called every fixed step a hit happens, with the closing speed. For audio. */
+  /** Fired on every hit step with the closing speed (audio). */
   onImpact: ((strength: number) => void) | null = null;
   private readonly d: GameDeps;
-  private readonly view: CarState = { position: { x: 0, y: 0, z: 0 }, heading: 0, velocity: { x: 0, y: 0, z: 0 }, speed: 0, yawRate: 0, slipAngle: 0 };
+  private readonly view: CarState = createViewState();
   private intro: CinematicCam | null = null;
   private setup: RaceSetup | null = null;
-  private readonly bg = new Color();
   readonly showroomCam = new ShowroomCam();
 
   constructor(d: GameDeps) {
@@ -78,15 +79,7 @@ export class Game {
 
   setWeather(w: Weather): void {
     this.weather = w;
-    const p = WEATHER[w];
-    const fog = this.d.engine.scene.fog;
-    if (fog instanceof FogExp2) {
-      fog.density = p.fogDensity;
-      fog.color.setHex(p.fogColor);
-    }
-    this.d.engine.scene.background = this.bg.setHex(p.fogColor);
-    this.d.hud.setWeather(w);
-    this.d.world.setWeather(p);
+    applyWeather(this.d.engine, this.d.hud, this.d.world, w);
   }
 
   startRace(s: RaceSetup): void {
@@ -100,6 +93,7 @@ export class Game {
     // views in racer order so index lines up
     this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint)));
     this.setWeather(s.weather);
+    this.plan = s.weatherChange ?? null;
     this.rm.place();
     this.views.update(0, 0);
     this.syncView();
@@ -109,14 +103,18 @@ export class Game {
       this.state = 'CINEMATIC';
       this.intro = new CinematicCam({ camera: this.d.engine.camera, subject: this.views.views[0].holder, shots: createIntroShots(), handover: () => this.chase.pose });
       this.intro.onShotChange = () => this.d.engine.kickBloom(0.7);
-      this.intro.onComplete = () => this.goRacing();
+      this.intro.onComplete = () => {
+        this.onIntroEnd?.();
+        this.goRacing();
+      };
       this.intro.start();
+      this.onIntroStart?.();
     } else {
       this.goRacing();
     }
   }
 
-  /** Menu / garage backdrop: the car alone on the grid while the camera orbits it. */
+  /** Menu / garage backdrop: one car on the grid, camera orbiting. */
   showroom(car: CarSpec, paint: number, glow?: number): void {
     this.state = 'MENU';
     this.d.results.hide();
@@ -133,7 +131,7 @@ export class Game {
     if (this.setup) this.startRace({ ...this.setup, cinematic: false });
   }
 
-  /** Dev: run the fixed simulation without rendering (headless checks, `?ff=seconds`). */
+  /** Dev: simulate without rendering (`?ff=seconds`). */
   fastForward(seconds: number): void {
     if (this.state === 'CINEMATIC') this.goRacing();
     for (let i = 0; i < seconds * 60; i++) this.fixed(1 / 60);
@@ -143,7 +141,6 @@ export class Game {
     if (this.state === 'CINEMATIC') this.intro?.skip();
   }
 
-  /** Reset-to-track: put the player on the nearest centre-line point, stopped. */
   resetToTrack(): void {
     const p = this.player;
     p.contact.place(p.car, p.contact.nearestIndex(p.car));
@@ -154,6 +151,7 @@ export class Game {
     this.state = 'RACING';
     this.intro = null;
     this.rm.begin();
+    this.onCountdown?.();
   }
 
   private syncView(): void {
@@ -171,6 +169,12 @@ export class Game {
     this.d.input.sample(this.ctl);
     const was = this.rm.phase;
     this.rm.step(dt, this.ctl, this.weather);
+    if (this.plan && this.rm.phase === 'RACING' && this.rm.raceTime > this.plan.at) {
+      const to = this.plan.to;
+      this.plan = null;
+      this.setWeather(to);
+      this.onWeatherChange?.(to);
+    }
     this.views.fixedStep(dt);
     const hit = Math.max(this.rm.player.contact.impact, this.rm.carImpact);
     if (hit > 0.8) this.onImpact?.(hit);
@@ -188,8 +192,8 @@ export class Game {
     }
     if (was === 'RACING' && this.rm.phase === 'FINISHED' && this.rm.result) {
       this.state = 'PODIUM';
-      this.d.results.show(this.rm.result);
-      this.onFinish?.(this.rm.result);
+      const extra = this.onFinish?.(this.rm.result) ?? undefined;
+      this.d.results.show(this.rm.result, extra);
     }
   };
 

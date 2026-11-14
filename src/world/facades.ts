@@ -24,14 +24,14 @@ class Strips {
   readonly idx: number[] = [];
 
   /** One vertical (and optionally roofed) run of samples a..b on one side. */
-  run(tr: Track, side: number, a: number, b: number, h: number, tint: readonly number[], roof: number, y0 = 0): void {
+  run(tr: Track, side: number, a: number, b: number, h: number, tint: readonly number[], roof: number, y0 = 0, inset = 0): void {
     const n = tr.samples.length;
     const p = { x: 0, z: 0 };
     const per = roof > 0 ? 3 : 2;
     const base = this.pos.length / 3;
     for (let i = a; i <= b; i++) {
       const k = i % n;
-      const o = side * (tr.wall[k] + 0.02);
+      const o = side * (tr.wall[k] + 0.02 - inset);
       lateralPoint(tr, k, o, p);
       this.pos.push(p.x, y0, p.z, p.x, h, p.z);
       const u = (i * tr.spacing) / 16;
@@ -108,11 +108,11 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
       const alley = tr.zones[i] === 'alley';
       const h = basin ? 1.1 : (alley ? 24 : 12) + rnd() * (alley ? 26 : 38);
       const b = Math.min(n, j);
-      if (basin) rim.run(tr, side, i, b, h, [0.15, 1.2, 1.8], 0);
+      if (basin) rim.run(tr, side, i, b, h, [0.15, 1.2, 1.8], 0, 0, 0.05);
       else {
         (rnd() < 0.5 ? warm : cool).run(tr, side, i, b, h, TINTS[Math.floor(rnd() * TINTS.length)], 2);
         const c = SHOP[Math.floor(rnd() * SHOP.length)];
-        if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35);
+        if (b - i > 3 && rnd() < 0.8) shops.run(tr, side, i + 1, b - 1, 3.0, c, 0, 0.35, 0.07);
       }
       for (let k = i; k <= b; k++) height[hi][k % n] = h;
       i = b;
