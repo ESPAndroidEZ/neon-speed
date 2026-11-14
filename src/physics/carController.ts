@@ -6,8 +6,12 @@ import { DriftScorer } from './driftScorer';
 import { Drivetrain } from './drivetrain';
 import { tireLateral } from './tire';
 import { restoreCar, snapshotCar } from './carSnapshot';
+import { steerAngle } from './steering';
+import { LoadTransfer } from './loadTransfer';
+import { createAssist, type Assist } from './assists';
 
 const G = 9.81;
+const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration that helps traction (keeps launches as tuned)
 
 export interface CarFlags {
   drifting: boolean;
@@ -16,12 +20,7 @@ export interface CarFlags {
   handbrake: boolean;
 }
 
-/**
- * Arcade drift car. Pure maths, no rendering. Bicycle model in the car's local frame
- * (u forward, v left, r yaw rate) with saturating tyres, a friction circle on the rear
- * axle (throttle steals lateral grip -> power oversteer) and a handbrake that cuts rear grip.
- * Advance with step() at a fixed 1/60 s only.
- */
+/** Arcade car, pure maths: bicycle model (u forward, v left, r yaw) with weight transfer, friction circles and a handbrake. step() at 1/60 s only. */
 export class CarController {
   readonly state: CarState = {
     position: { x: 0, y: 0, z: 0 },
@@ -39,6 +38,14 @@ export class CarController {
   surfaceDrag = 0;
   /** 0..1 front-tyre steering authority (hydroplaning in puddles). */
   steerAuthority = 1;
+  /** Driving assists and steering sensitivity (player settings; the AI keeps STANDARD and 1). */
+  readonly assist: Assist = createAssist();
+  sensitivity = 1;
+  readonly load = new LoadTransfer();
+  /** Last step's body accelerations (m/s^2) and the lagged throttle, for the next step's weight transfer. */
+  axRaw = 0;
+  ayRaw = 0;
+  thr = 0;
 
   private readonly t: CarTuning;
   u = 0;
@@ -60,6 +67,7 @@ export class CarController {
 
   restore(d: unknown): void {
     restoreCar(this, d as ReturnType<typeof snapshotCar>);
+    this.load.update(0, this.t, this.load.ax, this.load.ay);
     this.publish();
   }
 
@@ -68,15 +76,15 @@ export class CarController {
     s.position.x = x;
     s.position.z = z;
     s.heading = heading;
-    this.prevX = x;
-    this.prevZ = z;
-    this.prevHeading = heading;
+    [this.prevX, this.prevZ, this.prevHeading] = [x, z, heading];
     this.u = this.v = this.r = 0;
     this.hbFactor = 1;
     this.drift.reset();
     this.surfaceGrip = 1;
     this.surfaceDrag = 0;
     this.steerAuthority = 1;
+    this.axRaw = this.ayRaw = this.thr = 0;
+    this.load.reset(this.t);
     this.drivetrain.reset();
     this.publish();
   }
@@ -88,45 +96,46 @@ export class CarController {
     this.prevX = s.position.x;
     this.prevZ = s.position.z;
     this.prevHeading = s.heading;
-    dtn.update(dt, this.u, input.throttle, input.brake, input.nitro);
-
+    const as = this.assist;
+    this.thr = t.throttleLag > 0 ? this.thr + (input.throttle - this.thr) * Math.min(1, dt / t.throttleLag) : input.throttle;
+    dtn.update(dt, this.u, this.thr, input.brake, input.nitro);
+    const ld = this.load;
+    ld.update(dt, t, this.axRaw, this.ayRaw);
+    const steerIn = clamp(input.steer * this.sensitivity, -1, 1);
     const { u, v, r } = this;
     const g = weather.grip * this.surfaceGrip;
     const env = weather as Partial<PhysicsEnv>;
-    const yawMul = env.yawDampMul ?? 1;
+    const yawMul = (env.yawDampMul ?? 1) * (1 + 0.4 * as.steer);
     const assistMul = env.assistMul ?? 1;
     const rearMul = env.rearGripMul ?? 1;
     const absU = Math.abs(u);
-    const dir = u >= 0 ? 1 : -1;
-    const wheelbase = t.cgToFront + t.cgToRear;
-    const fzF = (t.mass * G * t.cgToRear) / wheelbase;
-    const fzR = (t.mass * G * t.cgToFront) / wheelbase;
+    const { fzF, fzR } = ld;
     const sf = smoothstep(0.2, 2.5, absU); // no tyre forces at a standstill
     const slipDen = Math.max(absU, 3);
-
-    // Steering: less lock at speed, plus auto counter-steer when the stick is released mid-slide.
-    const lock = lerp(1, t.minSteerScale, smoothstep(5, t.steerFalloffSpeed, absU));
-    const beta = Math.atan2(v, slipDen);
-    const assist = t.driftAssist * assistMul * smoothstep(3, 9, u) * (1 - Math.abs(input.steer));
-    const delta = input.steer * t.maxSteer * lock * this.steerAuthority + assist * clamp(beta, -0.6, 0.6);
+    const delta = steerAngle(t, as, steerIn, u, v, this.steerAuthority, assistMul);
 
     // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
     this.hbFactor = lerp(this.hbFactor, input.handbrake ? t.handbrakeGrip : 1, Math.min(1, dt * (input.handbrake ? 14 : 3)));
 
     // Rear axle: drive force is capped by traction, and what it uses is taken from sideways grip.
     const muR = t.gripRear * g * this.hbFactor * rearMul;
-    const tractionLimit = muR * fzR;
+    const tractionLimit = muR * (ld.staticR + (fzR - ld.staticR) * TRACTION_SQUAT);
     const wanted = dtn.driveForce;
-    const fxDrive = clamp(wanted, -tractionLimit, tractionLimit);
-    const usage = Math.abs(fxDrive) / (tractionLimit + 1);
+    // Lifting off: engine braking drags the rear axle too (lift-off oversteer on a loose car).
+    const eng = this.thr < 0.05 && dtn.gear > 0 && u > 1 ? -t.engineBraking * t.mass * G * clamp(dtn.rpm / t.redlineRpm, 0, 1) * Math.min(1, g) : 0;
+    const fxDrive = clamp(wanted + eng, -tractionLimit, tractionLimit);
+    // Braking uses grip too: what the brakes use is taken from sideways grip.
+    const bk = dtn.brakeCmd * t.brakeForce * (u > 0.5 ? 1 : 0);
+    const useF = (bk * t.brakeBias * (1 - 0.45 * as.brake)) / (t.gripFront * fzF);
+    const useBR = (bk * (1 - t.brakeBias)) / (t.gripRear * fzR);
+    const usage = Math.max(Math.abs(fxDrive) / (tractionLimit + 1), useBR);
     const latScale = Math.max(0.45, Math.sqrt(Math.max(0, 1 - usage * usage * 0.72)));
-
-    const alphaF = Math.atan2(v + t.cgToFront * r, slipDen) - dir * delta;
+    const latScaleF = Math.max(0.5, Math.sqrt(Math.max(0, 1 - useF * useF * 0.55)));
+    const alphaF = Math.atan2(v + t.cgToFront * r, slipDen) - (u >= 0 ? 1 : -1) * delta;
     const alphaR = Math.atan2(v - t.cgToRear * r, slipDen);
-    const fyF = tireLateral(alphaF, fzF, t.gripFront * g, t.tireB, t.tireC) * sf;
-    const fyR = tireLateral(alphaR, fzR, muR * latScale, t.tireB, t.tireC) * sf;
+    const fyF = tireLateral(alphaF, fzF, t.gripFront * g * ld.gripF * latScaleF, t.tireB, t.tireC) * sf;
+    const fyR = tireLateral(alphaR, fzR, muR * latScale * ld.gripR, t.tireB, t.tireC) * sf;
     const cd = Math.cos(delta);
-
     // Longitudinal: brakes (grip-limited, so rain/snow lengthen stopping), handbrake, drag, rolling.
     const motion = clamp(u, -1, 1);
     const brakeMax = t.brakeForce * g;
@@ -135,9 +144,10 @@ export class CarController {
     const fDrag = -t.dragCoef * u * absU;
     const fRoll = -t.rollingResistance * t.mass * G * clamp(u / 0.3, -1, 1) - this.surfaceDrag * t.mass * u;
     const fScrub = -fyF * Math.sin(delta);
-
-    const du = (fxDrive + fBrake + fHand + fDrag + fRoll + fScrub) / t.mass + v * r;
-    const dv = (fyF * cd + fyR) / t.mass - u * r;
+    this.axRaw = (fxDrive + fBrake + fHand + fDrag + fRoll + fScrub) / t.mass;
+    this.ayRaw = (fyF * cd + fyR) / t.mass;
+    const du = this.axRaw + v * r;
+    const dv = this.ayRaw - u * r;
     const dr = (t.cgToFront * fyF * cd - t.cgToRear * fyR - t.yawDamping * yawMul * r) / t.inertia;
     this.u += du * dt;
     this.v += dv * dt;

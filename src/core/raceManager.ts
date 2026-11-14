@@ -20,6 +20,7 @@ export type RacePhase = 'GRID' | 'COUNTDOWN' | 'RACING' | 'FINISHED';
 export const COUNTDOWN_SECONDS = 3;
 const GO_FLASH = 0.8;
 const COAST_BRAKE = 0.6;
+const UNSTICK_AFTER = 8;
 
 /**
  * Grid start, 3-2-1 countdown, laps, timing, positions and finish. Works with zero AI (time trial).
@@ -72,7 +73,7 @@ export class RaceManager {
     contact.surfaces = this.surfaces;
     const r: Racer = {
       id, name, isPlayer, car, contact, laps: new LapCounter(this.track), agent,
-      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0,
+      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0, stuck: 0,
     };
     if (isPlayer) {
       this.playerIdx = this.racers.length;
@@ -154,6 +155,7 @@ export class RaceManager {
       }
       r.car.step(dt, inp, w);
       r.contact.update(r.car);
+      if (!r.isPlayer && !r.finished) this.unstick(r, dt);
       this.carImpact = Math.max(this.carImpact, r.contact.impact);
     }
     // Arcade rule: rivals pass through each other (no AI pile-ups); only contact with the player is solid.
@@ -161,6 +163,15 @@ export class RaceManager {
       for (let j = i + 1; j < this.racers.length; j++)
         if (this.racers[i].isPlayer || this.racers[j].isPlayer) this.carImpact = Math.max(this.carImpact, resolveCarPair(this.racers[i].car, this.racers[j].car));
     if (live) this.updateLaps();
+  }
+
+  /** A rival pinned against a wall or prop for too long is lifted back onto the road (the player has R). */
+  private unstick(r: Racer, dt: number): void {
+    r.stuck = Math.abs(r.car.state.speed) < 0.8 ? r.stuck + dt : Math.max(0, r.stuck - dt * 2);
+    if (r.stuck < UNSTICK_AFTER) return;
+    r.stuck = 0;
+    r.contact.place(r.car, r.contact.nearestIndex(r.car));
+    r.laps.teleport(r.contact.hit.index);
   }
 
   private updateLaps(): void {

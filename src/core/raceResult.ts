@@ -18,6 +18,8 @@ export interface Racer {
   bestLap: number;
   /** Finish order, 1-based, 0 until finished. */
   finishRank: number;
+  /** Seconds a rival has been pinned (almost stopped) while racing; past UNSTICK_AFTER it is put back on the road. */
+  stuck: number;
 }
 
 export interface RaceResult {

@@ -3,7 +3,7 @@ import type { CarInput } from '../types/game';
 
 interface RacerData {
   id: string; finished: boolean; finishTime: number; lapStart: number; bestLap: number | null; finishRank: number;
-  input: CarInput; car: unknown; laps: unknown; hitIndex: number; agent: unknown;
+  input: CarInput; car: unknown; laps: unknown; hitIndex: number; agent: unknown; stuck: number;
 }
 
 export interface RaceData {
@@ -17,7 +17,7 @@ export function snapshotRace(rm: RaceManager): RaceData {
     racers: rm.racers.map((r) => ({
       id: r.id, finished: r.finished, finishTime: r.finishTime, lapStart: r.lapStart, bestLap: Number.isFinite(r.bestLap) ? r.bestLap : null,
       finishRank: r.finishRank, input: { ...r.input }, car: r.car.snapshot(), laps: r.laps.snapshot(), hitIndex: r.contact.hit.index,
-      agent: r.agent?.snapshot?.() ?? null,
+      agent: r.agent?.snapshot?.() ?? null, stuck: r.stuck,
     })),
   };
 }
@@ -42,6 +42,7 @@ export function restoreRace(rm: RaceManager, d: RaceData): void {
     r.car.restore(x.car);
     r.laps.restore(x.laps);
     r.contact.hit.index = x.hitIndex;
+    r.stuck = x.stuck ?? 0;
     if (x.agent !== null) r.agent?.restore?.(x.agent);
   });
 }

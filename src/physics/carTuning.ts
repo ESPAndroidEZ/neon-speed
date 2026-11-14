@@ -45,6 +45,18 @@ export interface CarTuning {
   turboLag: number;
   /** Rpm above which the turbo starts to build boost. */
   turboRpm: number;
+  /** Centre-of-gravity height in metres: bigger = more weight transfer. */
+  cgHeight: number;
+  /** Share (0..1) of cornering load transfer carried by the front axle: above 0.5 pushes (understeer), below it rotates. */
+  rollFront: number;
+  /** Grip lost per unit of squared load transfer (0 disables the effect). */
+  loadSens: number;
+  /** Share of brake force at the front axle (0.5..0.75). More front bias = stable but understeers under braking. */
+  brakeBias: number;
+  /** Seconds the throttle takes to follow the pedal (0 = instant). */
+  throttleLag: number;
+  /** Engine braking when lifting, in g at the redline. */
+  engineBraking: number;
 }
 
 export const GEAR_RATIOS: readonly number[] = [3.6, 2.2, 1.55, 1.2, 0.97, 0.8];
@@ -87,6 +99,12 @@ export function createDefaultTuning(): CarTuning {
     turboTorque: 0,
     turboLag: 0.6,
     turboRpm: 2800,
+    cgHeight: 0.42,
+    rollFront: 0.5,
+    loadSens: 0.22,
+    brakeBias: 0.6,
+    throttleLag: 0,
+    engineBraking: 0.06,
   };
 }
 

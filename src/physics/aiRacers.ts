@@ -188,8 +188,8 @@ export function createAIRacer(id: string, name: string, skill: number): AIRacerA
       if (out.brake > 0) out.throttle = 0;
       out.handbrake = false;
 
-      // unstick: if the car sits (or has been pinned) for a while, reverse away from the wall, then drive on
-      stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
+      // unstick: if the car is pinned at the road edge for a while, reverse away from the wall, then drive on
+      stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 && Math.abs(lat) > tp.width / 2 - 1.5 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
       if (stuckFor > 1.2) {
         reverseFor = 2;
         stuckFor = 0;
