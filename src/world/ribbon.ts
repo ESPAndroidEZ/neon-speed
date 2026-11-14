@@ -5,6 +5,8 @@ import type { Track } from './track';
 export type Off = number | ((i: number) => number);
 const val = (o: Off, i: number): number => (typeof o === 'number' ? o : o(i));
 const wrap = (tr: Track, i: number): number => i % tr.samples.length;
+/** Road height at sample i (flat tracks: 0). */
+const hgt = (tr: Track, i: number): number => tr.heights[wrap(tr, i)];
 
 /** Ground position at lateral offset `off` from sample i. */
 export function lateralPoint(tr: Track, i: number, off: number, out: { x: number; z: number }): void {
@@ -35,9 +37,9 @@ export function ribbon(tr: Track, offA: Off, offB: Off, y: number, vScale = 16, 
   const p = { x: 0, z: 0 };
   for (let i = 0; i <= n; i++) {
     lateralPoint(tr, i, val(offA, wrap(tr, i)), p);
-    pos.push(p.x, y, p.z);
+    pos.push(p.x, y + hgt(tr, i), p.z);
     lateralPoint(tr, i, val(offB, wrap(tr, i)), p);
-    pos.push(p.x, y, p.z);
+    pos.push(p.x, y + hgt(tr, i), p.z);
     uv.push(0, (i * tr.spacing) / vScale, 1, (i * tr.spacing) / vScale);
     if (i < n && keep(i) && keep(wrap(tr, i + 1))) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
   }
@@ -54,7 +56,8 @@ export function wallStrip(tr: Track, off: Off, y0: number, y1: number | ((i: num
   for (let i = 0; i <= n; i++) {
     const top = typeof y1 === 'number' ? y1 : y1(wrap(tr, i));
     lateralPoint(tr, i, val(off, wrap(tr, i)), p);
-    pos.push(p.x, y0, p.z, p.x, top, p.z);
+    const h = hgt(tr, i);
+    pos.push(p.x, y0 + h, p.z, p.x, top + h, p.z);
     uv.push((i * tr.spacing) / tile, 0, (i * tr.spacing) / tile, (top - y0) / tile);
     if (i < n && keep(i) && keep(wrap(tr, i + 1))) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
   }

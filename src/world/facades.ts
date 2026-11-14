@@ -86,7 +86,7 @@ export function buildFacades(tr: Track, plaza?: Plaza): Facades {
   };
   const eligible = (i: number): boolean => {
     const z = tr.zones[i];
-    return z === 'street' || z === 'alley' || z === 'plaza';
+    return z === 'street' || z === 'alley' || z === 'plaza' || z === 'boulevard';
   };
   for (const side of [1, -1]) {
     const hi = side > 0 ? 0 : 1;

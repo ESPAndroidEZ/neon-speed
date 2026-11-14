@@ -37,7 +37,7 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   const d = new Object3D();
   const n = tr.samples.length;
   const p = { x: 0, z: 0 };
-  const streetish = (i: number): boolean => tr.zones[i] === 'street' || tr.zones[i] === 'alley' || tr.zones[i] === 'plaza';
+  const streetish = (i: number): boolean => tr.zones[i] === 'street' || tr.zones[i] === 'alley' || tr.zones[i] === 'plaza' || tr.zones[i] === 'boulevard';
 
   // lamps: head on a short arm out from the wall, pool on the road below
   const lampIdx: number[] = [];

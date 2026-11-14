@@ -11,15 +11,32 @@ export interface Track {
   readonly wall: Float32Array;
   readonly spacing: number;
   readonly length: number;
+  /** Road surface height per sample, metres (visual only: the physics stays flat). */
+  readonly heights: Float32Array;
+  /** Samples driven to finish the race: all of them for a circuit, fewer for a point-to-point sprint. */
+  readonly raceSamples: number;
 }
 
-const WALL_GAP: Record<Zone, number> = { street: 0.7, alley: 0.6, plaza: 0.9, tunnel: 0.8, bridge: 1.0, dock: 1.0 };
+/** Height control point: `at` is the fraction of the loop (0..1), `h` the road height in metres. */
+export interface ElevationPoint {
+  at: number;
+  h: number;
+}
+
+export interface TrackOptions {
+  /** Smooth (cosine) height profile; the loop wraps, so keep the first and last heights equal for a closed circuit. */
+  elevation?: readonly ElevationPoint[];
+  /** Sprint: the race ends at this fraction of the loop (the rest is the return road back to the grid). */
+  sprintEnd?: number;
+}
+
+const WALL_GAP: Record<Zone, number> = { street: 0.7, alley: 0.6, plaza: 0.9, tunnel: 0.8, bridge: 1.0, dock: 1.0, boulevard: 0.8, yard: 0.6, cliff: 1.2 };
 
 /** Half of the drivable width at sample i. */
 export const halfWidthAt = (tr: Track, i: number): number => tr.samples[i].width / 2;
 
 /** Resample a dense street path to even spacing, smoothing width changes over about 36 m. */
-export function createTrackFromPath(name: string, path: DensePath, spacing = 3, start?: readonly [number, number]): Track {
+export function createTrackFromPath(name: string, path: DensePath, spacing = 3, start?: readonly [number, number], opts: TrackOptions = {}): Track {
   const pts = path.pts;
   const m = pts.length;
   const cum: number[] = [0];
@@ -68,7 +85,19 @@ export function createTrackFromPath(name: string, path: DensePath, spacing = 3, 
   });
   const wall = new Float32Array(count);
   for (let i = 0; i < count; i++) wall[i] = samples[i].width / 2 + WALL_GAP[zones[i]];
-  return { name, samples, zones, wall, spacing: step, length: total };
+  const heights = new Float32Array(count);
+  const el = opts.elevation;
+  if (el && el.length > 1) {
+    const pts = [{ at: el[el.length - 1].at - 1, h: el[el.length - 1].h }, ...el, { at: el[0].at + 1, h: el[0].h }];
+    for (let i = 0, k = 0; i < count; i++) {
+      const f = i / count;
+      while (k < pts.length - 2 && pts[k + 1].at <= f) k++;
+      const t = Math.max(0, Math.min(1, (f - pts[k].at) / (pts[k + 1].at - pts[k].at || 1)));
+      heights[i] = pts[k].h + (pts[k + 1].h - pts[k].h) * (0.5 - 0.5 * Math.cos(Math.PI * t));
+      samples[i].position.y = heights[i];
+    }
+  }
+  return { name, samples, zones, wall, spacing: step, length: total, heights, raceSamples: opts.sprintEnd ? Math.round(count * opts.sprintEnd) : count };
 }
 
 /** Signed curvature (1/m) at sample i; positive = turning left (heading increases). */

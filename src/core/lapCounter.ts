@@ -11,9 +11,12 @@ export class LapCounter {
   readonly checkpoints: number;
   last = 0;
   private readonly n: number;
+  /** Samples in one race lap: the whole loop, or the sprint distance. */
+  private readonly len: number;
 
   constructor(track: Track, checkpoints = 8) {
     this.n = track.samples.length;
+    this.len = track.raceSamples;
     this.checkpoints = checkpoints;
   }
 
@@ -46,17 +49,17 @@ export class LapCounter {
 
   /** Finished laps (the start line crossed in order `lap` times). */
   get laps(): number {
-    return Math.max(0, Math.floor(this.total / this.n));
+    return Math.max(0, Math.floor(this.total / this.len));
   }
 
   /** Checkpoint index 0..checkpoints-1 within the current lap. */
   get checkpoint(): number {
-    const t = Math.max(0, this.total) % this.n;
-    return Math.floor((t * this.checkpoints) / this.n);
+    const t = Math.max(0, this.total) % this.len;
+    return Math.floor((t * this.checkpoints) / this.len);
   }
 
   /** Total distance driven in laps (fractional), for ranking racers. */
   get progress(): number {
-    return this.total / this.n;
+    return this.total / this.len;
   }
 }

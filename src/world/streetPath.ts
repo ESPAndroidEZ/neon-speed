@@ -1,4 +1,4 @@
-export type Zone = 'street' | 'alley' | 'plaza' | 'tunnel' | 'bridge' | 'dock';
+export type Zone = 'street' | 'alley' | 'plaza' | 'tunnel' | 'bridge' | 'dock' | 'boulevard' | 'yard' | 'cliff';
 
 /** A corner of the street polygon. `zone` and `w` describe the leg that STARTS at this vertex. */
 export interface Vertex {
