@@ -30,10 +30,16 @@ export function metrics(png) {
   let n = 0, m = 0, m2 = 0;
   for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const v = lum[y * w + x]; n++; m += v; m2 += v * v; }
   m /= n;
-  return { mean: sum / (w * h), clip: clipped / (w * h), contrast: Math.sqrt(Math.max(0, m2 / n - m * m)) };
+  // saturation of the brightest 5 % of pixels: neon must stay colourful, not wash out to white
+  const idx = Array.from({ length: w * h }, (_, i) => i).sort((a, b) => lum[b] - lum[a]).slice(0, Math.floor(w * h * 0.05));
+  let chroma = 0;
+  for (const i of idx) { const r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2]; chroma += (Math.max(r, g, b) - Math.min(r, g, b)) / (Math.max(r, g, b) || 1); }
+  return { mean: sum / (w * h), clip: clipped / (w * h), contrast: Math.sqrt(Math.max(0, m2 / n - m * m)), chroma: chroma / idx.length };
 }
 
 const CASES = [];
+// look presets (docs/art-direction.md, section 6): each must pass the same bands; Neon Night must also stay saturated
+for (const look of ['neon', 'dusk', 'grit']) for (const w of ['clear', 'rain']) CASES.push({ name: `${look}-${w}`, q: `?skip&ai=2&car=supra&track=neon&w=${w}&wi=1&look=${look}&ff=1`, look });
 for (const w of ['clear', 'rain', 'snow']) {
   CASES.push({ name: `${w}-grid`, q: `?skip&ai=3&car=supra&w=${w}&wi=1&ff=1` });
   CASES.push({ name: `${w}-speed`, q: `?skip&demo=straight&ai=0&car=supra&w=${w}&wi=1&at=2&ff=6.5` });
@@ -50,10 +56,11 @@ for (const c of CASES) {
   const buf = await page.screenshot();
   writeFileSync(`${OUT}/${c.name}.png`, buf);
   const m = metrics(PNG.sync.read(buf));
-  const band = c.name.startsWith('clear') ? BANDS.clear : BANDS.bad;
-  const ok = m.mean >= band.meanMin && m.mean <= band.meanMax && m.clip <= BANDS.clipMax && m.contrast >= BANDS.contrastMin && errors.length === 0;
+  const band = c.name.startsWith('clear') || c.name.endsWith('-clear') ? BANDS.clear : BANDS.bad;
+  const sat = c.look === 'neon' ? m.chroma >= 0.3 : true;
+  const ok = sat && m.mean >= band.meanMin && m.mean <= band.meanMax && m.clip <= BANDS.clipMax && m.contrast >= BANDS.contrastMin && errors.length === 0;
   if (!ok) failed++;
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${c.name.padEnd(12)} mean ${m.mean.toFixed(3)}  clipped ${(m.clip * 100).toFixed(2)}%  contrast ${m.contrast.toFixed(3)}${errors.length ? '  ERRORS ' + errors[0] : ''}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${c.name.padEnd(12)} mean ${m.mean.toFixed(3)}  clipped ${(m.clip * 100).toFixed(2)}%  contrast ${m.contrast.toFixed(3)}  chroma ${m.chroma.toFixed(2)}${errors.length ? '  ERRORS ' + errors[0] : ''}`);
   await page.close();
 }
 await browser.close();

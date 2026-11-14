@@ -3,7 +3,7 @@
 Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, session 5 done).
+Updated: 2026-11-14 (Claude, session 6: design overhaul).
 
 ## Done
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
@@ -24,14 +24,13 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-When the queue finishes: read logs/qwen/summary.txt (EMPTY = the model produced nothing), /review-qwen each of 012-019, then wire them: radio2 -> `game/radio` (TRACK_RADIO start/idle per map, RIVAL_RADIO_2), tips2 -> `ui/loadingCard`, barks -> `ui/versus`, vinylDraw -> garage (vinyl choice per car, saved), propTram/propYard -> `world/worldParts` (Neon / Container Maze), qwen tests -> `npm test`.
-Carlos: judge driving feel (questions in the last reply), try the Legend toggle after the story, drop Tripo GLBs for cars (and optionally Dante/Mara, loader hook TODO).
-Backlog: car upgrades (phase 5), Capacitor (phase 6), AI wrong-way recovery (rivals still get pinned in crowded fields), city ambience (011, re-split needed).
+1. Read logs/qwen/summary.txt, /review-qwen each finished task (016-044), then MERGE their files into the registries (copy the file, add one import and a spread): archetypes (A, B) into `ARCHETYPES`, graffiti A-C into `GRAFFITI` and place them as wall decals in `world/city`, signs A/B into `SIGNS` (the atlas is 4 columns: raise rows), facade variants into `makeFacadeSheet` calls, rims A/B into `RIM_DESIGNS`, parts into `PARTS`, vinyls A/B into `VINYL_PAINTERS`, props A-E + tram/yard props into worldParts per district, catalog into a parts shop in the garage, dynoGraph2 into tuneMenu, loadoutList into the menu, tests into `npm test`.
+2. Not built yet: HUD redesign (speedo arc, drift pop-ups, NITRO burst, edge speed lines), title screen with a 3D hero car, photo mode, depth of field in garage, tail-light trails, heat haze, per-look visual check bands (docs/art-direction.md section 6), chunked streaming of city details (instancing is in).
+3. Carlos: judge the new look on a real GPU (`?look=dusk`, `?look=grit`), run Settings > Test my device, try the garage Appearance panel and the Tuning screen; install on a phone (docs/mobile.md).
 
-## Qwen queue (unattended: `scripts/qwen-queue.sh 012 013 014 015 016 017 018 019`; one task file per number in `docs/tasks/`)
-Small tasks, ONE file each (see docs/tasks/000-readme.md): 012 radio per map, 013 tips per map, 014 rival barks, 015 vinyl painters, 016 tram stop + shelter props, 017 yard props, 018 AI unit tests, 019 dialogue/career tests.
-Logs: `logs/qwen/<task>.log`, one result line per task in `logs/qwen/summary.txt` (state DONE / EMPTY / FAILED / TIMEOUT). Watch: `tail -f logs/qwen/queue.log`.
-Old tasks 003/009/010 (merged), 005 (done by Claude), 006/007/008/011 (output limit, nothing committed) are in docs/tasks/done.
+## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`)
+Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
+Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
 
 ## Open contract requests
 None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamples`, `Zone` gained boulevard/yard/cliff, `RaceSetup.trackId`, `StoryEvent.chapter/trackId`, `Line.mood/if/unless/choice`; the AI agent contract is unchanged (options go through `createAIRacer`); `Serializable<T>` (snapshot/restore) added to src/types/game.ts and `AIRacerAgent` extends `Partial<Serializable>` (round 3 save system); `GameState` gained `'MENU'` (step 5); `AIWorldView` gained `grip` (weather grip for the AI, feedback round 1).
@@ -74,3 +73,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-14 Claude (session 5, step 3): maps. `src/data/tracks/*.ts` (TrackDef: vertices, start, laps, propsDensity, weather, elevation, sprintEnd, driftTarget), 5 maps (Kestrel, Neon Strip, Container Maze, Cliffside Run sprint, Container Drift), `world.load(def)` swaps the map, theme builders (city / port yard / cliff terrain+rails), visual elevation (car height + pitch + chase cam), track select screen with outlines + best times, per-map bests in the save (`trackBest`), headless validator (`world/trackValidate`) + tests/tracks-check + tests/ai-tracks-check. Contract note: `Track` gained `heights`, `raceSamples`; `Zone` gained boulevard/yard/cliff; `RaceSetup.trackId`.
 - 2026-11-14 Claude (session 5, steps 4-5): story + characters + AI. Chapter 2 (6 events, 3 bosses, branching choice with flags/relationships saved), Chapter 3 outline in docs/story.md; portraits with 4 moods, versus screen before every race, 3D low-poly figures (Mara in the garage, rivals at the grid, Dante at the finale), crew screen with relationship bars; AI rebuilt (racing line, slipstream/dive-bomb/defence, 4 difficulty levels with personalities, capped rubber band, Legend after the story). Tests: ai-levels, story2, ai-tracks. Known: rivals still get lifted back after 9 s pins ~2-4 times per 8-car race.
 - 2026-11-14 Claude (session 5, step 6): Qwen tasks 012-019 written (small), baton to Qwen, queue started.
+- 2026-11-14 Claude (session 6): design overhaul. Mobile (PWA + Capacitor android/ios + icons + docs/mobile.md); docs/art-direction.md and ui-style.md; look pipeline (looks, palettes, sky, grading, streaks, rim lights); city kit (facade sheets, shopfronts, sign atlas, archetypes, details); car appearance (finishes, vinyl, rims, parts, stance); performance tuning (11 upgrades, PR/classes, setup, dyno, tuning screen); graphics settings (Ultra, 11 options, benchmark). Qwen 012/013/014 merged. Tasks 016-044 queued. Contract notes: none in types/game.ts; new save fields look, graphics, loadouts, upgrades, setups.

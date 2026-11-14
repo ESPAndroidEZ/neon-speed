@@ -16,7 +16,7 @@
 - Real car brand names and logos only in `src/data/cars.ts` (swappable for fictional ones).
 
 ## Map
-`src/types` contracts, `src/core` engine, math, race/lap logic, `src/camera`, `src/physics` (cars, assists, AI: aiLine/aiTraffic/aiDifficulty), `src/world` (maps, themes, characters), `src/input`, `src/data` (cars, rivals, story, `tracks/*.ts` maps, characters), `src/game` (orchestration, story, cast, versus gate), `src/fx`, `src/ui` (menus, portraits, versus, track select), `src/audio`, `src/dev` (throwaway).
+`src/types` contracts, `src/core` engine, math, race/lap logic, `src/camera`, `src/physics` (cars, assists, AI: aiLine/aiTraffic/aiDifficulty), `src/world` (maps, themes, characters), `src/input`, `src/data` (cars, rivals, story, `tracks/*.ts` maps, characters), `src/game` (orchestration, story, cast, versus gate), `src/fx`, `src/ui` (menus, portraits, versus, track select, garage look, tuning, graphics, theme tokens), `src/audio`, `src/dev` (throwaway).
 `docs/handoff.md` status and next steps. `docs/plan.md` phases. `docs/story.md` story and cinematic. `docs/tasks/` Qwen tasks. `docs/inbox/` owner notes.
 
 ## Session start
@@ -43,4 +43,5 @@ Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or 
 - Turbo is a drivetrain model (boost with lag, extra torque, events for shift, lift and limiter) with per-car config: Supra twin, Evo single, RX-7 sequential twin; Civic and 350Z are naturally aspirated. Audio is procedural (AudioWorklet engine, oscillator fallback). No audio samples unless Carlos allows tiny CC0 ones (log licences if so).
 - Props may come from Meshy's FREE tier as GLBs in `public/models/props/` (procedural fallback otherwise). Cars: Tripo free tier (above). Round 2 lore is canonical in `docs/story.md`.
 - Session 5 (fixed): STANDARD assist = the approved handling (assists BEGINNER/PRO deviate from it, never STANDARD). Weight transfer is per-car data (`CarTuning`); balance is guarded by `tests/balance-check` (lap-time bands, order Civic < 350Z < RX-7 < Evo < Supra by class). Maps are data (`src/data/tracks`), validated by `tests/tracks-check`; sprint = one run, `raceSamples` shorter than the loop. AI never gets more grip or power than the player; its only help is the rubber band in `physics/aiDifficulty` (capped at 9 %, shrinking per level, Legend none; Legend unlocks after the story). Chapter 2 and its branching choice (flags `open` / `sponsor`) are canonical in `docs/story.md`.
+- Session 6 (fixed): visual identity follows docs/art-direction.md (looks, palettes, quality bars, budgets) and menus follow docs/ui-style.md. Brands on signs, parts and upgrades are FICTIONAL. Performance upgrades never touch the locked turbo model (the turbo part only scales an existing turbo). PR must rise with every upgrade (tests/tuning-check). Mobile install: docs/mobile.md.
 - Qwen branches are `qwen/<task>`. Never merge without `/review-qwen`.

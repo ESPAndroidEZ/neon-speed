@@ -53,7 +53,7 @@ for n in "${TASKS[@]}"; do
   build=fail
   (cd "$WT" && npm run build --silent >/dev/null 2>&1) && build=ok
   commits=$(git -C "$WT" rev-list --count main.."$branch" 2>/dev/null || echo 0)
-  changed=$(git -C "$WT" diff --name-only main.."$branch" 2>/dev/null | grep -v "^docs/handoff.md$" | wc -l)
+  changed=$(git -C "$WT" diff --name-only "$(git -C "$WT" merge-base main "$branch")" "$branch" 2>/dev/null | grep -v "^docs/handoff.md$" | wc -l)
   state=DONE; [ "$changed" = 0 ] && state=EMPTY; [ "$rc" = 124 ] && state=TIMEOUT; [ "$rc" != 0 ] && [ "$rc" != 124 ] && state=FAILED
   sum "$n $name $state exit=$rc build=$build commits=$commits files=$changed minutes=$mins log=logs/qwen/$name.log"
 done

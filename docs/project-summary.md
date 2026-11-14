@@ -1,6 +1,6 @@
 # Racer's Blood: project summary
 
-Updated 2026-11-14 (after session 5).
+Updated 2026-11-14 (after session 6, design overhaul).
 
 ## What it is
 A 3D arcade street racer in the browser (TypeScript, Three.js, Vite; Capacitor iOS/Android later). Night city, neon,
@@ -11,6 +11,9 @@ circuit ("Kestrel Bay Streets", 1.4 km), five cars, AI rivals, a four-event stor
 - 0 Foundation, 1 Drive, 2 Track and city, 3 Cars and AI, 4 Juice and audio: done.
 - 5 Progression: garage, cash, paint, underglow, saves, story career done; car upgrades and more event types todo.
 - 6 Mobile (touch controls, Capacitor) and 7 Ship (tutorial, TestFlight): todo. Touch controls are a Qwen task.
+
+## Look and install
+Three look presets (Neon Night, Dusk Heat, Overcast Grit) switch in Settings or with `?look=neon|dusk|grit`; graphics presets Low/Medium/High/Ultra plus 11 options and a device benchmark in Settings. Install on phones: `docs/mobile.md` (PWA from the browser, or Capacitor android/ and ios/ projects). Garage: Appearance panel and Tuning screen (PR class D-S, 11 upgrade categories, setup sliders, dyno).
 
 ## Run
 `npm install`, `npm run dev` (http://localhost:5173), `npm run build` (line limit + code-health + tsc + vite),
@@ -52,7 +55,7 @@ Sound is procedural only; no samples without Carlos's yes. Cars: Tripo free tier
 - Sound quality is unjudged by the author (no ears): use the K panel presets. Procedural synthesis has a ceiling.
 - The headless GPU is software (SwiftShader): bloom and fog look different on a real GPU; tune by eye on yours.
 - The repo has no git remote; nothing is pushed.
-- City ambience, vinyls and extra props are not built (small Qwen tasks 012-019 are queued: radio/tips/barks data, vinyl painters, tram and yard props, AI and dialogue tests). Character GLB loading (Tripo) is a TODO; procedural figures are used.
+- Qwen is producing the content kit (archetypes, graffiti, signs, rims, parts, vinyls, props, catalog, dyno polish, tests; tasks 016-044). The HUD redesign (speedo arc, drift pop-ups) and the title screen with a 3D hero car are not built yet. City ambience is not built (small Qwen tasks 012-019 are queued: radio/tips/barks data, vinyl painters, tram and yard props, AI and dialogue tests). Character GLB loading (Tripo) is a TODO; procedural figures are used.
 - AI in a crowded field still gets pinned now and then (a lift back onto the road after 9 s); tune by watching a 6-rival race.
 
 ## What is next

@@ -55,6 +55,13 @@ RaceManager.phase: GRID -> COUNTDOWN (3-2-1, cars locked) -> RACING -> FINISHED
 - AI: `physics/aiLine` (apex line by relaxation, speed profile), `aiTraffic` (slipstream, dive-bomb, defence), `aiDifficulty` (ROOKIE..LEGEND, personalities, capped rubber band), `aiRacers` (the agent). Same physics and grip as the player.
 - Tests added: handling, contact, balance (lap-time bands, class order), tracks, ai-tracks, ai-levels, story2, text-data.
 
+## Session 6: design overhaul (docs/art-direction.md, docs/ui-style.md)
+- Look: `core/looks` (Neon Night / Dusk Heat / Overcast Grit; `?look=` or Settings), `data/palettes` (per-district colours, skyline rules), `world/sky` (procedural sky: stars, clouds, moon, skyline rings), grade in `fx/finalFx` (split toning, contrast, anamorphic streaks), palette rim lights and fog tint in `world/world` + `game/weatherApply`, studio-strip env in `world/envMap`.
+- City kit (`world/city/`): `textures` (PBR-style facade sheets: albedo, emissive window atlas, normal, roughness; shopfront tile), `archetypes` (data: wall kind, height, tint, rates; `buildFacades` picks per run), `details` (pure `layoutDetails` + instanced AC units, balconies, awnings, fire escapes, tanks, antennas, billboards, blinking beacons), `signs` (fictional-brand sign atlas), `graffiti` (painter registry, reference only for now).
+- Cars: `data/loadout` (finish, vinyl, rims, tint, headlight, glow pattern, calipers, stance, parts, plate; saved per car), `world/carAppearance`, `vinylLayer` (painter registry), `rims` (design registry), `carParts` (spoiler/splitter/skirts/hood at anchors; GLB cars take the same add-ons), `ui/garageLook`. Performance: `data/upgrades` (11 x 3), `data/setup` (8 sliders), `data/carBuild` (applied at race start), `physics/carRating` (PR, classes D-S), `physics/dyno`, `ui/tuneMenu`, `ui/dynoGraph`. Graphics: `core/graphics` (presets low..ultra, 11 options, benchmark), `ui/graphicsSettings`.
+- Mobile: `docs/mobile.md` (PWA manifest + service worker, Capacitor android/ ios/ projects).
+- Tests added: loadout, tuning (PR monotonic, stability, controllability at max), city (archetypes, details budget, parts fit).
+
 ## Visual checks and cars (round 4)
 `core/grade` holds the per-weather look (exposure, bloom, colour grade, glow and spot scales) applied by `game/weatherApply`; `scripts/visual-check.mjs` (Playwright) asserts luminance, clipping and contrast in CLEAR/RAIN/SNOW. Procedural cars are lofted: `world/carLoft` (mirrored cross-sections along Z, smooth normals, material groups), `carBody` (stations from the proportion numbers in `data/cars.ts`), `carDetails` (splitter, skirts, wing, scoop, tips, door lines, mirrors, lamps), `carWheels` (rounded tyres, five-spoke rims, discs, calipers, arches).
 

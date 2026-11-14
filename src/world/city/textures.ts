@@ -64,7 +64,7 @@ function normalFrom(height: Float32Array, k: number): HTMLCanvasElement {
  * windows with frames, sills and lit/unlit variety, and matching roughness and normal maps. Deterministic per (kind, seed).
  * Reference implementation of a "canvas texture" for docs/tasks: copy its shape (seeded rng, 512 px, 4 maps) for new sheets.
  */
-export function makeFacadeSheet(kind: FacadeKind, seed = 1): FacadeSheet {
+export function makeFacadeSheet(kind: FacadeKind, seed = 1, baseOverride?: string): FacadeSheet {
   const rnd = createRng(seed * 7919 + kind.length);
   const albedo = canvas();
   const emis = canvas();
@@ -74,7 +74,7 @@ export function makeFacadeSheet(kind: FacadeKind, seed = 1): FacadeSheet {
   const r = rough.getContext('2d');
   const height = new Float32Array(N * N);
   if (!a || !e || !r) return { map: tex(albedo, true), emissiveMap: tex(emis, true), normalMap: tex(canvas(), false), roughnessMap: tex(rough, false) };
-  const base = { brick: '#9a6a5a', concrete: '#9a9a9c', metal: '#7d8794', glass: '#3a4a5e' }[kind];
+  const base = baseOverride ?? { brick: '#9a6a5a', concrete: '#9a9a9c', metal: '#7d8794', glass: '#3a4a5e' }[kind];
   a.fillStyle = base;
   a.fillRect(0, 0, N, N);
   r.fillStyle = kind === 'glass' ? '#3a3a3a' : kind === 'metal' ? '#808080' : '#d8d8d8';
