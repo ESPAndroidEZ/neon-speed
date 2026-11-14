@@ -11,7 +11,11 @@ import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
+import { CombinedInput } from './input/combinedInput';
+import { GamepadInput } from './input/gamepad';
 import { KeyboardInput } from './input/keyboard';
+import { createTouchControls } from './ui/touchControls';
+import { installMinimap } from './game/extras';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
 import type { Weather } from './types/game';
 import { DialogueBox, Subtitles, Voice } from './ui/dialogue';
@@ -50,7 +54,8 @@ const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map
 
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
-const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new KeyboardInput();
+const touch = createTouchControls(document.body, { onReset: () => game.resetToTrack(), onPause: () => pause.toggle() });
+const input = q.has('demo') ? new DemoInput(q.get('demo') === 'straight') : new CombinedInput([new KeyboardInput(), new GamepadInput(), touch]);
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
@@ -157,12 +162,14 @@ const loading = new LoadingCard();
 game.onStartRace = () => loading.show();
 installRadio(engine, game, subs);
 
+installMinimap(game, world, (fn) => engine.onFrame(fn));
 let hudShown = true;
 engine.onFrame(() => {
   const show = game.state !== 'MENU';
   if (show !== hudShown) {
     hudShown = show;
     hud.setVisible(show);
+    touch.setVisible(show);
   }
 });
 
