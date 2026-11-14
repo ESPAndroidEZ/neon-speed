@@ -113,7 +113,7 @@ export class CarController {
 
     // Longitudinal: brakes (grip-limited, so rain/snow lengthen stopping), handbrake, drag, rolling.
     const motion = clamp(u, -1, 1);
-    const brakeMax = Math.min(t.brakeForce, g * t.gripFront * t.mass * G);
+    const brakeMax = t.brakeForce * g;
     const fBrake = -dtn.brakeCmd * brakeMax * motion;
     const fHand = input.handbrake ? -Math.min(t.handbrakeForce, g * t.gripRear * fzR) * motion : 0;
     const fDrag = -t.dragCoef * u * absU;
