@@ -13,7 +13,8 @@ Per task:
 - Green: commit only the files you touched (never `git add -A`), message ending with the Co-Authored-By trailer you normally use, then `git push -u origin HEAD` (ignore push failures, note them once in the report).
 - When a task is fully done, change its queue item to `- [x]` and append ` -- <one-line result>`; append a short entry (what changed, what you verified, anything Carlos should look at or listen to) to `docs/overnight/report.md`.
 - Red and not fixable in two honest attempts: undo your own changes for that task, mark the item `- [!]` with the reason, add it to the report, move on. Never leave the build red at a commit.
-- When your context passes ~60 %, finish the current step cleanly, commit, and end the session with the single last line `OVERNIGHT-CONTINUE` (a fresh session picks up from the files).
+- You normally stay in ONE long session: when you stop talking between tasks, the runner sends you a message starting with `[nudge N]` telling you to continue with the next open item. Treat it exactly like this prompt. Do not end your turn early just to be tidy; keep going through the queue.
+- Only when your context is more than ~60 % full: finish the current step cleanly, commit, and end with the single last line `OVERNIGHT-CONTINUE`. The runner then starts a brand-new session that picks up from the files. Never print that line, or `OVERNIGHT-DONE`, in any other situation.
 
 If the file `docs/overnight/STOP` exists, finish the step you are on, commit it if green (otherwise undo it), and end with `OVERNIGHT-DONE: stopped by STOP file`.
 

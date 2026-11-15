@@ -20,7 +20,7 @@ PROMPT_FILE=docs/overnight/prompt.md
 STOP_FILE=docs/overnight/STOP
 LOG_DIR=logs/overnight
 UNTIL=${UNTIL:-}
-MAX_RUNS=${MAX_RUNS:-40}
+MAX_RUNS=${MAX_RUNS:-300}   # turns (one run = one turn in tmux mode)
 MAX_IDLE=${MAX_IDLE:-12}
 RUN_TIMEOUT=${RUN_TIMEOUT:-5400}
 MODEL=${MODEL:-}
@@ -63,7 +63,7 @@ say "branch $branch, $(grep -c '^- \[ \]' "$QUEUE") open tasks, runs<=$MAX_RUNS 
 # --- keep Windows awake while the script runs (WSL dies when the PC sleeps) -----------------------
 awake_pid=
 if [[ $KEEP_AWAKE == 1 ]] && command -v powershell.exe >/dev/null; then
-  powershell.exe -NoProfile -Command "Add-Type -Namespace W -Name P -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern uint SetThreadExecutionState(uint f);'; [void][W.P]::SetThreadExecutionState(0x80000001); Start-Sleep -Seconds 43200" >/dev/null 2>&1 &
+  powershell.exe -NoProfile -Command "Add-Type -Namespace W -Name P -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern uint SetThreadExecutionState(uint f);'; [void][W.P]::SetThreadExecutionState(0x80000001); Start-Sleep -Seconds 43200" >/dev/null 2>&1 9>&- &
   awake_pid=$!
   say "keep-awake started (pid $awake_pid)"
 fi
@@ -125,37 +125,88 @@ run_session_print() {
   tail_txt=$(tail -n 8 "$log")
 }
 
-run_session_tmux() {
-  local sid transcript start now pane age
-  sid=$(cat /proc/sys/kernel/random/uuid)
-  transcript="$HOME/.claude/projects/$(pwd | sed 's#[^A-Za-z0-9]#-#g')/$sid.jsonl"
-  start=$(date +%s); code=0
+
+# --- persistent interactive session (tmux mode) ----------------------------------------------
+# One session is reused turn after turn (context stays warm). We send a "continue" message when it
+# goes idle, and only start a fresh session when the agent says its context is full
+# (OVERNIGHT-CONTINUE), the session is too old / nudged too often, or it is stuck.
+SID= TRANSCRIPT= S_START=0 NUDGES=0
+TURN_TIMEOUT=${TURN_TIMEOUT:-10800}   # one turn busy for 3 h = stuck
+SESSION_MAX=${SESSION_MAX:-28800}     # recycle a session after 8 h
+MAX_NUDGES=${MAX_NUDGES:-40}          # ...or after this many "continue" messages
+PROJ_DIR="$HOME/.claude/projects/$(pwd | sed 's#[^A-Za-z0-9]#-#g')"
+UUID_RE='[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}'
+
+session_alive() { tmux has-session -t "$TMUX_SESSION" 2>/dev/null; }
+
+session_open() {
+  SID=$(cat /proc/sys/kernel/random/uuid); TRANSCRIPT="$PROJ_DIR/$SID.jsonl"; S_START=$(date +%s); NUDGES=0
   tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
-  local cmd="nice -n $NICE $CLAUDE_BIN --dangerously-skip-permissions --session-id $sid ${MODEL:+--model $MODEL} 'Follow the instructions in docs/overnight/prompt.md exactly.'"
-  tmux new-session -d -s "$TMUX_SESSION" -x 200 -y 50 -c "$PWD" -e "PATH=$PATH" "$cmd" || { code=1; tail_txt=; : >"$log"; return; }
-  say "session $sid started (tmux attach -t $TMUX_SESSION, or /resume)"
-  while tmux has-session -t "$TMUX_SESSION" 2>/dev/null; do
-    sleep 15
-    now=$(date +%s)
-    if (( now - start > RUN_TIMEOUT )); then say "session timeout"; code=124; break; fi
+  local cmd="nice -n $NICE $CLAUDE_BIN --dangerously-skip-permissions --session-id $SID ${MODEL:+--model $MODEL} 'Follow the instructions in docs/overnight/prompt.md exactly. [nudge 0]'"
+  tmux new-session -d -s "$TMUX_SESSION" -x 200 -y 50 -c "$PWD" -e "PATH=$PATH" "$cmd" 9>&- || { SID=; return 1; }
+  say "NEW session $SID (tmux attach -t $TMUX_SESSION, or /resume)"
+}
+
+# Take over a session a previous runner left running (keeps its context). Fails if it has no --session-id.
+session_adopt() {
+  SID=$(ps -eo args | grep -E "[c]laude .*--session-id" | grep -oE "$UUID_RE" | head -1)
+  [[ -n $SID ]] || return 1
+  TRANSCRIPT="$PROJ_DIR/$SID.jsonl"; S_START=$(date +%s); NUDGES=0
+  say "ADOPTED running session $SID"
+}
+
+session_nudge() {
+  NUDGES=$((NUDGES + 1))
+  tmux send-keys -t "$TMUX_SESSION" Escape; sleep 1
+  tmux send-keys -t "$TMUX_SESSION" -l "[nudge $NUDGES] Continue with the next open item in docs/overnight/queue.md, same rules as prompt.md (no questions). Use the CONTINUE ending only if your context is over 60 percent full, and the DONE ending only when all work is finished."
+  sleep 1; tmux send-keys -t "$TMUX_SESSION" Enter
+}
+
+session_close() {
+  if session_alive; then
+    tmux send-keys -t "$TMUX_SESSION" Escape; sleep 1
+    tmux send-keys -t "$TMUX_SESSION" "/exit" Enter
+    for _ in 1 2 3 4 5 6 7 8; do sleep 2; session_alive || break; done
+    tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+  fi
+  SID=
+}
+
+# Returns when the session is idle (nothing running for QUIET s), dead, or stuck. $1 = epoch of the last nudge/start.
+session_wait_idle() {
+  local since=$1 now pane m
+  code=0
+  while session_alive; do
+    sleep 15; now=$(date +%s)
+    if (( now - since > TURN_TIMEOUT )); then say "turn timeout"; code=124; break; fi
     # Memory guard: below 1.5 GB available, kill stray headless browsers (the usual culprit), never Claude.
     if (( $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) < 1500 )); then
       say "low memory: killing headless browsers"; pkill chrome-headless 2>/dev/null
     fi
     pane=$(tmux capture-pane -p -J -t "$TMUX_SESSION" -S -60 2>/dev/null) || break
     grep -q 'esc to interrupt' <<<"$pane" && continue
-    [[ -f $transcript ]] || { (( now - start > 300 )) && { say "no transcript after 5 min, giving up on session"; code=2; break; }; continue; }
-    age=$(( now - $(stat -c %Y "$transcript") ))
-    (( age >= QUIET && now - start >= 120 )) && break   # idle: finished a task, or stopped at a limit
+    m=$(stat -c %Y "$TRANSCRIPT" 2>/dev/null) || { (( now - since > 300 )) && { say "no transcript after 5 min"; code=2; break; }; continue; }
+    (( m < since && now - since < 180 )) && continue        # the nudge has not been picked up yet
+    (( now - m >= QUIET )) && break
   done
-  tmux capture-pane -p -J -t "$TMUX_SESSION" -S -200 2>/dev/null >"$log"
-  tail_txt=$(grep -v '^\s*$' "$log" | tail -n 30)
-  if tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
-    tmux send-keys -t "$TMUX_SESSION" Escape; sleep 1
-    tmux send-keys -t "$TMUX_SESSION" "/exit" Enter
-    for _ in 1 2 3 4 5 6 7 8; do sleep 2; tmux has-session -t "$TMUX_SESSION" 2>/dev/null || break; done
-    tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+}
+
+run_session_tmux() {
+  local since
+  code=0
+  if ! session_alive; then
+    session_open || { code=1; tail_txt=; : >"$log"; return; }
+    since=$S_START
+  elif [[ -z $SID ]]; then
+    session_adopt || { session_close; session_open || { code=1; tail_txt=; : >"$log"; return; }; }
+    since=0
+  else
+    since=$(date +%s); session_nudge
   fi
+  session_wait_idle "$since"
+  tmux capture-pane -p -J -t "$TMUX_SESSION" -S -300 2>/dev/null >"$log"
+  # Only look at what happened after our last message, so old limit/marker text cannot fool us.
+  tail_txt=$(grep -v '^\s*$' "$log" | awk -v t="[nudge $NUDGES]" '{ if (index($0,t)) n=NR; a[NR]=$0 } END { for (i=n+1;i<=NR;i++) print a[i] }' | tail -n 40)
 }
 
 # --- main loop -------------------------------------------------------------------------------
@@ -172,8 +223,16 @@ while true; do
   if [[ $MODE == print ]]; then run_session_print; else run_session_tmux; fi
   say "run $run ended (exit=$code), $(wc -l <"$log") log lines"
 
+  if [[ $MODE == tmux ]] && ! session_alive; then SID=; fi
   if grep -q 'OVERNIGHT-DONE' <<<"$tail_txt"; then
-    say "agent reported OVERNIGHT-DONE"; break
+    say "agent reported OVERNIGHT-DONE"; [[ $MODE == tmux ]] && session_close; break
+  fi
+  if [[ $MODE == tmux ]]; then
+    if grep -q 'OVERNIGHT-CONTINUE' <<<"$tail_txt"; then
+      say "agent says its context is full -> fresh session next"; session_close
+    elif (( code != 0 )) || (( NUDGES >= MAX_NUDGES )) || (( $(date +%s) - S_START > SESSION_MAX )); then
+      say "recycling session (code=$code nudges=$NUDGES)"; session_close
+    fi
   fi
 
   if ! grep -q 'OVERNIGHT-CONTINUE' <<<"$tail_txt" \
@@ -195,6 +254,7 @@ while true; do
   key=$(progress_key)
   if [[ $key == "$last_key" ]]; then
     idle=$((idle + 1)); say "no progress ($idle/$MAX_IDLE)"
+    [[ $MODE == tmux ]] && (( idle >= 2 )) && { say "two quiet turns: fresh session next"; session_close; }
     (( idle >= MAX_IDLE )) && { say "giving up: $MAX_IDLE runs without progress"; break; }
     # An unrecognised usage-limit message looks like "no progress": back off long (2 min, then 30 min) so we outlast it.
     nap $(( idle >= 2 ? 1800 : 120 )) || break
