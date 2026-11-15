@@ -2,6 +2,7 @@ import { BoxGeometry, Color, ConeGeometry, CylinderGeometry, DoubleSide, Group, 
 import type { TrackDef } from '../data/tracks';
 import { createRng } from '../core/rng';
 import type { Track } from './track';
+import { markSky } from './shadowRig';
 
 /**
  * Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pass: pines on both verges,
@@ -45,14 +46,14 @@ function mountain(track: Track): Group {
   const peaks: { x: number; y: number; z: number; r: number }[] = [];
   const rnd = createRng(7);
   for (let k = 0; k < 16; k++) { const a = (k / 16) * 6.28 + rnd() * 0.3, d = 1700 + rnd() * 600; peaks.push({ x: c.x + Math.sin(a) * d, y: -20, z: c.z + Math.cos(a) * d, r: rnd() }); }
-  g.add(instanced(new ConeGeometry(1, 1, 7).translate(0, 0.5, 0), new MeshStandardMaterial({ color: 0x141a2a, roughness: 1 }), peaks, (r) => [380 + r * 260, 420 + r * 380]));
-  g.add(instanced(new ConeGeometry(1, 1, 7).translate(0, 0.5, 0), new MeshStandardMaterial({ color: 0xc8d4ec, roughness: 0.8, emissive: 0x1a2236 }), peaks.map((pk) => ({ ...pk, y: pk.y + (420 + pk.r * 380) * 0.72 })), (r) => [(380 + r * 260) * 0.29, (420 + r * 380) * 0.28]));
+  g.add(markSky(instanced(new ConeGeometry(1, 1, 7).translate(0, 0.5, 0), new MeshStandardMaterial({ color: 0x141a2a, roughness: 1 }), peaks, (r) => [380 + r * 260, 420 + r * 380])));
+  g.add(markSky(instanced(new ConeGeometry(1, 1, 7).translate(0, 0.5, 0), new MeshStandardMaterial({ color: 0xc8d4ec, roughness: 0.8, emissive: 0x1a2236 }), peaks.map((pk) => ({ ...pk, y: pk.y + (420 + pk.r * 380) * 0.72 })), (r) => [(380 + r * 260) * 0.29, (420 + r * 380) * 0.28])));
   // valley mist: soft sheets low over the valley road
   const mist = new MeshBasicMaterial({ color: 0x8090b0, transparent: true, opacity: 0.07, depthWrite: false, side: DoubleSide });
   for (const pt of scatter(track, 60, (i) => (track.heights?.[i] ?? 0) < 12, () => 25, 3)) {
     const m = new Mesh(new PlaneGeometry(220, 220).rotateX(-Math.PI / 2), mist);
     m.position.set(pt.x, pt.y + 3 + pt.r * 4, pt.z);
-    g.add(m);
+    g.add(markSky(m));
   }
   // lookout at the summit: warm lamps and a glow pool
   let top = 0;

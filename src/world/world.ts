@@ -9,6 +9,7 @@ import { paletteOf } from '../data/palettes';
 import { buildNeonEnvMap } from './envMap';
 import { disposeVisual } from './disposeVisual';
 import { buildSky } from './sky';
+import { rigKeyShadow } from './shadowRig';
 import { instanceProp, loadPropModel } from './propModels';
 import { layoutProps } from './propsLayout';
 import { RedHandWall } from './redHandWall';
@@ -65,6 +66,7 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const accL = new DirectionalLight(pal.accent[0], open ? 0.2 : def.theme === 'port' ? 0.6 : 0.22);
   accL.position.set(70, 30, -60);
   scene.add(root, hemi, moon, sky.group, keyL, accL);
+  const keyShadow = rigKeyShadow(keyL, scene); // snapped shadow rig following the camera; pass cast=true to turn key-light shadows on
   const visuals = new SurfaceVisuals(track, surfaces, root, env);
   const wall = new RedHandWall(track);
   root.add(wall.mesh);
@@ -108,12 +110,14 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
       steam.update(dt, x, z, px);
       clock += dt;
       sky.update(x, z, clock);
+      keyShadow.follow(x, z);
       details?.update(clock);
     },
     dispose: () => {
       mirror.setActive(false);
       scene.remove(root, hemi, moon, sky.group, keyL, accL);
       sky.dispose();
+      keyShadow.dispose();
       details?.dispose();
       disposeVisual(root); // geometries, materials AND their canvas textures (material.dispose() keeps textures)
     },

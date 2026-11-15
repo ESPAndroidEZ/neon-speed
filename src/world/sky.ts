@@ -2,6 +2,7 @@ import { BackSide, BoxGeometry, Color, DoubleSide, Group, InstancedMesh, Mesh, M
 import { createRng } from '../core/rng';
 import type { Look } from '../core/looks';
 import type { Palette } from '../data/palettes';
+import { markSky } from './shadowRig';
 
 const VERT = `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 const FRAG = `
@@ -86,6 +87,8 @@ export function buildSky(p: Palette, seed = 12): Sky {
     }
     group.add(w);
   }
+  group.name = 'sky';
+  markSky(group); // background: never casts or receives shadows (bug A3)
   return {
     group,
     update: (x, z, t) => {
