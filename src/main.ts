@@ -3,7 +3,7 @@ import { Engine } from './core/engine';
 import { AutoQuality } from './core/quality';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
-import { freeRaceField } from './data/rivals';
+import { competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
 import { finishFreeRace } from './game/freeRace';
@@ -104,7 +104,7 @@ const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   const def = findTrackDef(q.get('track') ?? trackId);
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
-  const field = freeRaceField(rivals);
+  const field = competitiveField(rivals, car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({

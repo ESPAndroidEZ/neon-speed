@@ -1,3 +1,4 @@
+import type { Upgrades } from '../data/upgrades';
 import type { Engine } from '../core/engine';
 import type { CarSpec } from '../data/cars';
 import type { CarTuning } from '../physics/carTuning';
@@ -20,7 +21,8 @@ export interface RaceSetup {
   cinematic: boolean;
   /** What is needed to rebuild this race from a save. */
   meta?: { rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null; level?: string };
-  agents: { agent: AIRacerAgent; car: CarSpec; paint: number; glow?: number }[];
+  /** `upgrades`: performance upgrades the AI car runs (free races match the player's; none = stock). */
+  agents: { agent: AIRacerAgent; car: CarSpec; paint: number; glow?: number; upgrades?: Upgrades }[];
 }
 
 export interface GameDeps {

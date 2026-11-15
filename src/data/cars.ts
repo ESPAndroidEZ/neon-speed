@@ -88,7 +88,7 @@ export const CARS: readonly CarSpec[] = [
     price: 26000,
     color: 0x2b2f36,
     blurb: 'Twin-turbo diesel estate: a wall of torque, heavy and long. Unstoppable on straights, a handful in hairpins.',
-    tuning: { mass: 1790, inertia: 2700, engineTorque: 560, turboTorque: 0.45, turboLag: 0.6, idleRpm: 800, redlineRpm: 5200, dragCoef: 0.6, gripFront: 1.5, gripRear: 1.5, driftAssist: 0.6, handbrakeGrip: 0.48, slideCap: 0.52, yawDamping: 4300, cgHeight: 0.5, rollFront: 0.54, brakeBias: 0.7, engineBraking: 0.07 },
+    tuning: { mass: 1650, inertia: 2150, engineTorque: 560, turboTorque: 0.45, turboLag: 0.6, idleRpm: 800, redlineRpm: 5200, dragCoef: 0.6, gripFront: 1.5, gripRear: 1.5, driftAssist: 0.6, handbrakeGrip: 0.48, slideCap: 0.52, yawDamping: 4300, cgHeight: 0.5, rollFront: 0.54, brakeBias: 0.7, engineBraking: 0.07 },
     shape: { length: 4.84, width: 1.85, height: 1.49, hoodLength: 1.45, windshieldRun: 0.9, rearWindowRun: 0.35, roofLength: 2.0, beltHeight: 0.9, wheelbase: 2.89, wheelRadius: 0.33, spoiler: 'none', haunch: 0.03, noseLow: 0.04, scoop: false },
     model: { yaw: 0, scale: 1 },
     sound: { layout: 'i6', turbo: 'twin' },

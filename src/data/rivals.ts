@@ -3,6 +3,9 @@ import { findCar } from './cars';
 import { AI_SETTING, type Difficulty, type DriveStyle } from '../physics/aiDifficulty';
 import { createAIRacer } from '../physics/aiRacers';
 import type { AIRacerAgent } from '../types/game';
+import { CARS } from './cars';
+import { applyUpgrades, type Upgrades } from './upgrades';
+import { applyTuning, createDefaultTuning, type CarTuning } from '../physics/carTuning';
 
 
 /** Everyone you can race against. Brand names stay in cars.ts: rivals only name a car id. */
@@ -45,6 +48,7 @@ export interface FieldEntry {
   car: CarSpec;
   paint: number;
   glow?: number;
+  upgrades?: Upgrades;
 }
 
 /** Turn rival ids into race entries (agent + car + paint). `skillScale` lets story events make a field easier or harder. */
@@ -63,4 +67,30 @@ export function freeRaceField(count: number, level: Difficulty = AI_SETTING.leve
   const pick = [...pool].sort((a, b) => a.skill - b.skill);
   const step = pick.length / count;
   return buildField(Array.from({ length: count }, (_, i) => pick[Math.min(pick.length - 1, Math.floor(i * step + step / 2))].id), 1, false, level);
+}
+
+/** An AI car's tuning: stock car + its upgrades (the player's build never leaks into it). */
+export function aiTuning(car: CarSpec, upgrades: Upgrades = {}): CarTuning {
+  const t = applyTuning(createDefaultTuning(), car.tuning);
+  applyUpgrades(t, upgrades);
+  return t;
+}
+
+/** Car tiers by price: free races only put you against cars of your own tier. */
+const TIER_EDGES = [0, 12000, 26000, 34000];
+export const carTier = (c: CarSpec): number => TIER_EDGES.filter((e) => c.price >= e).length - 1;
+
+/**
+ * Competitive free race: every rival at full skill, driving a car of the PLAYER's tier (Civic/Golf, 350Z/RX-7,
+ * E61/M3, Evo/Supra) with the same upgrade levels as the player's car. The difficulty setting still applies.
+ */
+export function competitiveField(count: number, player: CarSpec, upgrades: Upgrades, level: Difficulty = AI_SETTING.level): FieldEntry[] {
+  const tier = carTier(player);
+  const cars = CARS.filter((c) => carTier(c) === tier);
+  const pool = RIVALS.filter((r) => r.id !== 'dante' && r.id !== 'calloway');
+  return Array.from({ length: Math.max(0, count) }, (_, i) => {
+    const r = pool[i % pool.length];
+    const car = cars[i % cars.length];
+    return { agent: createAIRacer(r.id, r.name, 1, { level, style: r.style }), car, paint: r.color, glow: r.glow, upgrades: { ...upgrades } };
+  });
 }

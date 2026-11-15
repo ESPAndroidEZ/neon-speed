@@ -1,3 +1,4 @@
+import { aiTuning } from '../data/rivals';
 import { ChaseCam } from '../camera/chaseCam';
 import { CinematicCam } from '../camera/cinematicCam';
 import { createIntroShots } from '../camera/shots';
@@ -83,7 +84,7 @@ export class Game {
     applyTuning(this.d.tuning, s.car.tuning);
     applyBuild(this.d.tuning, s.car.id);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);
-    s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, applyTuning({ ...this.d.tuning }, a.car.tuning), a.agent));
+    s.agents.forEach((a, i) => this.rm.addRacer(`ai${i}`, a.agent.name, aiTuning(a.car, a.upgrades), a.agent)); // own car + its upgrades, nothing inherited from the player
     // views in racer order so index lines up
     this.rm.racers.forEach((r, i) => (r.isPlayer ? this.views.add(r, s.car, s.paint, s.glow) : this.views.add(r, s.agents[i - 1].car, s.agents[i - 1].paint, s.agents[i - 1].glow)));
     this.setWeather(s.weather);
