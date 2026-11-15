@@ -2,6 +2,7 @@ import type { Engine } from '../core/engine';
 import type { LaunchResult } from '../core/launch';
 import { WEATHER } from '../physics/weather';
 import { CornerGuide } from '../ui/cornerGuide';
+import { attachGhost } from './ghost';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 
@@ -17,6 +18,7 @@ const LAUNCH_POP: Record<Exclude<LaunchResult, 'NONE'>, [string, string]> = {
  */
 export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): CornerGuide {
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
+  attachGhost(engine, game, hud); // best-lap ghost car
   let countdownHint = false;
   let seenReward = 0;
   engine.onFrame(() => {
