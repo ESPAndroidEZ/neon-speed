@@ -43,7 +43,7 @@ export function createPlates(length: number, frontY = 0.36, rearY = 0.5, text = 
   const tex = new CanvasTexture(canvas);
   tex.colorSpace = SRGBColorSpace;
   tex.anisotropy = 4;
-  const mat = new MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0.1 });
+  const mat = new MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0.1, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }); // wins depth ties with the bumper far away
   const geo = new PlaneGeometry(0.52, 0.114);
   const front = new Mesh(geo, mat);
   front.position.set(0, frontY, length / 2 + 0.012);

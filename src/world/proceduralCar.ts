@@ -21,6 +21,8 @@ export interface Calibration {
 
 export interface CarVisual {
   root: Group;
+  /** The node that pitches and rolls (child of root). Body-fixed add-ons such as the plates go here so they move with the panels. */
+  body?: Group;
   calibrate?: Calibration;
   /** Rear exhaust tips and tyre contact points in car space, for smoke, flames and skid marks. */
   exhaust: readonly Object3D[];
@@ -111,6 +113,7 @@ export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loado
   let steerVis = 0;
   return {
     root,
+    body,
     exhaust,
     rearWheels: rear,
     setPaint: (hex) => {

@@ -71,6 +71,7 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
   let roll = 0;
   return {
     root,
+    body,
     exhaust,
     rearWheels: rear,
     calibrate: {

@@ -8,9 +8,9 @@ import { buildProceduralCar, type CarVisual } from './proceduralCar';
 import { createPlates, fitPlates } from './plates';
 
 /** Front and rear plates with the loadout's text; garage edits (setAppearance) update them live. */
-function withPlates(v: CarVisual, spec: CarSpec, l: Loadout, bodyRoot = v.root): CarVisual {
-  const plates = createPlates(spec.shape.length, 0.36, Math.min(0.62, spec.shape.beltHeight - 0.24), l.plate);
-  bodyRoot.add(plates.group);
+export function withPlates(v: CarVisual, spec: CarSpec, l: Loadout, bodyRoot = v.body ?? v.root): CarVisual {
+  const plates = createPlates(spec.shape.length, 0.36, Math.min(0.6, spec.shape.beltHeight - 0.32), l.plate);
+  bodyRoot.add(plates.group); // on the pitch/roll pivot: on root the rolling bumper swung through the still plate (bug A2)
   fitPlates(plates, bodyRoot, spec.shape.length); // centred and seated on the real bumper of THIS body
   const orig = v.setAppearance?.bind(v);
   v.setAppearance = (nl, paint) => { orig?.(nl, paint); plates.setText(nl.plate); };
