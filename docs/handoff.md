@@ -1,6 +1,6 @@
 # Handoff
 
-Baton: claude
+Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
 Updated: 2026-11-15 (Claude: handbrake momentum carry, GPU leak fix, phone access script; Qwen did 046/047).
@@ -27,7 +27,7 @@ Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + proced
 
 ## Next (Claude)
 1. Re-run `CYCLE=1 node scripts/soak.mjs 5 skip` (dev server up): geometry leak verified fixed, texture fix (world.dispose) not yet verified (run was killed).
-2. Rerun `scripts/qwen-queue.sh 048 049` (Evo, Supra models), then review like 046/047.
+2. Qwen queue 048 049 050 051 running (Evo, Supra, 350Z + RX-7 rework with cut_arches/lamp); review each with SHOTS=1 model-build. Claude works meanwhile on perf + handbrake (no overlap: Qwen only touches blender/cars).
 3. Owner to confirm the 7-step roadmap (inbox paste) before starting step 1.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)

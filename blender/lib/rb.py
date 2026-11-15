@@ -121,7 +121,7 @@ def box(name, center, size, material='trim', bevel=0.0):
     obj = bpy.context.active_object
     obj.name = name
     obj.scale = (size[0], size[2], size[1])
-    bpy.ops.object.transform_apply(scale=True)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)  # keep the pivot at the box centre
     obj.data.materials.append(mat(material) if isinstance(material, str) else material)
     if bevel > 0:
         b = obj.modifiers.new('bevel', 'BEVEL')
@@ -170,6 +170,75 @@ def mirror_x(obj):
     m = obj.modifiers.new('mirror', 'MIRROR')
     m.use_axis = (True, False, False)
     return obj
+
+
+def _apply_all(obj):
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    for m in list(obj.modifiers):
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    obj.select_set(False)
+
+
+def cut_arches(body, track, axles, radius, width, gap=0.05):
+    """Real wheel arches: applies the body's subdivision, then cuts a round arch (radius + gap) through the
+    flank at each wheel. track = wheel x (positive), axles = [front z, rear z]. Call after paint_faces, before smooth.
+    Put the wheels at x = +/-track so the tyre's outer face is flush with the body side."""
+    _apply_all(body)
+    for z in axles:
+        for side in (1, -1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=radius + gap, depth=width + 0.6,
+                                                location=G(side * (track + 0.2), radius, z), rotation=(0, math.pi / 2, 0))
+            cutter = bpy.context.active_object
+            mod = body.modifiers.new('arch', 'BOOLEAN')
+            mod.operation, mod.object, mod.solver = 'DIFFERENCE', cutter, 'EXACT'
+            _apply_all(body)
+            bpy.data.objects.remove(cutter)
+    # dark arch liner so the cut does not show the inside of the shell
+    for z in axles:
+        for side in (1, -1):
+            bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=radius, depth=0.3,
+                                                location=G(side * (track - 0.18), radius, z), rotation=(0, math.pi / 2, 0))
+            liner = bpy.context.active_object
+            liner.name = f'liner_{"f" if z == axles[0] else "r"}{"l" if side > 0 else "r"}'
+            liner.data.materials.append(mat('trim'))
+    return body
+
+
+def surface_z(body, x, y, front=True):
+    """z where the body surface is at (x, y), seen from the nose (front=True) or the tail. Use it to sit lights,
+    grilles and badges ON the body instead of floating in front of it. Returns None if the ray misses."""
+    o = G(x, y, 10 if front else -10)
+    d = G(0, 0, -1 if front else 1) - G(0, 0, 0)
+    hit, loc, _n, _i = body.ray_cast(o, d)
+    return (-loc.y) if hit else None
+
+
+def surface_x(body, y, z):
+    """x (left side, positive) where the body flank is at height y and position z: for mirrors, vents, side skirts."""
+    hit, loc, _n, _i = body.ray_cast(G(5, y, z), G(-1, 0, 0) - G(0, 0, 0))
+    return loc.x if hit else None
+
+
+def lamp(name, body, x, y, w, h, material, front=True, depth=0.08, inset=0.03):
+    """Headlight / tail light sitting on the body surface at (x, y), mirrored to the other side. Its outer face is
+    flush with the paint (sunk by `inset`), so it reads as part of the car, not a box stuck on it."""
+    hit, loc, n, _i = body.ray_cast(G(x, y, 10 if front else -10), G(0, 0, -1 if front else 1) - G(0, 0, 0))
+    if not hit:
+        raise ValueError(f'{name}: no body surface at x={x}, y={y}')
+    z = -loc.y
+    zc = z - depth / 2 + inset if front else z + depth / 2 - inset
+    obj = box(name, (x, y, zc), (w, h, depth), material, bevel=min(w, h) * 0.2)
+    up = max(-0.9, min(0.9, n.z))  # tilt the lamp to follow the panel (n is in Blender space: z = up)
+    obj.rotation_euler.x = -math.asin(up) if front else math.asin(up)
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)  # bake the tilt about the lamp centre
+    return mirror_x(obj)
 
 
 def smooth(obj, angle_deg=35):
