@@ -27,7 +27,11 @@ MODEL=${MODEL:-}
 KEEP_AWAKE=${KEEP_AWAKE:-1}
 MAX_WAIT=21600   # never sleep more than 6 h for one limit
 MARGIN=${LIMIT_MARGIN:-120}   # extra seconds after the announced reset
-PROBE=${PROBE_SECS:-1200}     # first wait when the reset time cannot be parsed (grows by 50 % steps)
+MODE=${MODE:-tmux}            # tmux = interactive session you can watch and /resume; print = headless claude -p
+TMUX_SESSION=${TMUX_SESSION:-neon}
+QUIET=${QUIET_SECS:-90}       # tmux mode: seconds of silence (and no "esc to interrupt") before a session counts as finished
+NICE=${NICE_LEVEL:-10}        # lower CPU priority for Claude and everything it spawns (headless Chromium etc.)
+PROBE=${PROBE_SECS:-1200}    # first wait when the reset time cannot be parsed (grows by 50 % steps)
 
 mkdir -p "$LOG_DIR"
 say() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG_DIR/runner.log"; }
@@ -38,6 +42,7 @@ flock -n 9 || { echo "another overnight.sh is already running"; exit 1; }
 
 # --- preconditions ---------------------------------------------------------------------------
 command -v "$CLAUDE_BIN" >/dev/null || { echo "'$CLAUDE_BIN' not found in PATH"; exit 1; }
+[[ ${MODE:-tmux} == print ]] || command -v tmux >/dev/null || { echo "tmux not found (or use MODE=print)"; exit 1; }
 [[ -f $QUEUE && -f $PROMPT_FILE ]] || { echo "missing $QUEUE or $PROMPT_FILE"; exit 1; }
 if [[ -z ${ALLOW_DIRTY:-} ]] && [[ -n $(git status --porcelain --untracked-files=no) ]]; then
   echo "Tracked files have uncommitted changes (commit or stash them, or ALLOW_DIRTY=1):"
@@ -62,9 +67,13 @@ if [[ $KEEP_AWAKE == 1 ]] && command -v powershell.exe >/dev/null; then
   awake_pid=$!
   say "keep-awake started (pid $awake_pid)"
 fi
-cleanup() { [[ -n $awake_pid ]] && kill "$awake_pid" 2>/dev/null; say "runner exit"; }
+cleanup() {
+  [[ -n $awake_pid ]] && kill "$awake_pid" 2>/dev/null
+  tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+  say "runner exit"
+}
 trap cleanup EXIT
-trap 'exit 130' INT TERM
+trap 'exit 130' INT TERM HUP
 
 # --- helpers ---------------------------------------------------------------------------------
 deadline=
@@ -105,6 +114,50 @@ limit_wait() {
   echo $(( target - now + MARGIN ))
 }
 
+# --- one Claude session ----------------------------------------------------------------------
+# print: headless `claude -p` (hidden from /resume). tmux (default): a normal interactive session
+# inside tmux session $TMUX_SESSION: visible in /resume, watch it with `tmux attach -t neon`.
+run_session_print() {
+  local args=(-p "$(cat "$PROMPT_FILE")" --dangerously-skip-permissions)
+  [[ -n $MODEL ]] && args+=(--model "$MODEL")
+  nice -n "$NICE" timeout -k 30 "$RUN_TIMEOUT" "$CLAUDE_BIN" "${args[@]}" </dev/null >"$log" 2>&1
+  code=$?
+  tail_txt=$(tail -n 8 "$log")
+}
+
+run_session_tmux() {
+  local sid transcript start now pane age
+  sid=$(cat /proc/sys/kernel/random/uuid)
+  transcript="$HOME/.claude/projects/$(pwd | sed 's#[^A-Za-z0-9]#-#g')/$sid.jsonl"
+  start=$(date +%s); code=0
+  tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+  local cmd="nice -n $NICE $CLAUDE_BIN --dangerously-skip-permissions --session-id $sid ${MODEL:+--model $MODEL} 'Follow the instructions in docs/overnight/prompt.md exactly.'"
+  tmux new-session -d -s "$TMUX_SESSION" -x 200 -y 50 -c "$PWD" -e "PATH=$PATH" "$cmd" || { code=1; tail_txt=; : >"$log"; return; }
+  say "session $sid started (tmux attach -t $TMUX_SESSION, or /resume)"
+  while tmux has-session -t "$TMUX_SESSION" 2>/dev/null; do
+    sleep 15
+    now=$(date +%s)
+    if (( now - start > RUN_TIMEOUT )); then say "session timeout"; code=124; break; fi
+    # Memory guard: below 1.5 GB available, kill stray headless browsers (the usual culprit), never Claude.
+    if (( $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) < 1500 )); then
+      say "low memory: killing headless browsers"; pkill chrome-headless 2>/dev/null
+    fi
+    pane=$(tmux capture-pane -p -J -t "$TMUX_SESSION" -S -60 2>/dev/null) || break
+    grep -q 'esc to interrupt' <<<"$pane" && continue
+    [[ -f $transcript ]] || { (( now - start > 300 )) && { say "no transcript after 5 min, giving up on session"; code=2; break; }; continue; }
+    age=$(( now - $(stat -c %Y "$transcript") ))
+    (( age >= QUIET && now - start >= 120 )) && break   # idle: finished a task, or stopped at a limit
+  done
+  tmux capture-pane -p -J -t "$TMUX_SESSION" -S -200 2>/dev/null >"$log"
+  tail_txt=$(grep -v '^\s*$' "$log" | tail -n 30)
+  if tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+    tmux send-keys -t "$TMUX_SESSION" Escape; sleep 1
+    tmux send-keys -t "$TMUX_SESSION" "/exit" Enter
+    for _ in 1 2 3 4 5 6 7 8; do sleep 2; tmux has-session -t "$TMUX_SESSION" 2>/dev/null || break; done
+    tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
+  fi
+}
+
 # --- main loop -------------------------------------------------------------------------------
 run=0 idle=0 unknown_waits=0
 last_key=$(progress_key)
@@ -116,12 +169,8 @@ while true; do
   log="$LOG_DIR/run-$(date +%m%d-%H%M%S)-$run.log"
   say "run $run start ($(open_tasks) open) -> $log"
 
-  args=(-p "$(cat "$PROMPT_FILE")" --dangerously-skip-permissions)
-  [[ -n $MODEL ]] && args+=(--model "$MODEL")
-  timeout -k 30 "$RUN_TIMEOUT" "$CLAUDE_BIN" "${args[@]}" </dev/null >"$log" 2>&1
-  code=$?
-  tail_txt=$(tail -n 8 "$log")
-  say "run $run exit=$code, $(wc -l <"$log") log lines"
+  if [[ $MODE == print ]]; then run_session_print; else run_session_tmux; fi
+  say "run $run ended (exit=$code), $(wc -l <"$log") log lines"
 
   if grep -q 'OVERNIGHT-DONE' <<<"$tail_txt"; then
     say "agent reported OVERNIGHT-DONE"; break

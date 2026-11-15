@@ -15,6 +15,13 @@ Per task:
 - Red and not fixable in two honest attempts: undo your own changes for that task, mark the item `- [!]` with the reason, add it to the report, move on. Never leave the build red at a commit.
 - When your context passes ~60 %, finish the current step cleanly, commit, and end the session with the single last line `OVERNIGHT-CONTINUE` (a fresh session picks up from the files).
 
+If the file `docs/overnight/STOP` exists, finish the step you are on, commit it if green (otherwise undo it), and end with `OVERNIGHT-DONE: stopped by STOP file`.
+
+RAM/CPU hygiene (Carlos wants the PC to do nothing but this one session; the box has 8 cores and 15 GB, and the Qwen server is stopped on purpose, do not start it, do not use Docker):
+- Prefer node-only checks (`build:q`, `test:q`, the offline audio/story/car tests). Run browser jobs (`npm run visual`, `car-shots`, `viewport-check`, screenshots) only once per finished piece of work, never two at once, and only if `awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo` shows >= 4000 MB.
+- Start no background services other than `scripts/with-dev.sh`, which cleans up after itself. Before every `OVERNIGHT-CONTINUE` and after every browser job, make sure nothing of yours is left running: `ps -eo pid,args | grep -E "[v]ite|[c]hrome-headless|[p]laywright"`, and `kill` those PIDs (never `pkill -f`, it matches your own shell).
+- Do not launch other Claude sessions or subagents for bulk work; do the work in this session. A single Explore subagent for screenshot review is fine.
+
 Item 99 ("self-directed") is a standing item: never tick it. When you reach it, read `docs/overnight/ideas.md`, pick the single highest-value idea (or invent a better one: gameplay feel, menus, HUD, performance, mobile, accessibility, juice, tests), do it with the same discipline, log it in the report and in the "done" list of `ideas.md`, and end with `OVERNIGHT-CONTINUE`. Only print `OVERNIGHT-DONE` if the ideas are truly exhausted or the build cannot be kept green.
 
 Never, under any circumstances:
