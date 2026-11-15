@@ -3,6 +3,10 @@ import { clamp, easeInOutCubic, lerp } from '../core/math';
 import type { CameraPose, CameraRig } from '../types/game';
 import { addShake, buildCurves, copyPose, makePose, samplePath } from './shotSampler';
 import type { CameraShot } from './shots';
+import { framing } from './aspectFrame';
+import type { Framing } from './aspectFrame';
+
+const FRAME: Framing = { fov: 60, dist: 1, height: 1, lookAhead: 0 };
 
 const UP = new Vector3(0, 1, 0);
 
@@ -182,8 +186,9 @@ export class CinematicCam implements CameraRig {
     cam.up.copy(UP);
     cam.lookAt(this.pose.lookAt);
     if (this.pose.roll !== 0) cam.rotateZ(this.pose.roll);
-    if (cam.fov !== this.pose.fov) {
-      cam.fov = this.pose.fov;
+    const fov = framing(cam.aspect, this.pose.fov, FRAME).fov; // portrait and ultrawide keep the shot readable
+    if (cam.fov !== fov) {
+      cam.fov = fov;
       cam.updateProjectionMatrix();
     }
   }

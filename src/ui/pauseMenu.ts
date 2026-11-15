@@ -7,6 +7,8 @@ export interface PauseHandlers {
   onRestart: () => void;
   onSave: (slot: SlotId) => void;
   onSaveQuit: () => void;
+  /** Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. */
+  extra?: () => (HTMLElement | null)[];
 }
 
 /** Pause overlay: Resume, Restart, Save (slot picker), Save & Quit. */
@@ -36,6 +38,8 @@ export class PauseMenu {
       button('Save', () => this.picker()),
       button('Save & Quit to menu', () => this.hnd.onSaveQuit()),
     );
+    const more = (this.hnd.extra?.() ?? []).filter((x): x is HTMLElement => x !== null);
+    if (more.length) el.append(h('div', 'rb-row', ''), ...more);
     this.layer = el;
     document.body.appendChild(el);
     el.querySelector('button')?.focus({ preventScroll: true });

@@ -1,21 +1,24 @@
 import { AudioManager } from './audio/audioManager';
 import { Engine } from './core/engine';
-import { AutoQuality } from './core/quality';
+import { AutoQuality, isPhone } from './core/quality';
+import { deviceHints, firstRunTier } from './core/perfTier';
+import { installGuard, watchContextLoss } from './core/guard';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
 import { finishFreeRace } from './game/freeRace';
-import { AudioTestPanel } from './dev/audioTestPanel';
-import { runDevStart } from './dev/devStart';
-import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
 import { attachRaceFeedback } from './game/raceFeedback';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
 import { applyDrivingSettings } from './ui/drivingSettings';
-import { registerServiceWorker } from './core/pwa';
+import { registerServiceWorker, showUpdatePrompt } from './core/pwa';
+import { installPlatform } from './game/platform';
+import { installHotkeys } from './game/hotkeys';
+import { fullscreenButton } from './ui/fullscreenButton';
+import { controlRows } from './ui/controlSettings';
 import { createControls } from './game/inputSetup';
 import { installMinimap } from './game/extras';
 import { applyTuning, createDefaultTuning } from './physics/carTuning';
@@ -30,20 +33,24 @@ import { LoadingCard } from './ui/loadingCard';
 import { TitleCards } from './ui/titleCards';
 import { Menu } from './ui/menu';
 import { PauseMenu } from './ui/pauseMenu';
-import { toast } from './ui/uiKit';
+import { button, toast } from './ui/uiKit';
+import { calibrate } from './ui/controlsOnboard';
 import { ResultsScreen } from './ui/results';
 import { installVersus } from './game/versusGate';
 import { Cast } from './game/cast';
 import { applySettings } from './ui/settings';
 import { preloadCarModels } from './world/carFactory';
+import { runBootLoader } from './ui/bootLoader';
+import { installRotateHint } from './ui/rotateHint';
 import { buildWorld } from './world/world';
 
 /* Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip (straight to a race, no menu)
    ?w=rain|snow  ?car=350z  ?ai=N rivals  ?demo (self-driving)  ?ff=seconds  ?at=zone|index  ?screen=garage|weather|settings|story */
 
+installGuard(import.meta.env.PROD);
 const container = document.getElementById('app');
 if (!container) throw new Error('#app container missing from index.html');
-const q = new URLSearchParams(location.search);
+const q = new URLSearchParams(import.meta.env.DEV ? location.search : ''); // dev flags never reach production
 const direct = q.has('skip') || q.has('demo');
 
 let kv: Storage | null = null;
@@ -53,11 +60,14 @@ try {
   kv = null; // blocked storage: play without saving
 }
 preloadCarModels(CARS);
+if (direct) document.getElementById('boot')?.remove(); // dev races start at once
+else runBootLoader();
 const slots = new SaveSlots(kv);
 const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map((c) => c.id));
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
-const controls = createControls(q.has('demo') ? (q.get('demo') ?? '') : null, { pause: () => pause.toggle(), reset: () => game.resetToTrack() });
+watchContextLoss(engine.renderer.domElement, () => engine.stop(), () => pause.autosave());
+const controls = createControls(q.has('demo') ? (q.get('demo') ?? '') : null, { pause: () => pause.toggle(), reset: () => game.resetToTrack() }, kv);
 const { pad, touch } = controls;
 const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
@@ -82,6 +92,7 @@ auto.onDowngrade = (tier) => {
   toast(`Frame rate was low: graphics lowered to ${tier.toUpperCase()}. (Settings: Auto quality)`);
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
+if (!navigator.webdriver && firstRunTier(store.data.settings, deviceHints(engine.renderer.getContext(), isPhone()), kv)) store.commit(); // tests keep their tier
 applySettings({ store, audio: audio.bus, engine, voice, auto, game, hud });
 const applyDriving = (): void => {
   applyDrivingSettings(store, pad);
@@ -94,11 +105,7 @@ if (q.get('look')) {
 }
 void world.applyPropModels();
 
-new AudioTestPanel(document.body, audio);
-const panel = new TuningPanel(document.body);
-panel.add('car', tuning);
-panel.add('chase', game.chase.tuning);
-panel.build();
+if (import.meta.env.DEV) void import('./dev/devPanels').then((m) => m.installDevPanels(audio, game, tuning, engine));
 
 const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   const def = findTrackDef(q.get('track') ?? trackId);
@@ -127,6 +134,7 @@ menu = new Menu({
   startEvent: (ev) => story.start(ev),
   slots,
   onDriving: applyDriving,
+  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt }),
   loadSlot: (id) => loadSlot(id),
 });
 const subs = new Subtitles(voice);
@@ -135,6 +143,7 @@ story = new StoryController({
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
+  extra: () => [fullscreenButton(fs), controls.prefs.data.scheme === 'tilt' ? button('Recalibrate tilt', () => void calibrate(controls.tilt)) : null],
   onResume: () => pause.resume(),
   onRestart: () => {
     pause.resume();
@@ -167,10 +176,7 @@ function loadSlot(id: import('./core/gameSave').SlotId): void {
   }
 }
 if (slots.corrupt) toast('Some saved games were unreadable and were skipped');
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) pause.pause();
-});
-window.addEventListener('pagehide', () => pause.autosave());
+const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMenu: () => { pause.saveAndQuit(); leaveToMenu(); } });
 game.onFinish = (r) => {
   const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
   const extra = story.finish(r) ?? free;
@@ -185,35 +191,23 @@ game.onStartRace = () => loading.show();
 installRadio(engine, game, subs);
 
 installMinimap(game, world, (fn) => engine.onFrame(fn));
-let hudShown = true;
+let hudShown = true, padsShown = true;
 engine.onFrame(() => {
   const show = game.state !== 'MENU';
-  if (show !== hudShown) {
-    hudShown = show;
-    hud.setVisible(show);
-    touch.setVisible(show);
-  }
+  const pads = show && !game.paused && game.state !== 'PODIUM'; // touch buttons never sit over the pause or results menus
+  if (show !== hudShown) hud.setVisible((hudShown = show));
+  if (pads !== padsShown) touch.setVisible((padsShown = pads));
 });
+installRotateHint();
 
 container.addEventListener('pointerdown', () => game.skipIntro());
-window.addEventListener('keydown', (e) => {
-  if (e.repeat || game.state === 'MENU') return;
-  if (game.paused && e.code !== 'Escape') return;
-  if (e.code === 'KeyR') game.resetToTrack();
-  else if (e.code === 'KeyP') toast(juice.toggleShowcase() ? 'Particle showcase ON (P)' : 'Particle showcase off');
-  else if (e.code === 'Digit1') game.setWeather('CLEAR');
-  else if (e.code === 'Digit2') game.setWeather('RAIN');
-  else if (e.code === 'Digit3') game.setWeather('SNOW');
-  else if (e.code === 'Enter' && game.state === 'PODIUM' && !story.current) game.restart();
-  else if (e.code === 'Escape') {
-    if (game.state === 'CINEMATIC') game.skipIntro(); // skipping never leaves the race
-    else if (game.state === 'PODIUM') leaveToMenu();
-    else pause.toggle();
-  } else if (e.code !== 'Backquote') game.skipIntro();
-});
+installHotkeys({ game, juice, story, pause, leaveToMenu });
+hud.mount(fullscreenButton(fs, true));
+controls.onboard();
 
 game.setWeather((q.get('w') ?? 'clear').toUpperCase() as Weather);
-runDevStart({ q, direct, game, store, world, menu, story, pause, juice, hud, leaveToMenu });
+// dev URL flags live in a lazily imported module (not in the production bundle); the loop starts once they ran
+const ready = import.meta.env.DEV ? import('./dev/devStart').then((m) => m.runDevStart({ q, direct, game, store, world, menu, story, pause, juice, hud, leaveToMenu })) : Promise.resolve(menu.title());
 
-registerServiceWorker();
-engine.start();
+registerServiceWorker(showUpdatePrompt);
+void ready.then(() => engine.start());

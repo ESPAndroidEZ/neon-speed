@@ -7,7 +7,7 @@ const CSS = `
 .rb-nitro-burst{position:absolute;right:6%;top:-10%;font-size:clamp(22px,3.4vw,40px);font-weight:900;font-style:italic;color:#fff;text-shadow:0 0 14px #ff2a9d,0 0 34px #ff2a9d;opacity:0;pointer-events:none}
 .rb-nitro-burst.go{animation:rb-burst .7s var(--ease,ease-out) both}
 @keyframes rb-burst{0%{opacity:0;transform:scale(.6) translateY(10px)}20%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:scale(1.5) translateY(-24px)}}
-.rb-pop{position:absolute;left:50%;top:var(--mt,18px);transform:translateX(-50%);font-weight:900;font-style:italic;font-size:clamp(22px,3.4vw,38px);color:#ff2a9d;text-shadow:0 0 14px #ff2a9d;opacity:0;pointer-events:none;white-space:nowrap}
+.rb-pop{position:absolute;left:50%;top:calc(var(--mt,18px) + 92px);transform:translateX(-50%);font-weight:900;font-style:italic;font-size:clamp(18px,min(3.4vw,5.5vh),38px);max-width:min(88vw,900px);text-align:center;white-space:normal !important;color:#ff2a9d;text-shadow:0 0 14px #ff2a9d;opacity:0;pointer-events:none;white-space:nowrap}
 .rb-pop.go{animation:rb-pop 1.1s var(--ease,ease-out) both}
 @keyframes rb-pop{0%{opacity:0;transform:translateX(-50%) scale(.5)}15%{opacity:1;transform:translateX(-50%) scale(1.2)}100%{opacity:0;transform:translateX(-50%) translateY(-34px) scale(1)}}
 .rb-lines{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-conic-gradient(from 0deg at 50% 52%,transparent 0 3.2deg,rgba(220,240,255,.11) 3.2deg 3.6deg);-webkit-mask-image:radial-gradient(circle at 50% 52%,transparent 48%,#000 100%);mask-image:radial-gradient(circle at 50% 52%,transparent 48%,#000 100%);animation:rb-spin 1.6s linear infinite}

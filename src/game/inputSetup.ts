@@ -4,6 +4,10 @@ import { CombinedInput } from '../input/combinedInput';
 import { GamepadInput } from '../input/gamepad';
 import { KeyboardInput } from '../input/keyboard';
 import { createTouchControls } from '../ui/touchControls';
+import { ControlStore } from '../input/controlPrefs';
+import { TiltInput } from '../input/tiltInput';
+import { chooseControls, controlsTutorial, enableTilt } from '../ui/controlsOnboard';
+import { isPhone } from '../core/quality';
 import type { Game } from './game';
 
 export interface Controls {
@@ -11,21 +15,49 @@ export interface Controls {
   input: CombinedInput | DemoInput;
   pad: GamepadInput;
   touch: ReturnType<typeof createTouchControls>;
+  /** Phone control prefs (scheme, auto gas, tilt calibration), saved on their own key. */
+  prefs: ControlStore;
+  tilt: TiltInput;
   /** Wire what needs the Game: speed-sensitive keyboard steering and gamepad rumble on impacts. Call once the Game exists. */
   attach(engine: Engine, game: Game): void;
+  /** First-run chooser (touch devices, once). */
+  onboard(): void;
 }
 
 /** All input devices in one place. `pause` and `reset` are what the pad's Start and Y and the touch buttons do. */
-export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }): Controls {
+export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }, kv: Storage | null): Controls {
   const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
   const keys = new KeyboardInput();
   const pad = new GamepadInput({ onPause: actions.pause, onReset: actions.reset });
-  const input = demo !== null ? new DemoInput(demo) : new CombinedInput([keys, pad, touch]);
+  const prefs = new ControlStore(kv);
+  const tilt = new TiltInput(prefs);
+  const input = demo !== null ? new DemoInput(demo) : new CombinedInput([keys, pad, touch, tilt]);
+  const apply = (): void => {
+    touch.setScheme(prefs.data);
+    tilt.active = prefs.data.scheme === 'tilt';
+  };
+  prefs.onChange(apply);
+  apply();
+  if (prefs.data.scheme === 'tilt' && isPhone()) {
+    tilt.listen(); // Android: no prompt needed
+    const again = (): void => {
+      window.removeEventListener('pointerup', again, true);
+      if (!tilt.receiving) void enableTilt(prefs, tilt, false); // iOS asks again from the first tap of the session
+    };
+    window.addEventListener('pointerup', again, true);
+  }
   return {
-    input, pad, touch,
+    input, pad, touch, prefs, tilt,
+    onboard: () => {
+      if (isPhone() && !prefs.data.chosen) chooseControls(prefs, tilt);
+    },
     attach: (engine, game) => {
+      let was = game.state;
       engine.onFrame(() => {
         keys.speedKph = game.telemetry.speedKph;
+        tilt.speedKph = touch.speedKph = Math.abs(game.telemetry.speedKph);
+        if (game.state === 'RACING' && was !== 'RACING' && isPhone()) controlsTutorial(prefs);
+        was = game.state;
       });
       const base = game.onImpact;
       game.onImpact = (s) => {

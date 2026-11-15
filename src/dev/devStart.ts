@@ -1,4 +1,6 @@
 import { showPeopleGallery } from './peopleGallery';
+import { installProbe } from './probe';
+import { buildResult } from '../core/raceResult';
 import { buildPerson } from '../world/peopleAdapter';
 import { STAGE } from '../world/stage';
 import { findTrackDef, TRACKS } from '../data/tracks';
@@ -35,6 +37,7 @@ export interface DevStartDeps {
  */
 export function runDevStart(d: DevStartDeps): void {
   const { q, game, store, world, menu, story, pause, juice, hud } = d;
+  if (q.has('probe')) installProbe(game); // dev: screen positions for scripts/viewport-check.mjs
   if (q.has('soak')) { // dev: stats for scripts/soak.mjs (leak and crash hunting)
     const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene } } }).d.engine;
     let objects = 0;
@@ -65,6 +68,10 @@ if (d.direct) {
   if (q.has('showcase')) juice.toggleShowcase();
   if (q.has('ff')) game.fastForward(Number(q.get('ff')));
   if (q.get('pause') === 'menu') pause.pause(); // dev: open the pause menu
+  if (q.has('results')) { // dev: the results screen over the running race (layout checks)
+    const res = buildResult(game.rm.racers, game.rm.player, 3);
+    (game as unknown as { d: { results: { show: (r: typeof res) => void } } }).d.results.show(res);
+  }
   if (q.get('pause') === 'load') {
     pause.pause(); // dev: autosave, quit to the menu and open the load screen
     pause.saveAndQuit();

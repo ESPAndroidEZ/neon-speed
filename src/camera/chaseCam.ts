@@ -1,6 +1,8 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import { clamp, damp, lerp, smoothstep, wrapAngle } from '../core/math';
 import type { CameraPose, CameraRig, CarState } from '../types/game';
+import { framing } from './aspectFrame';
+import type { Framing } from './aspectFrame';
 
 export interface ChaseTuning {
   distance: number;
@@ -62,6 +64,8 @@ export class ChaseCam implements CameraRig {
   private shakeT = 0;
   private slideAmp = 0;
   private slipFilt = 0;
+  /** Per-aspect framing (portrait pulls back and widens, ultrawide caps the horizontal view). */
+  private readonly frame: Framing = { fov: 60, dist: 1, height: 1, lookAhead: 0 };
 
   constructor(camera: PerspectiveCamera) {
     this.camera = camera;
@@ -107,27 +111,29 @@ export class ChaseCam implements CameraRig {
     const raw = clamp(car.slipAngle, -1.1, 1.1);
     this.slipFilt = damp(this.slipFilt, Math.sign(raw) * Math.max(0, Math.abs(raw) - 0.1), 4, frameDt);
     const slip = this.slipFilt;
+    const fr = framing(this.camera.aspect, lerp(t.fovMin, t.fovMax, sp) + this.kick, this.frame);
     const targetYaw = car.heading + t.slipFollow * slip * smoothstep(3, 10, Math.abs(car.speed));
     if (!this.ready) {
       this.yaw = targetYaw;
-      this.dist = t.distance;
-      this.height = t.height;
+      this.dist = t.distance * fr.dist;
+      this.height = t.height * fr.height;
       this.gy = car.position.y;
-      this.fov = t.fovMin;
+      this.fov = fr.fov;
       this.ready = true;
     }
     this.yaw += wrapAngle(targetYaw - this.yaw) * (1 - Math.exp(-t.yawLag * frameDt));
-    this.dist = damp(this.dist, lerp(t.distance, t.distanceFast, sp), 3, frameDt);
-    this.height = damp(this.height, lerp(t.height, t.heightFast, sp), 3, frameDt);
+    this.dist = damp(this.dist, lerp(t.distance, t.distanceFast, sp) * fr.dist, 3, frameDt);
+    this.height = damp(this.height, lerp(t.height, t.heightFast, sp) * fr.height, 3, frameDt);
     this.kick = damp(this.kick, this.nitro ? t.nitroKick : 0, this.nitro ? 4 : 2, frameDt);
-    this.fov = damp(this.fov, lerp(t.fovMin, t.fovMax, sp) + this.kick, 4, frameDt);
+    this.fov = damp(this.fov, fr.fov, 4, frameDt);
 
     this.gy = damp(this.gy, car.position.y, 5, frameDt);
     const sy = Math.sin(this.yaw);
     const cy = Math.cos(this.yaw);
     const p = car.position;
     this._pose.position.set(p.x - sy * this.dist, this.height + this.gy, p.z - cy * this.dist);
-    this._pose.lookAt.set(p.x + sy * 4, 1.0 + this.gy, p.z + cy * 4);
+    const ahead = 4 + fr.lookAhead;
+    this._pose.lookAt.set(p.x + sy * ahead, 1.0 + this.gy, p.z + cy * ahead);
     this._pose.fov = this.fov;
   }
 

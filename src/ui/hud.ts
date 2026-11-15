@@ -13,8 +13,11 @@ const CSS = `
 #hud .info{position:absolute;right:var(--mr);top:var(--mt);text-align:right;font-size:clamp(14px,2vw,20px);line-height:1.5;white-space:nowrap}
 #hud .ban{position:absolute;left:0;right:0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
 #hud .ds{position:absolute;left:50%;top:var(--mt);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);white-space:nowrap;font-style:italic;color:#ff2a9d;text-shadow:0 0 12px #ff2a9d;opacity:0;transition:opacity .2s}
+#hud .hb-fs{position:absolute;left:var(--ml);top:calc(var(--mt) + 40px)}
+@media (pointer:coarse){#hud .hb-fs{left:calc(max(14px,env(safe-area-inset-left)) + 112px);top:calc(max(10px,env(safe-area-inset-top)) + 34px)}}
 @media (max-width:760px){#hud .tl small{display:none}}
-@media (pointer:coarse){#hud .br{right:calc(var(--mr) + 206px);bottom:calc(var(--mb) - 6px);transform:scale(.7);transform-origin:right bottom}#hud .tl small{display:none}}
+@media (pointer:coarse){#hud{--u:clamp(64px,min(15vmin,19vw),118px)}#hud .br{right:calc(max(14px,env(safe-area-inset-right)) + var(--u) * 2.1 + 34px);bottom:calc(var(--mb) - 6px);transform:scale(.7);transform-origin:right bottom}#hud .tl small{display:none}}
+@media (pointer:coarse) and (orientation:portrait){#hud .br{right:auto;left:var(--ml);bottom:auto;top:calc(var(--mt) + 84px);transform:scale(.55);transform-origin:left top;text-align:left}}
 `;
 
 /** Plain-DOM HUD. Only touches the DOM when a value actually changes. */
@@ -30,6 +33,13 @@ export class Hud {
   private lastTier = 0;
   private lastInfo = '';
   private lastScore = -1;
+
+  /** Add a small HUD button (full screen) in the top-left button row; null is ignored. */
+  mount(el: HTMLElement | null): void {
+    if (!el) return;
+    el.classList.add('hb-fs');
+    this.root.append(el);
+  }
 
   /** HUD size 0.8 .. 1.3 (graphics settings). */
   setScale(s: number): void {

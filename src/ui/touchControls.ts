@@ -1,137 +1,163 @@
 import type { CarInput, InputSource } from '../types/game';
+import type { ControlPrefs, ControlScheme } from '../input/controlPrefs';
+import { SteerRamp } from '../input/steerRamp';
+import { ICONS } from './icons';
+import { holdButton, place, TOUCH_CSS } from './touchButton';
 
 export interface TouchControls extends InputSource {
   /** Show or hide the overlay (the architect hides it in menus). */
   setVisible(v: boolean): void;
+  /** Rebuild the layout for a scheme (tilt / touch wheel / buttons) and the auto-gas choice. */
+  setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'>): void;
+  /** Speed for the digital-steering ramp of the Buttons scheme. */
+  speedKph: number;
 }
 
-const CSS = `
-.rb-tc{position:fixed;inset:0;z-index:100;pointer-events:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
---sl:max(14px,env(safe-area-inset-left));--sr:max(14px,env(safe-area-inset-right));--sb:max(14px,env(safe-area-inset-bottom))}
-.rb-tc .zone{position:absolute;left:0;bottom:0;width:48%;height:72%;pointer-events:auto}
-.rb-tc .knob{position:absolute;width:118px;height:118px;margin:-59px 0 0 -59px;border-radius:50%;border:2px solid #18d8ff66;background:radial-gradient(#18d8ff22,#0000 70%);opacity:0;transition:opacity .15s}
-.rb-tc .knob i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:#18d8ffcc;box-shadow:0 0 18px #18d8ff}
-.rb-tc .hint{position:absolute;left:calc(var(--sl) + 24px);bottom:calc(var(--sb) + 30px);font:800 12px system-ui;letter-spacing:.12em;color:#ffffff66}
-.rb-tc .b{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:auto;touch-action:none;
-font:900 13px/1 system-ui,sans-serif;letter-spacing:.08em;color:#fff;background:#0b1024b3;border:2px solid var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent),inset 0 0 18px color-mix(in srgb,var(--c) 25%,transparent);
-transition:transform .06s,background .06s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.rb-tc .b small{font-size:9px;opacity:.7;margin-top:4px;letter-spacing:.14em}
-.rb-tc .b.on{transform:scale(.93);background:color-mix(in srgb,var(--c) 55%,#0b1024);box-shadow:0 0 28px var(--c)}
-.rb-tc .gas{right:var(--sr);bottom:var(--sb);width:96px;height:150px;border-radius:22px 22px 28px 28px;--c:#3dff8a}
-.rb-tc .brk{right:calc(var(--sr) + 108px);bottom:var(--sb);width:88px;height:104px;border-radius:20px;--c:#ff3b4e}
-.rb-tc .n2o{left:var(--sl);bottom:calc(var(--sb) + 40%);width:78px;height:78px;border-radius:50%;--c:#ff2a9d}
-.rb-tc .hb{left:calc(var(--sl) + 88px);bottom:calc(var(--sb) + 40% + 26px);width:78px;height:78px;border-radius:50%;--c:#ffc23d}
-.rb-tc .sm{top:max(12px,env(safe-area-inset-top));width:44px;height:44px;border-radius:12px;--c:#ffffff88;font-size:15px}
-.rb-tc .sm{top:calc(max(12px,env(safe-area-inset-top)) + 34px)}.rb-tc .rst{left:calc(var(--sl) + 56px)}.rb-tc .pse{left:var(--sl)}
-@media (max-height:420px){.rb-tc .gas{height:128px;width:88px}.rb-tc .brk{height:92px;width:80px;right:calc(var(--sr) + 98px)}.rb-tc .n2o,.rb-tc .hb{width:68px;height:68px}.rb-tc .hb{left:calc(var(--sl) + 78px)}}
-`;
+const ARROW_L = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M15.5 4 6 12l9.5 8z"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M8.5 4 18 12l-9.5 8z"/></svg>';
 
 /**
- * Phone controls (landscape): RIGHT thumb = GAS (big) and BRAKE pedals; LEFT thumb = drag-anywhere steering in the
- * lower left, with NITRO and HANDBRAKE above it so the thumb can flick up for a drift. Short vibration on press where
- * supported. Steering keeps the floating-stick feel: it centres where the thumb lands.
+ * Phone controls, three schemes (landscape thumb zones, bottom-left and bottom-right):
+ * - wheel (approved layout): LEFT thumb drags anywhere in the lower left to steer, NITRO + HANDBRAKE above it;
+ *   RIGHT thumb GAS (big) and BRAKE.
+ * - tilt: steering comes from input/tiltInput; LEFT a large BRAKE, RIGHT nitro, handbrake and a small pause.
+ *   Gas is automatic unless the player switched auto-gas off (then a GAS pedal joins the right side).
+ * - buttons: LEFT two steering arrows (ramped like the keyboard), RIGHT GAS + BRAKE, nitro/handbrake above the arrows.
+ * Every button tracks its own pointer id, so any mix of fingers works.
  */
 export function createTouchControls(container: HTMLElement, opts?: { onReset?: () => void; onPause?: () => void }): TouchControls {
   const isTouch = matchMedia('(pointer: coarse)').matches;
-  let steer = 0, gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
-  const buzz = (ms: number): void => void (navigator.vibrate?.(ms));
-
+  let gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
+  let stick = 0, left = false, right = false, auto = false, lastT = 0;
+  const ramp = new SteerRamp();
   const root = document.createElement('div');
   root.className = 'rb-tc';
+  root.addEventListener('contextmenu', (e) => e.preventDefault());
   const style = document.createElement('style');
-  style.textContent = CSS;
-  root.append(style);
+  style.textContent = TOUCH_CSS;
+  const layer = document.createElement('div');
+  root.append(style, layer);
   if (!isTouch) root.style.display = 'none';
-
-  // steering zone with a floating knob
-  const zone = document.createElement('div');
-  zone.className = 'zone';
-  const knob = document.createElement('div');
-  knob.className = 'knob';
-  const dot = document.createElement('i');
-  knob.append(dot);
-  const hint = document.createElement('div');
-  hint.className = 'hint';
-  hint.textContent = 'DRAG TO STEER';
-  zone.append(knob, hint);
-  let stickId: number | null = null;
-  let startX = 0;
-  zone.addEventListener('pointerdown', (e) => {
-    if (stickId !== null) return;
-    stickId = e.pointerId;
-    startX = e.clientX;
-    zone.setPointerCapture(e.pointerId);
-    const r = zone.getBoundingClientRect();
-    knob.style.left = `${e.clientX - r.left}px`;
-    knob.style.top = `${e.clientY - r.top}px`;
-    knob.style.opacity = '1';
-    hint.style.display = 'none';
-  });
-  zone.addEventListener('pointermove', (e) => {
-    if (e.pointerId !== stickId) return;
-    const dx = Math.max(-55, Math.min(55, e.clientX - startX));
-    steer = Math.max(-1, Math.min(1, -dx / 55)); // steer > 0 is LEFT
-    dot.style.transform = `translateX(${dx}px)`;
-  });
-  const sUp = (e: PointerEvent): void => {
-    if (e.pointerId !== stickId) return;
-    stickId = null;
-    steer = 0;
-    dot.style.transform = '';
-    knob.style.opacity = '0';
-  };
-  zone.addEventListener('pointerup', sUp);
-  zone.addEventListener('pointercancel', sUp);
-
-  function button(cls: string, label: string, sub: string, down: () => void, up?: () => void): HTMLDivElement {
-    const el = document.createElement('div');
-    el.className = `b ${cls}`;
-    el.innerHTML = sub ? `${label}<small>${sub}</small>` : label;
-    let id: number | null = null;
-    el.addEventListener('pointerdown', (e) => {
-      if (id !== null) return;
-      id = e.pointerId;
-      el.setPointerCapture(e.pointerId);
-      el.classList.add('on');
-      buzz(12);
-      down();
-    });
-    const u = (e: PointerEvent): void => {
-      if (e.pointerId !== id) return;
-      id = null;
-      el.classList.remove('on');
-      up?.();
-    };
-    el.addEventListener('pointerup', u);
-    el.addEventListener('pointercancel', u);
-    return el;
-  }
-
-  root.append(
-    zone,
-    button('gas', 'GAS', '', () => { gas = 1; }, () => { gas = 0; }),
-    button('brk', 'BRAKE', 'REVERSE', () => { brake = 1; }, () => { brake = 0; }),
-    button('n2o', 'NITRO', '', () => { nitro = true; }, () => { nitro = false; }),
-    button('hb', 'HAND', 'BRAKE', () => { handbrake = true; }, () => { handbrake = false; }),
-    button('sm rst', '↺', '', () => opts?.onReset?.()),
-    button('sm pse', 'II', '', () => opts?.onPause?.()),
-  );
   container.appendChild(root);
 
-  function sample(out: CarInput): CarInput {
-    const on = isTouch && visible;
-    out.throttle = on ? gas : 0;
-    out.brake = on ? brake : 0;
-    out.steer = on ? steer : 0;
-    out.handbrake = on && handbrake;
-    out.nitro = on && nitro;
-    return out;
+  const release = (): void => {
+    gas = brake = stick = 0;
+    handbrake = nitro = left = right = false;
+  };
+  const pedal = (k: 'gas' | 'brake', cls: string, label: string, sub = ''): HTMLDivElement =>
+    holdButton(cls, sub ? `${label}<small>${sub}</small>` : label, () => (k === 'gas' ? (gas = 1) : (brake = 1)), () => (k === 'gas' ? (gas = 0) : (brake = 0)));
+  const n2o = (): HTMLDivElement => holdButton('round n2o', 'NITRO', () => { nitro = true; }, () => { nitro = false; });
+  const hb = (): HTMLDivElement => holdButton('round hb', 'HAND<small>BRAKE</small>', () => { handbrake = true; }, () => { handbrake = false; });
+  const small = (cls: string, icon: string, fn?: () => void, label = ''): HTMLDivElement => {
+    const b = holdButton(`sm ${cls}`, icon, () => fn?.());
+    b.setAttribute('aria-label', label);
+    return b;
+  };
+  const S = { l: 'var(--sl)', r: 'var(--sr)', b: 'var(--sb)', u: 'var(--u)' };
+
+  function wheelZone(): HTMLElement {
+    const zone = document.createElement('div');
+    zone.className = 'zone';
+    const knob = document.createElement('div');
+    knob.className = 'knob';
+    const dot = document.createElement('i');
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = 'DRAG TO STEER';
+    knob.append(dot);
+    zone.append(knob, hint);
+    let id: number | null = null, startX = 0;
+    zone.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      if (id !== null) return;
+      id = e.pointerId;
+      startX = e.clientX;
+      zone.setPointerCapture(e.pointerId);
+      const r = zone.getBoundingClientRect();
+      knob.style.left = `${e.clientX - r.left}px`;
+      knob.style.top = `${e.clientY - r.top}px`;
+      knob.style.opacity = '1';
+      hint.style.display = 'none';
+    });
+    zone.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== id) return;
+      const dx = Math.max(-55, Math.min(55, e.clientX - startX));
+      stick = -dx / 55; // steer > 0 is LEFT
+      dot.style.transform = `translateX(${dx}px)`;
+    });
+    const up = (e: PointerEvent): void => {
+      if (e.pointerId !== id) return;
+      id = null;
+      stick = 0;
+      dot.style.transform = '';
+      knob.style.opacity = '0';
+    };
+    zone.addEventListener('pointerup', up);
+    zone.addEventListener('pointercancel', up);
+    return zone;
   }
 
-  function setVisible(v: boolean): void {
-    visible = v;
-    root.style.display = v && isTouch ? '' : 'none';
+  function setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'>): void {
+    release();
+    layer.replaceChildren();
+    root.dataset.scheme = p.scheme;
+    auto = p.scheme === 'tilt' && p.autoGas;
+    const reset = small('rst', ICONS.reset, opts?.onReset, 'Reset car');
+    const pause = small('pse', ICONS.pause, opts?.onPause, 'Pause');
+    const scheme: ControlScheme = p.scheme;
+    if (scheme === 'tilt') {
+      const gasPedal = p.autoGas ? null : place(pedal('gas', 'pedal gas', 'GAS'), { right: S.r, bottom: S.b });
+      const col = p.autoGas ? S.r : `calc(${S.r} + ${S.u} * 1.05 + 22px)`;
+      layer.append(
+        place(pedal('brake', 'big brk', 'BRAKE', 'REVERSE'), { left: S.l, bottom: S.b }),
+        place(n2o(), { right: col, bottom: S.b }),
+        place(hb(), p.autoGas ? { right: `calc(${S.r} + ${S.u} + 26px)`, bottom: `calc(${S.b} + ${S.u} * 0.45)` } : { right: col, bottom: `calc(${S.b} + ${S.u} + 24px)` }),
+        place(pause, { right: p.autoGas ? `calc(${S.r} + ${S.u} / 2 - 22px)` : `calc(${S.r} + ${S.u} * 0.52 - 22px)`, bottom: `calc(${S.b} + ${S.u} * ${p.autoGas ? 1 : 1.55} + 30px)`, top: 'auto' }),
+        place(reset, { left: S.l }),
+      );
+      if (gasPedal) layer.append(gasPedal);
+    } else {
+      const arrows = scheme === 'buttons';
+      if (!arrows) layer.append(wheelZone());
+      else layer.append(
+        place(holdButton('arrow', ARROW_L, () => { left = true; }, () => { left = false; }), { left: S.l, bottom: S.b }),
+        place(holdButton('arrow', ARROW_R, () => { right = true; }, () => { right = false; }), { left: `calc(${S.l} + ${S.u} * 1.15 + 18px)`, bottom: S.b }),
+      );
+      const above = arrows ? `calc(${S.b} + ${S.u} * 1.15 + 26px)` : `calc(${S.b} + min(40%, ${S.u} * 2.4))`;
+      layer.append(
+        place(pedal('gas', 'pedal gas', 'GAS'), { right: S.r, bottom: S.b }),
+        place(pedal('brake', 'pedal brk', 'BRAKE', 'REVERSE'), { right: `calc(${S.r} + ${S.u} * 1.05 + 16px)`, bottom: S.b }),
+        place(n2o(), { left: S.l, bottom: above }),
+        place(hb(), { left: `calc(${S.l} + ${S.u} + 30px)`, bottom: arrows ? above : `calc(${S.b} + min(40%, ${S.u} * 2.4) + 26px)` }),
+        place(pause, { left: S.l }),
+        place(reset, { left: `calc(${S.l} + 56px)` }),
+      );
+    }
   }
+  setScheme({ scheme: 'wheel', autoGas: true });
 
-  return { sample, setVisible, dispose: () => root.remove() };
+  const api: TouchControls = {
+    speedKph: 0,
+    sample(out: CarInput): CarInput {
+      const on = isTouch && visible;
+      const now = performance.now();
+      const dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 0;
+      lastT = now;
+      const digital = ramp.update((left ? 1 : 0) - (right ? 1 : 0), api.speedKph, dt);
+      out.throttle = on ? (auto ? (brake > 0 ? 0 : 1) : gas) : 0;
+      out.brake = on ? brake : 0;
+      out.steer = on ? (root.dataset.scheme === 'buttons' ? digital : stick) : 0;
+      out.handbrake = on && handbrake;
+      out.nitro = on && nitro;
+      return out;
+    },
+    setVisible(v: boolean): void {
+      visible = v;
+      if (!v) release();
+      root.style.display = v && isTouch ? '' : 'none';
+    },
+    setScheme,
+    dispose: () => root.remove(),
+  };
+  return api;
 }

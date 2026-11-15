@@ -28,5 +28,8 @@ Select your team under Signing, choose the iPhone, press Run. Landscape only, st
 App id `com.racersblood.game` and the name are in `capacitor.config.ts`.
 
 ## Notes
-- Touch controls appear automatically on `pointer: coarse` devices (`ui/touchControls`); graphics start on the saved tier, auto quality lowers it if the frame rate drops.
-- Haptics and the splash screen plugin are not added yet (phase 6).
+- Phone controls (Settings > Screen and controls, and a one-time chooser on the first start): **Tilt** (turn the phone like a wheel; auto gas, big BRAKE left, NITRO / HANDBRAKE / pause right; calibrate, sensitivity, full-lock angle, invert, manual gas), **Touch wheel** (drag-steer left, GAS / BRAKE right; the approved session-8 layout) or **Buttons** (left/right arrows). Code: `input/tiltMap` (pure maths, tests/tilt-check), `input/tiltInput`, `input/controlPrefs` (own storage key `rb-controls`), `ui/touchControls` + `ui/touchButton`, `ui/controlsOnboard`.
+- iOS asks for motion access from a tap ("Enable tilt" / choosing Tilt); denial falls back to the touch wheel. Motion sensors need HTTPS on iOS.
+- Full screen: HUD icon, pause menu and Settings (`core/fullscreen`, `ui/fullscreenButton`). iPhone Safari has no Fullscreen API: the button becomes "Add to Home Screen" with a one-time hint. The app (Capacitor) hides the status bar instead. Entering full screen tries to lock landscape; a wake lock keeps the screen on while racing (`core/wakeLock`).
+- Responsive: canvas follows the visual viewport (`core/viewport`), the chase camera widens and pulls back in portrait and caps the horizontal view on 32:9 (`camera/aspectFrame`), portrait shows a small "rotate your phone" hint. Checked by `npm run viewport` (10 viewports).
+- Haptics: `ui/haptics` (Capacitor Haptics in the app, navigator.vibrate on Android browsers).

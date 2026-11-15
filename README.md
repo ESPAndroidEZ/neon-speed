@@ -9,7 +9,12 @@ npm run build    # line check + typecheck + production build
 npm run visual   # Playwright weather screenshots + luminance/contrast assertions (needs npm run dev)
 npm run smoke    # browser smoke test (needs `npm run dev` and Chrome)
 npm test         # headless physics, track and collision checks (tests/*.mts)
+npm run build:prod   # release bundle in dist/ (see docs/release.md); build:public = brand-safe names
+npm run viewport     # 10 viewports: layout, safe area, car + road framing (needs npm run dev)
+npm run e2e          # menu to race, full screen, settings, offline start, bundle size (needs npm run dev)
 ```
+
+Play it: live at `https://espandroidez.github.io/racer-blood/` once GitHub Pages is switched on (docs/release.md), or on a phone on the same Wi-Fi: `npm run dev`, then open the `Network:` URL it prints. Phones: landscape, Settings > Phone controls = Tilt / Touch wheel / Buttons, and the full-screen button (iPhone: Share > Add to Home Screen).
 
 Controls: W/S gas and brake (brake from a stop reverses), A/D steer, Space handbrake, Shift nitro, R reset to track, 1/2/3 weather, M mute, Esc pause (Resume, Restart, Save, Save & Quit), P particle showcase, K audio test panel, backtick tuning panel. Main menu: Continue / Load (3 slots + autosave).
 Car models: drop GLBs into `public/models/<id>.glb` (see `docs/assets/tripo-brief.md`); `scripts/optimize-models.sh` shrinks them. Missing files fall back to the procedural cars.

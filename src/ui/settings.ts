@@ -21,6 +21,8 @@ export interface SettingsDeps {
   hud?: { setScale(s: number): void };
   /** Called after a driving setting changes (copies the saved values into physics and the gamepad). */
   onDriving?: () => void;
+  /** Rows added after the audio rows (screen and phone controls). */
+  extraRows?: () => HTMLElement[];
   onBack: () => void;
 }
 
@@ -138,7 +140,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, engVol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
+  root.append(vol, engVol, sfxVol, musVol, mute, voice, ...(d.extraRows?.() ?? []), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
   return root;
 }
 

@@ -3,6 +3,7 @@ import type { CarState, Disposable, TrackSample } from '../types/game';
 
 const CSS = `
 #minimap{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:clamp(120px,18vw,190px);height:clamp(120px,18vw,190px);pointer-events:none;background:rgba(8,14,26,.55);border-radius:12px;box-shadow:0 0 0 1px rgba(24,216,255,.28),0 8px 24px rgba(0,0,0,.45);z-index:5}
+@media (pointer:coarse){#minimap{left:auto;right:max(14px,env(safe-area-inset-right));bottom:auto;top:calc(max(14px,env(safe-area-inset-top)) + 84px);width:clamp(84px,15vmin,130px);height:clamp(84px,15vmin,130px)}}
 `;
 
 /** A 2d context or throw; returning a non-null type so it is usable inside closures. */

@@ -17,7 +17,7 @@ const f2 = (n: number): string => n.toFixed(2).padStart(6);
 
 function wire(): void {
   wired = true;
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !import.meta.env?.DEV) return; // debug overlay: dev builds only
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'F4') return;
     e.preventDefault();

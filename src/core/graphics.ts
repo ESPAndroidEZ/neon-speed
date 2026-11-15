@@ -75,6 +75,19 @@ export const usePreset = (tier: Quality): void => void Object.assign(GRAPHICS, P
 
 /** "Test my device": render a few synchronous frames and pick a preset from the measured cost (under 6 ms ultra, 10 high, 18 medium). */
 export function benchmark(engine: Engine, frames = 40): { tier: Quality; ms: number } {
-  const ms = engine.measureRender(frames);
+  const ms = measureRender(engine, frames);
   return { tier: ms < 6 ? 'ultra' : ms < 10 ? 'high' : ms < 18 ? 'medium' : 'low', ms };
+}
+
+/** Mean ms per frame over `frames` synchronous renders (waits for the GPU): the "Test my device" benchmark. */
+function measureRender(engine: Engine, frames: number): number {
+  const gl = engine.renderer.getContext();
+  engine.composer.render(0.016);
+  gl.finish();
+  const t0 = performance.now();
+  for (let i = 0; i < frames; i++) {
+    engine.composer.render(0.016);
+    gl.finish();
+  }
+  return (performance.now() - t0) / frames;
 }

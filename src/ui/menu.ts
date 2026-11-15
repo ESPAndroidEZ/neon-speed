@@ -1,3 +1,4 @@
+import { isPhone } from '../core/quality';
 import type { Engine } from '../core/engine';
 import type { AudioBus } from '../audio/audioBus';
 import { findCar, type CarSpec } from '../data/cars';
@@ -20,6 +21,8 @@ import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money } from './uiKit';
 
 export interface MenuDeps {
+  /** Screen and phone-control rows for Settings (ui/controlSettings). */
+  controlRows?: () => HTMLElement[];
   store: SaveStore;
   audio: AudioBus;
   engine: Engine;
@@ -102,7 +105,7 @@ export class Menu {
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '12vh';
     el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', 'Chapter 1 · Harbor Loop'), button('Press Enter / Tap', () => this.main(), 'hot'));
-    el.append(h('div', 'rb-sub', 'W/S gas+brake · A/D steer · Space handbrake · Shift nitro · M mute · R reset'));
+    if (!isPhone()) el.append(h('div', 'rb-sub', 'W/S gas+brake · A/D steer · Space handbrake · Shift nitro · M mute · R reset'));
     this.mount(el, 'title');
   }
 
@@ -178,6 +181,6 @@ export class Menu {
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other');
   }
 }

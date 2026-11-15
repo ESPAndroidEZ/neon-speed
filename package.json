@@ -23,13 +23,21 @@
     "mobile:ios": "npm run mobile:sync && cap open ios",
     "icons": "node scripts/make-icons.mjs",
     "map": "node scripts/gen-code-map.mjs",
-    "audio:level": "node scripts/audio-level.mjs"
+    "audio:level": "node scripts/audio-level.mjs",
+    "build:prod": "node scripts/check-lines.mjs && node scripts/check-health.mjs && tsc --noEmit && RB_RELEASE=1 vite build --mode production && node scripts/asset-report.mjs",
+    "build:public": "VITE_PUBLIC_BUILD=1 npm run build:prod",
+    "assets": "node scripts/asset-report.mjs",
+    "viewport": "node scripts/viewport-check.mjs",
+    "e2e": "node scripts/e2e-check.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/cli": "^8.6.2",
     "@capacitor/core": "^8.6.2",
+    "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.6.2",
+    "@capacitor/status-bar": "^8.0.4",
     "three": "^0.187.0"
   },
   "devDependencies": {

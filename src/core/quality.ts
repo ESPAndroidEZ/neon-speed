@@ -57,6 +57,9 @@ const ORDER: Quality[] = ['low', 'medium', 'high', 'ultra'];
  * Keeps the frame rate up: first lowers the render resolution in 10 % steps (down to 60 %, and raises it again when
  * there is headroom), and only when that is not enough drops one tier (never upgrades a tier by itself).
  */
+/** Frame work (ms) above which dynamic resolution steps down. */
+export const WORK_LIMIT_MS = 14;
+
 export class AutoQuality {
   enabled = true;
   onDowngrade: ((tier: Quality) => void) | null = null;
@@ -92,13 +95,14 @@ export class AutoQuality {
     const avg = this.acc / this.frames;
     this.acc = 0;
     this.frames = 0;
-    if (avg > this.limit) {
+    const busy = engine.workMs > WORK_LIMIT_MS; // a frame costing more than 14 ms leaves no headroom on a 60 Hz phone
+    if (avg > this.limit || busy) {
       this.good = 0;
       if (this.dyn > 0.6) { this.setDyn(engine, this.dyn - 0.1); this.cooldown = 1.5; return; } // resolution first
       this.bad++;
     } else {
       this.bad = 0;
-      if (avg < this.limit * 0.72 && ++this.good >= 3 && this.dyn < 1) { this.good = 0; this.setDyn(engine, this.dyn + 0.1); this.cooldown = 1.5; }
+      if (avg < this.limit * 0.72 && engine.workMs < WORK_LIMIT_MS * 0.6 && ++this.good >= 3 && this.dyn < 1) { this.good = 0; this.setDyn(engine, this.dyn + 0.1); this.cooldown = 1.5; }
       return;
     }
     const i = ORDER.indexOf(current);

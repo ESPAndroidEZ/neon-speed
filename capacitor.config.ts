@@ -8,6 +8,10 @@ const config: CapacitorConfig = {
   backgroundColor: '#05060d',
   ios: { contentInset: 'never', allowsLinkPreview: false },
   android: { allowMixedContent: false },
+  plugins: {
+    // immersive: the game draws under the status bar (safe-area insets keep the HUD clear) and hides it at start
+    StatusBar: { overlaysWebView: true, style: 'DARK', backgroundColor: '#00000000' },
+  },
 };
 
 export default config;

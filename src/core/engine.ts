@@ -16,6 +16,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import type { Disposable, FixedUpdate, FrameCallback } from '../types/game';
 import { clamp, damp } from './math';
+import { watchViewport } from './viewport';
 
 export interface BloomSettings {
   enabled: boolean;
@@ -63,10 +64,12 @@ export class Engine implements Disposable {
   dynScale = 1;
   private readonly updates = new Set<FixedUpdate>();
   private readonly frames = new Set<FrameCallback>();
-  private readonly observer: ResizeObserver;
+  private readonly unwatch: () => void;
   private baseBloomStrength: number;
   private bloomKick = 0;
   fpsCap = 0; // frame cap, 0 = the display's rate
+  /** Smoothed milliseconds of work per frame (update + render submit), read by AutoQuality. */
+  workMs = 0;
   private accumulator = 0;
   private lastTime = 0;
   private running = false;
@@ -109,8 +112,7 @@ export class Engine implements Disposable {
     this.composer.addPass(new OutputPass());
 
     this.resize();
-    this.observer = new ResizeObserver(() => this.resize());
-    this.observer.observe(this.container);
+    this.unwatch = watchViewport(this.container, () => this.resize());
   }
 
   /** Register simulation work. Called in registration order, FIXED_DT each. Returns an unsubscribe. */
@@ -159,19 +161,6 @@ export class Engine implements Disposable {
     for (const rt of [this.composer.renderTarget1, this.composer.renderTarget2]) if (rt.samples !== n) { rt.samples = n; rt.dispose(); }
   }
 
-  /** Mean ms per frame over `frames` synchronous renders (waits for the GPU): the "Test my device" benchmark. */
-  measureRender(frames: number): number {
-    const gl = this.renderer.getContext();
-    this.composer.render(0.016);
-    gl.finish();
-    const t0 = performance.now();
-    for (let i = 0; i < frames; i++) {
-      this.composer.render(0.016);
-      gl.finish();
-    }
-    return (performance.now() - t0) / frames;
-  }
-
   resize(): void {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
@@ -186,7 +175,7 @@ export class Engine implements Disposable {
 
   dispose(): void {
     this.stop();
-    this.observer.disconnect();
+    this.unwatch();
     this.updates.clear();
     this.frames.clear();
     this.composer.dispose();
@@ -215,5 +204,7 @@ export class Engine implements Disposable {
     this.bloomKick = damp(this.bloomKick, 0, 7, frameDt);
     this.bloom.strength = this.baseBloomStrength + this.bloomKick;
     this.composer.render(frameDt);
+    const work = performance.now() - now;
+    this.workMs += (work - this.workMs) * 0.05; // CPU time of a frame, smoothed (the display wait is not in it)
   };
 }
