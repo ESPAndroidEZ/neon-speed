@@ -9,6 +9,11 @@ import { driftHoldTarget, handbrakeCarry, slideDamping, slideYaw } from './stabi
 
 const G = 9.81;
 const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration that helps traction (keeps launches as tuned)
+/**
+ * Snow only (dry and rain are untouched): tyres dig in lengthwise, so drive traction uses grip^(1 - tr/2) instead of grip,
+ * and full power keeps `floorR` of the rear's sideways grip (a held throttle steps the tail out ~15 deg instead of spinning the car).
+ */
+export const SNOW_FEEL = { tr: 1, floorR: 0.7 };
 
 /**
  * Handling v1 (git tag handling-v1), kept verbatim as the `legacy` model: arcade bicycle model with weight transfer,
@@ -30,6 +35,8 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const yawMul = (env.yawDampMul ?? 1) * (1 + 0.4 * as.steer) * slideDamping(t, u, v, dtn.brakeCmd, c.hbFactor);
   const assistMul = env.assistMul ?? 1;
   const rearMul = env.rearGripMul ?? 1;
+  const snowK = weather.name === 'SNOW' ? env.intensity ?? 1 : 0;
+  const trMul = snowK > 0 ? lerp(1, 1 / Math.sqrt(Math.max(g, 0.05)), SNOW_FEEL.tr * snowK) : 1; // traction mu relative to lateral mu
   const absU = Math.abs(u);
   const { fzF, fzR } = ld;
   const sf = smoothstep(0.2, 2.5, absU); // no tyre forces at a standstill
@@ -39,17 +46,17 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   c.hbFactor = lerp(c.hbFactor, input.handbrake ? t.handbrakeGrip : driftHoldTarget(t, u, v, c.thr, c.hbFactor, g), Math.min(1, dt * (input.handbrake ? 14 : 3)));
 
   const muR = t.gripRear * g * c.hbFactor * rearMul; // drive is split by layout (driveSplit), each axle capped by its traction
-  const tractionLimit = muR * (ld.staticR + (fzR - ld.staticR) * TRACTION_SQUAT);
+  const tractionLimit = muR * trMul * (ld.staticR + (fzR - ld.staticR) * TRACTION_SQUAT);
   const wanted = dtn.driveForce;
   // Lifting off: engine braking drags the rear axle too (lift-off oversteer on a loose car).
   const eng = c.thr < 0.05 && dtn.gear > 0 && u > 1 ? -t.engineBraking * t.mass * G * clamp(dtn.rpm / t.redlineRpm, 0, 1) * Math.min(1, g) : 0;
-  const ds = splitDrive(t, wanted + eng, t.gripFront * g * ld.gripF * fzF, tractionLimit, c.drv), fFwd = ds.fxF * Math.sin(delta);
+  const ds = splitDrive(t, wanted + eng, t.gripFront * g * trMul * ld.gripF * fzF, tractionLimit, c.drv), fFwd = (ds.fxF / trMul) * Math.sin(delta); // the yaw pull stays within sideways grip
   // Braking uses grip too: what the brakes use is taken from sideways grip.
   const bk = dtn.brakeCmd * t.brakeForce * (u > 0.5 ? 1 : 0);
   const useF = (bk * t.brakeBias * (1 - 0.45 * as.brake)) / (t.gripFront * fzF);
   const useBR = (bk * (1 - t.brakeBias)) / (t.gripRear * fzR);
   const usage = Math.max(ds.useR, useBR);
-  const latScale = Math.max(t.powerFloor, Math.sqrt(Math.max(0, 1 - usage * usage * t.powerSlide)));
+  const latScale = Math.max(lerp(t.powerFloor, Math.max(t.powerFloor, SNOW_FEEL.floorR), snowK), Math.sqrt(Math.max(0, 1 - usage * usage * t.powerSlide)));
   const latScaleF = Math.max(0.5, Math.sqrt(Math.max(0, 1 - useF * useF * 0.55 - ds.useF * ds.useF * (1 - 0.75 * smoothstep(2, 8, absU))))); // braking and FWD drive cost front grip
   const alphaF = Math.atan2(v + t.cgToFront * r, slipDen) - (u >= 0 ? 1 : -1) * delta;
   const alphaR = Math.atan2(v - t.cgToRear * r, slipDen);

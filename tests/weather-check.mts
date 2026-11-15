@@ -128,7 +128,7 @@ sm.query(brg, 0, 0, 0, 20, hit);
 check('snow: ice on the bridge', hit.kind === 'ice', '');
 const corner = sm.cornerIndex[Math.floor(sm.cornerIndex.length / 2)];
 sm.query(corner, halfWidthAt(track, corner) - 0.5, 0, 0, 20, hit); // the road edge (roads were widened 2026-11-15)
-check('snow: banks at the edge of tight corners slow the car', hit.kind === 'snowbank' && hit.drag > 0.3, `${hit.kind} drag ${hit.drag}`);
+check('snow: banks at the edge of tight corners slow the car', hit.kind === 'snowbank' && hit.drag > 0.1, `${hit.kind} drag ${hit.drag}`);
 sm.query(corner, 0, 0, 0, 20, hit);
 check('snow: the racing line itself is clear', hit.kind === 'dry', hit.kind);
 

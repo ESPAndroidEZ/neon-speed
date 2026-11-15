@@ -30,8 +30,8 @@ export const createSurfaceHit = (): SurfaceHit => ({ kind: 'dry', grip: 1, drag:
 /** Per-level strength of each hazard: [puddle grip, ice grip, bank drag, bank grip]. NORMAL has no hazards. */
 const HAZARD: Record<PhysicsLevel, { puddle: number; ice: number; bankDrag: number; bankGrip: number } | null> = {
   NORMAL: null,
-  AGGRESSIVE: { puddle: 0.55, ice: 0.55, bankDrag: 0.7, bankGrip: 0.8 },
-  EXTREME: { puddle: 0.45, ice: 0.4, bankDrag: 1.0, bankGrip: 0.7 },
+  AGGRESSIVE: { puddle: 0.55, ice: 0.55, bankDrag: 0.15, bankGrip: 0.8 },
+  EXTREME: { puddle: 0.45, ice: 0.4, bankDrag: 0.25, bankGrip: 0.7 },
 };
 
 /**
