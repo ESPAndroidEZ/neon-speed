@@ -83,7 +83,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/dev
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
 - demoInput.ts (26) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
-- devStart.ts (91) THROWAWAY dev entry points driven by URL flags: `?skip ?demo ?ai ?at ?ff ?wi ?pause ?sh... | fn runDevStart; iface DevStartDeps
+- devStart.ts (99) THROWAWAY dev entry points driven by URL flags: `?skip ?demo ?ai ?at ?ff ?wi ?pause ?sh... | fn runDevStart; iface DevStartDeps
+- peopleGallery.ts (27) THROWAWAY dev scene (`?people`): 12 people in a row on the showroom stage, each playing... | fn showPeopleGallery
 - tuningPanel.ts (82) THROWAWAY dev panel: one slider per numeric field of the given objects, edited live. | class TuningPanel
 ## src/fx
 - exhaustFx.ts (55) Nitro flame cone and exhaust backfire flames (on lift-off, decel pops and upshifts) fro... | class ExhaustFx

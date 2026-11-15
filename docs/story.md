@@ -108,3 +108,13 @@ Optional: Tripo GLBs for Dante and Mara (`public/models/characters/<id>.glb`) re
   card: he did not cut the line, he *knew*. The truth is Calloway's father. Dante's endgame is to buy the Wall itself.
 - **Endings.** Win clean (Cain returns to drive one lap, Switch goes silent for the first time); or win the dirty way (Dante keeps the
   Wall). Epilogue sets up Chapter 4 on the open road.
+
+## New locations (round 9, 2026-11-15)
+- **Mountain Pass (Kestrel Highlands).** The old supply road over the ridge behind Kestrel Bay: switchbacks, a rock tunnel and
+  a lookout where the crews meet after midnight. Cain learned to drive here; Mara says the hairpins are "where he left his
+  nerves". Story use: a Chapter 3 night run to the lookout, where Vex is waiting with an offer; snow events after the ridge.
+- **Coast Run (Riviera Quarter).** South of the harbour, where the money lives: yachts, the casino square, the hotel hairpin,
+  the cliff tunnel and the beach road. The sponsor branch of Chapter 2 (`sponsor` flag) leads here: a glamour exhibition race
+  for a sponsor dinner, with DJ Switch calling it live from the esplanade. Dante's people watch from the casino terrace.
+Both are free-race maps now; story events can point at them through `StoryEvent.trackId` (`mountain`, `coast`).
+

@@ -1,3 +1,6 @@
+import { showPeopleGallery } from './peopleGallery';
+import { buildPerson } from '../world/peopleAdapter';
+import { STAGE } from '../world/stage';
 import { findTrackDef, TRACKS } from '../data/tracks';
 import type { SaveStore } from '../core/save';
 import { CARS, findCar } from '../data/cars';
@@ -70,6 +73,11 @@ if (d.direct) {
   }
 } else {
   if (q.get('car')) store.data.selected = findCar(q.get('car') ?? '').id; // dev: preview any car
+  if (q.has('people')) { // dev: people gallery (12 looks x clips) beside the stage; Qwen task 056 previews peopleModels here
+    const eng = (game as unknown as { d: { engine: { scene: import('three').Scene; onFrame: (f: (a: number, dt: number) => void) => void } } }).d.engine;
+    const tick = showPeopleGallery(eng.scene, buildPerson, STAGE.x, STAGE.z + 5);
+    eng.onFrame((_a, dt) => tick(dt));
+  }
   if (q.has('showcar')) { // dev: one car on the stage from a fixed angle, no UI (for screenshots)
     const c = findCar(q.get('showcar') ?? '');
     game.showroom(c, c.color, undefined);

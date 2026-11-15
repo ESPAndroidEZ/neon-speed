@@ -1,6 +1,6 @@
 # Plan: making this a great game, not just a working one
 
-Last updated: 2026-11-14 (Claude, session 6).
+Last updated: 2026-11-15 (Claude, round 9: real cars, people, new tracks).
 
 ## 1. What "great" means here
 
@@ -31,8 +31,8 @@ Everything else (more cars, more tracks) is content and comes last.
 | 2 | **Track and city** (now Kestrel Bay Streets): spline track, barriers, checkpoints, lap logic, instanced buildings/lamps, wet-road look | Claude (+ Qwen: track data) | One lap of a good-looking circuit at 60 fps on desktop | done |
 | 3 | **Cars and AI**: GLB loading, car-car and wall collisions, 3 AI racers, race state machine, podium | Qwen (`assetLoader`, `aiRacers`), Claude (collisions, flow) | A full race against AI is fun, with close finishes | done (race flow, mass-based collisions, 5 cars, AI with racing line, 4 difficulty levels, 5 maps) |
 | 4 | **Juice**: tyre smoke and skid marks, sparks, nitro flames and FOV kick, speed lines, procedural engine/turbo/tyre audio, synth music | Claude | Mute vs unmuted, the difference is dramatic | done; round 2 added weather particles, tyre/exhaust fx, showcase (P), turbo audio (needs ear tuning) |
-| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | done except polish: garage appearance (finishes, vinyl, rims, parts, stance), 11 performance upgrades + PR/classes + tuning screen + dyno, story chapters 1-2, circuit/sprint/drift events |
-| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | partial: touch controls and gamepad wired; Capacitor, perf tiers on device todo |
+| 5 | **Progression**: garage, cash, 3 upgrade stages, paint, underglow, wheels, vinyl colours, save/load, 3 event types (Circuit, Sprint, Drift) | Split | 30 min session has a reason to start the next race | done: 8 real-spec cars (FWD/AWD/RWD, real kg/Nm/0-100), Power Stage 0-4 + 7 part categories with advice, plates, 5 save slots, garage sound test; story chapters 1-2; circuit/sprint/drift events; 7 maps incl. Mountain Pass and Coast Run |
+| 6 | **Mobile**: touch controls, perf tiers, Capacitor iOS, safe areas, haptics | Qwen (`touchControls`), Claude (perf) | 60 fps on a mid-range iPhone, one-thumb playable | mostly done: phone layout (gas/brake right, nitro/handbrake left), phone quality defaults, dynamic resolution, mesh merging; Capacitor build on a device todo |
 | 7 | **Ship**: menus, tutorial, settings, TestFlight, crash/perf telemetry | Both | 10 outside testers finish the first race unaided | todo |
 
 ## 4. The pieces that decide quality

@@ -6,6 +6,7 @@ Baton: qwen
 Updated: 2026-11-15 (Claude: real cars phases 1-3, token tooling, Golf/E61 models merged; Qwen on 055 m3).
 
 ## Done
+Round 9 blocks 5-6: Qwen task 056 people models (docs/tasks/056-people-models.md, contract test tests/qwen/people-models-check.mts, preview `?people` gallery src/dev/peopleGallery.ts); docs updated (plan, story locations, code map).
 Round 9 block 4: people contract src/types/people.ts (17 joints, PARENT, REST for 1.75 m, PersonSpec, PersonRig, BuildPerson) = ARCHITECTURE CHANGE (new contract file); default factory world/peopleAdapter (jointed, shared geometry, material cache, lookToSpec for the story looks); procedural animator src/anim (clips: idle, walk, run, lean, armsCrossed, wave, cheer, flagUp, flagDrop, phone, talk; cross-fade, clamped head look-at, talk intensity; crowd pool with 40 m animate / frozen LOD / 160 m hide). Cast rewritten on it: showroom character + mechanic, rivals leaning at the grid, starter (flags up in the countdown, flag drop at GO), ~140 spectators per track cheering at GO, talk gestures while a dialogue line shows (ui/dialogue DIALOGUE.active). tests/people-check (200 spectators 0.8 ms/frame headless).
 Round 9 blocks 2-3: sample-engine pipeline (data/engineSounds manifest, audio/engineSamples loader + equal-power crossfade/pitch, synth fallback, tests/engine-sound-check), garage "Sound test (hold)" for any car (audio/revTest: shifts, limiter, blow-off, pops via the locked turboSound API); no recordings shipped yet (docs/audio-todo.md: candidates + what to cut; docs/audio-credits.md). M3 model merged (055). New tracks Mountain Pass (4.1 km, 23 corners, switchbacks, rock tunnel, lookout, pines, peaks, mist) and Coast Run (4.3 km, 21 corners, harbour, casino square, hotel hairpin, curving tunnel, chicane, beach road): world/landmarks, palettes, tests/new-tracks-check (width >= 14, valid, corner spacing, AI lap 2.5-4 min); circuits may be 4.6 km.
 Round 9 block 1: car pickers use text Prev/Next + Left/Right/A/D keys + swipe (ui/carNav), no arrow glyphs; audio mix: master 35 % default (old 0.7 saves moved once), engine bus + ambience bus, effects 0.75, limiter after the compressor, Master/Engine/Effects/Music sliders (settings.engineVolume), loudness test `npm run audio:level` (peak max -10 dBFS, RMS -24).
@@ -34,9 +35,9 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-1. Phase 4 of real cars: launch control by rpm. Rev counter marks the GOOD / GREAT launch rpm window per car, drivetrain (FWD low, RWD mid, AWD high) and weather/track grip; core/launch judges rpm at GO instead of press timing. Show real specs (version, drive, PS/Nm, kg, 0-100) in the garage.
-2. Review Qwen 055 m3 when the queue ends (same review as Golf/E61; watch for floating parts, use rb.surface_y).
-3. AI handbrake driving model (gap to a skilled human); instant replay.
+1. When Qwen returns the baton: /review-qwen 056, check `?people` by eye, run tests/qwen/people-models-check.mts, then switch Cast and peopleGallery to world/peopleModels.buildPerson and move the check into tests/.
+2. Engine recordings: Carlos trims loops per docs/audio-todo.md into public/audio/engines/<carId>/ and lists them in data/engineSounds.ts.
+3. Launch control by rpm (rev counter good/great window per drivetrain and weather); real specs in the garage; AI handbrake model.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
 Models merged: 046-050 (350Z, RX-7 old style, Evo, Supra, 350Z rework). 051 rx7 / 052 civic CANCELLED (owner: no more visual work on existing cars). RUNNING (fresh queue, `QWEN_TIMEOUT=50m`): 053 golf IN PROGRESS, then 054 e61, 055 m3 (Supra template). None finished yet.
@@ -72,6 +73,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-15 Claude: round 9 block 1 (car picker nav, loudness + limiter + engine slider).
 - 2026-11-15 Claude: round 9 blocks 2-3 (engine sample pipeline + sound test, M3 merged, Mountain Pass + Coast Run).
 - 2026-11-15 Claude: round 9 block 4 (people contract, animator, crowd, cast).
+- 2026-11-15 Claude: round 9 done (blocks 1-6); Qwen task 056 written; Baton: qwen.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
