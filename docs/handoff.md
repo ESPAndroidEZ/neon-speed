@@ -3,7 +3,7 @@
 Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-15 (Claude, session 8 end: 3 new cars, competitive free races, plates seated, subtler smoke; Qwen building 053-055).
+Updated: 2026-11-15 (Claude checkpoint: build green; Qwen on 053 golf, 054/055 queued).
 
 ## Done
 Session 2026-11-15 f: new cars Golf IV GTI / 535d Touring (E61) / M3 (E46) in data/cars.ts (CARS sorted by price, 4 tiers of 2, balance bands from measured AI laps, E61 1650 kg for responsiveness); competitive free races (data/rivals competitiveField: same tier, skill 1, player upgrade levels; AI tuning = own car + upgrades via aiTuning, nothing inherited from the player; tests/field-check); plates raycast-seated on each body (world/plates fitPlates); tyre smoke ~35 % smaller and greyer (fx/tyreFx LOOK). Session e: corner guide LEFT/RIGHT fix (tests/line-sign-check), AI handbrake turns, brighter nights (grade exposure 1.0/0.9/0.76), 5 save slots + overwrite confirm, Unlock all cars (Settings), tuning advice + best lap per exact setup (data/upgradeAdvice), dynamic resolution (core/quality AutoQuality.dyn, engine.dynScale).
@@ -35,7 +35,7 @@ Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + proced
 3. Instant replay (last 10 s + finish-line replay, slow-mo). Owner to test on iPhone.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
-Models merged: 046-050 (350Z, RX-7 old style, Evo, Supra, 350Z rework). 051 rx7 / 052 civic CANCELLED (owner: no more visual work on existing cars). RUNNING (fresh queue, `QWEN_TIMEOUT=50m`): 053 golf, 054 e61, 055 m3, all from the Supra template.
+Models merged: 046-050 (350Z, RX-7 old style, Evo, Supra, 350Z rework). 051 rx7 / 052 civic CANCELLED (owner: no more visual work on existing cars). RUNNING (fresh queue, `QWEN_TIMEOUT=50m`): 053 golf IN PROGRESS, then 054 e61, 055 m3 (Supra template). None finished yet.
 Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
 Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
 
@@ -63,6 +63,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-15 Claude: nitro rewards, ghost, plates, phone controls, 350Z merged, pushed to GitHub.
 - 2026-11-15 Claude: corner guide LEFT/RIGHT fix (+test), AI handbrake turns, brighter nights, 5 save slots + overwrite confirm, unlock-all button, tuning advice + best lap per setup, dynamic resolution.
 - 2026-11-15 Claude (session 8 end): Golf IV / E61 / M3 added, competitive free races, plates seated, subtler smoke, docs updated; Qwen 053-055 running, baton stays qwen until the queue ends.
+- 2026-11-15 Claude: checkpoint, build green, Qwen working on 053; baton stays qwen until the queue ends.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
