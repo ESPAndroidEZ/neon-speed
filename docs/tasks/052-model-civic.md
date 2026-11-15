@@ -1,4 +1,5 @@
 # Task 052: Civic hatchback model to the Supra's standard (`civic`)
+Status: CANCELLED 2026-11-15 (owner: no more visual work on existing cars). Do not run.
 Files: blender/cars/civic.py
 Branch: qwen/052-model-civic
 Check: scripts/model-build.sh cars/civic

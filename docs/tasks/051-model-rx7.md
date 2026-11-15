@@ -1,4 +1,5 @@
 # Task 051: Rework the RX-7 (FD) coupe (`rx7`)
+Status: CANCELLED 2026-11-15 (owner: no more visual work on existing cars). Do not run.
 Files: blender/cars/rx7.py
 Branch: qwen/051-model-rx7
 Check: scripts/model-build.sh cars/rx7
