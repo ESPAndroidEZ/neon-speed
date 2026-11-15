@@ -11,7 +11,7 @@ check('all three event types are present', ['circuit', 'sprint', 'drift'].every(
 for (const def of TRACKS) {
   const tr = buildTrack(def);
   const sprint = def.type === 'sprint';
-  const problems = validateTrack(tr, { minLength: sprint ? 1800 : 1000, maxLength: sprint ? 4500 : 3200, sprint });
+  const problems = validateTrack(tr, { minLength: sprint ? 1800 : 1000, maxLength: sprint ? 4500 : 4600, sprint }); // circuits up to 4.6 km since 2026-11-15 (2.5-4 min laps)
   check(`${def.id}: valid (${tr.length.toFixed(0)} m, ${tr.samples.length} samples, climb ${Math.max(...tr.heights).toFixed(0)} m)`, problems.length === 0, problems.map((p) => `${p.check}: ${p.detail}`).join('; '));
   check(`${def.id}: rules for its event type`, (def.type === 'drift' ? def.driftTarget! > 0 : true) && (sprint ? !!def.sprintEnd && def.laps === 1 : def.laps >= 2) && def.recommendedWeather.length > 0, def.type);
 }

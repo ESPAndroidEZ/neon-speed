@@ -1,0 +1,47 @@
+import type { TrackDef } from './types';
+
+/** Mountain Pass: valley bends, a switchback climb with hairpins, a ridge of esses through a rock tunnel, a lookout and
+ * a fast descent. Cliff drop on one side, rock wall on the other; snow at altitude in winter weather. Wide road (14-16 m). */
+export const MOUNTAIN_PASS: TrackDef = {
+  id: 'mountain',
+  name: 'Mountain Pass',
+  district: 'Kestrel Highlands',
+  blurb: 'Switchbacks and hairpins up to the ridge, a tunnel through the rock, a lookout above the valley and a fast run back down. Wide, technical, and cold at the top.',
+  theme: 'cliff',
+  type: 'circuit',
+  vertices: [
+    { x: 0, z: 0, r: 45, zone: 'cliff', w: 16 },
+    { x: 170, z: -60, r: 55, zone: 'cliff', w: 16 },
+    { x: 350, z: 10, r: 55, zone: 'cliff', w: 16 },
+    { x: 530, z: -70, r: 55, zone: 'cliff', w: 16 },
+    { x: 720, z: 0, r: 55, zone: 'cliff', w: 16 },
+    { x: 900, z: -50, r: 50, zone: 'cliff', w: 16 },
+    { x: 1250, z: 60, r: 20, zone: 'cliff', w: 14 },
+    { x: 1050, z: 135, r: 20, zone: 'cliff', w: 14 },
+    { x: 1250, z: 210, r: 20, zone: 'cliff', w: 14 },
+    { x: 1050, z: 285, r: 20, zone: 'cliff', w: 14 },
+    { x: 1250, z: 360, r: 20, zone: 'cliff', w: 14 },
+    { x: 1050, z: 435, r: 20, zone: 'cliff', w: 14 },
+    { x: 1080, z: 560, r: 55, zone: 'cliff', w: 15 },
+    { x: 940, z: 640, r: 55, zone: 'tunnel', w: 15 },
+    { x: 800, z: 580, r: 55, zone: 'tunnel', w: 15 },
+    { x: 660, z: 650, r: 55, zone: 'cliff', w: 15 },
+    { x: 520, z: 590, r: 55, zone: 'cliff', w: 15 },
+    { x: 380, z: 660, r: 55, zone: 'cliff', w: 15 },
+    { x: 240, z: 600, r: 50, zone: 'cliff', w: 15 },
+    { x: 100, z: 660, r: 40, zone: 'cliff', w: 15 },
+    { x: 30, z: 520, r: 50, zone: 'cliff', w: 15 },
+    { x: 170, z: 420, r: 22, zone: 'cliff', w: 14 },
+    { x: 30, z: 330, r: 22, zone: 'cliff', w: 14 },
+    { x: 150, z: 200, r: 45, zone: 'cliff', w: 15 },
+  ],
+  start: [80, -30],
+  laps: 2,
+  propsDensity: 0.3,
+  defaultWeather: 'CLEAR',
+  recommendedWeather: ['CLEAR', 'RAIN', 'SNOW'],
+  elevation: [
+    { at: 0, h: 2 }, { at: 0.18, h: 6 }, { at: 0.28, h: 22 }, { at: 0.38, h: 48 }, { at: 0.46, h: 70 }, { at: 0.54, h: 80 },
+    { at: 0.64, h: 82 }, { at: 0.72, h: 74 }, { at: 0.8, h: 52 }, { at: 0.88, h: 28 }, { at: 0.95, h: 10 }, { at: 1, h: 2 },
+  ],
+};

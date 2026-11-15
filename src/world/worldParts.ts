@@ -14,6 +14,7 @@ import type { Track } from './track';
 import { buildTrackMeshes, type TrackMeshes } from './trackMesh';
 import { buildBridge, buildTunnel } from './tunnelBridge';
 import { buildYard } from './yard';
+import { buildLandmarks } from './landmarks';
 
 /** Everything a theme contributes to a map; the optional parts are what only some themes have. */
 export interface Parts {
@@ -62,7 +63,9 @@ export function buildParts(track: Track, def: TrackDef, layout: PropsLayout, env
     furniture = buildFurniture(track, [new Float32Array(n), new Float32Array(n)]);
     dock = buildDock(track);
     group.add(furniture.group, dock.group, buildYard(track), buildProps(layout, null));
-  } else group.add(buildCliffside(track));
+  } else group.add(buildCliffside(track), buildTunnel(track)); // the tunnel builder only adds meshes where a 'tunnel' zone exists
+  const marks = buildLandmarks(track, def);
+  if (marks) group.add(marks);
   return {
     group, meshes, furniture, dock, details,
     waterMat: dock?.waterMat ?? new MeshStandardMaterial({ color: 0x050c1c }),

@@ -4,13 +4,15 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 
 ## src/audio
 - audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
-- audioManager.ts (169) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
+- audioManager.ts (200) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
 - audioParams.ts (23) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO; type AudioParams
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
 - engineDsp.ts (181) Engine sound synthesis, written as ONE self-contained class (no imports, no module-leve... | class EngineDsp
+- engineSamples.ts (92) Sample-based engine: looping recordings at fixed rpm, crossfaded by rpm (equal power be... | fn loadEngineSamples, layerMix, createSampleVoice
 - engineVoice.ts (103) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
 - music.ts (99) Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (spe... | class Music
 - musicPatterns.ts (72) Pure note logic for the generative synthwave track (no Web Audio), so it can be unit te... | fn chordTones, bassNote, arpNote, leadNote, drumHit, layers; const BPM, STEPS_PER_BAR, SECONDS_PER_STEP, midiToHz; iface DrumHit, Layers
+- revTest.ts (54) Garage "Sound test": a simulated rev run for any car (no driving, no purchase). Hold = ... | class RevTest; const REV_TEST; iface RevSample
 - rivalEngines.ts (85) Engine sound of the nearest rivals, positioned in 3D with distance falloff and a manual... | class RivalEngines
 - sfx.ts (153) Looping noise voice: filter into a gain, both set from outside each frame. | class Sfx
 - turboSound.ts (184) Per-kind whistle character: base pitch multiplier and the level of a second, higher whi... | class TurboSound; type TurboKind
@@ -45,9 +47,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - carReal.ts (56) Real-world reference specs per car (typical published figures for the version named) an... | fn stageSpec; const REAL; iface StageSpec, RealSpec; type Drive
 - cars.ts (143) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
 - characters.ts (38) What a person looks like. The 2D portraits and the 3D figures are both built from this.... | const LOOKS, lookOf; iface Look; type HairStyle, Accessory, Build
+- engineSounds.ts (37) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
 - loadout.ts (110) How a car looks and sits: everything the garage can change without touching performance... | fn sanitizeLoadout, stanceEffect, applyStance; const FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, CALIPERS, defaultLoadout; iface Vinyl, Loadout; type Finish, GlowPattern
 - lore.ts (48) World lore: title cards, crew bios and loading tips. Text only; no brand names. | const PREVIOUSLY, CREW, TIPS; iface TitleCard, CrewEntry
-- palettes.ts (23) District colour identity (docs/art-direction.md): the key light, an accent, and how the... | const PALETTES, paletteOf; iface Palette
+- palettes.ts (25) District colour identity (docs/art-direction.md): the key light, an accent, and how the... | const PALETTES, paletteOf; iface Palette
 - partsCatalog.ts (27) One purchasable body part. Brand names are FICTIONAL aftermarket makers. | const SLOT_BASE, partPrice, CATALOG; iface CatalogPart
 - partsCatalogAll.ts (5) Every purchasable body part (base + Qwen task 041). Import this, not CATALOG, in shops ... | const ALL_PARTS
 - partsCatalogMore.ts (23) | const CATALOG_MORE
@@ -63,9 +66,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tips2.ts (20) | const TIPS_2
 ## src/data/tracks
 - cliffsideRun.ts (31) Point-to-point coastal sprint over hills: ocean on one side, rock and guard rails on th... | const CLIFFSIDE_RUN
+- coastRun.ts (48) Coast Run: harbour esplanade with yachts, a climb to the casino square, the tight hotel... | const COAST_RUN
 - containerMaze.ts (43) Port yard between stacked containers: very tight corners and a straight under the gantr... | const CONTAINER_MAZE, CONTAINER_DRIFT
-- index.ts (19) Every map, in menu order. Add a file under src/data/tracks and list it here. | fn buildTrack; const TRACKS, findTrackDef
+- index.ts (21) Every map, in menu order. Add a file under src/data/tracks and list it here. | fn buildTrack; const TRACKS, findTrackDef
 - kestrelBay.ts (18) | const KESTREL_BAY
+- mountainPass.ts (47) Mountain Pass: valley bends, a switchback climb with hairpins, a ridge of esses through... | const MOUNTAIN_PASS
 - neonStrip.ts (28) Downtown boulevards with tram lines, an S-bend through the side streets and a tunnel un... | const NEON_STRIP
 - types.ts (34) circuit: laps round a loop. sprint: one run from start to finish. drift: laps scored by... | iface TrackDef; type EventType, Theme
 ## src/data
@@ -147,7 +152,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - dialogue.ts (164) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox
 - drivingSettings.ts (111) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
-- garage.ts (192) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (205) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageLook.ts (101) Garage appearance panel: finish, vinyl (pattern, colour, scale, number), rims (design, ... | fn lookRows
 - gauge.ts (111) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
 - graphicsSettings.ts (112) Graphics screen rows: presets, resolution scale, toggles, particle density, draw distan... | fn graphicsRows; iface GraphicsDeps
@@ -201,6 +206,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - facades.ts (140) Facade height per sample for the left (index 0) and right (index 1) side; 0 = no buildi... | fn buildFacades; iface Plaza, Facades
 - furniture.ts (164) Additive light pools under the lamps; weather raises their opacity when wet. | fn buildFurniture; iface Furniture
 - kestrelBay.ts (31) "Kestrel Bay Streets": about 1.4 km of city street, 8.5 to 11 m wide. Clockwise from th... | const KESTREL_VERTICES, createKestrelBay, PLAZA
+- landmarks.ts (107) Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pas... | fn buildLandmarks
 - loadoutStore.ts (6) The saved appearance of each car, read by the car factory when a visual is built (playe... | const getLoadout, setLoadout
 - materialUpgrade.ts (89) Classify a material by its name (Tripo usually gives generic names, so unknown means bo... | fn classifyMaterialName, upgradeCarMaterials; iface UpgradeOptions; type MaterialKind
 - mergeMeshes.ts (40) Draw-call saver: merges a group's direct Mesh children that share one material into a s... | fn mergeByMaterial
@@ -247,5 +253,5 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - weatherFx.ts (210) Per display frame. `speed` = car speed (m/s) for wind streaks. Particles live in a box ... | fn createWeatherFx; iface WeatherFx
 - world.ts (162) Parked cars as collision circles; hand to every TrackContact. | fn buildWorld; iface World
 - worldLook.ts (38) Pushes a WeatherProfile into the world's materials: wet = glossy and reflective, snow =... | fn applyWorldLook; iface LookTargets
-- worldParts.ts (72) Everything a theme contributes to a map; the optional parts are what only some themes h... | fn buildParts; iface Parts
+- worldParts.ts (75) Everything a theme contributes to a map; the optional parts are what only some themes h... | fn buildParts; iface Parts
 - yard.ts (41) Container walls: stacks one to four high flush against both walls of every yard lane, s... | fn buildYard

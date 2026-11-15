@@ -17,6 +17,8 @@ export const PALETTES: Record<string, Palette> = {
   neon: { key: 0xff2a9d, accent: [0x18d8ff, 0x7a2fd6], horizon: 0x9a1f7a, fog: 0x160a22, window: 0x9fe8ff, skyline: { count: 140, min: 70, max: 260 } },
   maze: { key: 0xff9a2e, accent: [0xe0b020, 0x9fe8ff], horizon: 0x8a4a1a, fog: 0x14100c, window: 0xffb050, skyline: { count: 60, min: 25, max: 80 } },
   'maze-drift': { key: 0xff9a2e, accent: [0xe0b020, 0x9fe8ff], horizon: 0x8a4a1a, fog: 0x14100c, window: 0xffb050, skyline: { count: 60, min: 25, max: 80 } },
+  mountain: { key: 0x9fb4ff, accent: [0xffb040, 0xe8f0ff], horizon: 0x3a4a7a, fog: 0x0c1222, window: 0xffd9a0, skyline: { count: 0, min: 0, max: 0 } }, // moonlit rock, amber lookout lamps, snow
+  coast: { key: 0xffb35c, accent: [0x18d8ff, 0xff2a9d], horizon: 0xc06a3a, fog: 0x12101a, window: 0xffd27d, skyline: { count: 80, min: 30, max: 110 } }, // sodium esplanade, sea teal, casino neon
   cliff: { key: 0x8fa4ff, accent: [0xffa030, 0xe8f0ff], horizon: 0x2a4a8a, fog: 0x0a1020, window: 0xffffff, skyline: { count: 0, min: 0, max: 0 } },
 };
 

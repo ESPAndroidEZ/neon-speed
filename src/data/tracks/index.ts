@@ -1,3 +1,5 @@
+import { MOUNTAIN_PASS } from './mountainPass';
+import { COAST_RUN } from './coastRun';
 import { buildStreetPath } from '../../world/streetPath';
 import { createTrackFromPath, type Track } from '../../world/track';
 import { CLIFFSIDE_RUN } from './cliffsideRun';
@@ -9,7 +11,7 @@ import type { TrackDef } from './types';
 export type { EventType, Theme, TrackDef } from './types';
 
 /** Every map, in menu order. Add a file under src/data/tracks and list it here. */
-export const TRACKS: readonly TrackDef[] = [KESTREL_BAY, NEON_STRIP, CONTAINER_MAZE, CLIFFSIDE_RUN, CONTAINER_DRIFT];
+export const TRACKS: readonly TrackDef[] = [KESTREL_BAY, NEON_STRIP, CONTAINER_MAZE, CLIFFSIDE_RUN, CONTAINER_DRIFT, MOUNTAIN_PASS, COAST_RUN];
 
 export const findTrackDef = (id: string): TrackDef => TRACKS.find((t) => t.id === id) ?? TRACKS[0];
 
