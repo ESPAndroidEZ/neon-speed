@@ -1,7 +1,8 @@
 import type { Engine } from './engine';
-import { GRAPHICS, usePreset } from './graphics';
+import { GRAPHICS, PRESETS, usePreset } from './graphics';
 import { grade } from './grade';
 import type { Quality } from './save';
+import type { Graphics } from './graphics';
 
 /** Everything a quality tier switches. Systems read `qualityNow()` each frame, so changes apply instantly. */
 export interface QualityParams {
@@ -65,7 +66,7 @@ export class AutoQuality {
   private cooldown = 4;
   private readonly limit: number;
 
-  constructor(minFps = 40) {
+  constructor(minFps = isPhone() ? 50 : 40) { // phones: a jerky 45 fps must count as low too
     this.limit = 1 / minFps;
   }
 
@@ -90,4 +91,26 @@ export class AutoQuality {
       this.onDowngrade?.(ORDER[i - 1]);
     }
   }
+}
+
+/** Touch-first device (phone or tablet). */
+export const isPhone = (): boolean => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
+/**
+ * Once per device: phones start on MEDIUM (no rain mirror, 1.5x resolution, no streaks), also for saves made
+ * before this existed (they defaulted to HIGH). The player can still pick HIGH afterwards. Returns true if it changed.
+ */
+export function phoneDefaults(s: { quality: Quality; graphics: Graphics }): boolean {
+  if (!isPhone()) return false;
+  try {
+    if (localStorage.getItem('rb-phone-defaults') === '1') return false;
+    localStorage.setItem('rb-phone-defaults', '1');
+  } catch {
+    return false;
+  }
+  if (s.quality === 'high' || s.quality === 'ultra') {
+    s.quality = 'medium';
+    s.graphics = { ...PRESETS.medium };
+  }
+  return true;
 }

@@ -35,6 +35,8 @@ export function runDevStart(d: DevStartDeps): void {
   if (q.has('soak')) { // dev: stats for scripts/soak.mjs (leak and crash hunting)
     const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene } } }).d.engine;
     let objects = 0;
+    (window as unknown as Record<string, unknown>).__rbRenderer = eng.renderer;
+    (window as unknown as Record<string, unknown>).__rbScene = eng.scene;
     (window as unknown as Record<string, unknown>).__rbStats = () => {
       const i = eng.renderer.info; objects = 0; eng.scene.traverse(() => { objects++; });
       return { geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs?.length ?? 0, calls: i.render.calls, triangles: i.render.triangles, objects };

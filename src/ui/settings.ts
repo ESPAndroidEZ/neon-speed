@@ -1,7 +1,7 @@
 import type { AudioBus } from '../audio/audioBus';
 import type { Engine } from '../core/engine';
 import { applyGraphics, GRAPHICS } from '../core/graphics';
-import { applyQuality } from '../core/quality';
+import { applyQuality, phoneDefaults } from '../core/quality';
 import type { SaveStore } from '../core/save';
 import { LEVELS, type PhysicsLevel } from '../physics/weatherLevels';
 import type { Voice } from './dialogue';
@@ -30,6 +30,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setMuted(s.muted);
   d.audio.setSfxVolume(s.sfxVolume);
   d.audio.setMusicVolume(s.musicVolume);
+  if (phoneDefaults(s)) d.store.commit();
   Object.assign(GRAPHICS, s.graphics);
   applyQuality(d.engine, s.quality, true);
   if (d.hud) applyGraphics(d.engine, { hud: d.hud, chase: d.game.chase });

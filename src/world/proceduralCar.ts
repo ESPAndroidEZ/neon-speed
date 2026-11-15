@@ -1,3 +1,4 @@
+import { mergeByMaterial } from './mergeMeshes';
 import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { damp } from '../core/math';
 import { buildBody, type BodyShape } from './carBody';
@@ -56,6 +57,7 @@ export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loado
   const tail = new Mesh(new BoxGeometry(w * 0.74, 0.08, 0.05), tailMat);
   tail.position.set(0, shape.beltHeight - 0.16, -zf - 0.01);
   body.add(tail);
+  mergeByMaterial(body); // static body pieces: one draw call per material
 
   addLightsAndShadow(root, w, shape.length - 0.22, parts.hoodY(zf - 0.14) - 0.06);
   const glowMat = new MeshBasicMaterial({ color: bright(0x2a6bff, 1.5), transparent: true, opacity: 0.6 });
@@ -87,6 +89,7 @@ export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loado
       else rear.push(pivot);
     }
   }
+  mergeByMaterial(root); // the four arch liners -> one draw call
   const exhaust: Object3D[] = [];
   for (const x of [-w * 0.28, w * 0.28]) {
     const e = new Group();

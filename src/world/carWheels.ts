@@ -1,3 +1,4 @@
+import { mergeByMaterial } from './mergeMeshes';
 import { centreCap, RIM_DESIGNS } from './rims';
 import { BoxGeometry, CylinderGeometry, Group, LatheGeometry, Mesh, MeshStandardMaterial, Vector2 } from 'three';
 
@@ -41,6 +42,7 @@ export function buildWheel(r: number, side: number, mats: WheelMats, design = 'f
   const disc = new Mesh(new CylinderGeometry(r * 0.52, r * 0.52, 0.025, 20).rotateZ(Math.PI / 2), brakeMat);
   disc.position.x = -side * 0.05;
   spin.add(disc);
+  mergeByMaterial(spin); // ~10 meshes -> 4 (tyre, rim, dish, disc)
   const caliper = new Mesh(new BoxGeometry(0.07, r * 0.32, r * 0.22), mats.caliper);
   caliper.position.set(-side * 0.05, r * 0.3, -r * 0.18);
   return { spin, caliper };
