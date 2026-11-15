@@ -3,7 +3,7 @@
 Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-15 (Claude: nitro rewards, ghost, plates, phone controls, GitHub; Qwen 051 running, 052 queued next).
+Updated: 2026-11-15 (Claude: corner-guide direction fix, AI handbrake turns, brighter nights, 5 save slots, unlock-all, tuning advice, dynamic resolution; Qwen 051/052 re-running).
 
 ## Done
 Session 2026-11-15 d: nitro rewards (core/rewards: NEAR MISS +12 %, SLIPSTREAM tow + trickle, CLEAN CORNER +8 %; saved with the race; tests/rewards-check), best-lap ghost per track+car (game/ghost, localStorage, display only), number plates front+rear from the garage text (world/plates), phone controls rebuilt (GAS/BRAKE right, NITRO/HANDBRAKE left over drag steering; HUD re-laid for touch), 350Z rework merged (050). Repo on GitHub (private): https://github.com/ESPAndroidEZ/racer-blood
@@ -29,9 +29,9 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-1. Instant replay (last 10 s + finish-line replay, slow-mo) is the next feature. Review Qwen 051 rx7 / 052 civic as they land: `git checkout qwen/0NN-model-<id> -- blender/cars/<id>.py && SHOTS=1 scripts/model-build.sh cars/<id>`, look at logs/models/<id>-*.png, commit .py + GLB, delete branch.
-2. Owner to test on iPhone (drift hold, Medium default); re-run `CYCLE=1 node scripts/soak.mjs 5 skip` to confirm the texture-leak fix.
-3. Owner to confirm the 7-step roadmap before starting step 1.
+1. AI pace: owner laps Container Maze in ~40 s with handbrake turns; AI (handbrake turns added) does ~65 s. Needs a dedicated AI handbrake-driving model (plan entry speed from the carry physics, hold HB to exit heading); tune with tests/lab/ai-pace.mts. Also: tests/lab/upgrade-impact.mts shows upgrades can make the AI SLOWER (Supra engine +3.5 s): the AI does not adapt to more power yet.
+2. Review Qwen 051 rx7 (first try TIMEOUT) and 052 civic when the queue ends; instant replay feature.
+3. Owner to test on iPhone: phone controls, brighter nights, dynamic resolution.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
 048 evo, 049 supra, 050 350z MERGED. RUNNING: 051 rx7 rework. NEXT: `scripts/qwen-queue.sh 052` (Civic to Supra standard). 046/047 old-style models are in the game until 050/051 replace them.
@@ -60,6 +60,9 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-15 Claude: drift hold, car mesh merge + phone MEDIUM default, Blender toolkit v2, Evo merged; Qwen 049-051 running.
 - 2026-11-15 Claude: wider corners, corner guide, launch timing, Supra merged.
 - 2026-11-15 Claude: nitro rewards, ghost, plates, phone controls, 350Z merged, pushed to GitHub.
+
+
+- 2026-11-15 Claude: corner guide LEFT/RIGHT fix (+test), AI handbrake turns, brighter nights, 5 save slots + overwrite confirm, unlock-all button, tuning advice + best lap per setup, dynamic resolution.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
