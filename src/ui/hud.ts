@@ -58,7 +58,7 @@ export class Hud {
 
   /** Centre banner: countdown digits and GO. Empty string hides it. */
   /** A short floating message above the HUD (drift tiers, banked points). */
-  private popUp(text: string, color: string): void {
+  popUp(text: string, color: string): void {
     this.pop.textContent = text;
     this.pop.style.color = color;
     this.pop.style.textShadow = `0 0 14px ${color}`;

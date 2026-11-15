@@ -27,7 +27,8 @@ export function lapTime(carId: string, weather: Weather): number {
   return rm.racers[0].finished ? rm.racers[0].finishTime / 2 : 999;
 }
 
-const BANDS: Record<string, [number, number]> = { civic: [74, 82], '350z': [71.5, 78.5], rx7: [71, 78], evo: [68, 75], supra: [67.5, 74.5] };
+// re-centred 2026-11-15 after the corners were widened (~12 s faster laps, same class order)
+const BANDS: Record<string, [number, number]> = { civic: [63, 71], '350z': [60.5, 68.5], rx7: [60, 68], evo: [58, 66], supra: [57.5, 65.5] };
 const times: Record<string, number> = {};
 for (const c of CARS) {
   times[c.id] = lapTime(c.id, 'CLEAR');

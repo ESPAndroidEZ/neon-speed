@@ -12,6 +12,7 @@ import type { AIRacerAgent, AIWorldView, CarInput, CarState, RaceTelemetry, Weat
 import { createNeutralInput } from '../types/game';
 import { LapCounter } from './lapCounter';
 import { restoreRace, snapshotRace } from './raceSnapshot';
+import { LaunchControl } from './launch';
 import { buildResult, positionOf, type RaceResult, type Racer } from './raceResult';
 
 export type { RaceResult, Racer };
@@ -32,6 +33,8 @@ export class RaceManager {
   phase: RacePhase = 'GRID';
   /** Seconds left in the countdown (3 -> 0). */
   countdown = COUNTDOWN_SECONDS;
+  /** Player launch timing at the countdown (core/launch). */
+  readonly launch = new LaunchControl();
   /** Seconds since GO. */
   raceTime = 0;
   /** Cumulative closing speed of the latest car-car or wall hit this step, for juice and audio. */
@@ -40,7 +43,7 @@ export class RaceManager {
   finishCount = 0;
   private readonly states: CarState[] = [];
   private readonly view: AIWorldView;
-  private readonly track: Track;
+  readonly track: Track;
   private readonly obstacles: ObstacleField | null;
   private readonly surfaces: SurfaceMap | null;
   private playerIdx = 0;
@@ -105,6 +108,7 @@ export class RaceManager {
     });
     this.phase = 'GRID';
     this.countdown = COUNTDOWN_SECONDS;
+    this.launch.reset();
     this.raceTime = 0;
     this.finishCount = 0;
     this.result = null;
@@ -137,9 +141,11 @@ export class RaceManager {
     this.view.grip = w.grip;
     if (this.phase === 'COUNTDOWN') {
       this.countdown -= dt;
+      this.launch.countdownStep(dt, playerInput.throttle);
       if (this.countdown <= 0) {
         this.phase = 'RACING';
         this.raceTime = 0;
+        this.launch.go();
       }
     } else this.raceTime += dt;
     const live = this.phase !== 'COUNTDOWN';
@@ -152,11 +158,13 @@ export class RaceManager {
         inp.throttle = 0; inp.brake = r.car.state.speed > 1.5 ? COAST_BRAKE : 0; inp.steer = 0; inp.handbrake = false; inp.nitro = false;
       } else if (r.isPlayer) {
         Object.assign(inp, playerInput);
+        this.launch.shapeInput(inp);
         applyDriving(r.car);
       } else if (r.agent) {
         Object.assign(inp, r.agent.decide(dt, r.car.state, this.view));
       }
       r.car.step(dt, inp, w);
+      if (r.isPlayer) r.car.u += this.launch.push(dt, inp.throttle) * dt; // launch timing boost
       r.contact.update(r.car);
       if (!r.isPlayer && !r.finished) unstick(r, dt);
       this.carImpact = Math.max(this.carImpact, r.contact.impact);

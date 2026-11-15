@@ -9,6 +9,7 @@ import { createNeutralInput } from '../src/types/game.ts';
 import type { Weather } from '../src/types/game.ts';
 import { createKestrelBay } from '../src/world/kestrelBay.ts';
 import { layoutProps } from '../src/world/propsLayout.ts';
+import { halfWidthAt } from '../src/world/track.ts';
 
 let failed = 0;
 const check = (n: string, ok: boolean, i: string): void => {
@@ -126,7 +127,7 @@ const brg = track.zones.indexOf('bridge') + 5;
 sm.query(brg, 0, 0, 0, 20, hit);
 check('snow: ice on the bridge', hit.kind === 'ice', '');
 const corner = sm.cornerIndex[Math.floor(sm.cornerIndex.length / 2)];
-sm.query(corner, 4.6, 0, 0, 20, hit);
+sm.query(corner, halfWidthAt(track, corner) - 0.5, 0, 0, 20, hit); // the road edge (roads were widened 2026-11-15)
 check('snow: banks at the edge of tight corners slow the car', hit.kind === 'snowbank' && hit.drag > 0.3, `${hit.kind} drag ${hit.drag}`);
 sm.query(corner, 0, 0, 0, 20, hit);
 check('snow: the racing line itself is clear', hit.kind === 'dry', hit.kind);

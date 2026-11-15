@@ -11,6 +11,7 @@ import { AudioTestPanel } from './dev/audioTestPanel';
 import { runDevStart } from './dev/devStart';
 import { TuningPanel } from './dev/tuningPanel';
 import { Juice } from './fx/juice';
+import { attachRaceFeedback } from './game/raceFeedback';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
 import { applyDrivingSettings } from './ui/drivingSettings';
@@ -54,7 +55,6 @@ try {
 preloadCarModels(CARS);
 const slots = new SaveSlots(kv);
 const store = new SaveStore(kv, defaultSave(CARS[0].id, CARS[0].color), CARS.map((c) => c.id));
-
 const engine = new Engine({ container });
 const world = buildWorld(engine.scene, engine.renderer);
 const controls = createControls(q.has('demo') ? (q.get('demo') ?? '') : null, { pause: () => pause.toggle(), reset: () => game.resetToTrack() });
@@ -67,6 +67,7 @@ const results = new ResultsScreen(document.body, { onAgain: () => game.restart()
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);
+attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
@@ -74,8 +75,7 @@ engine.onFrame((_a, dt) => {
   audio.update(dt);
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
-const voice = new Voice();
-const auto = new AutoQuality();
+const voice = new Voice(); const auto = new AutoQuality();
 auto.onDowngrade = (tier) => {
   store.data.settings.quality = tier;
   store.commit();

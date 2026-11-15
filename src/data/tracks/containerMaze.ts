@@ -1,16 +1,16 @@
 import type { TrackDef } from './types';
 
 const MAZE: TrackDef['vertices'] = [
-  { x: -40, z: 0, r: 12, zone: 'yard', w: 10 },
-  { x: 200, z: 0, r: 12, zone: 'yard', w: 9 },
-  { x: 200, z: 80, r: 12, zone: 'yard', w: 9 },
-  { x: 100, z: 80, r: 11, zone: 'yard', w: 9 },
-  { x: 100, z: 160, r: 11, zone: 'yard', w: 9 },
-  { x: 260, z: 160, r: 12, zone: 'dock', w: 11 },
-  { x: 260, z: 300, r: 14, zone: 'dock', w: 11 },
-  { x: 60, z: 300, r: 11, zone: 'yard', w: 9 },
-  { x: 60, z: 230, r: 11, zone: 'yard', w: 9 },
-  { x: -40, z: 230, r: 11, zone: 'yard', w: 9 },
+  { x: -40, z: 0, r: 19, zone: 'yard', w: 12 },
+  { x: 200, z: 0, r: 19, zone: 'yard', w: 11 },
+  { x: 200, z: 80, r: 19, zone: 'yard', w: 11 },
+  { x: 100, z: 80, r: 18, zone: 'yard', w: 11 },
+  { x: 100, z: 160, r: 18, zone: 'yard', w: 11 },
+  { x: 260, z: 160, r: 19, zone: 'dock', w: 13 },
+  { x: 260, z: 300, r: 21, zone: 'dock', w: 13 },
+  { x: 60, z: 300, r: 18, zone: 'yard', w: 11 },
+  { x: 60, z: 230, r: 18, zone: 'yard', w: 11 },
+  { x: -40, z: 230, r: 18, zone: 'yard', w: 11 },
 ];
 
 /** Port yard between stacked containers: very tight corners and a straight under the gantry cranes. */

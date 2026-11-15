@@ -13,22 +13,22 @@ const check = (n: string, ok: boolean, i: string): void => {
 const t = createKestrelBay();
 const n = t.samples.length;
 check('length 1.2-1.8 km', t.length > 1200 && t.length < 1800, `${t.length.toFixed(0)} m`);
-check('street width 8.5-11 m everywhere', t.samples.every((s) => s.width >= 8.4 && s.width <= 11.1), `${Math.min(...t.samples.map((s) => s.width)).toFixed(1)}..${Math.max(...t.samples.map((s) => s.width)).toFixed(1)}`);
+check('street width 10.5-14.5 m everywhere (widened 2026-11-15)', t.samples.every((s) => s.width >= 10.4 && s.width <= 14.6), `${Math.min(...t.samples.map((s) => s.width)).toFixed(1)}..${Math.max(...t.samples.map((s) => s.width)).toFixed(1)}`);
 let maxK = 0;
 for (let i = 0; i < n; i++) maxK = Math.max(maxK, Math.abs(curvatureAt(t, i)));
 check('tightest corner radius 12-30 m (street corners, not a highway)', 1 / maxK >= 12 && 1 / maxK <= 30, `${(1 / maxK).toFixed(1)} m`);
 check('fillets were not clamped below 12 m', buildStreetPath(KESTREL_VERTICES).minRadius >= 12, buildStreetPath(KESTREL_VERTICES).minRadius.toFixed(1));
-// count real 90-degree corners: heading change over 30 m windows
+// count real 90-degree corners: heading change over 60 m windows (corners are wider since 2026-11-15)
 let corners = 0;
 let cooldown = 0;
 for (let i = 0; i < n; i++) {
   const a = t.samples[i].tangent;
-  const b = t.samples[(i + 10) % n].tangent;
+  const b = t.samples[(i + 20) % n].tangent;
   const dh = Math.abs(Math.atan2(a.x * b.z - a.z * b.x, a.x * b.x + a.z * b.z));
   if (cooldown > 0) cooldown--;
   else if (dh > 1.2) {
     corners++;
-    cooldown = 15;
+    cooldown = 25;
   }
 }
 check('at least 8 tight (about 90 degree) corners', corners >= 8, `${corners}`);
