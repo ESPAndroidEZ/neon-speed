@@ -10,6 +10,9 @@ import { Music } from './music';
 import { RivalEngines } from './rivalEngines';
 import { Sfx } from './sfx';
 import { TurboSound } from './turboSound';
+import { findCar } from '../data/cars';
+import { createSampleVoice, loadEngineSamples } from './engineSamples';
+import { REV_TEST } from './revTest';
 
 const LAYOUT = { i4: 0, v6: 1, i6: 2, rotary: 3 } as const;
 
@@ -20,6 +23,9 @@ export type AudioTest = 'sweep' | 'upshift' | 'lift' | 'backfire' | 'squeal' | '
 export class AudioManager {
   readonly bus = new AudioBus();
   private voice: EngineVoice | null = null;
+  /** Sample-based engine for the current car (null = the synth plays). */
+  private sample: EngineVoice | null = null;
+  private sampleCar = '';
   private readonly sfx: Sfx;
   private readonly turbo: TurboSound;
   private readonly music: Music;
@@ -65,6 +71,20 @@ export class AudioManager {
     this.voice.out.connect(this.bus.engine);
   }
 
+  /** Real engine recordings for this car when it has any (data/engineSounds), else the synth keeps playing. */
+  private useCar(id: string): void {
+    if (id === this.sampleCar) return;
+    this.sampleCar = id;
+    this.sample?.dispose();
+    this.sample = null;
+    if (!id) return;
+    void loadEngineSamples(this.bus.ctx, id).then((l) => {
+      if (!l || this.sampleCar !== id) return;
+      this.sample = createSampleVoice(this.bus.ctx, l);
+      this.sample.out.connect(this.bus.engine);
+    });
+  }
+
   /** Trigger a test sound (K panel). */
   play(kind: AudioTest): void {
     void this.bus.ctx.resume();
@@ -93,7 +113,7 @@ export class AudioManager {
     const view = g.views.views.find((v) => v.racer.isPlayer);
     const spec = view?.spec;
     const speed = Math.abs(car.state.speed);
-    const inGame = g.state !== 'MENU' && !g.paused;
+    let inGame = g.state !== 'MENU' && !g.paused;
     const pedal = g.state === 'RACING' && g.rm.phase !== 'COUNTDOWN' ? g.ctl.throttle : 0;
 
     // camera velocity for Doppler
@@ -112,6 +132,15 @@ export class AudioManager {
     let slide = Math.max(smoothstep(0.15, 0.6, Math.abs(car.state.slipAngle)) * smoothstep(4, 12, speed), car.flags.wheelspin ? 0.5 : 0, car.flags.handbrake && speed > 6 ? 0.8 : 0);
     let nitro = t.nitroActive;
     let boost = dtn.boost;
+    const rt = REV_TEST.carId ? findCar(REV_TEST.carId) : null; // garage sound test: any car, no driving needed
+    if (rt) {
+      const s = REV_TEST.update(dt, rt.tuning.idleRpm ?? 900, rt.tuning.redlineRpm ?? 7000, rt.sound.turbo !== 'none');
+      rpm = s.rpm; load = s.load; boost = s.boost; inGame = true;
+      if (s.shift) this.turbo.pop(0.5);
+      if (s.lift) { if (rt.sound.turbo !== 'none') this.turbo.bov(Math.max(0.6, s.boost)); this.turbo.pop(0.8); }
+    }
+    const car2 = rt ?? spec, redline = rt?.tuning.redlineRpm ?? t.redlineRpm;
+    this.useCar(car2?.id ?? '');
     if (this.test) {
       this.testT += dt;
       if (this.test === 'sweep') {
@@ -124,10 +153,12 @@ export class AudioManager {
     }
 
     if (this.voice) {
-      const layout = spec ? LAYOUT[spec.sound.layout] : 0;
-      this.voice.set(rpm, load, layout, rpm >= t.redlineRpm * 0.995 && load > 0.5, pedal < 0.05 && speed > 8 ? 1 : 0, (inGame ? 1 : 0) * AUDIO.engineVolume, AUDIO.engineVoicing);
+      const layout = car2 ? LAYOUT[car2.sound.layout] : 0;
+      const vol = (inGame ? 1 : 0) * AUDIO.engineVolume, cutNow = rpm >= redline * 0.995 && load > 0.5, burble = pedal < 0.05 && speed > 8 ? 1 : 0;
+      this.voice.set(rpm, load, layout, cutNow, burble, this.sample ? 0 : vol, AUDIO.engineVoicing); // synth silent when samples play
+      this.sample?.set(rpm, load, layout, cutNow, burble, vol, AUDIO.engineVoicing);
     }
-    this.turbo.setKind(spec?.sound.turbo ?? 'none');
+    this.turbo.setKind(car2?.sound.turbo ?? 'none');
     this.turbo.update(boost, rpm, inGame);
 
     // drivetrain events -> turbo and exhaust sounds

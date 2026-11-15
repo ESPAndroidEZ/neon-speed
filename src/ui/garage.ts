@@ -1,4 +1,5 @@
 import { carNav, NAV_LABEL } from './carNav';
+import { REV_TEST } from '../audio/revTest';
 import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
 import { measureCar, type CarStats } from '../physics/carStats';
@@ -40,9 +41,10 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   panel.style.cssText += ';cursor:default;width:min(400px,92vw);box-sizing:border-box;max-height:88vh;overflow:auto';
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
-  const goPrev = (): void => { d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
-  const goNext = (): void => { d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
+  const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
+  const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
   carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
+  const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); window.clearInterval(watch); } }, 400);
   let yaw = 0;
   let lookOpen = false; // the appearance panel is collapsed until asked for
   let shown = d.store.data.selected; // the menu already put the selected car on show
@@ -160,11 +162,11 @@ export function buildGarage(d: GarageDeps): HTMLElement {
       buy.style.padding = '8px 6px';
       row.append(buy);
     }
-    const back = button('Back', () => { d.visual()?.calibrate?.setArrow(false); d.onBack(); });
+    const back = button('Back', () => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); d.onBack(); });
     back.style.minWidth = '80px';
     back.style.padding = '8px 10px';
     row.append(small(NAV_LABEL.next, goNext), back);
-    panel.append(row);
+    panel.append(row, soundTest(c.id));
   };
   const refreshCash = (): void => {
     document.querySelectorAll('.rb-cash').forEach((el) => (el.textContent = money(d.store.data.cash)));
@@ -189,4 +191,15 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   statusListeners.add(rerender);
   render();
   return root;
+}
+
+/** "Sound test": hold to rev any car (owned or not) from idle to the limiter with shifts; release for the lift-off pops. */
+function soundTest(carId: string): HTMLElement {
+  const b = button('Sound test (hold)', () => undefined);
+  b.style.cssText += ';width:100%;margin-top:6px;touch-action:none';
+  const down = (e: Event): void => { e.preventDefault(); if (REV_TEST.carId !== carId) REV_TEST.start(carId); REV_TEST.holding = true; b.classList.add('on'); };
+  const up = (): void => { REV_TEST.holding = false; b.classList.remove('on'); };
+  b.addEventListener('pointerdown', down);
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, up);
+  return b;
 }
