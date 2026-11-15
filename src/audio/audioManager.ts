@@ -11,10 +11,10 @@ import { RivalEngines } from './rivalEngines';
 import { Sfx } from './sfx';
 import { TurboSound } from './turboSound';
 import { findCar } from '../data/cars';
+import { voiceIndex } from '../data/engineVoices';
 import { createSampleVoice, loadEngineSamples } from './engineSamples';
 import { REV_TEST } from './revTest';
 
-const LAYOUT = { i4: 0, v6: 1, i6: 2, rotary: 3 } as const;
 
 /** Things the K panel can trigger without driving. */
 export type AudioTest = 'sweep' | 'upshift' | 'lift' | 'backfire' | 'squeal' | 'nitro' | 'flutter' | 'crash';
@@ -153,7 +153,7 @@ export class AudioManager {
     }
 
     if (this.voice) {
-      const layout = car2 ? LAYOUT[car2.sound.layout] : 0;
+      const layout = voiceIndex(car2?.id ?? '');
       const vol = (inGame ? 1 : 0) * AUDIO.engineVolume, cutNow = rpm >= redline * 0.995 && load > 0.5, burble = pedal < 0.05 && speed > 8 ? 1 : 0;
       this.voice.set(rpm, load, layout, cutNow, burble, this.sample ? 0 : vol, AUDIO.engineVoicing); // synth silent when samples play
       this.sample?.set(rpm, load, layout, cutNow, burble, vol, AUDIO.engineVoicing);
