@@ -2,6 +2,10 @@
 
 One line per file: `name (lines) description | exports by kind`. Search here before opening files.
 
+## src/anim
+- animator.ts (109) Sample a clip at time t into `out` (3 floats per joint in JOINTS order, then hips heigh... | fn sampleClip, blendPose; class Animator
+- clips.ts (80) Procedural animation clips: keyframed joint rotations (radians, Euler XYZ) plus a hips ... | const CLIPS; iface Key, Clip; type Rot, ClipName
+- crowd.ts (98) Spectators: a pool of rigs (shared geometry and materials come from the people factory)... | fn crowdSpec; class Crowd; iface Spot
 ## src/audio
 - audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
 - audioManager.ts (200) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
@@ -90,7 +94,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - skidMarks.ts (80) Seconds a mark takes to fade out completely. | class SkidMarks; const SKID_LIFE
 - tyreFx.ts (75) Per-surface look of tyre clouds: colour, size, lift and how many per second at full slide. | class TyreFx
 ## src/game
-- cast.ts (74) The people in the world: someone standing by the showroom car in menus and cutscenes, a... | class Cast
+- cast.ts (139) The people in the world, all on the people contract (src/types/people) and the procedur... | class Cast
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - freeRace.ts (25) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace
 - game.ts (217) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
@@ -144,12 +148,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - weatherLevels.ts (61) Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. | fn fillEnv; const LEVELS, gripFor, envFor; iface PhysicsEnv; type PhysicsLevel
 ## src/types
 - game.ts (173) SHARED CONTRACTS: the single source of truth between modules. | fn createNeutralInput; iface WeatherProfile, Vec3, Disposable, Serializable, CarInput, InputSource, CarState, RaceTelemetry, TrackSample, AIWorldView, AIRacerAgent, CameraPose, CameraRig, CarModel; type GameState, Weather, FixedUpdate, FrameCallback
+- people.ts (62) PEOPLE CONTRACT (2026-11-15). Every person in the game (story cast, starter, spectators... | const JOINTS, PARENT, REST; iface PersonSpec, PersonRig; type JointName, BodyVariant, PeopleHair, BuildPerson
 - world.ts (107) Open-world contracts (free roam). The road network is pure data: no `three` here or in ... | const SURFACES; iface RoadNode, RoadEdge, RoadGraph, Footprint, Poi, WorldClockState, RoamSave; type DistrictId, RoadKind, SurfaceType, PoiKind
 ## src/ui
 - carNav.ts (28) Car-picker navigation without arrow glyphs: Left/Right (and A/D) keys and a horizontal ... | fn carNav; const NAV_LABEL
 - cornerGuide.ts (97) Corner guide: the next corner's direction and severity (HAIRPIN / SHARP, or FAST when y... | class CornerGuide
 - crewMenu.ts (50) Characters whose relationship value is shown once Chapter 2 starts. | fn buildCrewMenu
-- dialogue.ts (164) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox
+- dialogue.ts (169) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox; const DIALOGUE
 - drivingSettings.ts (111) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
 - garage.ts (205) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
@@ -216,6 +221,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - partsSkirts.ts (55) | const SKIRTS_MORE
 - partsSplitters.ts (49) Wide flat lip with a raised front edge. | const SPLITTER_MORE
 - partsSpoilers.ts (60) Low ducktail kick at the trunk edge. | const SPOILER_MORE
+- peopleAdapter.ts (72) Default `buildPerson` (the people contract, src/types/people.ts) in the existing simple... | fn buildPerson, lookToSpec
 - plates.ts (97) Fictional Kestrel Bay plate: light reflective plate, blue city band on the left, the ow... | fn createPlates, fitPlates; iface Plates
 - proceduralCar.ts (158) Present on GLB-based cars: lets the garage fix a model that faces the wrong way. | fn buildProceduralCar; iface Calibration, CarVisual
 - propModels.ts (76) Target size per prop: `height` for upright props, `length` for containers (their long a... | fn loadPropModel, normaliseProp, instanceProp; iface Placement; type PropName

@@ -12,6 +12,9 @@ const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
  * A line with a `choice` stops on two buttons: skipping jumps to the question but never answers it.
  * `onChoose` applies the answer (story flags, relationships) and returns the reply lines to play next.
  */
+/** True while a dialogue line is on screen (the cast animates the speaker's talk gestures from it). */
+export const DIALOGUE = { active: false };
+
 export class DialogueBox {
   /** Called with the picked option; returns the lines to play next (default: the option's own reply). */
   onChoose: ((opt: ChoiceOption) => readonly Line[]) | null = null;
@@ -61,6 +64,7 @@ export class DialogueBox {
   }
 
   private show(): void {
+    DIALOGUE.active = true;
     const l = this.lines[this.idx];
     const sp: { name: string; color: number } = SPEAKERS[l.who as Speaker];
     this.asking = false;
@@ -154,6 +158,7 @@ export class DialogueBox {
   }
 
   private close(): void {
+    DIALOGUE.active = false;
     if (this.typing !== null) clearInterval(this.typing);
     this.typing = null;
     this.layer?.remove();
