@@ -2,7 +2,7 @@
 Files: src/ui/menu.ts src/ui/cornerGuide.ts src/ui/subtitles.ts src/i18n/enGame.ts src/i18n/esGame.ts src/i18n/enMenu.ts src/i18n/esMenu.ts
 Check: npx tsx tests/i18n-check.mts && npx tsx tests/line-sign-check.mts
 Branch: qwen/062-hud-menu-layout
-Contract (read-only): `t(key, params)` from '../i18n' (all visible text; add keys to BOTH en and es files with identical keys and {params}; Spanish: neutral Latin American, with accents, 'auto', 'manejo'). CSS variable `--rb-sub-scale` (1 / 1.25 / 1.5) is set by the Subtitle size setting.
+Contract (read-only): `t(key, params)` from '../i18n' (all visible text; add keys to BOTH en and es files with identical keys and {params}; Spanish: Spain Spanish, with accents, 'coche', 'conducción'). CSS variable `--rb-sub-scale` (1 / 1.25 / 1.5) is set by the Subtitle size setting.
 
 ## Behaviour
 1. menu.ts `main()` only (title and other screens unchanged): the button stack moves from the centre to the left third: `align-items:flex-start`, vertically centred, `padding-left: max(env(safe-area-inset-left), clamp(16px, 4vw, 48px))`, stack width at most 33vw (buttons `min-width:min(260px,33vw)`, text left-aligned), on portrait phones (max-width 600px) keep it left too but let buttons use up to 70vw. The 3D car is already moved right by the 'menu' camera layout; do not touch the camera.

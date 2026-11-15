@@ -131,7 +131,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enControls.ts (65) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
 - enGame.ts (36) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enMenu.ts (72) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
-- es.ts (11) Spanish UI strings (neutral Latin American wording: auto, manejo, placa). Same keys as ... | const ES
+- es.ts (11) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula). Same keys as ... | const ES
 - esContent.ts (11) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
 - esContentA.ts (153) Spanish for long content, part A: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_A
 - esContentB.ts (153) Spanish for long content, part B: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_B

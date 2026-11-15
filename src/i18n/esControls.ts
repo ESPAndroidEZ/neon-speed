@@ -1,9 +1,9 @@
 import type { EN_CONTROLS } from './enControls';
 
-/** Controles del teléfono, inclinación, pantalla completa, navegación de autos, idioma. */
+/** Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. */
 export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
-  'nav.prev': 'Auto anterior',
-  'nav.next': 'Auto siguiente',
+  'nav.prev': 'Coche anterior',
+  'nav.next': 'Coche siguiente',
   'fs.enter': 'Pantalla completa',
   'fs.exit': 'Salir de pantalla completa',
   'fs.homescreen': 'Añadir a pantalla de inicio',
@@ -33,15 +33,15 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'tilt.state.on': 'activa',
   'tilt.state.off': 'sin datos',
   'tilt.state.idle': 'apagada',
-  'tilt.enableTitle': 'Conduce inclinando el teléfono',
-  'tilt.enableBody': 'Sostén el teléfono en horizontal como un volante y toca <b>Activar inclinación</b>. Gíralo a la izquierda para ir a la izquierda.',
+  'tilt.enableTitle': 'Conduce inclinando el móvil',
+  'tilt.enableBody': 'Sostén el móvil en horizontal como un volante y toca <b>Activar inclinación</b>. Gíralo a la izquierda para ir a la izquierda.',
   'tilt.useWheel': 'Usar volante táctil',
   'tilt.calTitle': 'Calibrar inclinación',
-  'tilt.calBody': 'Sostén el teléfono en tu posición normal de manejo y toca <b>Calibrar</b>.',
+  'tilt.calBody': 'Sostén el móvil en tu posición normal de conducción y toca <b>Calibrar</b>.',
   'tilt.calibrate': 'Calibrar',
   'tilt.calibrated': 'Inclinación calibrada',
-  'tilt.holdUpright': 'Sostén el teléfono más vertical, como un volante',
-  'tilt.noData': 'Aún no hay datos de movimiento: mueve un poco el teléfono',
+  'tilt.holdUpright': 'Sostén el móvil más vertical, como un volante',
+  'tilt.noData': 'Aún no hay datos de movimiento: mueve un poco el móvil',
   'tilt.denied': 'Se negó el acceso al movimiento: se usa el volante táctil. (iPhone: Ajustes > Safari > Acceso a movimiento y orientación, luego recarga)',
   'tilt.unsupported': 'Este dispositivo no tiene sensor de inclinación: se usa el volante táctil',
   'tilt.insecure': 'La inclinación necesita una página segura (https): se usa el volante táctil. Abre la dirección https del juego para conducir inclinando.',
@@ -51,7 +51,7 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'ob.title': '¿Cómo quieres conducir?',
   'ob.body': 'Funciona mejor en horizontal. Puedes cambiarlo cuando quieras en Ajustes.',
   'ob.lang': 'Idioma',
-  'tut.tilt': 'Gira el teléfono como un volante para conducir. El acelerador es automático: FRENO a la izquierda, NITRO y FRENO DE MANO a la derecha (basta un toque).',
+  'tut.tilt': 'Gira el móvil como un volante para conducir. El acelerador es automático: FRENO a la izquierda, NITRO y FRENO DE MANO a la derecha (basta un toque).',
   'tut.wheel': 'Arrastra en la parte inferior izquierda para girar. ACELERAR y FRENAR a la derecha, NITRO y FRENO DE MANO sobre tu pulgar izquierdo.',
   'tut.buttons': 'Las flechas de la izquierda giran. ACELERAR y FRENAR a la derecha, NITRO y FRENO DE MANO sobre las flechas.',
   'pad.gas': 'ACELERAR',
@@ -62,6 +62,6 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'pad.handSub': 'DE MANO',
   'pad.drag': 'ARRASTRA PARA GIRAR',
   'pad.pause': 'Pausa',
-  'pad.reset': 'Reiniciar auto',
-  'rotate.hint': 'Gira el teléfono para ver mejor',
+  'pad.reset': 'Reiniciar coche',
+  'rotate.hint': 'Gira el móvil para ver mejor',
 } as const;

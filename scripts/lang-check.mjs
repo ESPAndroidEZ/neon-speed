@@ -15,12 +15,12 @@ const open = async (locale, ctx0) => {
 };
 const text = (page) => page.evaluate(() => document.body.innerText);
 
-let { ctx, page } = await open('es-MX');
-ok(/Presiona Enter|Toca/i.test(await text(page)), 'es-MX browser starts in Spanish');
+let { ctx, page } = await open('es-ES');
+ok(/Pulsa Intro|Toca/i.test(await text(page)), 'es-ES browser starts in Spanish');
 await page.click('button[lang=en]');
 ok(/Press Enter/i.test(await text(page)), 'EN button switches live');
 await page.click('button[lang=es]');
-ok(/Presiona Enter/i.test(await text(page)), 'ES button switches live');
+ok(/Pulsa Intro/i.test(await text(page)), 'ES button switches live');
 const glyphs = await page.evaluate(() => {
   const c = document.createElement('canvas'); c.width = 400; c.height = 40; const g = c.getContext('2d');
   g.font = '28px system-ui, sans-serif'; g.fillText('áéíóúñ¿¡ÁÉÍÓÚÑ', 4, 30);
@@ -29,7 +29,7 @@ const glyphs = await page.evaluate(() => {
 ok(glyphs > 600, `Spanish glyphs render (${glyphs} px)`);
 await page.reload({ waitUntil: 'load' });
 await page.waitForSelector('.rb-title');
-ok(/Presiona Enter/i.test(await text(page)), 'choice survives a reload (saved)');
+ok(/Pulsa Intro/i.test(await text(page)), 'choice survives a reload (saved)');
 await ctx.close();
 ({ ctx, page } = await open('en-US'));
 ok(/Press Enter/i.test(await text(page)), 'en-US browser starts in English');

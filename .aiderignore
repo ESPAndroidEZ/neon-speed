@@ -1,6 +1,0 @@
-node_modules/
-dist/
-package-lock.json
-public/models/
-docs/plan.md
-docs/story.md

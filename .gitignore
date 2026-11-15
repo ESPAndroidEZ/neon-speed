@@ -3,11 +3,6 @@ dist/
 *.log
 .DS_Store
 .env*
-# Aider runtime files only: the .aider*.yml and .json config files ARE committed
-.aider.chat.history.md
-.aider.input.history
-.aider.tags.cache.v*/
-.aider.llm.history
 assets-src/
 logs/
 __pycache__/
