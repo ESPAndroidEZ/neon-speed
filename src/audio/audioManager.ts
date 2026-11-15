@@ -14,6 +14,8 @@ import { findCar } from '../data/cars';
 import { voiceIndex } from '../data/engineVoices';
 import { createSampleVoice, loadEngineSamples } from './engineSamples';
 import { REV_TEST } from './revTest';
+import type { MoodId } from './musicPatterns';
+import { MUSIC_CUE } from './audioParams';
 
 
 /** Things the K panel can trigger without driving. */
@@ -35,6 +37,8 @@ export class AudioManager {
   private clock = 0;
   private readonly game: Game;
   private level = 0;
+  private raceNo = 0;
+  private wasRacing = false;
   private reader = new EventReader();
   private lastDtn: unknown = null;
   private lastPedal = 0;
@@ -195,6 +199,20 @@ export class AudioManager {
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);
 
     this.level += (smoothstep(5, 70, speed) + (nitro ? 0.25 : 0) - this.level) * Math.min(1, dt * 0.8);
-    this.music.update(true, this.level);
+    this.updateMusic(speed, load);
+  }
+
+  /** Mood from the game state and weather; intensity from speed, nitro and the last lap; duck from engine load and speech. */
+  private updateMusic(speed: number, load: number): void {
+    const g = this.game, racing = g.state === 'RACING';
+    if (racing && !this.wasRacing) this.music.reseed(++this.raceNo * 31 + 7); // a new song for every race
+    this.wasRacing = racing;
+    let mood: MoodId = 'menu';
+    if (g.state === 'MENU') mood = MUSIC_CUE.mood ?? 'menu';
+    else if (g.state === 'CINEMATIC') mood = 'story';
+    else if (g.state !== 'PODIUM') mood = g.weather === 'RAIN' ? 'rain' : g.weather === 'SNOW' ? 'snow' : 'race';
+    const t = g.telemetry, lastLap = racing && t.totalLaps > 1 && t.lap >= t.totalLaps ? 0.25 : 0;
+    const duck = (racing ? 0.3 * load * smoothstep(10, 60, speed) : 0) + MUSIC_CUE.speech;
+    this.music.update(!g.paused, Math.min(1, this.level + lastLap), mood, duck);
   }
 }

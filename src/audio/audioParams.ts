@@ -21,3 +21,6 @@ export const AUDIO = {
 };
 
 export type AudioParams = typeof AUDIO;
+
+/** Screens and speech tell the music what to do without the music knowing about them. */
+export const MUSIC_CUE: { mood: 'garage' | null; speech: number } = { mood: null, speech: 0 };

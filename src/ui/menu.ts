@@ -1,4 +1,5 @@
 import { isPhone } from '../core/quality';
+import { MUSIC_CUE } from '../audio/audioParams';
 import type { Engine } from '../core/engine';
 import type { AudioBus } from '../audio/audioBus';
 import { findCar, type CarSpec } from '../data/cars';
@@ -85,6 +86,7 @@ export class Menu {
 
   private mount(el: HTMLElement, s: 'title' | 'main' | 'other', layout: GarageLayout = 'main', again: (() => void) | null = null): void {
     this.d.layout(layout);
+    MUSIC_CUE.mood = layout === 'main' || layout === 'menu' ? null : 'garage'; // garage layouts get the lo-fi half-time mood
     this.again = again;
     this.layer?.remove();
     this.cash?.remove();

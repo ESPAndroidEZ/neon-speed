@@ -1,4 +1,5 @@
 import { SPEAKERS, type ChoiceOption, type Line, type Speaker } from '../data/story';
+import { MUSIC_CUE } from '../audio/audioParams';
 import { portraitEl } from './portraits';
 import { Voice } from './subtitles';
 import { h, injectCss } from './uiKit';
@@ -52,6 +53,7 @@ export class DialogueBox {
       return;
     }
     this.close();
+    MUSIC_CUE.speech = 0.7; // music ducks under spoken lines
     this.lines = lines;
     this.idx = 0;
     this.done = done;
@@ -160,6 +162,7 @@ export class DialogueBox {
   }
 
   private close(): void {
+    MUSIC_CUE.speech = 0;
     DIALOGUE.active = false;
     if (this.typing !== null) clearInterval(this.typing);
     this.typing = null;
