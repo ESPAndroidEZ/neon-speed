@@ -3,8 +3,8 @@ import type { KeyValueStore } from './save';
 /** Bump when the snapshot layout changes, and add a step to MIGRATIONS. */
 export const SAVE_VERSION = 1;
 const KEY = 'racers-blood-slots';
-export const MANUAL_SLOTS = 3;
-export type SlotId = 0 | 1 | 2 | 'auto';
+export const MANUAL_SLOTS = 5;
+export type SlotId = 0 | 1 | 2 | 3 | 4 | 'auto';
 
 /** What the load screen shows. */
 export interface SaveSummary {
@@ -68,9 +68,9 @@ export function parseSnapshot(raw: unknown): GameSnapshot | null {
   }
 }
 
-/** Three manual slots plus an autosave, in one localStorage entry. Tolerates missing, blocked or corrupt storage. */
+/** Five manual slots plus an autosave (older 3-slot saves load with slots 4-5 empty), in one localStorage entry. Tolerates missing, blocked or corrupt storage. */
 export class SaveSlots {
-  private slots: (GameSnapshot | null)[] = [null, null, null];
+  private slots: (GameSnapshot | null)[] = [null, null, null, null, null];
   private auto: GameSnapshot | null = null;
   private readonly kv: KeyValueStore | null;
   /** Set when stored data was unreadable (for a one-off warning). */
@@ -92,7 +92,7 @@ export class SaveSlots {
     try {
       const j: unknown = JSON.parse(raw);
       if (!isObj(j) || !Array.isArray(j.slots)) throw new Error('bad shape');
-      this.slots = [0, 1, 2].map((i) => parseSnapshot(j.slots instanceof Array ? j.slots[i] : null));
+      this.slots = [0, 1, 2, 3, 4].map((i) => parseSnapshot(j.slots instanceof Array ? j.slots[i] : null));
       this.auto = parseSnapshot(j.auto);
       this.corrupt = this.slots.some((s, i) => s === null && (j.slots as unknown[])[i] != null) || (this.auto === null && j.auto != null);
     } catch {
@@ -118,7 +118,7 @@ export class SaveSlots {
   /** The most recent save of any kind, or null. */
   latest(): { id: SlotId; snap: GameSnapshot } | null {
     let best: { id: SlotId; snap: GameSnapshot } | null = null;
-    for (const id of [0, 1, 2, 'auto'] as SlotId[]) {
+    for (const id of [0, 1, 2, 3, 4, 'auto'] as SlotId[]) {
       const snap = this.get(id);
       if (snap && (!best || snap.savedAt > best.snap.savedAt)) best = { id, snap };
     }

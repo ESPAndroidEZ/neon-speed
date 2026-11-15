@@ -8,6 +8,7 @@ import type { Voice } from './dialogue';
 import { drivingRows } from './drivingSettings';
 import { graphicsRows } from './graphicsSettings';
 import { button, h } from './uiKit';
+import { CARS } from '../data/cars';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -135,6 +136,18 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, button('Back', d.onBack));
+  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
   return root;
+}
+
+/** Test build: every car owned for free (the garage then lets anyone try them all). */
+function unlockAll(store: SaveStore): HTMLElement {
+  const b = button('', () => {
+    for (const c of CARS) if (!store.data.owned.includes(c.id)) store.data.owned.push(c.id);
+    store.commit();
+    b.textContent = 'All cars unlocked ✓';
+  });
+  const all = CARS.every((c) => store.data.owned.includes(c.id));
+  b.textContent = all ? 'All cars unlocked ✓' : 'Unlock all cars (free test)';
+  return b;
 }

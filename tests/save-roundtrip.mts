@@ -93,7 +93,7 @@ const snap = (t: number): GameSnapshot => ({ version: SAVE_VERSION, savedAt: t, 
 const mem = new Map<string, string>();
 const kv: KeyValueStore = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => void mem.set(k, v) };
 const slots = new SaveSlots(kv);
-check('empty storage: no saves', slots.latest() === null && MANUAL_SLOTS === 3, '');
+check('empty storage: no saves', slots.latest() === null && MANUAL_SLOTS === 5, '');
 slots.put(1, snap(100));
 slots.put('auto', snap(300));
 slots.put(0, snap(200));
