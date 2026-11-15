@@ -5,7 +5,7 @@ States: `- [ ]` open, `- [x]` done (result appended), `- [!]` blocked (reason ap
 Morning review: `docs/overnight/report.md`, then `git log main..HEAD --oneline`.
 Carlos's priorities tonight (2026-11-16): the rename to Neon Speed, different good sounds for every car, house music, better-looking cars, a better story, then anything that makes the game better.
 
-- [ ] 01 Baseline: build, tests, smoke on this branch (tasks/01-baseline.md)
+- [x] 01 Baseline: build, tests, smoke on this branch (tasks/01-baseline.md) -- green: build, 782 tests, smoke all pass
 - [ ] 10 Rename the game to Neon Speed everywhere players see it (tasks/10-rename-neon-speed.md)
 - [ ] 11 Every car gets its own engine sound (tasks/11-car-sounds.md)
 - [ ] 12 Procedural house music engine, menu + race (tasks/12-house-music.md)
