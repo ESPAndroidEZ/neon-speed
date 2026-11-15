@@ -1,4 +1,4 @@
-# Racer's Blood
+# Neon Speed (formerly Racer's Blood)
 
 3D arcade street racer: TypeScript, Three.js, Vite. Web first, Capacitor (iOS/Android) later. You are the lead architect. A local Qwen model (via Hermes Agent, `scripts/qwen.sh`) builds small isolated modules from `docs/tasks/`; you review them.
 
@@ -51,3 +51,9 @@ Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or 
 - Qwen branches are `qwen/<task>`. Never merge without `/review-qwen`.
 - 2026-11-15 (session 8, fixed): APPROVED handling: the handbrake carry and drift hold in `physics/stability` (owner: "I love it"); keep them, tune around them. City corners were widened on purpose (tests encode the new widths). Phone controls: GAS + BRAKE on the right, NITRO + HANDBRAKE on the left over drag steering. Eight cars: Civic, Golf IV GTI, 350Z, RX-7, 535d Touring (E61), M3 (E46), Evo VIII, Supra; four price tiers of two. Free races are competitive: rivals at full skill, in cars of the player's tier, with the player's upgrade levels. No more visual work on the existing car models (new cars only). Tyre smoke stays subtle (small, grey, under the bloom). Repo: private GitHub `ESPAndroidEZ/racer-blood`, push after every block.
 - 2026-11-15: Qwen runs through Hermes, not Aider. Qwen may also build 3D models as headless Blender scripts (`blender/`, `scripts/model-build.sh`, checked by `scripts/model-check.mts`); a Tripo GLB, if present, is never overwritten without FORCE=1. Blender: `scripts/setup-blender.sh`.
+- 2026-11-16 (owner, fixed; SUPERSEDES any earlier line that says otherwise):
+  - The game is called **Neon Speed**. Player-visible text, titles, manifest, docs and story use it. Do NOT change internal identifiers: repo name, Android/iOS application ids (`com.racersblood.game`), localStorage/save keys, Capacitor app id. Saves must keep loading.
+  - Existing car models MAY be redesigned now ("improve design on all cars"); the old "no more visual work on existing cars" is lifted. Keep proportions data in `data/cars.ts`, the procedural fallback, `tests/` and `npm run visual` green. Handling and the locked turbo are unaffected by visual work.
+  - Every car gets its own distinct engine voice (procedural). The locked turbo sound/model stays untouched. Background music is generated procedurally in WebAudio (house music); no downloaded samples or tracks unless they are CC0 and logged in `docs/assets/licenses.md`.
+  - The story in `docs/story.md` may be rewritten and extended for quality. Keep the Chapter 2 flags `open` / `sponsor`, the save format, and the beat ids that saves and tests reference (migrate or add, never silently remove).
+  - Overnight/unattended runs (`scripts/overnight.sh`, `docs/overnight/`) never ask Carlos anything: they decide, log the decision in `docs/overnight/report.md`, and continue.
