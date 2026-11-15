@@ -1,4 +1,4 @@
-import type { CarTuning } from './carTuning';
+import type { CarTuning } from '../carTuning';
 
 /** Per-axle drive result (reused object, written every step: no allocation). */
 export interface DriveOut {

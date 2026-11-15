@@ -17,6 +17,7 @@ import { findTrackDef } from '../data/tracks';
 import { applyBuild } from '../data/carBuild';
 import { applyWeather } from './weatherApply';
 import { ShowroomCam } from './showroomCam';
+import { handlingOverlay } from '../ui/handlingOverlay';
 
 /** Race orchestrator: GameState machine, race manager, car views, cameras, HUD. */
 export class Game {
@@ -211,6 +212,7 @@ export class Game {
     this.rm.fillTelemetry(this.telemetry);
     this.d.hud.setBanner(this.rm.banner);
     this.d.hud.update(this.telemetry);
+    handlingOverlay.update(p.car); // F4 debug overlay
   };
 }
 

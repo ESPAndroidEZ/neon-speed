@@ -1,5 +1,5 @@
-import { smoothstep } from '../core/math';
-import type { CarTuning } from './carTuning';
+import { smoothstep } from '../../core/math';
+import type { CarTuning } from '../carTuning';
 
 /**
  * Slide stability, the arcade part of the handling. Three small effects, all per-car data in `CarTuning`:

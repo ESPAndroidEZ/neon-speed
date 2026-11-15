@@ -2,6 +2,7 @@ import type { AIRacerAgent, AIWorldView, CarInput, CarState } from '../types/gam
 import { DIFFICULTIES, LEVELS, RUBBER_MAX, STYLES, type Difficulty, type DriveStyle } from './aiDifficulty';
 import { marginFor, racingLine, speedProfile, type RacingLine } from './aiLine';
 import { createTraffic, readTraffic } from './aiTraffic';
+import { HANDLING } from './assists';
 
 /*
  * AI driver: pure policy (no physics, no three). The car it drives uses the same physics and weather grip as the player's.
@@ -62,10 +63,10 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
   function build(world: AIWorldView, grip: number, conf = confidence): void {
     profConf = conf;
     line = racingLine(world.track, marginFor(grip));
-    const g = Math.max(0.12, grip);
+    const g = Math.max(0.12, grip), v2 = HANDLING.model === 'v2'; // v2: real tyres (~0.9-1 g), no handbrake-turn plan
     if (!profile || profile.length !== line.n) profile = new Float32Array(line.n);
     speedProfile(line, {
-      aLat: (gripLat = (GRID.A_LAT + GRID.A_LAT_SKILL * Math.min(1, sk)) * g * profConf * Math.min(1, 0.55 + 0.6 * g) * st.corner) * (1 + (g > 0.6 ? HB_ALAT * Math.min(1, sk) : 0)), // faster corner plan only where it can handbrake
+      aLat: (gripLat = (GRID.A_LAT + GRID.A_LAT_SKILL * Math.min(1, sk)) * g * profConf * Math.min(1, 0.55 + 0.6 * g) * st.corner * (v2 ? 0.8 : 1)) * (1 + (g > 0.6 && !v2 ? HB_ALAT * Math.min(1, sk) : 0)), // faster corner plan only where it can handbrake
       aBrake: (GRID.A_BRAKE + GRID.A_BRAKE_SKILL * Math.min(1, sk)) * Math.max(0.5, g) * st.brake,
       aAccel: (GRID.A_ACCEL + GRID.A_ACCEL_SKILL * Math.min(1, sk)) * Math.max(0.6, g),
       vMax: V_MAX,
@@ -151,11 +152,11 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
       const dist = Math.max(3, Math.hypot(tx - self.position.x, tz - self.position.z));
       const delta = Math.atan((2 * WHEELBASE * Math.sin(alpha)) / dist);
       const sp = Math.abs(speed);
-      const lock = 1 - 0.72 * Math.min(1, Math.max(0, (sp - 5) / 55));
+      const lock = HANDLING.model === 'v2' ? Math.min(1, (5.6 * 9.81) / Math.max(1, sp * sp) + 0.22) : 1 - 0.72 * Math.min(1, Math.max(0, (sp - 5) / 55));
       // handbrake turn-in: too fast to make a sharp corner on grip, so throw it in like the player does and hold it
       // until the nose points down the exit (no counter-steer meanwhile: that would cancel the rotation)
       const kIn = line.k[(hint + Math.round(8 / line.ds)) % n];
-      const hbOn = sk > 0.3 && world.grip > 0.6 && kIn > 1 / 40 && sp > Math.sqrt(gripLat / kIn) * 1.05 && Math.abs(alpha) > 0.08 && Math.abs(self.slipAngle) < HB_SLIP;
+      const hbOn = HANDLING.model !== 'v2' && sk > 0.3 && world.grip > 0.6 && kIn > 1 / 40 && sp > Math.sqrt(gripLat / kIn) * 1.05 && Math.abs(alpha) > 0.08 && Math.abs(self.slipAngle) < HB_SLIP;
       out.steer = Math.max(-1, Math.min(1, delta / (MAX_STEER * lock) + (hbOn ? 0 : self.slipAngle * 0.7)));
       if (hbOn) out.steer = -Math.sign(line.ks[(hint + Math.round(8 / line.ds)) % n]) * HB_LOCK; // full lock INTO the corner (ks > 0 = right)
 

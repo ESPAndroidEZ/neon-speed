@@ -112,6 +112,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const brand = h('div', 'rb-sub', c.brand);
     brand.append(badge);
     panel.append(brand, title, h('div', '', c.blurb));
+    if (c.tuning.v2) panel.append(h('div', 'rb-sub', c.tuning.v2.spec.character)); // layout character (data/carSpecs)
     if (st2 === 'procedural') panel.append(h('div', 'rb-sub', `Put ${c.id}.glb in public/models/`));
     panel.insertAdjacentHTML('beforeend', bar('Acceleration', 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar('Top speed', (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar('Grip', (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar('Slides easily', st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(

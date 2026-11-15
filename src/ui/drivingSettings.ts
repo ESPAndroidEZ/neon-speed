@@ -2,7 +2,7 @@ import type { SaveStore } from '../core/save';
 import { LOOK_IDS, LOOKS, setLook } from '../core/looks';
 import { storyComplete } from '../core/career';
 import { AI_SETTING, DIFFICULTIES, type Difficulty } from '../physics/aiDifficulty';
-import { DRIVING, type AssistLevel } from '../physics/assists';
+import { DRIVING, HANDLING, type AssistLevel, type HandlingModel, type StabilityLevel } from '../physics/assists';
 import { button, h } from './uiKit';
 
 const HINT: Record<AssistLevel, string> = {
@@ -16,12 +16,35 @@ export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number;
   const s = store.data.settings;
   DRIVING.level = s.assist;
   DRIVING.sens = s.steerSens;
+  HANDLING.model = s.handlingModel;
+  DRIVING.stability = s.stability;
   setLook(s.look);
   AI_SETTING.level = s.difficulty === 'LEGEND' && !storyComplete(store.data.career) ? 'STREET' : s.difficulty;
   if (pad) {
     pad.deadZone = s.padDeadzone;
     pad.rumbleOn = s.rumble;
   }
+}
+
+const MODEL_HINT: Record<HandlingModel, string> = { legacy: 'Arcade v1 handling (the original feel).', v2: 'Real-data model: loads, tyres, diffs, brakes. Every car feels like itself.' };
+const STAB_HINT: Record<StabilityLevel, string> = { OFF: 'Raw v2 physics, no ABS. Brakes can lock.', LIGHT: 'Counter-steer help and a late yaw limiter (default).', FULL: 'Strong help plus the v1 handbrake carry and drift hold.' };
+
+/** A labelled row of choice buttons with a hint line; `pick` stores the choice. */
+function choiceRow<T extends string>(label: string, opts: readonly T[], get: () => T, pick: (v: T) => void, hints: Record<T, string>): HTMLElement[] {
+  const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
+  const hint = h('div', 'rb-sub', hints[get()]);
+  const refresh = (): void => {
+    row.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === get()));
+    hint.textContent = hints[get()];
+  };
+  for (const o of opts) {
+    const b = button(o.toLowerCase(), () => { pick(o); refresh(); });
+    b.dataset.lv = o;
+    b.style.minWidth = '90px';
+    row.append(b);
+  }
+  refresh();
+  return [row, hint];
 }
 
 /** Driving assists, steering sensitivity and gamepad options as settings rows. */
@@ -107,5 +130,7 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
     save();
   });
   rumble.append(box);
-  return [lookRow, assist, hint, diff, diffHint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
+  const model = choiceRow('Handling', ['legacy', 'v2'] as const, () => s.handlingModel, (v) => { s.handlingModel = v; save(); }, MODEL_HINT);
+  const stab = choiceRow('Stability (v2)', ['OFF', 'LIGHT', 'FULL'] as const, () => s.stability, (v) => { s.stability = v; save(); }, STAB_HINT);
+  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range('Steering sensitivity', 'steerSens', 0.6, 1.4, 0.05), range('Stick deadzone', 'padDeadzone', 0.02, 0.4, 0.02), rumble];
 }

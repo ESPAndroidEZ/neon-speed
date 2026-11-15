@@ -1,3 +1,4 @@
+import type { CarSpecLink } from '../types/cars';
 /** Every number here is live-tunable from the in-game panel (backtick key). */
 export interface CarTuning {
   mass: number;
@@ -72,6 +73,8 @@ export interface CarTuning {
   powerFloor: number;
   /** Extra steering lock below ~30 km/h as a fraction of `maxSteer` (tight U-turns and parking). */
   parkSteer: number;
+  /** Real spec for the v2 handling model (data/carSpecs withSpec); absent = v2 derives a generic car from this tuning. */
+  v2?: CarSpecLink;
 }
 
 export const GEAR_RATIOS: readonly number[] = [3.6, 2.2, 1.55, 1.2, 0.97, 0.8];
@@ -131,6 +134,7 @@ export function createDefaultTuning(): CarTuning {
     powerSlide: 0.72,
     powerFloor: 0.45,
     parkSteer: 0.3,
+    v2: undefined,
   };
 }
 

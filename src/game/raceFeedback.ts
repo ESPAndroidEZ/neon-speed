@@ -1,6 +1,7 @@
 import type { Engine } from '../core/engine';
 import type { LaunchResult } from '../core/launch';
 import { WEATHER } from '../physics/weather';
+import { updatePrecipCover } from '../world/precipCover';
 import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import type { Hud } from '../ui/hud';
@@ -23,6 +24,8 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   let seenReward = 0;
   engine.onFrame(() => {
     const rm = game.rm;
+    const me = rm.player; // rain / snow stop under tunnel roofs and at the car's roof
+    if (me) updatePrecipCover(rm.track, me.contact.hit.index, engine.camera.position.x, engine.camera.position.z, me.car.state.position);
     const racing = game.state === 'RACING' && rm.phase === 'RACING';
     if (game.state === 'RACING' && rm.phase === 'COUNTDOWN' && !countdownHint && rm.countdown < 2.2) {
       countdownHint = true;

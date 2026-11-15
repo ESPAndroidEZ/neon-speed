@@ -1,6 +1,6 @@
-import { clamp, lerp, smoothstep } from '../core/math';
-import type { Assist } from './assists';
-import type { CarTuning } from './carTuning';
+import { clamp, lerp, smoothstep } from '../../core/math';
+import type { Assist } from '../assists';
+import type { CarTuning } from '../carTuning';
 
 /**
  * Front wheel angle: less lock at speed (steering assist shrinks it further, PRO keeps more),

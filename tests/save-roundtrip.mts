@@ -9,8 +9,10 @@ import { fillEnv, type PhysicsEnv } from '../src/physics/weatherLevels.ts';
 import { createNeutralInput } from '../src/types/game.ts';
 import type { CarInput } from '../src/types/game.ts';
 import { createKestrelBay } from '../src/world/kestrelBay.ts';
+import { HANDLING } from '../src/physics/assists.ts';
 import { layoutProps } from '../src/world/propsLayout.ts';
 
+if (process.env.HANDLING === 'v2') HANDLING.model = 'v2'; // handling-v2-check runs this file on the v2 model too
 let failed = 0;
 const check = (n: string, ok: boolean, i: string): void => {
   if (!ok) failed++;

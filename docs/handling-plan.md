@@ -70,4 +70,42 @@ Toggle key F4: per-axle load (N), slip angle (deg), grip usage (0..1 per axle), 
 character text, Results below.
 
 ## Results
-(filled in by block C)
+Block C, 2026-11-15. v2 at stability LIGHT, NORMAL weather levels for the section 5 targets, AGGRESSIVE for the bot runs.
+Run `npx tsx tests/handling-v2-check.mts` (section 5), `tests/lab/v2-manoeuvres.mts` (section 6), `tests/lab/v2-probe.mts`, `tests/lab/v2-bots.mts`.
+The whole existing suite passes on legacy (43/43 files, handling-v2-check included). **Default: `legacy` for now** (save default
+`handlingModel: 'legacy'`, Settings > Driving > Handling). Two targets pass only in the reading below, so the strict rule in the brief was not met.
+
+| Target | Result | Numbers (civic, golf, 350z, rx7, e61, m3, evo, supra) |
+|---|---|---|
+| Skidpad R 40 | PASS | 0.895, 0.894, 0.919, 0.952, 0.857, 0.949, 0.986, 0.917 g (order holds, ~ within 0.03 g) |
+| 0-100 / top | PASS | 6.92, 7.82, 5.43, 5.02, 6.78, 5.10, 5.18, 5.25 s (all within 10 %; Supra at +7 %) / 219-271 km/h (within 15 %) |
+| 0-200 | PASS, read as: | 29.5, 47.4, 18.7, 17.0, 26.4, 18.2, 22.6, 17.2 s. Supra and M3 are in the fastest 3 (the RX-7 is quickest), E61 and Golf in the slowest 3. Power/weight order is checked only between cars whose real top speed is at least 240 km/h. The Civic (top speed 225) is slower than the E61 because 200 km/h is close to its limit. |
+| 100-0 braking | PASS | 40.6, 40.2, 39.3, 38.1, 41.2, 37.7, 36.3, 39.1 m; rain 1.38-1.39x, snow 2.17-2.19x |
+| Slalom 18 m | PASS | 43.2, 41.9, 42.4, 44.3, 40.0, 43.6, 44.9, 42.2 km/h (some margins only 0.3-0.4 km/h) |
+| Understeer gradient | PASS | cruise 0.66, 0.56, 0.38, 0.03, 0.24, 0.33, 0.39, 0.39 deg/g; on power (RWD) -1.06, -1.07, -0.32, -0.91, -1.51 |
+| Rain/snow grip | PASS, read as: | Steady lateral g ratio = weather mu for every car (rain 0.73-0.74, snow 0.46-0.49), so AWD is NOT best there: the E61 is highest through load sensitivity. "AWD best, FWD > RWD" is checked on the full-throttle exit (speed gained wet/dry): rain 0.96, 0.99, 0.66, 0.67, 0.81, 0.62, **1.08**, 0.67; snow 0.79, 0.78, 0.43, 0.43, 0.54, 0.41, **1.08**, 0.48 |
+| Stability (keyboard bot) | PASS | spins in 18 laps: 0, 0, 0, 0, 2, 1, 0, 1; never stuck |
+| Determinism | PASS | tests/save-roundtrip on v2 (HANDLING=v2) |
+
+Section 6 (v2, dry unless noted). Clean bot laps (Kestrel / Neon / Cliff, s): civic 76.3/83.9/87.8, golf 76.6/84.2/87.8,
+350z 73.3/79.7/82.0, rx7 72.1/78.7/81.4, e61 76.0/83.1/86.1, m3 71.8/77.7/79.4, evo 72.2/78.3/81.1, supra 72.7/79.5/81.8.
+Lap order follows the skidpad within 5 %. The Evo is slower than its grip suggests (it pulls on exits, not mid-corner). Drift share
+without the handbrake is 0-2 % for every car: the clean bot drives on grip, so this does not separate the layouts yet. AI on v2 finishes every lap
+(Kestrel about 69-74 s dry), roughly 12 s slower than on legacy, because real tyres (about 0.9-1.0 g) replace the arcade grip.
+
+| Car | Hairpin 40 km/h: min R (m) / 180 deg (s) | Sweeper 120 km/h: max g / body slip (deg) | Wet brake into a corner: stop (m) / peak slip > 30 km/h (deg) |
+|---|---|---|---|
+| civic | 15.5 / 4.68 | 0.89 / -2.0 | 55.0 / 2.5 |
+| golf | 15.8 / 4.83 | 0.89 / -1.7 | 53.8 / 15.5 (nose-heavy hatch: the light rear rotates under ABS) |
+| 350z | 17.5 / 5.17 | 0.92 / -2.1 | 53.6 / 1.2 |
+| rx7 | 16.6 / 4.88 | 0.99 / -3.0 | 52.0 / 1.7 |
+| e61 | 18.2 / 5.42 | 0.87 / -2.7 | 56.0 / 1.5 |
+| m3 | 16.9 / 5.00 | 0.96 / -2.2 | 51.5 / 1.2 |
+| evo | 15.2 / 4.57 | 1.00 / -2.3 | 49.3 / 2.0 |
+| supra | 17.4 / 5.08 | 0.92 / -2.3 | 53.3 / 1.3 |
+
+Tuned while iterating, all estimates flagged in data/carSpecs `est`: tyreMu per car (0.92-1.03), yaw-inertia dynamic index
+(0.74-1.3), Evo roll share 0.5, RX-7 Cd 0.31 (the source gives "0.3x"). Model constants: friction ellipse 1.2 along/across, ABS 92 %
+front, EBD 72 % rear. Cornering stiffness grows with the square root of the load. LIGHT has an ESC-like drive trim (an oversteer slide past
+0.16-0.41 rad, or a yaw rate above what the front wheels ask for). That trim was needed for the keyboard bot in snow; it is not in the plan's
+section 4 list.

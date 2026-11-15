@@ -1,5 +1,5 @@
-import { clamp } from '../core/math';
-import type { CarTuning } from './carTuning';
+import { clamp } from '../../core/math';
+import type { CarTuning } from '../carTuning';
 
 const G = 9.81;
 const TRACK = 1.5; // wheel track in metres (same for every car, only used for roll transfer)

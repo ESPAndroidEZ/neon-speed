@@ -37,7 +37,7 @@ export class Bot {
     this.rnd = createRng(seed * 7919 + kind.length);
     this.line = racingLine(track.samples, marginFor(grip));
     this.v = new Float32Array(this.line.n);
-    const mu = Math.min(car.t.gripFront, car.t.gripRear) * grip;
+    const mu = car.gripEstimate * grip;
     speedProfile(this.line, { aLat: 9.81 * mu * this.st.skill, aBrake: 7.5 * grip * this.st.skill, aAccel: 4.5, vMax: 80 }, this.v);
   }
 

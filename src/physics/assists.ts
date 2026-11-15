@@ -26,10 +26,17 @@ export function setAssist(into: Assist, level: AssistLevel): void {
 export const clampSensitivity = (s: number): number => Math.min(1.4, Math.max(0.6, s));
 
 /** Player driving preferences (settings screen). Read by the race manager for the player's car only; rivals always use STANDARD. */
-export const DRIVING: { level: AssistLevel; sens: number; carMul: number } = { level: 'STANDARD', sens: 1, carMul: 1 };
+export const DRIVING: { level: AssistLevel; sens: number; carMul: number; stability: StabilityLevel } = { level: 'STANDARD', sens: 1, carMul: 1, stability: 'LIGHT' };
+
+/** Handling model (setting `handlingModel`): v1 arcade (`legacy`, git tag handling-v1) or the real-data model (`v2`). Global: every car, AI included. */
+export type HandlingModel = 'legacy' | 'v2';
+/** v2 arcade layer (physics/v2/arcade): OFF raw physics, LIGHT counter-steer + late yaw limiter (default), FULL adds the v1 handbrake carry and drift hold. */
+export type StabilityLevel = 'OFF' | 'LIGHT' | 'FULL';
+export const HANDLING: { model: HandlingModel } = { model: 'legacy' };
 
 /** Copy the preferences onto a car. Allocation free, safe to call every step. */
-export function applyDriving(car: { assist: Assist; sensitivity: number }): void {
+export function applyDriving(car: { assist: Assist; sensitivity: number; stability: StabilityLevel }): void {
+  car.stability = DRIVING.stability;
   const a = ASSIST_LEVELS[DRIVING.level];
   car.assist.steer = a.steer;
   car.assist.brake = a.brake;
