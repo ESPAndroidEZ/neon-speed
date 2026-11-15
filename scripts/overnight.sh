@@ -21,7 +21,7 @@ STOP_FILE=docs/overnight/STOP
 LOG_DIR=logs/overnight
 UNTIL=${UNTIL:-}
 MAX_RUNS=${MAX_RUNS:-40}
-MAX_IDLE=${MAX_IDLE:-3}
+MAX_IDLE=${MAX_IDLE:-12}
 RUN_TIMEOUT=${RUN_TIMEOUT:-5400}
 MODEL=${MODEL:-}
 KEEP_AWAKE=${KEEP_AWAKE:-1}
@@ -196,7 +196,8 @@ while true; do
   if [[ $key == "$last_key" ]]; then
     idle=$((idle + 1)); say "no progress ($idle/$MAX_IDLE)"
     (( idle >= MAX_IDLE )) && { say "giving up: $MAX_IDLE runs without progress"; break; }
-    nap 120 || break
+    # An unrecognised usage-limit message looks like "no progress": back off long (2 min, then 30 min) so we outlast it.
+    nap $(( idle >= 2 ? 1800 : 120 )) || break
   else
     idle=0; last_key=$key
     nap 10 || break
