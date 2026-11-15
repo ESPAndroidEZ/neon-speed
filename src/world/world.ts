@@ -54,7 +54,7 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const open = def.theme === 'cliff'; // no street lamps or buildings: lean on moonlight
   const moon = new DirectionalLight(0x8fa4ff, open ? 1.6 : 0.7);
   moon.position.set(-60, 90, -40);
-  const hemi = new HemisphereLight(0x3a4a8a, 0x0a0a12, open ? 2.2 : def.theme === 'port' ? 2.0 : 1.3);
+  const hemi = new HemisphereLight(0x5464a8, 0x1a1a26, open ? 2.6 : def.theme === 'port' ? 2.7 : 2.3); // brighter nights (owner: too dark)
   const pal = paletteOf(def.id);
   const sky = buildSky(pal);
   sky.setLook(look, pal);
