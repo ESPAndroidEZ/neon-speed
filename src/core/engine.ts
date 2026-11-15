@@ -59,6 +59,8 @@ export class Engine implements Disposable {
 
   private readonly container: HTMLElement;
   maxPixelRatio: number;
+  /** Dynamic resolution (core/quality AutoQuality): multiplies the final pixel ratio, applied after the screen's own limit. */
+  dynScale = 1;
   private readonly updates = new Set<FixedUpdate>();
   private readonly frames = new Set<FrameCallback>();
   private readonly observer: ResizeObserver;
@@ -173,7 +175,7 @@ export class Engine implements Disposable {
   resize(): void {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, this.maxPixelRatio);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, this.maxPixelRatio) * this.dynScale;
     this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(w, h);
     this.composer.setPixelRatio(pixelRatio);

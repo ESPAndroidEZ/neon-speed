@@ -54,8 +54,8 @@ export function applyQuality(engine: Engine, q: Quality, keepCustom = false): vo
 const ORDER: Quality[] = ['low', 'medium', 'high', 'ultra'];
 
 /**
- * Drops one tier when the frame rate stays low (never upgrades by itself). Judges 2 s windows of frame time;
- * two bad windows in a row trigger a downgrade, then it waits 6 s before judging again.
+ * Keeps the frame rate up: first lowers the render resolution in 10 % steps (down to 60 %, and raises it again when
+ * there is headroom), and only when that is not enough drops one tier (never upgrades a tier by itself).
  */
 export class AutoQuality {
   enabled = true;
@@ -70,6 +70,16 @@ export class AutoQuality {
     this.limit = 1 / minFps;
   }
 
+  /** Dynamic resolution on top of the tier: 1 = full, down to 0.6. Cheap first step before losing effects. */
+  dyn = 1;
+  private good = 0;
+
+  private setDyn(engine: Engine, v: number): void {
+    this.dyn = Math.round(Math.min(1, Math.max(0.6, v)) * 100) / 100;
+    engine.dynScale = this.dyn;
+    engine.resize();
+  }
+
   update(dt: number, engine: Engine): void {
     if (!this.enabled) return;
     if (this.cooldown > 0) {
@@ -78,16 +88,25 @@ export class AutoQuality {
     }
     this.acc += dt;
     this.frames++;
-    if (this.acc < 2) return;
+    if (this.acc < 1.5) return;
     const avg = this.acc / this.frames;
     this.acc = 0;
     this.frames = 0;
-    this.bad = avg > this.limit ? this.bad + 1 : 0;
+    if (avg > this.limit) {
+      this.good = 0;
+      if (this.dyn > 0.6) { this.setDyn(engine, this.dyn - 0.1); this.cooldown = 1.5; return; } // resolution first
+      this.bad++;
+    } else {
+      this.bad = 0;
+      if (avg < this.limit * 0.72 && ++this.good >= 3 && this.dyn < 1) { this.good = 0; this.setDyn(engine, this.dyn + 0.1); this.cooldown = 1.5; }
+      return;
+    }
     const i = ORDER.indexOf(current);
-    if (this.bad >= 2 && i > 0) {
+    if (this.bad >= 2 && i > 0) { // still slow at 60 % resolution: drop a tier (and give resolution back)
       this.bad = 0;
       this.cooldown = 6;
       applyQuality(engine, ORDER[i - 1]);
+      this.setDyn(engine, 0.8);
       this.onDowngrade?.(ORDER[i - 1]);
     }
   }
