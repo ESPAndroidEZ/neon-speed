@@ -5,6 +5,16 @@ import { defaultLoadout, type Loadout } from '../data/loadout';
 import { buildModelCar } from './modelCar';
 import { getYawOverride } from './modelPrefs';
 import { buildProceduralCar, type CarVisual } from './proceduralCar';
+import { createPlates } from './plates';
+
+/** Front and rear plates with the loadout's text; garage edits (setAppearance) update them live. */
+function withPlates(v: CarVisual, spec: CarSpec, l: Loadout, bodyRoot = v.root): CarVisual {
+  const plates = createPlates(spec.shape.length, 0.36, Math.min(0.62, spec.shape.beltHeight - 0.24), l.plate);
+  bodyRoot.add(plates.group);
+  const orig = v.setAppearance?.bind(v);
+  v.setAppearance = (nl, paint) => { orig?.(nl, paint); plates.setText(nl.plate); };
+  return v;
+}
 
 export type ModelStatus = 'glb' | 'procedural' | 'loading';
 const status = new Map<string, ModelStatus>();
@@ -19,14 +29,14 @@ export const modelStatus = (id: string): ModelStatus => status.get(id) ?? 'loadi
  * as soon as it has loaded. A missing or broken file leaves the procedural car in place.
  */
 export function createCarVisual(spec: CarSpec, paint: number, glow: number, env: Texture, upgrade: (v: CarVisual) => void, l: Loadout = defaultLoadout()): CarVisual {
-  const v = buildProceduralCar(spec.shape, paint, l);
+  const v = withPlates(buildProceduralCar(spec.shape, paint, l), spec, l);
   v.setEnv(env);
   v.setUnderglow(glow);
   const url = modelUrl(spec);
   if (!hasFailed(url)) {
     loadCarModel(url, { targetLength: spec.shape.length, scale: spec.model.scale, yawOffset: getYawOverride(spec.id) ?? spec.model.yaw })
       .then((m) => {
-        const mv = buildModelCar(m, spec.color, paint, getYawOverride(spec.id) ?? spec.model.yaw);
+        const mv = withPlates(buildModelCar(m, spec.color, paint, getYawOverride(spec.id) ?? spec.model.yaw), spec, l);
         mv.setEnv(env);
         mv.setUnderglow(glow);
         mv.setAppearance?.(l, paint);
