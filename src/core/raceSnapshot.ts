@@ -1,3 +1,4 @@
+import type { RewardData } from './rewards';
 import type { LaunchData } from './launch';
 import type { RaceManager } from './raceManager';
 import type { CarInput } from '../types/game';
@@ -10,12 +11,13 @@ interface RacerData {
 export interface RaceData {
   phase: string; countdown: number; raceTime: number; finishCount: number; racers: RacerData[];
   launch?: LaunchData;
+  rewards?: RewardData;
 }
 
 /** JSON-safe snapshot of the whole race: timers, every racer's car, lap counter, AI state. */
 export function snapshotRace(rm: RaceManager): RaceData {
   return {
-    phase: rm.phase, countdown: rm.countdown, raceTime: rm.raceTime, finishCount: rm.finishCount, launch: rm.launch.snapshot(),
+    phase: rm.phase, countdown: rm.countdown, raceTime: rm.raceTime, finishCount: rm.finishCount, launch: rm.launch.snapshot(), rewards: rm.rewards.snapshot(),
     racers: rm.racers.map((r) => ({
       id: r.id, finished: r.finished, finishTime: r.finishTime, lapStart: r.lapStart, bestLap: Number.isFinite(r.bestLap) ? r.bestLap : null,
       finishRank: r.finishRank, input: { ...r.input }, car: r.car.snapshot(), laps: r.laps.snapshot(), hitIndex: r.contact.hit.index,
@@ -32,6 +34,7 @@ export function restoreRace(rm: RaceManager, d: RaceData): void {
   rm.raceTime = d.raceTime;
   rm.finishCount = d.finishCount;
   rm.launch.restore(d.launch);
+  rm.rewards.restore(d.rewards);
   rm.result = null;
   d.racers.forEach((x, i) => {
     const r = rm.racers[i];

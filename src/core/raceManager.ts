@@ -13,6 +13,7 @@ import { createNeutralInput } from '../types/game';
 import { LapCounter } from './lapCounter';
 import { restoreRace, snapshotRace } from './raceSnapshot';
 import { LaunchControl } from './launch';
+import { RaceRewards } from './rewards';
 import { buildResult, positionOf, type RaceResult, type Racer } from './raceResult';
 
 export type { RaceResult, Racer };
@@ -35,6 +36,7 @@ export class RaceManager {
   countdown = COUNTDOWN_SECONDS;
   /** Player launch timing at the countdown (core/launch). */
   readonly launch = new LaunchControl();
+  readonly rewards = new RaceRewards();
   /** Seconds since GO. */
   raceTime = 0;
   /** Cumulative closing speed of the latest car-car or wall hit this step, for juice and audio. */
@@ -109,6 +111,7 @@ export class RaceManager {
     this.phase = 'GRID';
     this.countdown = COUNTDOWN_SECONDS;
     this.launch.reset();
+    this.rewards.reset();
     this.raceTime = 0;
     this.finishCount = 0;
     this.result = null;
@@ -170,6 +173,7 @@ export class RaceManager {
       this.carImpact = Math.max(this.carImpact, r.contact.impact);
     }
     this.carImpact = Math.max(this.carImpact, resolveField(this.racers));
+    if (live) this.rewards.step(dt, this.racers, this.track.samples, this.carImpact); // nitro for near misses, tow, clean corners
     if (live) this.updateLaps();
   }
 

@@ -18,6 +18,7 @@ const LAUNCH_POP: Record<Exclude<LaunchResult, 'NONE'>, [string, string]> = {
 export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): CornerGuide {
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
   let countdownHint = false;
+  let seenReward = 0;
   engine.onFrame(() => {
     const rm = game.rm;
     const racing = game.state === 'RACING' && rm.phase === 'RACING';
@@ -30,6 +31,11 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
     if (a && a !== 'NONE') {
       rm.launch.announce = null;
       hud.popUp(LAUNCH_POP[a][0], LAUNCH_POP[a][1]);
+    }
+    if (rm.rewards.seq !== seenReward) {
+      seenReward = rm.rewards.seq;
+      const k = rm.rewards.last;
+      if (k) hud.popUp(`${k}  +NITRO`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : '#7dff9a');
     }
     if (!racing || game.player.finished) {
       guide.el.style.opacity = '0';
