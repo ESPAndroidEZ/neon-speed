@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import { mergeByMaterial } from './mergeMeshes';
 import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, type Object3D, type Texture } from 'three';
 import { damp } from '../core/math';
@@ -151,7 +152,7 @@ export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loado
       steerVis = damp(steerVis, steer * 0.5, 14, dt);
       for (const s of spinners) s.rotation.x = spin;
       for (const p of steerPivots) p.rotation.y = steerVis;
-      tailMat.color.copy(bright(0xff1010, braking ? 6 : 2.2));
+      tailMat.color.setHex(0xff1010).multiplyScalar(braking ? LOOK_CONFIG.brakeLight.braking : LOOK_CONFIG.brakeLight.idle);
       pitch = damp(pitch, Math.max(-0.05, Math.min(0.05, -longAccel * 0.004)), 8, dt);
       roll = damp(roll, Math.max(-0.1, Math.min(0.1, latAccel * 0.0045)), 8, dt);
       body.rotation.x = pitch; // braking (negative accel) dives the nose

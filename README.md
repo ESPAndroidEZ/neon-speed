@@ -27,7 +27,7 @@ Working with the AI agents: see `CLAUDE.md` (Claude Code) and `AGENTS.md` (Qwen 
 
 ```bash
 scripts/start-qwen.sh                                   # llama.cpp server on 127.0.0.1:8080
-export OPENAI_API_BASE=http://127.0.0.1:8080/v1 OPENAI_API_KEY=local-dummy-key
+# Hermes reads the server address from ~/.hermes/config.yaml (base_url http://127.0.0.1:8080/v1)
 git worktree add ../racer-qwen -b qwen/001-asset-loader # once per task
 cd ../racer-qwen && scripts/qwen.sh 001                 # runs the task, builds, commits
 ```

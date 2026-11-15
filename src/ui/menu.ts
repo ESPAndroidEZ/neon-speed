@@ -21,6 +21,7 @@ import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money } from './uiKit';
 import { onLangChange, t } from '../i18n';
 import { langRow } from './langRow';
+import { garageLayout, type GarageLayout } from './garageConfig';
 
 export interface MenuDeps {
   /** Screen and phone-control rows for Settings (ui/controlSettings). */
@@ -34,8 +35,8 @@ export interface MenuDeps {
   hud?: { setScale(s: number): void };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;
-  /** Slide the showroom car sideways on screen (garage panel sits on the left). */
-  shift: (metres: number) => void;
+  /** Put the showroom car where this screen layout wants it (ui/garageConfig). */
+  layout: (l: GarageLayout) => void;
   /** Visual of the car currently on show. */
   visual: () => CarVisual | null;
   /** Hook for when a GLB replaces the procedural body. */
@@ -82,8 +83,8 @@ export class Menu {
     this.d.showroom(c, this.d.store.data.paint[c.id] ?? c.color, this.d.store.data.glow[c.id]);
   }
 
-  private mount(el: HTMLElement, s: 'title' | 'main' | 'other', shift = 0, again: (() => void) | null = null): void {
-    this.d.shift(shift);
+  private mount(el: HTMLElement, s: 'title' | 'main' | 'other', layout: GarageLayout = 'main', again: (() => void) | null = null): void {
+    this.d.layout(layout);
     this.again = again;
     this.layer?.remove();
     this.cash?.remove();
@@ -113,7 +114,7 @@ export class Menu {
     el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
     if (!isPhone()) el.append(h('div', 'rb-sub', t('menu.keys')));
     el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
-    this.mount(el, 'title', 0, () => this.title());
+    this.mount(el, 'title', 'main', () => this.title());
   }
 
   main(): void {
@@ -128,31 +129,31 @@ export class Menu {
       el.append(c);
     }
     el.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
-    this.mount(el, 'main', 0, () => this.main());
+    this.mount(el, 'main', 'menu', () => this.main());
   }
 
   load(): void {
-    this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other', 0, () => this.load());
+    this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other', 'main', () => this.load());
   }
 
   tune(): void {
-    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other', 0, () => this.tune());
+    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other', 'main', () => this.tune());
   }
 
   crew(): void {
-    this.mount(buildCrewMenu(this.d.store, () => this.main()), 'other', 0, () => this.crew());
+    this.mount(buildCrewMenu(this.d.store, () => this.main()), 'other', 'main', () => this.crew());
   }
 
   story(): void {
-    this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other', 0, () => this.story());
+    this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other', 'main', () => this.story());
   }
 
   showEnding(chapter = 1): void {
-    this.mount(buildEnding(this.d.store.data.career, chapter, () => this.main()), 'other', 0, () => this.showEnding(chapter));
+    this.mount(buildEnding(this.d.store.data.career, chapter, () => this.main()), 'other', 'main', () => this.showEnding(chapter));
   }
 
   maps(): void {
-    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other', 0, () => this.maps());
+    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other', 'main', () => this.maps());
   }
 
   weather(def: TrackDef): void {
@@ -179,15 +180,15 @@ export class Menu {
       row.append(card);
     }
     el.append(row, h('div', 'rb-sub', t('menu.pink')), button(t('common.back'), () => this.maps()));
-    this.mount(el, 'other', 0, () => this.weather(def));
+    this.mount(el, 'other', 'main', () => this.weather(def));
   }
 
   garage(): void {
     const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: () => this.main() });
-    this.mount(el, 'other', window.innerWidth > 800 ? 1.9 : 0, () => this.garage());
+    this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage());
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other', 0, () => this.settings());
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other', 'main', () => this.settings());
   }
 }

@@ -11,6 +11,7 @@ import { button, h } from './uiKit';
 import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
+import { applyUiSizes } from './uiSizes';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -43,6 +44,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.voice.enabled = s.voice;
   d.auto.enabled = s.autoQuality;
   d.game.physicsLevel = s.weatherPhysics;
+  applyUiSizes(s);
   d.game.chase.tuning.shake = { OFF: 0, LOW: 0.5, NORMAL: 1 }[s.cameraShake];
 }
 
@@ -132,12 +134,26 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     b.style.minWidth = '100px';
     wp.append(b);
   }
+  const sizeRow = (label: 'ctl.subSize' | 'ctl.mapSize', key: 'subtitleSize' | 'minimapSize'): HTMLElement => {
+    const row = h('div', 'rb-row', `<span class="rb-lbl">${t(label)}</span>`);
+    for (const sz of ['S', 'M', 'L'] as const) {
+      const b = button(t(`size.${sz}`), () => {
+        s[key] = sz;
+        applySettings(d);
+        d.store.commit();
+        row.querySelectorAll('button').forEach((x) => x.classList.toggle('hot', x === b));
+      }, s[key] === sz ? 'hot' : '');
+      b.style.minWidth = '90px';
+      row.append(b);
+    }
+    return row;
+  };
   const refreshWp = (): void => {
     wp.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.weatherPhysics));
     hint.textContent = t(`hint.wphys.${s.weatherPhysics}`);
   };
   refreshWp();
-  root.append(vol, engVol, sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button(t('common.back'), d.onBack));
+  root.append(vol, engVol, sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button(t('common.back'), d.onBack));
   return root;
 }
 

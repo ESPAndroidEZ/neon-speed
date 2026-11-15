@@ -9,6 +9,7 @@ import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
 import { button, h, money } from './uiKit';
 import { t, tx } from '../i18n';
+import { garageLayout } from './garageConfig';
 
 export interface GarageDeps {
   store: SaveStore;
@@ -36,7 +37,7 @@ const clamp01 = (v: number): number => Math.max(0.04, Math.min(1, v));
 export function buildGarage(d: GarageDeps): HTMLElement {
   const root = h('div', 'rb-layer');
   // desktop: panel on the left, car on the right; narrow screens: bottom sheet
-  const wide = window.innerWidth > 800;
+  const wide = garageLayout(window.innerWidth) === 'side';
   root.style.justifyContent = wide ? 'center' : 'flex-end';
   root.style.alignItems = wide ? 'flex-start' : 'center';
   root.style.padding = wide ? '0 0 0 max(24px,3vw)' : '0 0 2vh';
@@ -55,7 +56,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   const paintOf = (c: CarSpec): number => d.store.data.paint[c.id] ?? c.color;
   const glowOf = (c: CarSpec): number => d.store.data.glow[c.id] ?? GLOWS[0];
   const bar = (label: string, v: number, text: string): string =>
-    `<div class="rb-row" style="justify-content:space-between;flex-wrap:nowrap"><span style="flex:1 1 auto;text-align:left;min-width:0;overflow-wrap:anywhere">${label}</span><div class="rb-bar"><i style="width:${Math.round(clamp01(v) * 100)}%"></i></div><span style="width:92px;white-space:nowrap;text-align:right;opacity:.8">${text}</span></div>`;
+    `<div class="rb-row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:100px;flex:none;text-align:left;white-space:nowrap">${label}</span><div class="rb-bar"><i style="width:${Math.round(clamp01(v) * 100)}%"></i></div><span style="width:92px;white-space:nowrap;text-align:right;opacity:.8">${text}</span></div>`;
   const swatches = (list: readonly number[], cur: number, pick: (c: number) => void): HTMLElement => {
     const row = h('div', 'rb-row');
     row.style.margin = '6px 0';

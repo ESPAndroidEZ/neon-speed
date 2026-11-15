@@ -2,8 +2,9 @@
 # Run Qwen tasks back to back, unattended, in an isolated worktree (../racer-qwen). Never touches main.
 # Usage: scripts/qwen-queue.sh [--dry-run] 005 003 007 ...
 # Per task: reset the worktree to a fresh branch qwen/<task-file-name> from main, npm install if needed,
-# run scripts/qwen.sh <n> (Hermes) under `timeout 35m`, log to logs/qwen/<task>.log,
-# append one result line to logs/qwen/summary.txt, then continue with the next task even if this one failed.
+# run scripts/qwen.sh <n> (Hermes) under `timeout 30m`, log to logs/qwen/<task>.log,
+# append one result line to logs/qwen/summary.txt. The build must be green before the next task starts: a red build
+# (or a task that failed/timed out) HALTS the queue with a HALTED line (CONTINUE_ON_RED=1 keeps going instead).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WT="$ROOT/../racer-qwen"
@@ -44,7 +45,7 @@ for n in "${TASKS[@]}"; do
 
   # 3. run Qwen (the baton line in the worktree comes from main: it must say 'Baton: qwen')
   start=$(date +%s)
-  run bash -c "cd '$WT' && timeout ${QWEN_TIMEOUT:-35m} scripts/qwen.sh '$n' > '$log' 2>&1"
+  run bash -c "cd '$WT' && timeout ${QWEN_TIMEOUT:-30m} scripts/qwen.sh '$n' > '$log' 2>&1"
   rc=$?
   mins=$(( ($(date +%s) - start) / 60 ))
 
@@ -56,5 +57,6 @@ for n in "${TASKS[@]}"; do
   changed=$(git -C "$WT" diff --name-only "$(git -C "$WT" merge-base main "$branch")" "$branch" 2>/dev/null | grep -v "^docs/handoff.md$" | wc -l)
   state=DONE; [ "$changed" = 0 ] && state=EMPTY; [ "$rc" = 124 ] && state=TIMEOUT; [ "$rc" != 0 ] && [ "$rc" != 124 ] && state=FAILED
   sum "$n $name $state exit=$rc build=$build commits=$commits files=$changed minutes=$mins log=logs/qwen/$name.log"
+  if [ "$build" != ok ] && [ "${CONTINUE_ON_RED:-0}" != 1 ]; then sum "HALTED after $n: build is red (logs/qwen/$name.log); fix or rerun the rest"; say "build red after $n: queue halted"; exit 1; fi
 done
 say "queue finished"

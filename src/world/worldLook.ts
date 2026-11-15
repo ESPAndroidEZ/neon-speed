@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import { Color, type MeshBasicMaterial, type PointsMaterial, type MeshStandardMaterial, type Texture } from 'three';
 import type { WeatherProfile } from '../types/game';
 
@@ -20,10 +21,10 @@ const ROAD_SNOW = new Color(0x6f7889);
 export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
   const wet = p.name === 'RAIN';
   const snow = p.name === 'SNOW';
-  t.roadMat.roughness = p.roadRoughness;
-  t.roadMat.metalness = wet ? 0.55 : snow ? 0.05 : 0.35;
+  t.roadMat.roughness = p.roadRoughness * LOOK_CONFIG.road.roughnessScale;
+  t.roadMat.metalness = wet ? LOOK_CONFIG.road.metalnessWet : snow ? LOOK_CONFIG.road.metalnessSnow : LOOK_CONFIG.road.metalnessDry;
   t.roadMat.envMap = t.env;
-  t.roadMat.envMapIntensity = wet ? 1.0 : snow ? 0.1 : 0.5;
+  t.roadMat.envMapIntensity = wet ? LOOK_CONFIG.road.envWet : snow ? LOOK_CONFIG.road.envSnow : LOOK_CONFIG.road.envDry;
   t.roadMat.color.copy(snow ? ROAD_SNOW : ROAD_DRY);
   t.vergeMat.color.setHex(snow ? 0x5b6577 : 0x1d2128);
   t.groundMat.color.setHex(snow ? 0x3f4858 : 0x14161c);

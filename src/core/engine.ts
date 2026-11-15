@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import {
   ACESFilmicToneMapping,
   Color,
@@ -40,7 +41,7 @@ export const FIXED_DT = 1 / 60;
 const MAX_FRAME_DT = 0.1; // clamp stalls (tab switch, GC) so we never fast-forward the sim
 const MAX_SUBSTEPS = 5; // beyond this we drop the backlog instead of spiralling
 
-const DEFAULT_BLOOM: BloomSettings = { enabled: true, strength: 0.85, radius: 0.55, threshold: 0.85 };
+const DEFAULT_BLOOM: BloomSettings = { enabled: true, strength: 0.85 * LOOK_CONFIG.bloom.strength, radius: LOOK_CONFIG.bloom.radius, threshold: Math.max(0.85, LOOK_CONFIG.bloom.threshold) };
 
 /**
  * Owns the renderer, the one scene, the one camera, the post-processing chain and the main loop.
@@ -96,7 +97,7 @@ export class Engine implements Disposable {
     this.container.appendChild(this.renderer.domElement);
 
     this.scene.background = new Color(0x05060d);
-    this.scene.fog = new FogExp2(0x070914, 0.011);
+    this.scene.fog = new FogExp2(0x070914, 0.011 * LOOK_CONFIG.fog.densityScale);
     this.camera = new PerspectiveCamera(60, w / h, 0.1, 800);
 
     const target = new WebGLRenderTarget(w, h, {

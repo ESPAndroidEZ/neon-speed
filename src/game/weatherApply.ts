@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import { Color, FogExp2 } from 'three';
 import type { Engine } from '../core/engine';
 import { setGrade } from '../core/grade';
@@ -19,13 +20,13 @@ export function applyWeather(engine: Engine, hud: Hud, world: World, w: Weather)
   // district tint on the weather fog, scaled by the look
   bg.setHex(p.fogColor).lerp(tint.setHex(paletteOf(world.def.id).fog), 0.55);
   if (fog instanceof FogExp2) {
-    fog.density = p.fogDensity * look.fogK;
+    fog.density = p.fogDensity * look.fogK * LOOK_CONFIG.fog.densityScale;
     fog.color.copy(bg);
   }
   engine.scene.background = bg;
   const g = setGrade(w);
   engine.renderer.toneMappingExposure = g.exposure * look.exposure;
-  engine.setBloom({ strength: qualityNow().bloomStrength * g.bloomK * look.bloomK, threshold: g.bloomThreshold });
+  engine.setBloom({ strength: qualityNow().bloomStrength * g.bloomK * look.bloomK * LOOK_CONFIG.bloom.strength, radius: LOOK_CONFIG.bloom.radius, threshold: Math.max(g.bloomThreshold, LOOK_CONFIG.bloom.threshold) });
   hud.setWeather(w);
   world.setWeather(p);
 }

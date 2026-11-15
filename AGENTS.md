@@ -7,6 +7,7 @@ Only work when `docs/handoff.md` says `Baton: qwen`; otherwise stop and tell the
 - No `enum`, `namespace` or constructor parameter properties; declare fields explicitly.
 - Type-only imports use `import type`.
 - Import only from `three`, `three/addons/*` and `../types/game`. No new packages.
+  Exceptions, only when the task's Files/Behaviour says so: `../render/lookConfig` (LOOK_CONFIG, read-only data), `../ui/garageConfig` (GARAGE_CONFIG), `../i18n` (`t(key, params)` and `tx(english)`; every visible string goes through `t()` with a key added to BOTH `src/i18n/en*.ts` and `es*.ts`, same keys, same `{params}`).
 - Do not edit `src/types/*`, `src/core/*`, `src/camera/*`, `src/physics/carController.ts`, `src/main.ts`.
 - No allocation in per-frame code: reuse vectors, no `new Vector3()` inside update loops.
 - Car space: +Z nose, +X left. `steer > 0` is LEFT.

@@ -4,7 +4,7 @@
 # Only one agent works at a time: refuses unless docs/handoff.md says "Baton: qwen" (override: FORCE=1).
 # Task file lines used here:  Files: <paths Qwen may change, space separated; a trailing / allows a folder>
 #                             Check: <extra command that must pass after the build, e.g. scripts/model-build.sh cars/350z>
-# Hermes has no per-file lock like Aider, so after the run anything outside Files: is reverted.
+# Hermes has no per-file lock, so after the run anything outside Files: is reverted.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 n="$1"; TURNS="${TURNS:-80}"; BUDGET="${BUDGET:-2700}"
@@ -12,7 +12,7 @@ n="$1"; TURNS="${TURNS:-80}"; BUDGET="${BUDGET:-2700}"
 grep -q '^Baton: qwen' docs/handoff.md || [ "${FORCE:-}" = 1 ] || {
   echo "The baton is not with Qwen (docs/handoff.md). Let Claude finish and run /checkpoint, or use FORCE=1."; exit 1; }
 command -v hermes >/dev/null || { echo "hermes not found"; exit 1; }
-curl -fs http://127.0.0.1:8080/health >/dev/null || { echo "Qwen server is down: run ./start-qwen.sh"; exit 1; }
+curl -fs http://127.0.0.1:8080/health >/dev/null || { echo "Qwen server is down: run scripts/start-qwen.sh"; exit 1; }
 
 task=$(ls docs/tasks/"$1"-*.md 2>/dev/null | head -1)
 [ -n "$task" ] || { echo "No task file docs/tasks/$1-*.md"; exit 1; }

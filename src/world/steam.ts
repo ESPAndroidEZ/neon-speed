@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import type { Scene } from 'three';
 import { ParticlePool } from '../fx/particles';
 import type { Placed } from './propsLayout';
@@ -15,12 +16,12 @@ export class Steam {
 
   update(dt: number, camX: number, camZ: number, viewportPx: number): void {
     this.pool.setScale(viewportPx * 0.9);
-    this.acc += dt * 14;
+    this.acc += dt * LOOK_CONFIG.mist.rate;
     while (this.acc >= 1) {
       this.acc -= 1;
       for (const v of this.vents) {
         if (Math.abs(v.x - camX) > 90 || Math.abs(v.z - camZ) > 90) continue;
-        this.pool.emit(v.x + (Math.random() - 0.5) * 0.4, 0.5, v.z + (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4, 1.4 + Math.random() * 0.8, (Math.random() - 0.5) * 0.4, 2.2 + Math.random(), 0.5, 2.6, 0.7, 0.75, 0.85, 0.28);
+        this.pool.emit(v.x + (Math.random() - 0.5) * 0.4, 0.5, v.z + (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4, (1.4 + Math.random() * 0.8) * LOOK_CONFIG.mist.riseScale, (Math.random() - 0.5) * 0.4, 2.2 + Math.random(), 0.5, 2.6, 0.7, 0.75, 0.85, LOOK_CONFIG.mist.opacity);
       }
     }
     this.pool.update(dt);

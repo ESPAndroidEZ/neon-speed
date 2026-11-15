@@ -198,10 +198,10 @@ export class Game {
     this.views.update(alpha, frameDt);
     this.syncView();
     if (this.state === 'MENU') {
-      const v = this.views.views[0];
-      this.showroomCam.update(this.d.engine.camera, frameDt, v.x, v.z);
+      this.showroomCam.update(this.d.engine.camera, frameDt, this.views.views[0].x, this.views.views[0].z);
       return;
     }
+    this.showroomCam.release(this.d.engine.camera);
     const p = this.rm.player;
     this.chase.setNitro(p.car.drivetrain.nitroActive);
     if (this.state === 'CINEMATIC') {

@@ -123,8 +123,8 @@ menu = new Menu({
     game.showroom(c, p, g);
     cast.stage('mara');
   },
-  shift: (m) => {
-    game.showroomCam.shift = m;
+  layout: (l) => {
+    game.showroomCam.layout = l;
   },
   visual: () => game.views.views[0]?.visual ?? null,
   onSwap: (fn) => {

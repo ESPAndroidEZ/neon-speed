@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import type { Engine } from './engine';
 import { GRAPHICS, PRESETS, usePreset } from './graphics';
 import { grade } from './grade';
@@ -47,7 +48,7 @@ export function applyQuality(engine: Engine, q: Quality, keepCustom = false): vo
   if (!keepCustom) usePreset(q);
   const t = qualityNow();
   engine.maxPixelRatio = t.pixelRatio * GRAPHICS.resScale;
-  engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength * grade.bloomK });
+  engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength * grade.bloomK * LOOK_CONFIG.bloom.strength, radius: LOOK_CONFIG.bloom.radius });
   engine.resize();
 }
 
