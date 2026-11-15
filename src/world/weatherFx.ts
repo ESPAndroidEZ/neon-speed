@@ -1,90 +1,86 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Color, InstancedMesh, LineBasicMaterial, LineSegments, MeshBasicMaterial, Object3D, Points, PointsMaterial, RingGeometry, type PerspectiveCamera, type Scene } from 'three';
+import { Vector3, type Camera, type InstancedBufferGeometry, type Mesh, type PerspectiveCamera, type PlaneGeometry, type Scene, type ShaderMaterial } from 'three';
 import { qualityNow } from '../core/quality';
-import { clamp, smoothstep } from '../core/math';
+import { clamp } from '../core/math';
 import type { Disposable, WeatherProfile } from '../types/game';
-import { makePoolTexture } from './textures';
+import { precipCover } from './precipCover';
+import { createPrecipState, stepPrecip, wrapN, type PrecipBox, type PrecipState } from './precipMath';
+import { makeDrops, makeSplashes, makeStreaks } from './precipMeshes';
+import { WindLines } from './windLines';
 
 export interface WeatherFx extends Disposable {
-  /** Per display frame. `speed` = car speed (m/s) for wind streaks. Particles live in a box around the camera. */
+  /** Per display frame. `speed` = car speed (m/s) for wind lines. */
   update(frameDt: number, camera: PerspectiveCamera, speed: number): void;
   setProfile(p: WeatherProfile): void;
   /** 0..1 dynamic weather: rain / snow intensity ramps in over time. */
   setIntensity(k: number): void;
   /** Dev showcase: draw rain, snow and wind lines at full strength. */
   setShowcase(on: boolean): void;
+  /** For tests: CPU state of the rain and snow volumes and every mesh (fixed pools). */
+  readonly debug: { rain: PrecipState; snow: PrecipState; meshes: readonly Mesh<InstancedBufferGeometry | PlaneGeometry, ShaderMaterial>[] };
 }
 
-const W = 44;
-const H = 26;
-const RAIN = 5000;
-const SNOW = 3600;
-const RIPPLES = 110;
-const WIND = 160;
-const wrap = (v: number, n: number): number => ((v % n) + n) % n;
+export const RAIN_BOX: PrecipBox = { sx: 40, sy: 22, sz: 40, ahead: 9, lift: 3 };
+export const SNOW_BOX: PrecipBox = { sx: 36, sy: 20, sz: 36, ahead: 8, lift: 3 };
+export const RAIN_N = 7000;
+export const SNOW_N = 4500;
+const SPLASH_N = 220;
+
+type Pool = Mesh<InstancedBufferGeometry, ShaderMaterial>;
 
 /**
- * Rain streaks with splash ripples on the road, snow flakes with turbulence, and wind lines at high speed.
- * Fixed-size buffers, no allocation per frame; counts follow the quality tier and the weather intensity.
+ * Precipitation as one GPU system (see precipMath / precipShaders): fixed pools of instanced quads whose world
+ * positions come from seeds + drift + wrap in the vertex shader. Rain = additive streaks stretched by speed relative
+ * to the camera, with splash rings on the road; snow = soft flakes with turbulence; optional windscreen droplets.
+ * Killed under tunnel roofs and in the player's car (precipCover). The CPU only writes a few uniforms per frame.
  */
 export function createWeatherFx(scene: Scene): WeatherFx {
   let precip = 0;
   let name: WeatherProfile['name'] = 'CLEAR';
   let intensity = 1;
   let showcase = false;
-  let t = 0;
-  const last = { x: 0, y: 0, z: 0, set: false };
+  let gustT = 0;
+  let splashClock = 0;
+  let inside = 0;
+  let main: Camera | null = null;
+  const fwd = new Vector3();
+  const rainS = createPrecipState();
+  const snowS = createPrecipState();
+  const rain: Pool = makeStreaks(RAIN_N, RAIN_BOX.sx, RAIN_BOX.sy, RAIN_BOX.sz, { color: 0x9fb4d8, alpha: 0.3, width: 0.011, exposure: 0.045, minLen: 0.35, maxLen: 2.0, turb: 0, round: 0, additive: true }, 11);
+  const snow: Pool = makeStreaks(SNOW_N, SNOW_BOX.sx, SNOW_BOX.sy, SNOW_BOX.sz, { color: 0xe4ebf6, alpha: 0.8, width: 0.045, exposure: 0.012, minLen: 0, maxLen: 0.45, turb: 0.6, round: 1, additive: false }, 23);
+  const splash: Pool = makeSplashes(SPLASH_N, 30, 30);
+  const drops: Mesh<PlaneGeometry, ShaderMaterial> = makeDrops();
+  const meshes: Mesh<InstancedBufferGeometry | PlaneGeometry, ShaderMaterial>[] = [rain, snow, splash, drops];
+  const base = [0.3, 0.8, 0.25, 0];
+  // reflections (road mirror) render the scene with another camera: precipitation is drawn for the main view only
+  meshes.forEach((m, i) => {
+    m.onBeforeRender = (_r, _s, cam) => {
+      m.material.uniforms.uAlpha.value = cam === main ? base[i] : 0;
+      m.material.uniformsNeedUpdate = true;
+    };
+  });
+  const wind = new WindLines(scene);
+  scene.add(rain, snow, splash, drops);
 
-  // ── rain: line segments (local box coordinates, shifted against camera motion so drops stay put in the world)
-  const rl = new Float32Array(RAIN * 3);
-  for (let i = 0; i < RAIN; i++) rl.set([Math.random() * W, Math.random() * H, Math.random() * W], i * 3);
-  const rainPos = new Float32Array(RAIN * 6);
-  const rainGeo = new BufferGeometry();
-  rainGeo.setAttribute('position', new BufferAttribute(rainPos, 3).setUsage(35048));
-  const rain = new LineSegments(rainGeo, new LineBasicMaterial({ color: new Color(0xaabfe8), transparent: true, opacity: 0.3, depthWrite: false, blending: AdditiveBlending }));
-  rain.frustumCulled = false;
-  rain.visible = false;
-
-  // ── snow: points
-  const sl = new Float32Array(SNOW * 3);
-  const sp = new Float32Array(SNOW); // sway phase
-  for (let i = 0; i < SNOW; i++) {
-    sl.set([Math.random() * W, Math.random() * H, Math.random() * W], i * 3);
-    sp[i] = Math.random() * 6.28;
-  }
-  const snowPos = new Float32Array(SNOW * 3);
-  const snowGeo = new BufferGeometry();
-  snowGeo.setAttribute('position', new BufferAttribute(snowPos, 3).setUsage(35048));
-  const snow = new Points(snowGeo, new PointsMaterial({ map: makePoolTexture(), color: 0xffffff, size: 0.27, sizeAttenuation: true, transparent: true, opacity: 0.72, depthWrite: false }));
-  snow.frustumCulled = false;
-  snow.visible = false;
-
-  // ── splash ripples on the road
-  const ripMat = new MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, depthWrite: false, blending: AdditiveBlending });
-  const ripples = new InstancedMesh(new RingGeometry(0.1, 0.15, 14).rotateX(-Math.PI / 2), ripMat, RIPPLES);
-  ripples.frustumCulled = false;
-  ripples.visible = false;
-  const rx = new Float32Array(RIPPLES);
-  const rz = new Float32Array(RIPPLES);
-  const ra = new Float32Array(RIPPLES).fill(9);
-  let rHead = 0;
-  let rAcc = 0;
-  const dummy = new Object3D();
-  const rc = new Color();
-
-  // ── wind lines
-  const wl = new Float32Array(WIND * 3);
-  for (let i = 0; i < WIND; i++) wl.set([(Math.random() - 0.5) * 16, 0.5 + Math.random() * 7, Math.random() * 30 - 8], i * 3);
-  const windPos = new Float32Array(WIND * 6);
-  const windGeo = new BufferGeometry();
-  windGeo.setAttribute('position', new BufferAttribute(windPos, 3).setUsage(35048));
-  const windMat = new LineBasicMaterial({ color: 0xcfe6ff, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending });
-  const wind = new LineSegments(windGeo, windMat);
-  wind.frustumCulled = false;
-  let heading = 0;
-
-  scene.add(rain, snow, ripples, wind);
+  const pushCover = (u: ShaderMaterial['uniforms']): void => {
+    const c = precipCover;
+    u.uCar.value.set(c.carX, c.carY, c.carZ, c.carR);
+    u.uTunA.value.set(c.ax, c.az, c.mx, c.mz);
+    u.uTunB.value.set(c.bx, c.bz, c.valid ? c.tunHalf : 0, c.tunTop);
+  };
+  const pushVolume = (m: Pool, s: PrecipState, cam: Vector3, fallX: number, fallY: number, fallZ: number, density: number, fov: number): void => {
+    const u = m.material.uniforms;
+    u.uCentre.value.set(s.cx, s.cy, s.cz);
+    u.uDrift.value.set(s.dx, s.dy, s.dz);
+    u.uCamPos.value.copy(cam);
+    u.uRel.value.set(fallX - s.vx, fallY - s.vy, fallZ - s.vz);
+    u.uTime.value = s.time;
+    u.uDensity.value = density;
+    u.uPix.value = (2 * Math.tan((fov * Math.PI) / 360)) / 620;
+    pushCover(u);
+  };
 
   return {
+    debug: { rain: rainS, snow: snowS, meshes },
     setProfile(p) {
       name = p.name;
       precip = p.precipitation;
@@ -96,115 +92,62 @@ export function createWeatherFx(scene: Scene): WeatherFx {
       showcase = on;
     },
     update(dt, camera, speed) {
-      t += dt;
+      main = camera;
+      const d = dt > 0 && dt < 0.25 ? dt : 1 / 60;
+      gustT = wrapN(gustT + d, Math.PI * 100);
       const c = camera.position;
-      const dx = last.set ? c.x - last.x : 0;
-      const dy = last.set ? c.y - last.y : 0;
-      const dz = last.set ? c.z - last.z : 0;
-      last.x = c.x;
-      last.y = c.y;
-      last.z = c.z;
-      last.set = true;
-      const q = qualityNow().particles;
+      camera.getWorldDirection(fwd);
+      const q = qualityNow();
+      const k = showcase ? 1 : intensity * Math.max(0.5, precip);
+      const density = clamp(k * q.particles, 0, 1);
       const showRain = showcase || (name === 'RAIN' && intensity > 0.02);
       const showSnow = showcase || (name === 'SNOW' && intensity > 0.02);
+      const gust = Math.sin(gustT * 0.4) * 0.9 + Math.sin(gustT * 1.3) * 0.4;
+      inside += ((precipCover.valid ? precipCover.inside : 0) - inside) * (1 - Math.exp(-6 * d));
+
+      const rfx = 1 + gust * 0.5;
+      const rfz = 0.5;
+      stepPrecip(rainS, RAIN_BOX, d, c.x, c.y, c.z, fwd.x, fwd.z, rfx, -13, rfz);
       rain.visible = showRain;
-      snow.visible = showSnow;
-      ripples.visible = showRain;
-      const k = showcase ? 1 : intensity * Math.max(0.5, precip);
-      const sdx = clamp(dx, -3, 3);
-      const sdz = clamp(dz, -3, 3);
-
+      splash.visible = showRain;
       if (showRain) {
-        const n = Math.floor(RAIN * k * q);
-        const slantX = -clamp(dx / Math.max(dt, 1e-3), -90, 90) * 0.012 + 0.25;
-        const slantZ = -clamp(dz / Math.max(dt, 1e-3), -90, 90) * 0.012;
-        for (let i = 0; i < n; i++) {
-          const o = i * 3;
-          rl[o] = wrap(rl[o] - sdx, W);
-          rl[o + 1] = wrap(rl[o + 1] - dy - 24 * dt, H);
-          rl[o + 2] = wrap(rl[o + 2] - sdz, W);
-          const x = c.x + rl[o] - W / 2;
-          const y = c.y + rl[o + 1] - H / 2 + 6;
-          const z = c.z + rl[o + 2] - W / 2;
-          const p6 = i * 6;
-          rainPos[p6] = x; rainPos[p6 + 1] = y; rainPos[p6 + 2] = z;
-          rainPos[p6 + 3] = x + slantX; rainPos[p6 + 4] = y + 0.9; rainPos[p6 + 5] = z + slantZ;
-        }
-        rainGeo.setDrawRange(0, n * 2);
-        rainGeo.attributes.position.needsUpdate = true;
-        // ripples: spawn on the road around the camera, grow and fade
-        rAcc += dt * 140 * k * q;
-        while (rAcc >= 1) {
-          rAcc -= 1;
-          rx[rHead] = c.x + (Math.random() - 0.5) * 36;
-          rz[rHead] = c.z + (Math.random() - 0.5) * 36;
-          ra[rHead] = 0;
-          rHead = (rHead + 1) % RIPPLES;
-        }
-        for (let i = 0; i < RIPPLES; i++) {
-          ra[i] += dt * 2.2;
-          const a = ra[i];
-          const live = a < 1;
-          dummy.position.set(rx[i], 0.05, rz[i]);
-          dummy.scale.setScalar(live ? 0.7 + a * 3.2 : 0.0001);
-          dummy.updateMatrix();
-          ripples.setMatrixAt(i, dummy.matrix);
-          ripples.setColorAt(i, rc.setScalar(live ? (1 - a) * 0.9 : 0));
-        }
-        ripples.instanceMatrix.needsUpdate = true;
-        if (ripples.instanceColor) ripples.instanceColor.needsUpdate = true;
+        pushVolume(rain, rainS, c, rfx, -13, rfz, density, camera.fov);
+        base[0] = 0.3;
+        splashClock = wrapN(splashClock + d * 1.7, 1000);
+        const u = splash.material.uniforms;
+        const pc = precipCover;
+        u.uCentre.value.set(rainS.cx, rainS.cy, rainS.cz);
+        u.uClock.value = splashClock;
+        u.uDensity.value = density;
+        u.uCamPos.value.copy(c);
+        u.uRoad.value.set(pc.rx, pc.ry, pc.rz, pc.valid ? pc.roadHalf : 0);
+        u.uRoadT.value.set(pc.tx, pc.tz, pc.grade);
+        pushCover(u);
       }
 
-      if (showSnow) {
-        const n = Math.floor(SNOW * k * q);
-        const gust = Math.sin(t * 0.4) * 0.9 + Math.sin(t * 1.3) * 0.4; // wind gusts
-        for (let i = 0; i < n; i++) {
-          const o = i * 3;
-          const ph = sp[i];
-          sl[o] = wrap(sl[o] - sdx + (Math.sin(t * 0.9 + ph) * 0.9 + gust) * dt, W);
-          sl[o + 1] = wrap(sl[o + 1] - dy - (1.9 + Math.sin(ph * 3 + t) * 0.4) * dt, H);
-          sl[o + 2] = wrap(sl[o + 2] - sdz + Math.cos(t * 0.7 + ph) * 0.8 * dt, W);
-          snowPos[o] = c.x + sl[o] - W / 2;
-          snowPos[o + 1] = c.y + sl[o + 1] - H / 2 + 6;
-          snowPos[o + 2] = c.z + sl[o + 2] - W / 2;
-        }
-        snowGeo.setDrawRange(0, n);
-        snowGeo.attributes.position.needsUpdate = true;
-      }
+      const sfx = gust;
+      const sfz = 0.4;
+      stepPrecip(snowS, SNOW_BOX, d, c.x, c.y, c.z, fwd.x, fwd.z, sfx, -1.7, sfz);
+      snow.visible = showSnow;
+      if (showSnow) pushVolume(snow, snowS, c, sfx, -1.7, sfz, density, camera.fov);
 
-      // wind lines: white streaks racing past the camera, only at high speed
-      const vis = showcase ? 1 : smoothstep(34, 70, speed);
-      windMat.opacity = vis * 0.5;
-      wind.visible = vis > 0.02 && qualityNow().fx;
-      if (wind.visible) {
-        const len = 1.5 + speed * 0.08;
-        const mx = Math.hypot(dx, dz) > 0.02 ? dx : Math.sin(heading);
-        const mz = Math.hypot(dx, dz) > 0.02 ? dz : Math.cos(heading);
-        const ml = Math.hypot(mx, mz) || 1;
-        const fx = mx / ml;
-        const fz = mz / ml;
-        heading = Math.atan2(fx, fz);
-        for (let i = 0; i < WIND; i++) {
-          const o = i * 3;
-          wl[o + 2] -= (speed * 1.6 + 8) * dt;
-          if (wl[o + 2] < -10) wl[o + 2] += 40;
-          const lx = wl[o];
-          const lz = wl[o + 2];
-          const wx = c.x + fz * lx + fx * lz;
-          const wz = c.z - fx * lx + fz * lz;
-          const p6 = i * 6;
-          windPos[p6] = wx; windPos[p6 + 1] = wl[o + 1]; windPos[p6 + 2] = wz;
-          windPos[p6 + 3] = wx + fx * len; windPos[p6 + 4] = wl[o + 1]; windPos[p6 + 5] = wz + fz * len;
-        }
-        windGeo.attributes.position.needsUpdate = true;
-      }
+      // windscreen droplets: faint, rain only, never in a tunnel
+      const dropA = showRain && q.fx ? 0.1 * k * (1 - inside) : 0;
+      base[3] = dropA;
+      drops.visible = dropA > 0.004;
+      const du = drops.material.uniforms;
+      du.uTime.value = rainS.time;
+      du.uAspect.value = camera.aspect;
+
+      wind.update(d, rainS, speed, q.fx, showcase);
     },
     dispose() {
-      for (const o of [rain, snow, ripples, wind]) {
-        scene.remove(o);
-        o.geometry.dispose();
+      for (const m of meshes) {
+        scene.remove(m);
+        m.geometry.dispose();
+        m.material.dispose();
       }
+      wind.dispose(scene);
     },
   };
 }
