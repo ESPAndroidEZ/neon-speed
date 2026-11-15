@@ -44,12 +44,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rewards.ts (90) Racer fields the rewards read (structural, so tests can pass plain objects). | class RaceRewards; const REWARD; iface RewardRacer, RewardData; type RewardKind
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - save.ts (170) Paint per car id (0xRRGGBB). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality
-- saveParse.ts (78) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- saveParse.ts (80) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 ## src/data
 - barks.ts (63) Pre-race taunts for the versus screen (task 014). Keyed by rival id, four lines each. | const BARKS
 - carBuild.ts (21) What the player has done to each car: installed upgrades and the tuning setup (the save... | fn applyBuild; const getBuild, setBuild
 - carReal.ts (56) Real-world reference specs per car (typical published figures for the version named) an... | fn stageSpec; const REAL; iface StageSpec, RealSpec; type Drive
-- cars.ts (143) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
+- carSpecs.ts (76) Real specs for the v2 handling model (contract: types/cars.ts), from docs/car-data.md. ... | fn withSpec; const SPECS
+- cars.ts (144) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
 - characters.ts (38) What a person looks like. The 2D portraits and the 3D figures are both built from this.... | const LOOKS, lookOf; iface Look; type HairStyle, Accessory, Build
 - engineSounds.ts (37) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
 - loadout.ts (110) How a car looks and sits: everything the garage can change without touching performance... | fn sanitizeLoadout, stanceEffect, applyStance; const FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, CALIPERS, defaultLoadout; iface Vinyl, Loadout; type Finish, GlowPattern
@@ -82,12 +83,12 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - upgrades.ts (82) Performance upgrades. POWER STAGE 0-4 (owner, 2026-11-15) replaces engine/turbo/ECU/exh... | fn applyUpgrades, sanitizeUpgrades; const UPGRADES, UPGRADE_IDS, findUpgrade; iface UpgradeLevel, UpgradeCategory; type UpgradeId, Upgrades
 ## src/dev
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
-- demoInput.ts (26) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
+- demoInput.ts (29) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
 - devStart.ts (99) THROWAWAY dev entry points driven by URL flags: `?skip ?demo ?ai ?at ?ff ?wi ?pause ?sh... | fn runDevStart; iface DevStartDeps
 - peopleGallery.ts (27) THROWAWAY dev scene (`?people`): 12 people in a row on the showroom stage, each playing... | fn showPeopleGallery
 - tuningPanel.ts (82) THROWAWAY dev panel: one slider per numeric field of the given objects, edited live. | class TuningPanel
 ## src/fx
-- exhaustFx.ts (55) Nitro flame cone and exhaust backfire flames (on lift-off, decel pops and upshifts) fro... | class ExhaustFx
+- exhaustFx.ts (59) Nitro particles per second per exhaust (before the quality tier's particle scale). | class ExhaustFx
 - finalFx.ts (74) One final pass before output: radial speed blur, chromatic aberration, vignette and fil... | class FinalFx
 - headlights.ts (56) Two pooled headlight SpotLights, assigned each frame to the player's car and the neares... | class HeadlightPool
 - juice.ts (156) Visual feedback: tyre smoke / spray / powder, skid marks, sparks, flames, backfire, rai... | class Juice
@@ -98,13 +99,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - cast.ts (139) The people in the world, all on the people contract (src/types/people) and the procedur... | class Cast
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - freeRace.ts (25) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace
-- game.ts (217) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
+- game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - ghost.ts (78) full or blocked storage: no ghost | fn attachGhost
 - ghostData.ts (59) Pure ghost-lap logic (no DOM, no three): recording at 10 Hz, best-lap choice and interp... | fn ghostPose; class GhostRecorder; const GHOST_HZ, isGhostLap; iface GhostLap, Pose
 - inputSetup.ts (37) Hand this to the Game; sources are keyboard, gamepad and touch merged (or the dev demo ... | fn createControls; iface Controls
 - pause.ts (62) Pause state and saving: pause on Esc or a hidden tab, autosave when pausing or leaving,... | class PauseController
-- raceFeedback.ts (50) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
+- raceFeedback.ts (53) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
 - racerViews.ts (90) Interpolated world pose, valid after update(). | class RacerViews; iface RacerView
 - radio.ts (131) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
@@ -124,30 +125,40 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/physics
 - aiDifficulty.ts (59) AI difficulty levels and personalities. Pure data: the AI reads these, nothing else cha... | const DIFFICULTIES, AI_SETTING, RUBBER_MAX, LEVELS, STYLES; iface Level, Style; type Difficulty, DriveStyle
 - aiLine.ts (108) The racing line of a track: lateral offsets from the centre line, line points, and the ... | fn racingLine, speedProfile; const marginFor; iface RacingLine, SpeedLimits
-- aiRacers.ts (197) AI driver: pure policy (no physics, no three). The car it drives uses the same physics ... | fn createAIRacer; iface AIOptions
+- aiRacers.ts (198) AI driver: pure policy (no physics, no three). The car it drives uses the same physics ... | fn createAIRacer; iface AIOptions
 - aiTraffic.ts (65) What the cars around one driver mean for its line and speed this step. Reused, never re... | fn readTraffic; const createTraffic; iface Traffic
-- assists.ts (38) Driving assists. STANDARD is the approved handling (all effects zero); BEGINNER adds he... | fn setAssist, applyDriving; const ASSIST_LEVELS, createAssist, clampSensitivity, DRIVING; iface Assist; type AssistLevel
+- assists.ts (45) Driving assists. STANDARD is the approved handling (all effects zero); BEGINNER adds he... | fn setAssist, applyDriving; const ASSIST_LEVELS, createAssist, clampSensitivity, DRIVING, HANDLING; iface Assist; type AssistLevel, HandlingModel, StabilityLevel
 - carCollision.ts (66) Car vs car using two circles per car. Mass based: the lighter car is pushed and bounced... | fn resolveCarPair
-- carController.ts (219) Arcade car, pure maths: bicycle model (u forward, v left, r yaw) with weight transfer, ... | class CarController; iface CarFlags
+- carController.ts (169) Arcade car, pure maths: bicycle model (u forward, v left, r yaw) with weight transfer, ... | class CarController; iface CarFlags
 - carRating.ts (63) PR class thresholds (lower bounds). Event restrictions and opponent matching use these. | fn rate; const CLASS_MIN, CLASSES, classOf, allowedInClass; iface Rating; type CarClass
 - carSnapshot.ts (36) JSON-safe copy of everything a car controller (and its drivetrain and drift scorer) rem... | fn snapshotCar, restoreCar
 - carStats.ts (46) 0-100 km/h, seconds. | fn measureCar; iface CarStats
-- carTuning.ts (141) Every number here is live-tunable from the in-game panel (backtick key). | fn createDefaultTuning, applyTuning; const GEAR_RATIOS, gearRatio, REVERSE_RATIO; iface CarTuning
+- carTuning.ts (145) Every number here is live-tunable from the in-game panel (backtick key). | fn createDefaultTuning, applyTuning; const GEAR_RATIOS, gearRatio, REVERSE_RATIO; iface CarTuning
 - driftScorer.ts (46) Chain scoring: points grow with speed x angle x chain time; banked after a calm spell, ... | class DriftScorer
 - driveEvents.ts (54) Event types pushed by the drivetrain. | class EventReader, EventChannel; const EV_UPSHIFT, EV_DOWNSHIFT, EV_LIFT, EV_CUT, EV_BACKFIRE
-- driveSplit.ts (43) Per-axle drive result (reused object, written every step: no allocation). | fn splitDrive; const createDriveOut, layoutOf; iface DriveOut; type Layout
 - drivetrain.ts (121) Engine, automatic 6-speed gearbox, reverse and nitro. Outputs one drive force at the wh... | class Drivetrain
 - dyno.ts (30) Newton metres at the crank (with full boost on turbo cars). | fn dynoCurve; iface DynoCurve
+## src/physics/legacy
+- driveSplit.ts (43) Per-axle drive result (reused object, written every step: no allocation). | fn splitDrive; const createDriveOut, layoutOf; iface DriveOut; type Layout
+- legacyStep.ts (80) Handling v1 (git tag handling-v1), kept verbatim as the `legacy` model: arcade bicycle ... | fn stepLegacy
 - loadTransfer.ts (49) Weight transfer for the bicycle model. Braking loads the front axle, acceleration the r... | class LoadTransfer
-- obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
 - stability.ts (70) Slide stability, the arcade part of the handling. Three small effects, all per-car data... | fn slideDamping, slideYaw, handbrakeCarry, driftHoldTarget
 - steering.ts (16) Front wheel angle: less lock at speed (steering assist shrinks it further, PRO keeps mo... | fn steerAngle
-- surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
+## src/physics
+- obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
+- surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - trackContact.ts (162) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
+## src/physics/v2
+- arcade.ts (68) v2 arcade layer (plan section 4), on top of the physics and never inside the force code... | fn steerV2, driveTrim, yawAssist, rearHold, carry
+- v2Params.ts (92) Diff codes (numbers, no enum): 0 open, 1 helical, 2 viscous, 3 clutch, 4 active. Layout... | fn buildV2, createV2; iface V2Car
+- v2Step.ts (126) Cornering stiffness grows slower than load: a more heavily loaded axle needs more slip ... | fn stepV2
+- v2Tyre.ts (32) v2 tyres, pure arithmetic (no allocation). Load sensitivity: mu = mu0 * (1 - k * (Fz / ... | fn axleCaps, diffCap; const CAP, lateralCurve
+## src/physics
 - weather.ts (8) Starting values; tune live. Grip multiplies tyres AND brakes. | const WEATHER
 - weatherLevels.ts (61) Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. | fn fillEnv; const LEVELS, gripFor, envFor; iface PhysicsEnv; type PhysicsLevel
 ## src/types
+- cars.ts (90) CAR SPEC CONTRACT v2 (2026-11-15, block C, docs/handling-plan.md section 1). Real-world... | iface TyreSize, EngineSpec, CarSpecV2, SpecRef, CarSpecLink; type DriveLayout, DiffKind
 - game.ts (173) SHARED CONTRACTS: the single source of truth between modules. | fn createNeutralInput; iface WeatherProfile, Vec3, Disposable, Serializable, CarInput, InputSource, CarState, RaceTelemetry, TrackSample, AIWorldView, AIRacerAgent, CameraPose, CameraRig, CarModel; type GameState, Weather, FixedUpdate, FrameCallback
 - people.ts (62) PEOPLE CONTRACT (2026-11-15). Every person in the game (story cast, starter, spectators... | const JOINTS, PARENT, REST; iface PersonSpec, PersonRig; type JointName, BodyVariant, PeopleHair, BuildPerson
 - world.ts (107) Open-world contracts (free roam). The road network is pure data: no `three` here or in ... | const SURFACES; iface RoadNode, RoadEdge, RoadGraph, Footprint, Poi, WorldClockState, RoamSave; type DistrictId, RoadKind, SurfaceType, PoiKind
@@ -156,12 +167,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - cornerGuide.ts (97) Corner guide: the next corner's direction and severity (HAIRPIN / SHARP, or FAST when y... | class CornerGuide
 - crewMenu.ts (50) Characters whose relationship value is shown once Chapter 2 starts. | fn buildCrewMenu
 - dialogue.ts (169) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox; const DIALOGUE
-- drivingSettings.ts (111) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
+- drivingSettings.ts (136) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
-- garage.ts (205) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (206) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageLook.ts (101) Garage appearance panel: finish, vinyl (pattern, colour, scale, number), rims (design, ... | fn lookRows
 - gauge.ts (111) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
 - graphicsSettings.ts (112) Graphics screen rows: presets, resolution scale, toggles, particle density, draw distan... | fn graphicsRows; iface GraphicsDeps
+- handlingOverlay.ts (52) Handling debug overlay (plan section 7), toggled with F4: per-axle load (N), slip angle... | const handlingOverlay
 - hud.ts (99) Plain-DOM HUD. Only touches the DOM when a value actually changes. | class Hud
 - loadingCard.ts (22) Short loading card with a lore tip while a race is being set up. Also masks the car mod... | class LoadingCard
 - loadoutList.ts (29) | fn buildLoadoutList
@@ -186,7 +198,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - carAppearance.ts (65) The pieces of a procedural car the appearance system drives. | fn applyAppearance, glowAt; iface AppearanceTargets
 - carBody.ts (119) Proportion data for one body style (metres). Pure data; names and brands live in data/c... | fn buildBody; const RIDE; iface BodyShape, BodyParts
 - carDetails.ts (42) Bolt-on details: front splitter, side skirts, rear wing or lip with end plates, hood sc... | fn addDetails
-- carFactory.ts (68) Front and rear plates with the loadout's text; garage edits (setAppearance) update them... | fn createCarVisual, preloadCarModels; const statusListeners, modelStatus; type ModelStatus
+- carFactory.ts (68) Front and rear plates with the loadout's text; garage edits (setAppearance) update them... | fn withPlates, createCarVisual, preloadCarModels; const statusListeners, modelStatus; type ModelStatus
 - carLights.ts (39) Scale every car's lamp glow (bad weather: fog would turn big halos into a white-out). | fn setLightGlow, addLightsAndShadow
 - carLoft.ts (85) Half cross-section (x >= 0) as (x, y) points from one end to the other; the loft mirror... | fn loft; iface LoftOptions; type HalfRing
 - carParts.ts (84) Body parts a car can wear. Procedural cars and GLB cars take the same add-on parts at a... | fn attachParts; const PART_SLOTS, PARTS; iface PartAnchors; type PartSlot, PartBuilder, PartChoice
@@ -212,11 +224,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - facades.ts (140) Facade height per sample for the left (index 0) and right (index 1) side; 0 = no buildi... | fn buildFacades; iface Plaza, Facades
 - furniture.ts (164) Additive light pools under the lamps; weather raises their opacity when wet. | fn buildFurniture; iface Furniture
 - kestrelBay.ts (31) "Kestrel Bay Streets": about 1.4 km of city street, 8.5 to 11 m wide. Clockwise from th... | const KESTREL_VERTICES, createKestrelBay, PLAZA
-- landmarks.ts (107) Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pas... | fn buildLandmarks
+- landmarks.ts (108) Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pas... | fn buildLandmarks
 - loadoutStore.ts (6) The saved appearance of each car, read by the car factory when a visual is built (playe... | const getLoadout, setLoadout
 - materialUpgrade.ts (89) Classify a material by its name (Tripo usually gives generic names, so unknown means bo... | fn classifyMaterialName, upgradeCarMaterials; iface UpgradeOptions; type MaterialKind
 - mergeMeshes.ts (40) Draw-call saver: merges a group's direct Mesh children that share one material into a s... | fn mergeByMaterial
-- modelCar.ts (108) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
+- modelCar.ts (109) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
 - modelPrefs.ts (21) Per-car yaw corrections set in the garage (radians), kept in localStorage so a fix work... | fn getYawOverride, setYawOverride
 - partsHoods.ts (54) | const HOOD_MORE
 - partsSkirts.ts (55) | const SKIRTS_MORE
@@ -224,7 +236,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - partsSpoilers.ts (60) Low ducktail kick at the trunk edge. | const SPOILER_MORE
 - peopleAdapter.ts (72) Default `buildPerson` (the people contract, src/types/people.ts) in the existing simple... | fn buildPerson, lookToSpec
 - plates.ts (97) Fictional Kestrel Bay plate: light reflective plate, blue city band on the left, the ow... | fn createPlates, fitPlates; iface Plates
-- proceduralCar.ts (158) Present on GLB-based cars: lets the garage fix a model that faces the wrong way. | fn buildProceduralCar; iface Calibration, CarVisual
+- precipCover.ts (112) What the sky cannot reach, for the precipitation shaders: the tunnel run near the camer... | fn updatePrecipCover; const precipCover; iface PrecipCover
+- precipMath.ts (121) CPU side of the precipitation volume (pure TS, no three, no allocation). Particles neve... | fn createPrecipState, stepPrecip, resetPrecip, particleWorld; const TIME_WRAP, CUT_SPEED, wrapN; iface PrecipBox, PrecipState, P3
+- precipMeshes.ts (92) Deterministic 0..1 sequence (mulberry32): the same seeds every run, so screenshots and ... | fn makeStreaks, makeSplashes, makeDrops; iface StreakLook
+- precipShaders.ts (125) GLSL for the precipitation system. Rain and snow share one vertex shader: world-space w... | const STREAK_VERT, STREAK_FRAG, SPLASH_VERT, SPLASH_FRAG, DROPS_VERT, DROPS_FRAG
+- proceduralCar.ts (161) Present on GLB-based cars: lets the garage fix a model that faces the wrong way. | fn buildProceduralCar; iface Calibration, CarVisual
 - propModels.ts (76) Target size per prop: `height` for upright props, `length` for containers (their long a... | fn loadPropModel, normaliseProp, instanceProp; iface Placement; type PropName
 - propYard.ts (88) | fn buildBarrel, buildPallet, buildForklift, buildFloodlight
 - props.ts (67) Visible props: parked cars, cones, manhole covers, zebra crossings, steam-vent grates, ... | fn buildProps
@@ -243,7 +259,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roadIndex.ts (104) Distance along the edge from node a, metres from the centre line (+ = left of a -> b) a... | class RoadIndex; const createRoadHit; iface RoadHit
 - spatial.ts (29) Uniform grid hash over the world square: ids are filed under every cell their box touch... | class GridHash
 ## src/world
-- sky.ts (109) Follow the camera (x, z), advance the clouds, and re-colour for a look and a district. | fn buildSky; iface Sky
+- shadowRig.ts (79) Half-size (m) of the square the key light's shadow covers around the camera. | fn snapToTexel, markSky, rigKeyShadow; const SHADOW_HALF, SHADOW_MAP, texelSize; iface KeyShadow
+- sky.ts (112) Follow the camera (x, z), advance the clouds, and re-colour for a look and a district. | fn buildSky; iface Sky
 - stage.ts (33) Where the showroom car sits: far from the street grid, so the menu camera never ends up... | fn buildStage; const STAGE
 - steam.ts (28) Rising steam from street vents. Only vents near the camera emit, so the cost stays flat. | class Steam
 - streetPath.ts (109) A corner of the street polygon. `zone` and `w` describe the leg that STARTS at this ver... | fn buildStreetPath; iface Vertex, DensePath; type Zone
@@ -257,8 +274,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - vinylB.ts (95) | const VINYLS_B
 - vinylLayer.ts (68) Vinyl painters: each paints one pattern onto a transparent `size` x `size` canvas in `c... | fn makeVinylMap; const VINYL_PAINTERS, VINYL_IDS; type VinylPainter
 - wallArt.ts (53) Draw a stylised red hand (palm, thumb and four fingers) centred at (x, y); `s` is the p... | fn drawHandprint, drawWall
-- weatherFx.ts (210) Per display frame. `speed` = car speed (m/s) for wind streaks. Particles live in a box ... | fn createWeatherFx; iface WeatherFx
-- world.ts (162) Parked cars as collision circles; hand to every TrackContact. | fn buildWorld; iface World
+- weatherFx.ts (153) Per display frame. `speed` = car speed (m/s) for wind lines. | fn createWeatherFx; const RAIN_BOX, SNOW_BOX, RAIN_N, SNOW_N; iface WeatherFx
+- windLines.ts (65) White wind lines racing past the camera at high speed. Laid out along the camera's (cut... | class WindLines
+- world.ts (166) Parked cars as collision circles; hand to every TrackContact. | fn buildWorld; iface World
 - worldLook.ts (38) Pushes a WeatherProfile into the world's materials: wet = glossy and reflective, snow =... | fn applyWorldLook; iface LookTargets
 - worldParts.ts (75) Everything a theme contributes to a map; the optional parts are what only some themes h... | fn buildParts; iface Parts
 - yard.ts (41) Container walls: stacks one to four high flush against both walls of every yard lane, s... | fn buildYard
