@@ -146,9 +146,9 @@ export class Juice {
   private screenFx(dt: number): void {
     const p = this.game.rm.player.car;
     const nitro = p.drivetrain.nitroActive;
-    if (nitro && !this.wasNitro) this.engine.kickBloom(0.8);
+    if (nitro && !this.wasNitro) this.engine.kickBloom(0.2); // a small pulse; more blew the night image out
     this.wasNitro = nitro;
-    const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? 0.4 : 0);
+    const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? 0.15 : 0);
     this.streak = damp(this.streak, target, 3, dt);
     this.post.width = this.engine.renderer.domElement.width;
     this.post.update(dt, this.streak * GRAPHICS.motionBlur);

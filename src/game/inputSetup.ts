@@ -20,7 +20,7 @@ export function createControls(demo: string | null, actions: { pause: () => void
   const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
   const keys = new KeyboardInput();
   const pad = new GamepadInput({ onPause: actions.pause, onReset: actions.reset });
-  const input = demo !== null ? new DemoInput(demo === 'straight') : new CombinedInput([keys, pad, touch]);
+  const input = demo !== null ? new DemoInput(demo) : new CombinedInput([keys, pad, touch]);
   return {
     input, pad, touch,
     attach: (engine, game) => {

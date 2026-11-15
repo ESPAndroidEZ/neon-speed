@@ -149,9 +149,9 @@ export class Engine implements Disposable {
     if (s.threshold !== undefined) this.bloom.threshold = s.threshold;
   }
 
-  /** Momentary extra bloom that decays on its own: shot cuts, nitro ignition, impacts. */
+  /** Momentary extra bloom that decays on its own: shot cuts, nitro ignition, impacts. Capped at 0.5 so it never washes out. */
   kickBloom(extra: number): void {
-    this.bloomKick = Math.max(this.bloomKick, extra);
+    this.bloomKick = Math.min(0.5, Math.max(this.bloomKick, extra));
   }
 
   /** MSAA samples of the HDR target (0, 2, 4); re-created. */
