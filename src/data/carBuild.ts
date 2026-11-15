@@ -14,7 +14,7 @@ export const setBuild = (id: string, upgrades: Upgrades, setup: Setup): void => 
 /** The player's car at race start: base tuning (already applied) + upgrades + setup + stance. Also sets the steering multiplier. */
 export function applyBuild(t: CarTuning, carId: string): void {
   const b = getBuild(carId);
-  applyUpgrades(t, b.upgrades);
+  applyUpgrades(t, b.upgrades, carId);
   applySetup(t, b.setup);
   applyStance(t, (getLoadout(carId) ?? defaultLoadout()).stance);
   DRIVING.carMul = b.setup.steer;

@@ -8,6 +8,8 @@ export interface CarTuning {
   /** Peak tyre friction coefficients (dry). */
   gripFront: number;
   gripRear: number;
+  /** Share of drive torque at the front axle: 0 = RWD, 1 = FWD, between = AWD (physics/driveSplit). */
+  driveFront: number;
   /** Tyre curve: stiffness B and shape C. Lower C = more grip left when sliding. */
   tireB: number;
   tireC: number;
@@ -35,6 +37,8 @@ export interface CarTuning {
   shiftTime: number;
   wheelRadius: number;
   finalDrive: number;
+  /** 6th-gear ratio; gears 2-6 stretch toward it (0.8 = the stock box). Tall = more top speed, same launch. */
+  topRatio: number;
   driveEfficiency: number;
   nitroTorqueMul: number;
   nitroBurnPerSec: number;
@@ -71,6 +75,8 @@ export interface CarTuning {
 }
 
 export const GEAR_RATIOS: readonly number[] = [3.6, 2.2, 1.55, 1.2, 0.97, 0.8];
+/** Ratio of `gear` (1-6) for this car: the stock box stretched so 6th = `topRatio` (1st unchanged). */
+export const gearRatio = (t: CarTuning, gear: number): number => GEAR_RATIOS[gear - 1] * Math.pow(t.topRatio / 0.8, (gear - 1) / 5);
 export const REVERSE_RATIO = 3.2;
 
 export function createDefaultTuning(): CarTuning {
@@ -81,6 +87,7 @@ export function createDefaultTuning(): CarTuning {
     cgToRear: 1.4,
     gripFront: 1.3,
     gripRear: 1.25,
+    driveFront: 0,
     tireB: 8,
     tireC: 1.5,
     handbrakeGrip: 0.45,
@@ -103,6 +110,7 @@ export function createDefaultTuning(): CarTuning {
     shiftTime: 0.18,
     wheelRadius: 0.32,
     finalDrive: 3.9,
+    topRatio: 0.8,
     driveEfficiency: 0.9,
     nitroTorqueMul: 1.55,
     nitroBurnPerSec: 0.22,

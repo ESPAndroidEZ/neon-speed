@@ -12,7 +12,7 @@ import { createNeutralInput } from '../../src/types/game.ts';
 const track = createKestrelBay();
 function lap(carId: string, up?: UpgradeId): number {
   const t = applyTuning(createDefaultTuning(), CARS.find((c) => c.id === carId)!.tuning);
-  if (up) applyUpgrades(t, { [up]: 3 });
+  if (up) applyUpgrades(t, { [up]: up === 'stage' ? 4 : 3 }, carId);
   const rm = new RaceManager(track, 2);
   rm.addRacer('ai', 'AI', t, createAIRacer('ai', 'AI', 1));
   rm.addRacer('you', 'You', createDefaultTuning(), null, true);

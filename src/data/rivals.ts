@@ -72,7 +72,7 @@ export function freeRaceField(count: number, level: Difficulty = AI_SETTING.leve
 /** An AI car's tuning: stock car + its upgrades (the player's build never leaks into it). */
 export function aiTuning(car: CarSpec, upgrades: Upgrades = {}): CarTuning {
   const t = applyTuning(createDefaultTuning(), car.tuning);
-  applyUpgrades(t, upgrades);
+  applyUpgrades(t, upgrades, car.id);
   return t;
 }
 

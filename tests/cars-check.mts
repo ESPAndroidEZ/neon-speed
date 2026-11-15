@@ -1,3 +1,5 @@
+import { measureCar } from '../src/physics/carStats.ts';
+import { REAL } from '../src/data/carReal.ts';
 import { CARS } from '../src/data/cars.ts';
 import { CarController } from '../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning } from '../src/physics/carTuning.ts';
@@ -50,7 +52,10 @@ check('350Z 0-100 5.0-6.0 s', z.t100 > 5 && z.t100 < 6, z.t100.toFixed(2));
 check('rx7 0-100 4.8-5.8 s', rx7.t100 > 4.8 && rx7.t100 < 5.8, rx7.t100.toFixed(2));
 check('evo 0-100 4.0-5.2 s', evo.t100 > 4.0 && evo.t100 < 5.2, evo.t100.toFixed(2));
 check('supra 0-100 3.8-4.8 s', supra.t100 > 3.8 && supra.t100 < 4.8, supra.t100.toFixed(2));
-check('civic is the slowest top speed, supra the fastest', res.every((r) => r.top >= civic.top) && res.every((r) => r.top <= supra.top + 1), res.map((r) => r.top.toFixed(0)).join(' '));
+for (const c of CARS) { // owner decision 2026-11-15: real performance (data/carReal)
+  const m = measureCar(c.tuning), r = REAL[c.id];
+  check(`${c.id}: 0-100 within 10 % of the real ${r.zeroTo100} s, top within 15 % of ${r.top} km/h`, Math.abs(m.accel - r.zeroTo100) <= r.zeroTo100 * 0.1 && Math.abs(m.topKph - r.top) <= r.top * 0.15, `${m.accel.toFixed(2)} s, ${m.topKph.toFixed(0)} km/h`);
+}
 check('top speeds sane (190-295)', res.every((r) => r.top > 190 && r.top <= 295), '');
 check('all cars can start a drift (0.3-1.4 rad)', res.every((r) => r.slip >= 0.3 && r.slip <= 1.4), res.map((r) => r.slip.toFixed(2)).join(' '));
 check('evo has the most rear grip, civic the least', CARS.find((c) => c.id === 'evo')!.tuning.gripRear! >= Math.max(...CARS.map((c) => c.tuning.gripRear ?? 1.25)) && CARS[0].tuning.gripRear! <= Math.min(...CARS.map((c) => c.tuning.gripRear ?? 1.25)), '');

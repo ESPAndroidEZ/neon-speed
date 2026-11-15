@@ -3,10 +3,7 @@ import type { Setup } from './setup';
 
 /** When each upgrade actually helps (shown in the tuning menu next to the measured numbers). */
 export const ADVICE: Record<UpgradeId, string> = {
-  engine: 'More torque everywhere: faster out of every corner. The best all-round upgrade on long, fast tracks (Neon Strip, Cliffside).',
-  turbo: 'More boost on turbo cars: huge mid-range, but it arrives late. Best on long straights; on tight tracks lag hurts.',
-  ecu: 'Higher redline and quicker shifts: small, steady gain, best paired with engine and exhaust.',
-  exhaust: 'Wider power band: stronger at high rpm. Good on fast tracks, little gain in tight streets.',
+  stage: 'Real tuning stages for THIS car (typical PS/Nm from the tuning scene). Big gains on straights and exits; on tight tracks traction limits the gain, so pair it with tyres and a differential.',
   tyres: 'More grip front and rear: faster through every corner and in the rain. The biggest gain on tight tracks (Container Maze, Kestrel Bay).',
   suspension: 'Less grip lost in roll: steadier in quick direction changes (S-bends, chicanes).',
   brakes: 'Shorter stops: brake later into hairpins. Pairs with more power (you arrive faster).',

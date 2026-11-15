@@ -1,6 +1,6 @@
 import { clamp, smoothstep } from '../core/math';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventChannel } from './driveEvents';
-import { GEAR_RATIOS, REVERSE_RATIO, type CarTuning } from './carTuning';
+import { GEAR_RATIOS, gearRatio, REVERSE_RATIO, type CarTuning } from './carTuning';
 
 const RAD_S_TO_RPM = 60 / (2 * Math.PI);
 const MAX_REVERSE_SPEED = 9;
@@ -63,7 +63,7 @@ export class Drivetrain {
     const pedal = reversing ? brake : throttle;
     this.brakeCmd = reversing ? throttle : brake;
 
-    const ratio = (reversing ? REVERSE_RATIO : GEAR_RATIOS[this.gear - 1]) * t.finalDrive;
+    const ratio = (reversing ? REVERSE_RATIO : gearRatio(t, this.gear)) * t.finalDrive;
     const wheelRpm = (Math.abs(u) / t.wheelRadius) * ratio * RAD_S_TO_RPM;
     const target = Math.max(wheelRpm, t.idleRpm + (pedal > 0.05 ? pedal * 3000 : 0));
     this.rpm += (target - this.rpm) * Math.min(1, dt * 12);

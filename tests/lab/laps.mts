@@ -84,7 +84,7 @@ export function runLaps(o: RunOpts): LapStats {
     if (inSpin && spinCool > 0.5) inSpin = false;
     if (hitCool <= 0 && contact.impact > 4) { hits++; hitCool = 1; }
     slow = sp < 1.5 && t > 4 ? slow + D : 0;
-    if (slow > 3) { stuck++; slow = 0; contact.place(car, contact.nearestIndex(car), 0); }
+    if (slow > 3) { stuck++; slow = 0; o.trace?.push(`STUCK t${t.toFixed(1)} i${contact.nearestIndex(car)} ${log.join(' ')}`); contact.place(car, contact.nearestIndex(car), 0); }
   }
   const pct = (p: number): number => { let acc = 0; for (let k = 0; k < 160; k++) { acc += hist[k]; if (acc >= moving * p) return k / 100; } return 1.6; };
   let drift = 0;

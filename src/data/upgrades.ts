@@ -1,11 +1,13 @@
 import type { CarTuning } from '../physics/carTuning';
+import { REAL, stageSpec } from './carReal';
 
 /**
- * Performance upgrades: 11 categories, 3 levels each. Every level is a set of multipliers (`mul`) and additions (`add`) on
- * `CarTuning`, so they stack and are data only. Prices are in cash; `needs` limits a category to cars that have the part
+ * Performance upgrades. POWER STAGE 0-4 (owner, 2026-11-15) replaces engine/turbo/ECU/exhaust: each stage sets the
+ * car's real typical torque for that stage (data/carReal), so the shown PS/Nm is what the physics gets. The other 7
+ * categories have 3 levels; every level is multipliers (`mul`) and additions (`add`) on `CarTuning`, data only. Prices are in cash; `needs` limits a category to cars that have the part
  * (the turbo model is locked: its upgrade only strengthens a turbo that already exists). Part names are FICTIONAL brands.
  */
-export type UpgradeId = 'engine' | 'turbo' | 'ecu' | 'exhaust' | 'tyres' | 'suspension' | 'brakes' | 'weight' | 'gearbox' | 'nitrous' | 'differential';
+export type UpgradeId = 'stage' | 'tyres' | 'suspension' | 'brakes' | 'weight' | 'gearbox' | 'nitrous' | 'differential';
 
 type Delta = { mul?: Partial<Record<keyof CarTuning, number>>; add?: Partial<Record<keyof CarTuning, number>> };
 
@@ -19,20 +21,14 @@ export interface UpgradeCategory {
   name: string;
   blurb: string;
   needs?: 'turbo';
-  levels: readonly [UpgradeLevel, UpgradeLevel, UpgradeLevel];
+  levels: readonly UpgradeLevel[];
 }
 
 const lv = (name: string, price: number, d: Delta): UpgradeLevel => ({ name, price, ...d });
 
 export const UPGRADES: readonly UpgradeCategory[] = [
-  { id: 'engine', name: 'Engine', blurb: 'Ported head, forged internals, bigger bore.', levels: [
-    lv('Stage 1 Kurogane head work', 1800, { mul: { engineTorque: 1.05 } }), lv('Stage 2 Voss forged pistons', 4200, { mul: { engineTorque: 1.11 } }), lv('Stage 3 Aster full build', 9500, { mul: { engineTorque: 1.18 } })] },
-  { id: 'turbo', name: 'Turbo', needs: 'turbo', blurb: 'Bigger boost and quicker spool on turbo cars.', levels: [
-    lv('Halden ball-bearing core', 2200, { mul: { turboTorque: 1.08, turboLag: 0.94 } }), lv('Halden twin-scroll', 5200, { mul: { turboTorque: 1.16, turboLag: 0.88 } }), lv('Halden billet race turbo', 11000, { mul: { turboTorque: 1.25, turboLag: 0.82 } })] },
-  { id: 'ecu', name: 'ECU', blurb: 'Remap: higher redline, crisper shifts.', levels: [
-    lv('Nimbus street map', 900, { mul: { engineTorque: 1.02, shiftTime: 0.92 }, add: { redlineRpm: 200 } }), lv('Nimbus track map', 2400, { mul: { engineTorque: 1.04, shiftTime: 0.84 }, add: { redlineRpm: 400 } }), lv('Nimbus open ECU', 5200, { mul: { engineTorque: 1.06, shiftTime: 0.76 }, add: { redlineRpm: 600 } })] },
-  { id: 'exhaust', name: 'Intake and exhaust', blurb: 'Free-flow intake, header and cat-back. Wider power band.', levels: [
-    lv('Ryo cold-air intake', 700, { mul: { engineTorque: 1.02 }, add: { torqueWidth: 150 } }), lv('Ryo header and cat-back', 2000, { mul: { engineTorque: 1.04 }, add: { torqueWidth: 350 } }), lv('Ryo titanium race system', 4600, { mul: { engineTorque: 1.06 }, add: { torqueWidth: 600 } })] },
+  { id: 'stage', name: 'Power stage', blurb: 'Typical tuning-scene stages for THIS car: the real power and torque they make.', levels: [
+    lv('Stage 1', 2500, {}), lv('Stage 2', 6000, {}), lv('Stage 3', 14000, {}), lv('Stage 4', 26000, {})] },
   { id: 'tyres', name: 'Tyres', blurb: 'More grip front and rear.', levels: [
     lv('Pyrel sport tyres', 1200, { mul: { gripFront: 1.04, gripRear: 1.04 } }), lv('Pyrel semi-slicks', 3000, { mul: { gripFront: 1.08, gripRear: 1.08 } }), lv('Pyrel race slicks', 6800, { mul: { gripFront: 1.12, gripRear: 1.12 } })] },
   { id: 'suspension', name: 'Suspension', blurb: 'Stiffer, better-damped: less grip lost in roll.', levels: [
@@ -50,13 +46,16 @@ export const UPGRADES: readonly UpgradeCategory[] = [
 ];
 
 export const UPGRADE_IDS = UPGRADES.map((u) => u.id);
-export type Upgrades = Partial<Record<UpgradeId, 0 | 1 | 2 | 3>>;
+export type Upgrades = Partial<Record<UpgradeId, number>>;
 
 export const findUpgrade = (id: UpgradeId): UpgradeCategory => UPGRADES.find((u) => u.id === id) ?? UPGRADES[0];
 
 /** Apply installed upgrades to a tuning, in place. Turbo parts are ignored on cars without a turbo. */
-export function applyUpgrades(t: CarTuning, up: Upgrades): void {
+export function applyUpgrades(t: CarTuning, up: Upgrades, carId?: string): void {
+  const st = Math.max(0, Math.min(4, up.stage ?? 0));
+  if (st > 0) t.engineTorque *= carId && REAL[carId] ? stageSpec(carId, st).nm / REAL[carId].nm : [1, 1.12, 1.22, 1.45, 1.75][st];
   for (const cat of UPGRADES) {
+    if (cat.id === 'stage') continue;
     const level = up[cat.id] ?? 0;
     if (level === 0 || (cat.needs === 'turbo' && t.turboTorque <= 0)) continue;
     const l = cat.levels[level - 1]; // each level states the TOTAL effect of that category, not a step on top of the last
@@ -69,9 +68,15 @@ export function applyUpgrades(t: CarTuning, up: Upgrades): void {
 export function sanitizeUpgrades(raw: unknown): Upgrades {
   const out: Upgrades = {};
   if (typeof raw !== 'object' || raw === null) return out;
+  const r = raw as Record<string, unknown>;
   for (const id of UPGRADE_IDS) {
-    const v = (raw as Record<string, unknown>)[id];
-    if (typeof v === 'number' && v >= 1) out[id] = Math.min(3, Math.floor(v)) as 1 | 2 | 3;
+    const v = r[id];
+    if (typeof v === 'number' && v >= 1) out[id] = Math.min(id === 'stage' ? 4 : 3, Math.floor(v));
+  }
+  if (out.stage === undefined) { // old saves: engine/turbo/ECU/exhaust levels (0-3) -> the nearest power stage (0-4)
+    const old = ['engine', 'turbo', 'ecu', 'exhaust'].map((k) => r[k]).filter((v): v is number => typeof v === 'number').map((v) => Math.max(0, Math.min(3, v)));
+    const avg = old.length ? old.reduce((a, b) => a + b, 0) / old.length : 0;
+    if (avg > 0) out.stage = Math.min(4, Math.round((avg * 4) / 3));
   }
   return out;
 }

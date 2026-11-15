@@ -35,7 +35,7 @@ for (const id of ['supra', 'evo', 'rx7', 'civic', '350z']) {
   const vals: number[] = [];
   let peak = 0;
   let boostAt1s = 0;
-  for (let k = 0; k < 60 * 25; k++) {
+  for (let k = 0; k < 60 * 40; k++) { // 40 s: real gearing (data/carReal) needs longer to reach the limiter
     c.step(D, gas, WEATHER.CLEAR);
     c.drivetrain.events.drain((t, v) => { evs.push(t); vals.push(v); });
     peak = Math.max(peak, c.drivetrain.boost);

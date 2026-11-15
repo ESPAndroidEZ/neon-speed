@@ -69,8 +69,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - neonStrip.ts (28) Downtown boulevards with tram lines, an S-bend through the side streets and a tunnel un... | const NEON_STRIP
 - types.ts (34) circuit: laps round a loop. sprint: one run from start to finish. drift: laps scored by... | iface TrackDef; type EventType, Theme
 ## src/data
-- upgradeAdvice.ts (42) When each upgrade actually helps (shown in the tuning menu next to the measured numbers). | fn buildKey, bestLapFor, recordLap; const ADVICE
-- upgrades.ts (77) Performance upgrades: 11 categories, 3 levels each. Every level is a set of multipliers... | fn applyUpgrades, sanitizeUpgrades; const UPGRADES, UPGRADE_IDS, findUpgrade; iface UpgradeLevel, UpgradeCategory; type UpgradeId, Upgrades
+- upgradeAdvice.ts (39) When each upgrade actually helps (shown in the tuning menu next to the measured numbers). | fn buildKey, bestLapFor, recordLap; const ADVICE
+- upgrades.ts (82) Performance upgrades. POWER STAGE 0-4 (owner, 2026-11-15) replaces engine/turbo/ECU/exh... | fn applyUpgrades, sanitizeUpgrades; const UPGRADES, UPGRADE_IDS, findUpgrade; iface UpgradeLevel, UpgradeCategory; type UpgradeId, Upgrades
 ## src/dev
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
 - demoInput.ts (26) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
@@ -166,7 +166,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - titleCards.ts (70) Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each c... | class TitleCards
 - touchControls.ts (137) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - trackSelect.ts (96) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
-- tuneMenu.ts (116) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
+- tuneMenu.ts (117) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
 - uiKit.ts (54) Small transient message at the bottom centre. | fn injectCss, h, button, toast; const money, lapText
 - versus.ts (91) The versus screen before a race: your portrait, car and stats against the strongest riv... | fn showVersus
 ## src/world

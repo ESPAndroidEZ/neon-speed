@@ -27,8 +27,9 @@ export function lapTime(carId: string, weather: Weather): number {
   return rm.racers[0].finished ? rm.racers[0].finishTime / 2 : 999;
 }
 
-// re-centred 2026-11-15: wider corners, then the AI learned handbrake turns (Kestrel ~10 s faster again), same class order
-const BANDS: Record<string, [number, number]> = { civic: [52.5, 60.5], golf: [52, 60], '350z': [50, 58], rx7: [49, 57], e61: [48, 56], m3: [47.5, 55.5], evo: [47, 55], supra: [47, 55] };
+// 2026-11-15 owner decision: cars are FULLY REAL (data/carReal), so lap times no longer follow price. Bands = measured
+// AI laps +-4 s (regression guards); realism itself is checked in tests/cars-check (0-100 and top speed vs the real car).
+const BANDS: Record<string, [number, number]> = { civic: [55, 63], golf: [56.5, 64.5], '350z': [56, 64], rx7: [53.5, 61.5], e61: [54.5, 62.5], m3: [50, 58], evo: [53.5, 61.5], supra: [55, 63] };
 const times: Record<string, number> = {};
 for (const c of CARS) {
   times[c.id] = lapTime(c.id, 'CLEAR');
@@ -36,8 +37,8 @@ for (const c of CARS) {
   check(`${c.id} lap in ${lo}-${hi} s`, times[c.id] >= lo && times[c.id] <= hi, `${times[c.id].toFixed(1)} s`);
 }
 const order = CARS.map((c) => times[c.id]);
-check('faster cars in higher classes (each car at least as fast as the one below it)', order.every((t, i) => i === 0 || t <= order[i - 1] + 0.3), order.map((t) => t.toFixed(1)).join(' '));
-check('civic is the slowest, a full 3 s behind supra', times.civic > times.supra + 3, `${(times.civic - times.supra).toFixed(1)} s`);
+const med = [...order].sort((a, b) => a - b)[Math.floor(order.length / 2)];
+check('no car is hopeless on the test circuit (each within 6 s of the median)', order.every((t) => Math.abs(t - med) < 6), `median ${med.toFixed(1)} s`);
 const wet = lapTime('evo', 'RAIN');
 check('rain is slower than dry for the same car', wet > times.evo * 1.08, `${times.evo.toFixed(1)} -> ${wet.toFixed(1)}`);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');

@@ -18,13 +18,13 @@ const D = 1 / 60;
 const base = (id: string): CarTuning => applyTuning(createDefaultTuning(), CARS.find((c) => c.id === id)!.tuning);
 const build = (id: string, up: Upgrades, setup: Setup = defaultSetup()): CarTuning => {
   const t = base(id);
-  applyUpgrades(t, up);
+  applyUpgrades(t, up, id);
   applySetup(t, setup);
   return t;
 };
-const all = (L: 0 | 1 | 2 | 3): Upgrades => Object.fromEntries(UPGRADE_IDS.map((id) => [id, L])) as Upgrades;
+const all = (L: 0 | 1 | 2 | 3): Upgrades => Object.fromEntries(UPGRADE_IDS.map((id) => [id, id === 'stage' && L === 3 ? 4 : L])) as Upgrades; // maxed = Stage 4
 
-check('11 categories with 3 priced levels each', UPGRADES.length === 11 && UPGRADES.every((u) => u.levels.length === 3 && u.levels[0].price < u.levels[1].price && u.levels[1].price < u.levels[2].price), '');
+check('8 categories: Power stage with 4 levels, the rest 3, prices rising', UPGRADES.length === 8 && UPGRADES.every((u) => u.levels.length === (u.id === 'stage' ? 4 : 3) && u.levels.every((l, i) => i === 0 || l.price > u.levels[i - 1].price)), '');
 check('every part name is a fictional brand (no real company names)', UPGRADES.every((u) => u.levels.every((l) => !/(bosch|garrett|brembo|bilstein|michelin|nismo|trd|hks|apexi|greddy|tein|recaro|toyo|bridgestone)/i.test(l.name))), '');
 check('the default setup changes nothing', JSON.stringify(build('evo', {})) === JSON.stringify(base('evo')), '');
 
@@ -107,6 +107,6 @@ for (const c of CARS) {
 const dc = dynoCurve(build('supra', all(3)));
 const ds = dynoCurve(base('supra'));
 check('dyno curve is finite, rises with upgrades and peaks inside the rev range', dc.torque.every(Number.isFinite) && dc.peakPower.value > ds.peakPower.value && dc.peakTorque.rpm >= base('supra').idleRpm && dc.rpm.length === 36, `${ds.peakPower.value.toFixed(0)} -> ${dc.peakPower.value.toFixed(0)} hp`);
-check('stored upgrades and setups are sanitised', JSON.stringify(sanitizeUpgrades({ engine: 9, ghost: 2, tyres: 'x', brakes: 1.7 })) === '{"engine":3,"brakes":1}' && sanitizeSetup({ finalDrive: 9, diff: -4, steer: 'x' }).finalDrive === 1.15 && sanitizeSetup({ diff: -4 }).diff === 0, '');
+check('stored upgrades and setups are sanitised', JSON.stringify(sanitizeUpgrades({ engine: 9, ghost: 2, tyres: 'x', brakes: 1.7 })) === '{"brakes":1,"stage":4}' && sanitizeSetup({ finalDrive: 9, diff: -4, steer: 'x' }).finalDrive === 1.15 && sanitizeSetup({ diff: -4 }).diff === 0, '');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
