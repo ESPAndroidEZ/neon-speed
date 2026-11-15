@@ -1,3 +1,5 @@
+import { ADVICE, bestLapFor, buildKey } from '../data/upgradeAdvice';
+import { TRACKS } from '../data/tracks';
 import type { SaveStore } from '../core/save';
 import { CARS, type CarSpec } from '../data/cars';
 import { defaultSetup, SETUP_RANGES, type Setup } from '../data/setup';
@@ -40,6 +42,9 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
     root.append(head);
     const badge = h('div', 'rb-row', `<div style="font-size:30px;font-weight:900;color:${CLASS_COLOR[r.cls]}">${r.cls} ${r.pr}</div><div class="rb-sub">stock ${r0.cls} ${r0.pr} · 0-100 ${r.accel.toFixed(1)} s · top ${Math.round(r.topKph)} km/h · 30 m/s stop ${r.brake30.toFixed(0)} m</div>`);
     root.append(badge);
+    const bk = buildKey(store.data.upgrades[c.id] ?? {}, store.data.setups[c.id] ?? defaultSetup());
+    const laps = TRACKS.map((tr) => { const b = bestLapFor(tr.id, c.id, bk); return b ? `${tr.name} ${Math.floor(b / 60)}:${(b % 60).toFixed(1).padStart(4, '0')}` : ''; }).filter(Boolean);
+    root.append(h('div', 'rb-sub', laps.length ? `Your best laps with this exact setup: ${laps.join(' · ')}` : 'Your best laps with this exact setup will show here (race to record them).'));
     if (!owned) root.append(h('div', 'rb-sub', 'Buy this car in the garage first.'));
     const cols = h('div', 'rb-row');
     cols.style.alignItems = 'flex-start';
@@ -50,7 +55,15 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
       const level = store.data.upgrades[c.id]?.[u.id] ?? 0;
       const absent = u.needs === 'turbo' && t.turboTorque <= 0;
       const next = level < 3 ? u.levels[level as 0 | 1 | 2] : null;
-      const row = h('div', 'rb-row', `<div style="flex:1;min-width:150px"><b>${u.name}</b> ${'●'.repeat(level)}${'○'.repeat(3 - level)}<div style="font-size:11px;opacity:.7">${absent ? 'needs a turbo car' : next ? next.name : 'maxed'}</div></div>`);
+      let gain = '';
+      if (next && !absent) { // measured effect of the next level (same physics as the race)
+        const tn = stock(c);
+        applyUpgrades(tn, { ...(store.data.upgrades[c.id] ?? {}), [u.id]: level + 1 });
+        applySetup(tn, store.data.setups[c.id] ?? defaultSetup());
+        const rn = rate(tn), f = (x: number, d = 1): string => { const v = Number(x.toFixed(d)); return v > 0 ? `+${v}` : v < 0 ? String(v) : '0'; };
+        gain = `<div style="font-size:11px;color:#7dff9a">next: PR ${f(rn.pr - r.pr, 0)} · 0-100 ${f(rn.accel - r.accel)} s · top ${f(rn.topKph - r.topKph, 0)} km/h · stop ${f(rn.brake30 - r.brake30, 0)} m</div>`;
+      }
+      const row = h('div', 'rb-row', `<div style="flex:1;min-width:150px"><b>${u.name}</b> ${'●'.repeat(level)}${'○'.repeat(3 - level)}<div style="font-size:11px;opacity:.7">${absent ? 'needs a turbo car' : next ? next.name : 'maxed'}</div>${gain}<div style="font-size:11px;opacity:.55;max-width:330px">${ADVICE[u.id]}</div></div>`);
       row.style.justifyContent = 'space-between';
       if (next && !absent) {
         const b = button(`$${next.price.toLocaleString()}`, () => {

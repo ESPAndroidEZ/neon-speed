@@ -5,6 +5,8 @@ import { disposeVisual } from '../world/disposeVisual';
 import { buildProceduralCar } from '../world/proceduralCar';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
+import { getBuild } from '../data/carBuild';
+import { buildKey, recordLap } from '../data/upgradeAdvice';
 import { ghostPose, GhostRecorder, isGhostLap, type GhostLap, type Pose } from './ghostData';
 
 
@@ -41,7 +43,7 @@ function ghostBody(spec: CarSpec): Object3D {
  * On every later lap a translucent car drives the best lap alongside you.
  */
 export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
-  let rec = new GhostRecorder(), setupRef: unknown = null, k = '', body: Object3D | null = null;
+  let rec = new GhostRecorder(), setupRef: unknown = null, k = '', body: Object3D | null = null, lastLap = -1;
   const pose: Pose = { x: 0, y: 0, z: 0, h: 0 };
   const clear = (): void => {
     if (body) { engine.scene.remove(body); disposeVisual(body); body = null; }
@@ -50,13 +52,17 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
     const rm = game.rm, s = game.setup;
     if (!s || game.state !== 'RACING') { if (body) body.visible = false; return; }
     if (s !== setupRef) { // new race: load this track + car's ghost
-      setupRef = s; clear();
+      setupRef = s; clear(); lastLap = -1;
       k = key(s.trackId ?? 'kestrel', s.car.id);
       rec = new GhostRecorder(load(k));
       if (rec.best) { body = ghostBody(s.car); body.visible = false; engine.scene.add(body); }
     }
     if (rm.phase !== 'RACING') return;
     const p = game.player, st = p.car.state, lt = rm.raceTime - p.lapStart;
+    if (p.lapStart !== lastLap) { // a lap ended: keep the best lap per exact build (tuning menu shows it)
+      if (lastLap >= 0) { const b = getBuild(s.car.id); recordLap(s.trackId ?? 'kestrel', s.car.id, buildKey(b.upgrades, b.setup), p.lapStart - lastLap); }
+      lastLap = p.lapStart;
+    }
     pose.x = st.position.x; pose.y = st.position.y; pose.z = st.position.z; pose.h = st.heading;
     const fresh = rec.update(p.lapStart, lt, pose);
     if (fresh) {
