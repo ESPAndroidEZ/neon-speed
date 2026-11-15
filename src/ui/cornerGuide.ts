@@ -78,7 +78,7 @@ export class CornerGuide {
     if (sev === 0 && !state) return this.show(false);
     const kind = ['FAST', 'SHARP', 'HAIRPIN'][sev];
     const word = state === 'brake' ? 'BRAKE' : state === 'warn' ? 'EASE' : kind;
-    const left = turn > 0;
+    const left = turn < 0; // ks > 0 is a RIGHT turn (tests/lab/turn-sign.mts)
     const key = `${state}|${sev}|${left}|${Math.round(dist / 10)}|${word}`;
     this.show(true);
     if (key === this.lastKey) return;

@@ -10,7 +10,7 @@ export interface RacingLine {
   /** Line points. */
   x: Float32Array;
   z: Float32Array;
-  /** Signed curvature of the line, 1/m, + = turning left; and its absolute value smoothed by taking the max over +/-3 points. */
+  /** Signed curvature of the line, 1/m, + = turning RIGHT (checked in tests/lab/turn-sign.mts); and its absolute value smoothed by taking the max over +/-3 points. */
   ks: Float32Array;
   k: Float32Array;
   /** Largest allowed |offset| per sample (keeps the car off the walls). */
