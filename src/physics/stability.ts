@@ -47,3 +47,18 @@ export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, g
   const beta = Math.atan2(v, u);
   return -HB_CARRY * Math.max(-0.9, Math.min(0.9, beta)) * share * Math.min(1, grip) * smoothstep(2, 8, u) * dt;
 }
+
+/**
+ * Drift hold: the rear-grip target once the handbrake is released. After a handbrake entry (rear grip still
+ * recovering, hb < 0.985), staying on the throttle while the car is sliding keeps the rear loose, so the slide can be
+ * held through a corner: more throttle = bigger angle, steer sets the line, lifting off or straightening ends it.
+ * Reuses `hb` (already saved state), so grip driving, the AI and restored races are unaffected.
+ */
+const DRIFT_HOLD = 0.66;
+export function driftHoldTarget(t: CarTuning, u: number, v: number, throttle: number, hb: number): number {
+  if (hb >= 0.985 || u < 7 || throttle < 0.25) return 1;
+  const slip = Math.abs(Math.atan2(v, u));
+  if (slip < 0.07) return 1;
+  const k = smoothstep(0.25, 0.9, throttle) * smoothstep(0.07, 0.16, slip);
+  return 1 - (1 - Math.max(DRIFT_HOLD, t.handbrakeGrip)) * k;
+}

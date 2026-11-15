@@ -153,5 +153,18 @@ const hold = (c: CarController, secs: number, i: CarInput): void => {
     check(`handbrake ${steer > 0 ? 'left' : 'right'} tightens the turn`, b > a * 1.4, `travel after 1 s: steer ${(a * 57.3).toFixed(0)} deg, + handbrake ${(b * 57.3).toFixed(0)} deg`);
   }
 }
+{
+  // Owner request: a handbrake entry must turn into a drift you can HOLD round a corner on the throttle.
+  const slipAfter = (thr: number, steer: number): number => {
+    const c = mk({ mass: 1180, inertia: 1500, handbrakeGrip: 0.5, slideCap: 0.54 });
+    toSpeed(c, 22);
+    for (let i = 0; i < 18; i++) c.step(D, inp({ throttle: thr, steer: 1, handbrake: true }), WEATHER.CLEAR);
+    hold(c, 2.5, inp({ throttle: thr, steer }));
+    return Math.abs(Math.atan2(c.v, Math.abs(c.u)));
+  };
+  const held = slipAfter(1, 0.5), straight = slipAfter(1, 0);
+  check('handbrake drift holds on the throttle', held > 0.3 && held < 0.75, `slip after 2.5 s ${(held * 57.3).toFixed(0)} deg`);
+  check('straightening ends the drift', straight < 0.15, `slip ${(straight * 57.3).toFixed(0)} deg`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

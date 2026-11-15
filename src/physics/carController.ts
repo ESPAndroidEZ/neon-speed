@@ -8,7 +8,7 @@ import { tireLateral } from './tire';
 import { restoreCar, snapshotCar } from './carSnapshot';
 import { steerAngle } from './steering';
 import { LoadTransfer } from './loadTransfer';
-import { handbrakeCarry, slideDamping, slideYaw } from './stability';
+import { driftHoldTarget, handbrakeCarry, slideDamping, slideYaw } from './stability';
 import { createAssist, type Assist } from './assists';
 
 const G = 9.81;
@@ -114,7 +114,7 @@ export class CarController {
     const slipDen = Math.max(absU, 3);
     const delta = steerAngle(t, as, steerIn, u, v, this.steerAuthority, assistMul);
     // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
-    this.hbFactor = lerp(this.hbFactor, input.handbrake ? t.handbrakeGrip : 1, Math.min(1, dt * (input.handbrake ? 14 : 3)));
+    this.hbFactor = lerp(this.hbFactor, input.handbrake ? t.handbrakeGrip : driftHoldTarget(t, u, v, this.thr, this.hbFactor), Math.min(1, dt * (input.handbrake ? 14 : 3)));
 
     // Rear axle: drive force is capped by traction, and what it uses is taken from sideways grip.
     const muR = t.gripRear * g * this.hbFactor * rearMul;
