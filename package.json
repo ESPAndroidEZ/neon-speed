@@ -6,17 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/check-lines.mjs && node scripts/check-health.mjs && tsc --noEmit && vite build",
+    "build:q": "scripts/q.sh build npm run build",
     "typecheck": "tsc --noEmit",
     "check:lines": "node scripts/check-lines.mjs",
     "preview": "vite preview",
     "test": "for f in tests/*.mts; do npx tsx \"$f\" || exit 1; done",
+    "test:q": "scripts/q.sh test npm test",
     "smoke": "scripts/smoke.sh",
+    "smoke:q": "scripts/q.sh smoke npm run smoke",
     "handling": "tsx tests/lab/handling-lab.mts",
     "visual": "node scripts/visual-check.mjs",
+    "visual:q": "scripts/q.sh visual npm run visual",
     "mobile:sync": "npm run build && cap sync",
     "mobile:android": "npm run mobile:sync && cap open android",
     "mobile:ios": "npm run mobile:sync && cap open ios",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "node scripts/make-icons.mjs",
+    "map": "node scripts/gen-code-map.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",

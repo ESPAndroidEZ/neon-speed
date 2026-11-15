@@ -23,12 +23,16 @@
 Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or `story.md` only when the task needs them.
 
 ## Token discipline
-- Never read `node_modules`, `dist` or lockfiles (denied in settings). Read files by line range, not whole, when you only need a part.
-- Edit in place; don't rewrite files. Don't re-read a file you just edited. Show only the tail of build output.
-- Hand well-specified boilerplate to Qwen with `/new-task`. Keep feel-critical work (handling, cameras, juice) yourself.
-- `/clear` between phases. `/compact` around 60% context.
-- After every finished block run `/checkpoint`. Do not wait to be "running out".
-- Default model is Sonnet. Switch to Opus only for hard design or tuning problems, then switch back.
+- Never cat files. Use Read with offset/limit (about 150 lines per read, `wc -l` first for unknown files).
+- Find things with Grep (-n, head_limit 40) or docs/code-map.md before opening any file.
+- After an Edit, don't re-read the file.
+- Run builds and tests only through `npm run build:q` / `npm run test:q`; open logs/last-*.txt only with grep or a line range.
+- Review changes with `git diff --stat` and `git diff <file> | head -80`.
+- Screenshots: look at the one you need, downscaled to at most 1280 px wide; never read GLB or other binaries.
+- Delegate broad searches, bot playtests and screenshot reviews to subagents (Explore or general-purpose) so only the conclusion returns to the main context.
+- /clear at each phase boundary after /checkpoint; /compact at about 60% context.
+- After every finished block run /checkpoint. Hand well-specified boilerplate to Qwen with /new-task; keep feel-critical work yourself.
+- Default model is Sonnet; Opus only for hard design or tuning problems, then switch back.
 
 ## Owner decisions (fixed)
 - Name Racer's Blood. Real brands. Free Chapter 1 demo first, one city loop, short tracks later.

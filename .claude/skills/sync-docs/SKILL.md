@@ -9,4 +9,5 @@ description: Make the docs match the code. Run at the end of every phase or step
 4. `CLAUDE.md`: update the "Map" section only if folders were added or renamed.
 5. `README.md`: update the command list if scripts changed (`npm run dev`, `build`, `test`).
 6. `docs/architecture.md` (max 80 lines): modules, data flow, contracts, tuning knobs. Edit sections that no longer match the code; do not rewrite the whole file.
-7. Verify with `grep` that every file path named in the docs still exists. Reply with one line.
+7. `npm run map` to regenerate docs/code-map.md (the API index).
+8. Verify with `grep` that every file path named in the docs still exists. Reply with one line.

@@ -21,7 +21,11 @@
       "Read(./package-lock.json)",
       "Read(./.env*)",
       "Bash(rm -rf *)",
-      "Bash(git push --force*)"
+      "Bash(git push --force*)",
+      "Read(./public/models/**)",
+      "Read(./**/*.glb)",
+      "Read(./**/*.map)",
+      "Read(./**/*.min.js)"
     ]
   }
 }
