@@ -1,3 +1,4 @@
+import { carNav, NAV_LABEL } from './carNav';
 import { stageSpec } from '../data/carReal';
 import { ADVICE, bestLapFor, buildKey } from '../data/upgradeAdvice';
 import { TRACKS } from '../data/tracks';
@@ -20,6 +21,9 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
   const root = h('div', 'rb-layer dim');
   root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(14px,2.5vh) 14px';
   let idx = Math.max(0, CARS.findIndex((c) => c.id === store.data.selected));
+  const goPrev = (): void => { idx = (idx + CARS.length - 1) % CARS.length; render(); };
+  const goNext = (): void => { idx = (idx + 1) % CARS.length; render(); };
+  carNav(root, goPrev, goNext);
   const stock = (c: CarSpec): CarTuning => applyTuning(createDefaultTuning(), c.tuning);
   const current = (c: CarSpec): CarTuning => {
     const t = stock(c);
@@ -36,8 +40,8 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
     root.replaceChildren();
     root.append(h('h2', 'rb-title', 'TUNING'));
     const head = h('div', 'rb-row');
-    const prev = button('◀', () => { idx = (idx + CARS.length - 1) % CARS.length; render(); });
-    const next = button('▶', () => { idx = (idx + 1) % CARS.length; render(); });
+    const prev = button(NAV_LABEL.prev, goPrev);
+    const next = button(NAV_LABEL.next, goNext);
     prev.style.minWidth = next.style.minWidth = '60px';
     head.append(prev, h('div', '', `<div class="rb-sub">${c.brand}</div><div style="font-size:26px;font-weight:900">${c.name}</div>`), next);
     root.append(head);

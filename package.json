@@ -21,7 +21,8 @@
     "mobile:android": "npm run mobile:sync && cap open android",
     "mobile:ios": "npm run mobile:sync && cap open ios",
     "icons": "node scripts/make-icons.mjs",
-    "map": "node scripts/gen-code-map.mjs"
+    "map": "node scripts/gen-code-map.mjs",
+    "audio:level": "node scripts/audio-level.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",

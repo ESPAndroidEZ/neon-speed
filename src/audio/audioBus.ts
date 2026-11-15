@@ -2,14 +2,21 @@
 export class AudioBus {
   readonly ctx: AudioContext;
   readonly sfx: GainNode;
+  /** Engines (player and rivals): own slider, mixed under music and ambience. */
+  readonly engine: GainNode;
+  /** City hum, sea: fixed level, straight to master (above engines and effects). */
+  readonly ambience: GainNode;
+  /** Output meter after the limiter (loudness test, ?soak). */
+  readonly meter: AnalyserNode;
   readonly music: GainNode;
   readonly noise: AudioBuffer;
   private readonly master: GainNode;
   private readonly chase: BiquadFilterNode;
-  private sfxVol = 1;
+  private sfxVol = 0.75;
   private musicVol = 0.55;
   private musicMul = 0.7;
-  private vol = 0.7;
+  private vol = 0.35;
+  private engineVol = 0.6;
   private mutedFlag = false;
 
   constructor() {
@@ -19,8 +26,21 @@ export class AudioBus {
     const comp = this.ctx.createDynamicsCompressor();
     comp.threshold.value = -14;
     comp.ratio.value = 6;
-    this.master.connect(comp).connect(this.ctx.destination);
+    const limit = this.ctx.createDynamicsCompressor(); // brick-wall-ish limiter: peaks never clip
+    limit.threshold.value = -6;
+    limit.knee.value = 0;
+    limit.ratio.value = 20;
+    limit.attack.value = 0.002;
+    limit.release.value = 0.12;
+    this.meter = this.ctx.createAnalyser();
+    this.meter.fftSize = 2048;
+    this.master.connect(comp).connect(limit).connect(this.ctx.destination);
+    limit.connect(this.meter);
     this.sfx = this.ctx.createGain();
+    this.engine = this.ctx.createGain();
+    this.engine.gain.value = this.engineVol;
+    this.ambience = this.ctx.createGain();
+    this.ambience.gain.value = 0.9;
     this.music = this.ctx.createGain();
     this.music.gain.value = this.musicVol * this.musicMul;
     // chase mix: a slight low-pass takes the edge off everything the camera hears from outside the cabin
@@ -29,6 +49,9 @@ export class AudioBus {
     this.chase.frequency.value = 9500;
     this.chase.Q.value = 0.5;
     this.sfx.connect(this.chase).connect(this.master);
+    this.engine.connect(this.chase);
+    this.ambience.connect(this.master);
+    if (location.search.includes('soak')) (window as unknown as Record<string, unknown>).__rbBus = this; // dev: loudness test
     this.music.connect(this.master);
     const len = this.ctx.sampleRate * 2;
     this.noise = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
@@ -63,6 +86,11 @@ export class AudioBus {
   setSfxVolume(v: number): void {
     this.sfxVol = Math.min(1, Math.max(0, v));
     this.sfx.gain.setTargetAtTime(this.sfxVol, this.ctx.currentTime, 0.03);
+  }
+
+  setEngineVolume(v: number): void {
+    this.engineVol = Math.min(1, Math.max(0, v));
+    this.engine.gain.setTargetAtTime(this.engineVol, this.ctx.currentTime, 0.03);
   }
 
   setMusicVolume(v: number): void {

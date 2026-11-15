@@ -62,7 +62,7 @@ export class AudioManager {
     this.voice = w ?? createOscillatorVoice(this.bus.ctx);
     this.engineKind = w ? 'worklet' : 'oscillator';
     console.info(`[audio] engine voice: ${this.engineKind}`);
-    this.voice.out.connect(this.bus.sfx);
+    this.voice.out.connect(this.bus.engine);
   }
 
   /** Trigger a test sound (K panel). */

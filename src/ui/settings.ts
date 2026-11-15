@@ -30,6 +30,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setVolume(s.volume);
   d.audio.setMuted(s.muted);
   d.audio.setSfxVolume(s.sfxVolume);
+  d.audio.setEngineVolume(s.engineVolume);
   d.audio.setMusicVolume(s.musicVolume);
   if (phoneDefaults(s)) d.store.commit();
   Object.assign(GRAPHICS, s.graphics);
@@ -46,7 +47,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const root = h('div', 'rb-layer dim');
   root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
   root.append(h('h2', 'rb-title', 'SETTINGS'));
-  const slider = (label: string, key: 'volume' | 'sfxVolume' | 'musicVolume'): HTMLElement => {
+  const slider = (label: string, key: 'volume' | 'sfxVolume' | 'engineVolume' | 'musicVolume'): HTMLElement => {
     const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
     const input = h('input') as HTMLInputElement;
     input.type = 'range';
@@ -63,6 +64,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     return row;
   };
   const vol = slider('Master', 'volume');
+  const engVol = slider('Engine', 'engineVolume');
   const sfxVol = slider('Effects', 'sfxVolume');
   const musVol = slider('Music', 'musicVolume');
 
@@ -136,7 +138,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = HINT[s.weatherPhysics];
   };
   refreshWp();
-  root.append(vol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
+  root.append(vol, engVol, sfxVol, musVol, mute, voice, shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
   return root;
 }
 

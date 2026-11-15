@@ -28,7 +28,7 @@ export class AmbienceBed {
     const rg = ctx.createGain();
     rg.gain.value = 0.6;
     bus.loopNoise().connect(rumble).connect(rg).connect(this.hum);
-    this.hum.connect(bus.sfx);
+    this.hum.connect(bus.ambience);
     // sea: noise through a slowly sweeping low-pass, its level rising and falling like waves (0.11 Hz)
     this.seaFilter = ctx.createBiquadFilter();
     this.seaFilter.type = 'lowpass';
@@ -36,7 +36,7 @@ export class AmbienceBed {
     this.seaFilter.Q.value = 0.6;
     this.sea = ctx.createGain();
     this.sea.gain.value = 0;
-    bus.loopNoise().connect(this.seaFilter).connect(this.sea).connect(bus.sfx);
+    bus.loopNoise().connect(this.seaFilter).connect(this.sea).connect(bus.ambience);
     this.lfo = ctx.createOscillator();
     this.lfo.frequency.value = 0.11;
     this.lfoGain = ctx.createGain();

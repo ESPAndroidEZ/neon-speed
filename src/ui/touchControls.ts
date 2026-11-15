@@ -52,7 +52,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
   knob.append(dot);
   const hint = document.createElement('div');
   hint.className = 'hint';
-  hint.textContent = '◀ DRAG TO STEER ▶';
+  hint.textContent = 'DRAG TO STEER';
   zone.append(knob, hint);
   let stickId: number | null = null;
   let startX = 0;

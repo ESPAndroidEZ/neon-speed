@@ -35,7 +35,7 @@ export class RivalEngines {
       panner.refDistance = 7;
       panner.rolloffFactor = 1.4;
       panner.maxDistance = 140;
-      voice.out.connect(panner).connect(this.bus.sfx);
+      voice.out.connect(panner).connect(this.bus.engine);
       this.slots.push({ voice, panner, view: null });
     }
     this.ready = true;

@@ -3,7 +3,7 @@
 One line per file: `name (lines) description | exports by kind`. Search here before opening files.
 
 ## src/audio
-- audioBus.ts (107) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
+- audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
 - audioManager.ts (169) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
 - audioParams.ts (23) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO; type AudioParams
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
@@ -38,7 +38,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rewards.ts (90) Racer fields the rewards read (structural, so tests can pass plain objects). | class RaceRewards; const REWARD; iface RewardRacer, RewardData; type RewardKind
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - save.ts (170) Paint per car id (0xRRGGBB). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality
-- saveParse.ts (76) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- saveParse.ts (78) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 ## src/data
 - barks.ts (63) Pre-race taunts for the versus screen (task 014). Keyed by rival id, four lines each. | const BARKS
 - carBuild.ts (21) What the player has done to each car: installed upgrades and the tuning setup (the save... | fn applyBuild; const getBuild, setBuild
@@ -141,12 +141,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - game.ts (173) SHARED CONTRACTS: the single source of truth between modules. | fn createNeutralInput; iface WeatherProfile, Vec3, Disposable, Serializable, CarInput, InputSource, CarState, RaceTelemetry, TrackSample, AIWorldView, AIRacerAgent, CameraPose, CameraRig, CarModel; type GameState, Weather, FixedUpdate, FrameCallback
 - world.ts (107) Open-world contracts (free roam). The road network is pure data: no `three` here or in ... | const SURFACES; iface RoadNode, RoadEdge, RoadGraph, Footprint, Poi, WorldClockState, RoamSave; type DistrictId, RoadKind, SurfaceType, PoiKind
 ## src/ui
+- carNav.ts (28) Car-picker navigation without arrow glyphs: Left/Right (and A/D) keys and a horizontal ... | fn carNav; const NAV_LABEL
 - cornerGuide.ts (97) Corner guide: the next corner's direction and severity (HAIRPIN / SHARP, or FAST when y... | class CornerGuide
 - crewMenu.ts (50) Characters whose relationship value is shown once Chapter 2 starts. | fn buildCrewMenu
 - dialogue.ts (164) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox
 - drivingSettings.ts (111) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
-- garage.ts (188) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (192) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageLook.ts (101) Garage appearance panel: finish, vinyl (pattern, colour, scale, number), rims (design, ... | fn lookRows
 - gauge.ts (111) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
 - graphicsSettings.ts (112) Graphics screen rows: presets, resolution scale, toggles, particle density, draw distan... | fn graphicsRows; iface GraphicsDeps
@@ -159,14 +160,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (62) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - saveUi.ts (40) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
-- settings.ts (153) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- settings.ts (155) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
 - storyMenu.ts (65) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
 - subtitles.ts (82) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; iface Caption
 - theme.ts (26) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
 - titleCards.ts (70) Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each c... | class TitleCards
 - touchControls.ts (137) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - trackSelect.ts (96) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
-- tuneMenu.ts (117) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
+- tuneMenu.ts (121) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
 - uiKit.ts (54) Small transient message at the bottom centre. | fn injectCss, h, button, toast; const money, lapText
 - versus.ts (91) The versus screen before a race: your portrait, car and stats against the strongest riv... | fn showVersus
 ## src/world

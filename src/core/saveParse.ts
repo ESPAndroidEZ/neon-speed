@@ -54,6 +54,8 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.autoQuality = s.autoQuality !== false;
   if (s.cameraShake === 'OFF' || s.cameraShake === 'LOW' || s.cameraShake === 'NORMAL') out.settings.cameraShake = s.cameraShake;
   out.settings.sfxVolume = num(s.sfxVolume, out.settings.sfxVolume, 0, 1);
+  out.settings.engineVolume = num(s.engineVolume, out.settings.engineVolume, 0, 1);
+  if (s.engineVolume === undefined && out.settings.volume === 0.7) out.settings.volume = 0.35; // 2026-11-15: old default was too loud
   out.settings.musicVolume = num(s.musicVolume, out.settings.musicVolume, 0, 1);
   if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
   if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;

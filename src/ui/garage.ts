@@ -1,3 +1,4 @@
+import { carNav, NAV_LABEL } from './carNav';
 import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
 import { measureCar, type CarStats } from '../physics/carStats';
@@ -39,6 +40,9 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   panel.style.cssText += ';cursor:default;width:min(400px,92vw);box-sizing:border-box;max-height:88vh;overflow:auto';
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
+  const goPrev = (): void => { d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
+  const goNext = (): void => { d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
+  carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
   let yaw = 0;
   let lookOpen = false; // the appearance panel is collapsed until asked for
   let shown = d.store.data.selected; // the menu already put the selected car on show
@@ -135,7 +139,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     if (cal) panel.append(cal);
     const row = h('div', 'rb-row');
     row.style.flexWrap = 'nowrap';
-    row.append(small('◀', () => { d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); }));
+    row.append(small(NAV_LABEL.prev, goPrev));
     if (owned) {
       const sel = d.store.data.selected === c.id;
       const b = button(sel ? 'Selected' : 'Select', () => { d.store.select(c.id); render(); }, sel ? '' : 'hot');
@@ -159,7 +163,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const back = button('Back', () => { d.visual()?.calibrate?.setArrow(false); d.onBack(); });
     back.style.minWidth = '80px';
     back.style.padding = '8px 10px';
-    row.append(small('▶', () => { d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); }), back);
+    row.append(small(NAV_LABEL.next, goNext), back);
     panel.append(row);
   };
   const refreshCash = (): void => {
