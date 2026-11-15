@@ -1,4 +1,4 @@
-# Racer's Blood: story and opening cinematic
+# Neon Speed: story and opening cinematic
 
 Tagline: **"Every street remembers who bled for it."**
 
@@ -46,7 +46,7 @@ Runs 11.5 s and maps onto the four shots already built in `src/camera/shots.ts`.
 | 0.0 - 2.2 | Front low sweep | Black. Rain hiss, then a hard cut to the headlights: they flare on (emissive pulse). Camera sweeps low across the nose | Rain, idle rumble. **Switch (VO):** "Kestrel Bay. Two a.m." |
 | 2.2 - 4.2 | Wheel flyby | Tracking down the flank, tyre spray, neon sliding across the paint | Tyre hiss through a puddle, rev blip. **Switch:** "The rain doesn't wash anything clean here." |
 | 4.2 - 8.4 | 360 orbit | Full reveal of the car. Lower-third: *Honda Civic, "The Beater"*. Cranes and signs behind | Synth bed rises, bass pulse. **Switch (4.2-6.4):** "Redline runs the Loop. Dante runs Redline." **(6.4-8.4):** "And Mara's garage is three days from the bank." |
-| 8.4 - 10.8 | Rear crane reveal | Camera rises, the road and city skyline open up. Title **RACER'S BLOOD** fades in at 9.4 | Rev builds, synth sting. **Switch:** "So tonight... you drive." |
+| 8.4 - 10.8 | Rear crane reveal | Camera rises, the road and city skyline open up. Title **NEON SPEED** fades in at 9.4 | Rev builds, synth sting. **Switch:** "So tonight... you drive." |
 | 10.8 - 11.5 | Whip into chase cam | FOV kick, motion blur, tagline under the title, countdown 3-2-1 begins | Whoosh, bloom kick, countdown beeps, gameplay music starts |
 
 Notes: every hard cut gets a bloom kick (already wired). In rain races the opening uses the same shots with the rain layer on. The car in the cinematic is always the car you currently drive.

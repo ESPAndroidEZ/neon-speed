@@ -1,4 +1,4 @@
-# Handoff
+# Handoff (the game is called Neon Speed since 2026-11-16; internal ids keep the old name)
 
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)

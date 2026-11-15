@@ -1,4 +1,4 @@
-# Racer's Blood
+# Neon Speed
 
 Night street racer in the browser, with rain and snow. TypeScript, Three.js, Vite.
 

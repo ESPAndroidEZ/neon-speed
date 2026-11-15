@@ -21,6 +21,10 @@ export const THEME_CSS = `
 .rb-layer .rb-btn{animation:rb-in var(--dur-slow) var(--ease) both}
 .rb-layer .rb-btn:nth-of-type(2){animation-delay:.06s}.rb-layer .rb-btn:nth-of-type(3){animation-delay:.12s}.rb-layer .rb-btn:nth-of-type(4){animation-delay:.18s}
 .rb-layer .rb-btn:nth-of-type(5){animation-delay:.24s}.rb-layer .rb-btn:nth-of-type(6){animation-delay:.3s}.rb-layer .rb-btn:nth-of-type(7){animation-delay:.36s}
-@media (prefers-reduced-motion:reduce){.rb-title,.rb-layer .rb-btn{animation:none}}
+/* NEON SPEED wordmark: NEON cyan, SPEED magenta, each tube flickers on its own beat */
+.rb-wm{font:900 italic var(--fs-hero) var(--font);letter-spacing:.06em;margin:0;text-align:center;line-height:1}
+.rb-wm em{color:#d8f8ff;text-shadow:0 0 10px var(--cyan),0 0 32px var(--cyan),0 0 64px #18d8ff88;animation:rb-flicker 7s infinite}
+.rb-wm strong{color:#ffe0f0;text-shadow:0 0 10px var(--magenta),0 0 32px var(--magenta),0 0 64px #ff2a9d88;animation:rb-flicker 9s 2s infinite}
+@media (prefers-reduced-motion:reduce){.rb-title,.rb-wm em,.rb-wm strong,.rb-layer .rb-btn{animation:none}}
 @keyframes rb-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 `;

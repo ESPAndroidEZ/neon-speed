@@ -18,7 +18,7 @@ import { buildSettings } from './settings';
 import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
 import type { TrackDef } from '../data/tracks';
-import { button, h, injectCss, lapText, money } from './uiKit';
+import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
 import { onLangChange, t } from '../i18n';
 import { langRow } from './langRow';
 import { garageLayout, type GarageLayout } from './garageConfig';
@@ -111,7 +111,7 @@ export class Menu {
     const el = h('div', 'rb-layer');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '12vh';
-    el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
+    el.append(wordmark(), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
     if (!isPhone()) el.append(h('div', 'rb-sub', t('menu.keys')));
     el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
     this.mount(el, 'title', 'main', () => this.title());

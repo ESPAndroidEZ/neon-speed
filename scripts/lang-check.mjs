@@ -10,7 +10,7 @@ const open = async (locale, ctx0) => {
   const ctx = ctx0 ?? (await browser.newContext({ locale, viewport: { width: 844, height: 390 } }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}?probe`, { waitUntil: 'load' });
-  await page.waitForSelector('.rb-title', { timeout: 20000 });
+  await page.waitForSelector('.rb-wm', { timeout: 20000 });
   return { ctx, page };
 };
 const text = (page) => page.evaluate(() => document.body.innerText);
@@ -28,7 +28,7 @@ const glyphs = await page.evaluate(() => {
 });
 ok(glyphs > 600, `Spanish glyphs render (${glyphs} px)`);
 await page.reload({ waitUntil: 'load' });
-await page.waitForSelector('.rb-title');
+await page.waitForSelector('.rb-wm');
 ok(/Pulsa Intro/i.test(await text(page)), 'choice survives a reload (saved)');
 await ctx.close();
 ({ ctx, page } = await open('en-US'));
