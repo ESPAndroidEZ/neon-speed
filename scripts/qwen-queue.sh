@@ -2,7 +2,7 @@
 # Run Qwen tasks back to back, unattended, in an isolated worktree (../racer-qwen). Never touches main.
 # Usage: scripts/qwen-queue.sh [--dry-run] 005 003 007 ...
 # Per task: reset the worktree to a fresh branch qwen/<task-file-name> from main, npm install if needed,
-# run scripts/qwen.sh <n> with AIDER_YES_ALWAYS=1 under `timeout 30m`, log to logs/qwen/<task>.log,
+# run scripts/qwen.sh <n> (Hermes) under `timeout 35m`, log to logs/qwen/<task>.log,
 # append one result line to logs/qwen/summary.txt, then continue with the next task even if this one failed.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -18,7 +18,7 @@ sum() { if [ "$DRY" = 1 ]; then echo "DRY summary: $*"; else mkdir -p "$LOGS"; e
 run() { if [ "$DRY" = 1 ]; then echo "DRY: $*"; return 0; fi; "$@"; }
 [ "$DRY" = 1 ] || mkdir -p "$LOGS"
 
-command -v aider >/dev/null || [ "$DRY" = 1 ] || { say "aider not found"; exit 1; }
+command -v hermes >/dev/null || [ "$DRY" = 1 ] || { say "hermes not found"; exit 1; }
 say "queue: ${TASKS[*]} (dry-run=$DRY)"
 
 for n in "${TASKS[@]}"; do
@@ -44,7 +44,7 @@ for n in "${TASKS[@]}"; do
 
   # 3. run Qwen (the baton line in the worktree comes from main: it must say 'Baton: qwen')
   start=$(date +%s)
-  run bash -c "cd '$WT' && AIDER_YES_ALWAYS=1 timeout 30m scripts/qwen.sh '$n' > '$log' 2>&1"
+  run bash -c "cd '$WT' && timeout 35m scripts/qwen.sh '$n' > '$log' 2>&1"
   rc=$?
   mins=$(( ($(date +%s) - start) / 60 ))
 

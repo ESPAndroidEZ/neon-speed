@@ -10,3 +10,4 @@ dist/
 .aider.llm.history
 assets-src/
 logs/
+__pycache__/

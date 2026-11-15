@@ -1,6 +1,6 @@
 # Racer's Blood
 
-3D arcade street racer: TypeScript, Three.js, Vite. Web first, Capacitor (iOS/Android) later. You are the lead architect. A local Qwen model (via Aider) builds small isolated modules from `docs/tasks/`; you review them.
+3D arcade street racer: TypeScript, Three.js, Vite. Web first, Capacitor (iOS/Android) later. You are the lead architect. A local Qwen model (via Hermes Agent, `scripts/qwen.sh`) builds small isolated modules from `docs/tasks/`; you review them.
 
 ## Commands
 - `npm run build`: 220-line check, `tsc --noEmit`, `vite build`. Zero errors before anything counts as done.
@@ -45,3 +45,4 @@ Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or 
 - Session 5 (fixed): STANDARD assist = the approved handling (assists BEGINNER/PRO deviate from it, never STANDARD). Weight transfer is per-car data (`CarTuning`); balance is guarded by `tests/balance-check` (lap-time bands, order Civic < 350Z < RX-7 < Evo < Supra by class). Maps are data (`src/data/tracks`), validated by `tests/tracks-check`; sprint = one run, `raceSamples` shorter than the loop. AI never gets more grip or power than the player; its only help is the rubber band in `physics/aiDifficulty` (capped at 9 %, shrinking per level, Legend none; Legend unlocks after the story). Chapter 2 and its branching choice (flags `open` / `sponsor`) are canonical in `docs/story.md`.
 - Session 6 (fixed): visual identity follows docs/art-direction.md (looks, palettes, quality bars, budgets) and menus follow docs/ui-style.md. Brands on signs, parts and upgrades are FICTIONAL. Performance upgrades never touch the locked turbo model (the turbo part only scales an existing turbo). PR must rise with every upgrade (tests/tuning-check). Mobile install: docs/mobile.md.
 - Qwen branches are `qwen/<task>`. Never merge without `/review-qwen`.
+- 2026-11-15: Qwen runs through Hermes, not Aider. Qwen may also build 3D models as headless Blender scripts (`blender/`, `scripts/model-build.sh`, checked by `scripts/model-check.mts`); a Tripo GLB, if present, is never overwritten without FORCE=1. Blender: `scripts/setup-blender.sh`.

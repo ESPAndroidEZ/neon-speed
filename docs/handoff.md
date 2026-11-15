@@ -1,11 +1,12 @@
 # Handoff
 
-Baton: claude
+Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-14 (Claude, session 6: design overhaul).
+Updated: 2026-11-15 (Claude: Hermes + Blender model pipeline, handbrake fix; baton to Qwen for car models 046-049).
 
 ## Done
+Qwen tooling (2026-11-15): Hermes replaces Aider (scripts/qwen.sh with scope guard + `Check:` line), headless Blender model pipeline (scripts/setup-blender.sh, blender/lib/rb.py, blender/cars/civic.py reference, scripts/model-build.sh, scripts/model-check.mts). Handbrake slide fix (stability.ts: limits stay on past a wider handbrake window, total-speed gate) + regression in tests/handling-check.
 Contracts, engine, cinematic, physics (tested), chase cam, keyboard, HUD, tuning panel (Phase 1).
 Track + city (Phase 2): Harbor Loop (1.4 km), road/kerbs/barriers, instanced city, lamps, neon, harbour, wet/snow look, barrier + verge contact, lap counter, R = reset to track. Tests: `npm test`.
 
@@ -24,9 +25,11 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-Follow docs/next-session.md (start prompt, Qwen review table, design priorities, re-split list).
+Review model tasks 046-049 with `SHOTS=1 scripts/model-build.sh cars/<id>` and the renders in logs/models/, then /review-qwen each.
+Then follow docs/next-session.md (start prompt, Qwen review table, design priorities, re-split list).
 
-## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`)
+## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
+NOW: 046 350z, 047 rx7, 048 evo, 049 supra (Blender car models, `Check:` runs model-build + model-check). 045 handbrake: done by Claude.
 Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
 Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
 
@@ -47,6 +50,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-14 Claude: feedback round 1 done: GLB pipeline, 5 cars, Kestrel Bay Streets, AI rivals, story mode chapter 1, UI margins. Contract change: AIWorldView.grip. Qwen queue now 004, 003, 005, 006, 007.
 - 2026-11-14 Claude: round 2 steps 1-3: graphics pass (material upgrade, glow, headlight spots, env, shafts, FinalFx, tiers + auto quality, prop GLB pipeline), particles (weatherFx, tyre/exhaust/skid fx, showcase P), weather physics levels (NORMAL/AGGRESSIVE/EXTREME, puddles, snow banks, ice, ramp-in), turbo model + drive events.
 - 2026-11-14 Claude: round 2 done: graphics pass, particles, weather physics levels, turbo + audio rebuild (worklet), lore, radio, crew screen, Red Hand Wall. Qwen queue unchanged except 004 (done by Claude). Code-health check added to the build.
+- 2026-11-15 Claude: Hermes + Blender model pipeline, handbrake fix (wrong-way slide), tasks 046-049 written, baton to Qwen.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
