@@ -28,7 +28,7 @@ export function lapTime(carId: string, weather: Weather): number {
 }
 
 // re-centred 2026-11-15: wider corners, then the AI learned handbrake turns (Kestrel ~10 s faster again), same class order
-const BANDS: Record<string, [number, number]> = { civic: [52.5, 60.5], '350z': [50, 58], rx7: [49, 57], evo: [47, 55], supra: [47, 55] };
+const BANDS: Record<string, [number, number]> = { civic: [52.5, 60.5], golf: [52, 60], '350z': [50, 58], rx7: [49, 57], e61: [48, 56], m3: [47.5, 55.5], evo: [47, 55], supra: [47, 55] };
 const times: Record<string, number> = {};
 for (const c of CARS) {
   times[c.id] = lapTime(c.id, 'CLEAR');

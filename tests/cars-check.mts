@@ -44,7 +44,7 @@ const z = by('350z');
 const supra = by('supra');
 const evo = by('evo');
 const rx7 = by('rx7');
-check('five cars', CARS.length === 5, `${CARS.length}`);
+check('eight cars', CARS.length === 8, `${CARS.length}`);
 check('civic 0-100 6.2-8 s', civic.t100 > 6.2 && civic.t100 < 8, civic.t100.toFixed(2));
 check('350Z 0-100 5.0-6.0 s', z.t100 > 5 && z.t100 < 6, z.t100.toFixed(2));
 check('rx7 0-100 4.8-5.8 s', rx7.t100 > 4.8 && rx7.t100 < 5.8, rx7.t100.toFixed(2));
