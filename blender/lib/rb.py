@@ -19,8 +19,8 @@ PALETTE = {  # name: (rgb, metallic, roughness, emission strength)
     'tyre': ((0.02, 0.02, 0.02), 0.0, 0.9, 0.0),
     'rim': ((0.55, 0.56, 0.6), 1.0, 0.3, 0.0),
     'chrome': ((0.9, 0.9, 0.9), 1.0, 0.1, 0.0),
-    'light_front': ((1.0, 0.97, 0.9), 0.0, 0.2, 3.0),
-    'light_rear': ((0.9, 0.02, 0.02), 0.0, 0.3, 2.0),
+    'light_front': ((1.0, 0.97, 0.9), 0.0, 0.2, 0.6),  # the game adds real headlights + bloom: keep this low
+    'light_rear': ((0.9, 0.02, 0.02), 0.0, 0.3, 0.8),
 }
 
 

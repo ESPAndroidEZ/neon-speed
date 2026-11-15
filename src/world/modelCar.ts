@@ -28,7 +28,7 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
   const bodyMat = (found && bodies.includes(found as never) ? found : bodies.length === 1 ? bodies[0] : null) as (Material & { color?: Color; map?: unknown }) | null;
   const tint = (hex: number): void => {
     if (!bodyMat?.color) return;
-    if (hex === factoryColor) bodyMat.color.setHex(0xffffff);
+    if (hex === factoryColor && bodyMat.map) bodyMat.color.setHex(0xffffff); // textured (Tripo): show the baked paint; untextured (Blender): the colour IS the paint
     else if (bodyMat.map) bodyMat.color.setHex(0xffffff).lerp(new Color(hex), 0.7); // textured body: keep some of the baked detail
     else bodyMat.color.setHex(hex);
   };
