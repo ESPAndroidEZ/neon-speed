@@ -5,12 +5,13 @@ import { defaultLoadout, type Loadout } from '../data/loadout';
 import { buildModelCar } from './modelCar';
 import { getYawOverride } from './modelPrefs';
 import { buildProceduralCar, type CarVisual } from './proceduralCar';
-import { createPlates } from './plates';
+import { createPlates, fitPlates } from './plates';
 
 /** Front and rear plates with the loadout's text; garage edits (setAppearance) update them live. */
 function withPlates(v: CarVisual, spec: CarSpec, l: Loadout, bodyRoot = v.root): CarVisual {
   const plates = createPlates(spec.shape.length, 0.36, Math.min(0.62, spec.shape.beltHeight - 0.24), l.plate);
   bodyRoot.add(plates.group);
+  fitPlates(plates, bodyRoot, spec.shape.length); // centred and seated on the real bumper of THIS body
   const orig = v.setAppearance?.bind(v);
   v.setAppearance = (nl, paint) => { orig?.(nl, paint); plates.setText(nl.plate); };
   return v;

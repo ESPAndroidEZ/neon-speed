@@ -1,4 +1,4 @@
-import { CanvasTexture, Group, Mesh, MeshStandardMaterial, PlaneGeometry, SRGBColorSpace } from 'three';
+import { CanvasTexture, Group, Mesh, MeshStandardMaterial, type Object3D, PlaneGeometry, Raycaster, SRGBColorSpace, Vector3 } from 'three';
 
 /** Fictional Kestrel Bay plate: light reflective plate, blue city band on the left, the owner's text (up to 8 chars). */
 function drawPlate(c: HTMLCanvasElement, text: string): void {
@@ -27,6 +27,8 @@ function drawPlate(c: HTMLCanvasElement, text: string): void {
 
 export interface Plates {
   readonly group: Group;
+  readonly front: Mesh;
+  readonly rear: Mesh;
   setText(text: string): void;
 }
 
@@ -59,5 +61,37 @@ export function createPlates(length: number, frontY = 0.36, rearY = 0.5, text = 
     tex.needsUpdate = true;
   };
   setText(text);
-  return { group, setText };
+  return { group, front, rear, setText };
+}
+
+const ray = new Raycaster();
+const from = new Vector3(), dir = new Vector3(), n = new Vector3();
+
+/**
+ * Seat both plates ON the bodywork: a ray at the car's centre line (x = 0) finds the bumper surface at the plate's
+ * height, the plate goes 1 cm proud of it, tilted to the panel. Falls back to the default spot when nothing is hit.
+ * Call once after the car is built (procedural or GLB). Not per frame.
+ */
+export function fitPlates(p: Plates, car: Object3D, length: number): void {
+  car.updateMatrixWorld(true);
+  const targets: Object3D[] = [];
+  car.traverse((o) => { // solid bodywork only: no plates, beams, glow planes or other see-through helpers
+    const m = o as Mesh;
+    const mat = Array.isArray(m.material) ? m.material[0] : m.material;
+    if (m.isMesh && o.visible && !p.group.children.includes(o) && !mat?.transparent) targets.push(o);
+  });
+  for (const [plate, sign] of [[p.front, 1], [p.rear, -1]] as const) {
+    from.set(0, plate.position.y, sign * (length / 2 + 2));
+    car.localToWorld(from);
+    dir.set(0, 0, -sign).transformDirection(car.matrixWorld);
+    ray.set(from, dir);
+    ray.far = 3;
+    const hit = ray.intersectObjects(targets, false).find((h) => h.face);
+    if (!hit || !hit.face) continue;
+    const local = car.worldToLocal(hit.point.clone());
+    n.copy(hit.face.normal).transformDirection(hit.object.matrixWorld).transformDirection(car.matrixWorld.clone().invert());
+    if (n.z * sign < 0.3) continue; // hit something facing the wrong way (an arch, a wheel): keep the default spot
+    plate.position.set(0, local.y, local.z + sign * 0.012);
+    plate.rotation.set(-Math.asin(Math.max(-0.6, Math.min(0.6, n.y))) * sign, sign > 0 ? 0 : Math.PI, 0);
+  }
 }
