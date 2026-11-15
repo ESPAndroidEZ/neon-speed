@@ -4,6 +4,7 @@ import { BoxGeometry, Color, Group, Mesh, MeshBasicMaterial, MeshPhysicalMateria
 import { damp } from '../core/math';
 import { buildBody, type BodyShape } from './carBody';
 import { addDetails } from './carDetails';
+import { addSignature } from './carSignature';
 import { flakeTexture } from './textures';
 import { addLightsAndShadow } from './carLights';
 import { buildArch, buildWheel, makeWheelMats } from './carWheels';
@@ -56,10 +57,11 @@ export function buildProceduralCar(baseShape: BodyShape, paintHex: number, loado
   body.add(shell, cab);
   const headMat = new MeshBasicMaterial({ color: bright(0xdff2ff, 2.4) });
   const tailMat = new MeshBasicMaterial({ color: bright(0xff1010, 2.2) });
-  addDetails(body, shape, parts, paint, trim, metal, headMat);
-  const tail = new Mesh(new BoxGeometry(w * 0.74, 0.08, 0.05), tailMat);
+  addDetails(body, shape, parts, paint, trim, metal);
+  const tail = new Mesh(new BoxGeometry(w * 0.74, 0.03, 0.04), trim); // dark bar between the lamps
   tail.position.set(0, shape.beltHeight - 0.16, -zf - 0.01);
   body.add(tail);
+  addSignature(body, shape, parts, { paint, trim, metal, head: headMat, tail: tailMat });
   mergeByMaterial(body); // static body pieces: one draw call per material
 
   addLightsAndShadow(root, w, shape.length - 0.22, parts.hoodY(zf - 0.14) - 0.06);

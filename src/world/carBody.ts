@@ -1,5 +1,6 @@
 import type { BufferGeometry } from 'three';
 import { loft, type HalfRing } from './carLoft';
+import type { CarLook } from './carSignature';
 
 /** Proportion data for one body style (metres). Pure data; names and brands live in data/cars.ts. */
 export interface BodyShape {
@@ -25,6 +26,8 @@ export interface BodyShape {
   noseLow: number;
   /** Raised hood scoop. */
   scoop: boolean;
+  /** Which car's lamps, rails and vents to draw (see carSignature). */
+  look?: CarLook;
 }
 
 export const RIDE = 0.2;
