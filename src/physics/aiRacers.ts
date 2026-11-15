@@ -15,6 +15,9 @@ const WINDOW = 14;
 const MAX_STEER = 0.5;
 const WHEELBASE = 2.6;
 const V_MAX = 82;
+// Handbrake cornering (same physics as the player's handbrake turn): corner speed planned this much faster per skill.
+const ENV = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
+const HB_ALAT = Number(ENV.RB_HB_ALAT ?? 1.2), HB_SLIP = Number(ENV.RB_HB_SLIP ?? 0.7), HB_LOCK = Number(ENV.RB_HB_LOCK ?? 1);
 const GRID = { A_LAT: 6.5, A_LAT_SKILL: 5.2, A_BRAKE: 6.0, A_BRAKE_SKILL: 2.3, A_ACCEL: 4.5, A_ACCEL_SKILL: 2.5 };
 
 const hash = (s: string): number => {
@@ -45,6 +48,7 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
   let line!: RacingLine; // set by the first build() before any use
   let profile: Float32Array | null = null;
   let profileGrip = -1;
+  let gripLat = 9; // this driver's grip-only cornering limit, m/s^2 (set in build)
   let hint = -1;
   let shift = 0;
   let confidence = 1;
@@ -61,7 +65,7 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
     const g = Math.max(0.12, grip);
     if (!profile || profile.length !== line.n) profile = new Float32Array(line.n);
     speedProfile(line, {
-      aLat: (GRID.A_LAT + GRID.A_LAT_SKILL * Math.min(1, sk)) * g * profConf * Math.min(1, 0.55 + 0.6 * g) * st.corner,
+      aLat: (gripLat = (GRID.A_LAT + GRID.A_LAT_SKILL * Math.min(1, sk)) * g * profConf * Math.min(1, 0.55 + 0.6 * g) * st.corner) * (1 + (g > 0.6 ? HB_ALAT * Math.min(1, sk) : 0)), // faster corner plan only where it can handbrake
       aBrake: (GRID.A_BRAKE + GRID.A_BRAKE_SKILL * Math.min(1, sk)) * Math.max(0.5, g) * st.brake,
       aAccel: (GRID.A_ACCEL + GRID.A_ACCEL_SKILL * Math.min(1, sk)) * Math.max(0.6, g),
       vMax: V_MAX,
@@ -148,7 +152,12 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
       const delta = Math.atan((2 * WHEELBASE * Math.sin(alpha)) / dist);
       const sp = Math.abs(speed);
       const lock = 1 - 0.72 * Math.min(1, Math.max(0, (sp - 5) / 55));
-      out.steer = Math.max(-1, Math.min(1, delta / (MAX_STEER * lock) + self.slipAngle * 0.7));
+      // handbrake turn-in: too fast to make a sharp corner on grip, so throw it in like the player does and hold it
+      // until the nose points down the exit (no counter-steer meanwhile: that would cancel the rotation)
+      const kIn = line.k[(hint + Math.round(8 / line.ds)) % n];
+      const hbOn = sk > 0.3 && world.grip > 0.6 && kIn > 1 / 40 && sp > Math.sqrt(gripLat / kIn) * 1.05 && Math.abs(alpha) > 0.08 && Math.abs(self.slipAngle) < HB_SLIP;
+      out.steer = Math.max(-1, Math.min(1, delta / (MAX_STEER * lock) + (hbOn ? 0 : self.slipAngle * 0.7)));
+      if (hbOn) out.steer = -Math.sign(line.ks[(hint + Math.round(8 / line.ds)) % n]) * HB_LOCK; // full lock INTO the corner (ks > 0 = right)
 
       // speed: the profile a little ahead, a slipstream bonus, never into the car in front
       let vt = Math.min(profile[(hint + ahead) % n] * pace * (traffic.draft ? 1.05 : 1), traffic.cap + 3);
@@ -156,7 +165,8 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
       out.throttle = Math.max(0, Math.min(1, (vt - speed) * 0.45 + 0.1));
       out.brake = speed > vt + 1.2 ? Math.min(1, (speed - vt) * 0.22) : 0;
       if (out.brake > 0) out.throttle = 0;
-      out.handbrake = false;
+      out.handbrake = hbOn;
+      if (out.handbrake) { out.brake = 0; out.throttle = Math.max(out.throttle, 0.6); }
 
       // unstick: pinned at the road edge or against another car for a while: reverse away from the wall, then drive on
       stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);
