@@ -2,6 +2,7 @@ import { RADIO } from '../data/radio';
 import { TRACK_RADIO } from '../data/radio2';
 import { createRng } from '../core/rng';
 import type { Weather } from '../types/game';
+import { t, tx } from '../i18n';
 
 export interface RadioSnapshot {
   /** Race is on (countdown over, not finished). */
@@ -74,17 +75,17 @@ export class RadioDirector {
 
   /** Line for the finish: win (P1) or lose. Call once when the race ends. */
   finish(position: number): string {
-    return this.pick('finish' + (position === 1 ? 'W' : 'L'), position === 1 ? RADIO.win : RADIO.lose);
+    return tx(this.pick('finish' + (position === 1 ? 'W' : 'L'), position === 1 ? RADIO.win : RADIO.lose));
   }
 
   /** Returns a line to show, or null. Call once per frame (or per fixed step). */
   update(s: RadioSnapshot): string | null {
     if (!s.racing) return null;
-    const rivalAt = (p: number): string => s.rivals.find((r) => r.position === p)?.name ?? s.rivals[0]?.name ?? 'the pack';
+    const rivalAt = (p: number): string => s.rivals.find((r) => r.position === p)?.name ?? s.rivals[0]?.name ?? t('radio.pack');
     const say = (key: string, list: readonly string[], name: string, gap = MIN_GAP): string | null => {
       if (s.time - this.lastSay < gap) return null;
       this.lastSay = s.time;
-      return this.fill(this.pick(key, list), s, name);
+      return this.fill(tx(this.pick(key, list)), s, name);
     };
     let out: string | null = null;
     if (!this.started) {

@@ -19,6 +19,8 @@ import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
 import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money } from './uiKit';
+import { onLangChange, t } from '../i18n';
+import { langRow } from './langRow';
 
 export interface MenuDeps {
   /** Screen and phone-control rows for Settings (ui/controlSettings). */
@@ -49,7 +51,6 @@ export interface MenuDeps {
   startEvent: (ev: StoryEvent) => void;
 }
 
-const WEATHER_BLURB: Record<Weather, string> = { CLEAR: 'Full grip. Learn the lines.', RAIN: 'Wet tarmac: 72% grip, longer braking.', SNOW: 'Ice and slush: 45% grip. Pure drift.' };
 
 /** Title -> main menu -> weather / garage / settings. All plain DOM over the live 3D scene. */
 export class Menu {
@@ -58,10 +59,13 @@ export class Menu {
   private cash: HTMLElement | null = null;
   private rivals = 3;
   private screen: 'none' | 'title' | 'main' | 'other' = 'none';
+  /** Rebuilds the screen on show, so a language switch re-renders it live. */
+  private again: (() => void) | null = null;
 
   constructor(d: MenuDeps) {
     injectCss();
     this.d = d;
+    onLangChange(() => this.again?.());
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       if (e.code === 'Enter' && this.screen === 'title') this.main();
@@ -78,8 +82,9 @@ export class Menu {
     this.d.showroom(c, this.d.store.data.paint[c.id] ?? c.color, this.d.store.data.glow[c.id]);
   }
 
-  private mount(el: HTMLElement, s: 'title' | 'main' | 'other', shift = 0): void {
+  private mount(el: HTMLElement, s: 'title' | 'main' | 'other', shift = 0, again: (() => void) | null = null): void {
     this.d.shift(shift);
+    this.again = again;
     this.layer?.remove();
     this.cash?.remove();
     this.layer = el;
@@ -97,6 +102,7 @@ export class Menu {
     this.cash?.remove();
     this.layer = this.cash = null;
     this.screen = 'none';
+    this.again = null;
   }
 
   title(): void {
@@ -104,9 +110,10 @@ export class Menu {
     const el = h('div', 'rb-layer');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = '12vh';
-    el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', 'Chapter 1 · Harbor Loop'), button('Press Enter / Tap', () => this.main(), 'hot'));
-    if (!isPhone()) el.append(h('div', 'rb-sub', 'W/S gas+brake · A/D steer · Space handbrake · Shift nitro · M mute · R reset'));
-    this.mount(el, 'title');
+    el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
+    if (!isPhone()) el.append(h('div', 'rb-sub', t('menu.keys')));
+    el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
+    this.mount(el, 'title', 0, () => this.title());
   }
 
   main(): void {
@@ -116,36 +123,36 @@ export class Menu {
     el.style.paddingBottom = '10vh';
     const latest = this.d.slots.latest();
     if (latest) {
-      const c = button('Continue', () => this.d.loadSlot(latest.id), 'hot');
+      const c = button(t('menu.continue'), () => this.d.loadSlot(latest.id), 'hot');
       c.title = describe(latest.snap);
       el.append(c);
     }
-    el.append(button('Story', () => this.story(), latest ? '' : 'hot'), button('Free Race', () => this.maps()), button('Garage', () => this.garage()), button('Tuning', () => this.tune()), button('Crew', () => this.crew()), ...(latest ? [button('Load', () => this.load())] : []), button('Settings', () => this.settings()));
-    this.mount(el, 'main');
+    el.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    this.mount(el, 'main', 0, () => this.main());
   }
 
   load(): void {
-    this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other');
+    this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other', 0, () => this.load());
   }
 
   tune(): void {
-    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other');
+    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other', 0, () => this.tune());
   }
 
   crew(): void {
-    this.mount(buildCrewMenu(this.d.store, () => this.main()), 'other');
+    this.mount(buildCrewMenu(this.d.store, () => this.main()), 'other', 0, () => this.crew());
   }
 
   story(): void {
-    this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other');
+    this.mount(buildStoryMenu({ store: this.d.store, start: (ev) => this.d.startEvent(ev), onBack: () => this.main() }), 'other', 0, () => this.story());
   }
 
   showEnding(chapter = 1): void {
-    this.mount(buildEnding(this.d.store.data.career, chapter, () => this.main()), 'other');
+    this.mount(buildEnding(this.d.store.data.career, chapter, () => this.main()), 'other', 0, () => this.showEnding(chapter));
   }
 
   maps(): void {
-    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other');
+    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other', 0, () => this.maps());
   }
 
   weather(def: TrackDef): void {
@@ -156,8 +163,8 @@ export class Menu {
       this.rivals = n;
       riv.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.n === String(n)));
     };
-    for (const [n, label] of [[0, 'Time trial'], [3, '3 rivals'], [5, '5 rivals']] as const) {
-      const b = button(label, () => setRivals(n));
+    for (const [n, label] of [[0, 'menu.timeTrial'], [3, 'menu.rivals3'], [5, 'menu.rivals5']] as const) {
+      const b = button(t(label), () => setRivals(n));
       b.dataset.n = String(n);
       b.style.minWidth = '130px';
       riv.append(b);
@@ -166,21 +173,21 @@ export class Menu {
     setRivals(this.rivals);
     const row = h('div', 'rb-row');
     for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
-      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${w}</div><div style="opacity:.8;margin:6px 0">${WEATHER_BLURB[w]}</div><div class="rb-sub">Grip ${Math.round(WEATHER[w].grip * 100)}%<br>Best ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
+      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${t(`weather.${w}`)}</div><div style="opacity:.8;margin:6px 0">${t(`weather.${w}.blurb`)}</div><div class="rb-sub">${t('menu.grip', { n: Math.round(WEATHER[w].grip * 100) })}<br>${t('menu.best')} ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
       card.addEventListener('click', () => this.d.startRace(w, def.type === 'circuit' ? this.rivals : 0, def.id));
       if (def.recommendedWeather.includes(w)) card.style.borderColor = '#ff2a9d';
       row.append(card);
     }
-    el.append(row, h('div', 'rb-sub', 'Pink outline: suits this map'), button('Back', () => this.maps()));
-    this.mount(el, 'other');
+    el.append(row, h('div', 'rb-sub', t('menu.pink')), button(t('common.back'), () => this.maps()));
+    this.mount(el, 'other', 0, () => this.weather(def));
   }
 
   garage(): void {
     const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: () => this.main() });
-    this.mount(el, 'other', window.innerWidth > 800 ? 1.9 : 0);
+    this.mount(el, 'other', window.innerWidth > 800 ? 1.9 : 0, () => this.garage());
   }
 
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other');
+    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other', 0, () => this.settings());
   }
 }

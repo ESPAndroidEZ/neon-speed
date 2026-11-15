@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 const CSS = `
 .rb-gauge{position:relative;width:clamp(170px,22vw,250px);aspect-ratio:1;margin-left:auto}
 .rb-gauge canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -34,7 +35,7 @@ export class ArcGauge {
     this.num.className = 'num';
     this.gear.className = 'gear';
     this.burst.className = 'rb-nitro-burst';
-    this.burst.textContent = 'NITRO';
+    this.burst.textContent = t('pad.nitro');
     this.el.append(this.cv, this.num, this.gear, this.burst);
   }
 

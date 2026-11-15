@@ -5,6 +5,7 @@ import { PART_SLOTS, PARTS } from '../world/carParts';
 import { RIM_IDS } from '../world/rims';
 import { VINYL_IDS } from '../world/vinylLayer';
 import { h } from './uiKit';
+import { t, tx } from '../i18n';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 
@@ -21,7 +22,7 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
     if (heavy) rebuild();
     else live(l);
   };
-  const label = (t: string): void => void root.append(h('div', 'rb-sub', t));
+  const label = (text: string): void => void root.append(h('div', 'rb-sub', text));
   const chips = (opts: readonly { id: string; name: string }[], cur: string, pick: (id: string) => void): void => {
     const row = h('div', 'rb-row');
     for (const o of opts) {
@@ -49,7 +50,7 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
     root.append(row);
   };
   const slider = (name: string, min: number, max: number, step: number, cur: number, set: (v: number) => void, heavy = false): void => {
-    const row = h('div', 'rb-row', `<span style="width:80px;font-size:12px">${name}</span>`);
+    const row = h('div', 'rb-row', `<span class="rb-lbl" style="font-size:12px">${name}</span>`);
     const i = h('input') as HTMLInputElement;
     i.type = 'range';
     i.min = String(min);
@@ -64,38 +65,38 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
     row.append(i);
     root.append(row);
   };
-  label('Finish');
-  chips(FINISH_IDS.map((id) => ({ id, name: FINISHES[id].name })), l.finish, (id) => { l.finish = id as Loadout['finish']; commit(); });
-  label('Vinyl');
-  chips([{ id: '', name: 'none' }, ...VINYL_IDS.map((id) => ({ id, name: id }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); });
+  label(t('look.finish'));
+  chips(FINISH_IDS.map((id) => ({ id, name: tx(FINISHES[id].name) })), l.finish, (id) => { l.finish = id as Loadout['finish']; commit(); });
+  label(t('look.vinyl'));
+  chips([{ id: '', name: t('look.none') }, ...VINYL_IDS.map((id) => ({ id, name: id }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); });
   swatches(PAINTS, l.vinyl.color, (c) => { l.vinyl.color = c; commit(); });
-  slider('Scale', 0.5, 2, 0.1, l.vinyl.scale, (v) => (l.vinyl.scale = v));
-  slider('Rotate', -90, 90, 5, l.vinyl.rotation, (v) => (l.vinyl.rotation = v));
+  slider(t('look.scale'), 0.5, 2, 0.1, l.vinyl.scale, (v) => (l.vinyl.scale = v));
+  slider(t('look.rotate'), -90, 90, 5, l.vinyl.rotation, (v) => (l.vinyl.rotation = v));
   for (const slot of PART_SLOTS) {
-    label(slot === 'skirts' ? 'Side skirts' : slot[0].toUpperCase() + slot.slice(1));
-    chips([{ id: '', name: 'stock' }, ...Object.keys(PARTS[slot]).map((id) => ({ id, name: id }))], l.parts[slot] ?? '', (id) => {
+    label(t(`look.slot.${slot}`));
+    chips([{ id: '', name: t('look.stock') }, ...Object.keys(PARTS[slot]).map((id) => ({ id, name: id }))], l.parts[slot] ?? '', (id) => {
       if (id) l.parts[slot] = id;
       else delete l.parts[slot];
       commit(slot === 'spoiler'); // the stock spoiler is part of the body: rebuild
     });
   }
-  label('Rims');
+  label(t('look.rims'));
   chips(RIM_IDS.map((id) => ({ id, name: id })), l.rim.design, (id) => { l.rim.design = id; commit(true); });
-  slider('Size', 17, 21, 1, l.rim.size, (v) => (l.rim.size = v), true);
+  slider(t('look.size'), 17, 21, 1, l.rim.size, (v) => (l.rim.size = v), true);
   swatches([0xc4c8d4, 0x14141a, 0xffd27d, 0xff2a9d, 0x18d8ff, 0xc41a1a], l.rim.color, (c) => { l.rim.color = c; commit(); });
-  slider('Window tint', 0, 0.9, 0.05, l.tint, (v) => (l.tint = v));
-  label('Headlights');
+  slider(t('look.tint'), 0, 0.9, 0.05, l.tint, (v) => (l.tint = v));
+  label(t('look.headlights'));
   swatches(HEADLIGHTS, l.headlight, (c) => { l.headlight = c; commit(); });
-  label('Underglow pattern');
+  label(t('look.glowPattern'));
   chips(GLOW_PATTERNS.map((id) => ({ id, name: id })), l.glowPattern, (id) => { l.glowPattern = id as Loadout['glowPattern']; commit(); });
-  label('Brake calipers');
+  label(t('look.calipers'));
   swatches(CALIPERS, l.caliper, (c) => { l.caliper = c; commit(); });
-  slider('Stance', -1, 1, 0.1, l.stance, (v) => (l.stance = v));
+  slider(t('look.stance'), -1, 1, 0.1, l.stance, (v) => (l.stance = v));
   const plate = h('input') as HTMLInputElement;
   plate.value = l.plate;
   plate.maxLength = 8;
   plate.style.cssText = 'width:110px;text-transform:uppercase;font:700 14px monospace;text-align:center';
   plate.addEventListener('change', () => { l.plate = plate.value.toUpperCase(); commit(); });
-  root.append(h('div', 'rb-sub', 'Plate'), plate);
+  root.append(h('div', 'rb-sub', t('look.plate')), plate);
   return root;
 }

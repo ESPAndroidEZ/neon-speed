@@ -8,6 +8,7 @@ import { BARKS } from '../data/barks';
 import { portraitEl } from './portraits';
 import { drawOutline } from './trackSelect';
 import { h, injectCss } from './uiKit';
+import { t, tx } from '../i18n';
 
 const stats = new Map<string, CarStats>();
 const statsOf = (c: CarSpec): CarStats => {
@@ -26,7 +27,7 @@ function side(who: string, name: string, car: CarSpec, align: 'left' | 'right', 
   const head = h('div', '', `<div class="rb-sub" style="color:${color}">${tag}</div><div style="font-size:clamp(22px,4vw,34px);font-weight:900;font-style:italic">${name}</div><div class="rb-sub">${car.brand} ${car.name}</div>`);
   head.style.textAlign = align;
   const p = portraitEl(who, align === 'left' ? 'neutral' : 'smirk', 120);
-  const bars = h('div', '', bar('Accel', 1 - (s.accel - 3.5) / 3.5, color) + bar('Top', (s.topKph - 180) / 120, color) + bar('Slide', s.slide / 1.4, color) + bar('Grip', (s.grip - 1) / 0.8, color));
+  const bars = h('div', '', bar(t('vs.accel'), 1 - (s.accel - 3.5) / 3.5, color) + bar(t('vs.top'), (s.topKph - 180) / 120, color) + bar(t('vs.slide'), s.slide / 1.4, color) + bar(t('vs.grip'), (s.grip - 1) / 0.8, color));
   bars.style.cssText = 'width:100%;display:flex;flex-direction:column;gap:5px';
   col.append(p, head, bars);
   return col;
@@ -50,25 +51,25 @@ export function showVersus(d: { player: CarSpec; weather: Weather; def: TrackDef
   cv.height = 130;
   cv.style.cssText = 'width:min(220px,28vw);opacity:.9';
   drawOutline(cv, d.def);
-  mid.append(h('div', '', '<div style="font-size:clamp(40px,8vw,80px);font-weight:900;font-style:italic;color:#ff2a9d;text-shadow:0 0 30px #ff2a9d">VS</div>'), cv, h('div', 'rb-sub', `${d.def.name} · ${d.weather.toLowerCase()}`));
-  row.append(side('rookie', 'You', d.player, 'left', '#18d8ff', 'Driver'));
+  mid.append(h('div', '', '<div style="font-size:clamp(40px,8vw,80px);font-weight:900;font-style:italic;color:#ff2a9d;text-shadow:0 0 30px #ff2a9d">VS</div>'), cv, h('div', 'rb-sub', `${d.def.name} · ${t(`weather.${d.weather}`).toLowerCase()}`));
+  row.append(side('rookie', t('vs.you'), d.player, 'left', '#18d8ff', t('vs.driver')));
   row.append(mid);
   const bark = lead ? BARKS[lead.id]?.[Math.floor(Math.random() * 4)] : undefined;
-  if (lead) row.append(side(lead.id, lead.name, findCar(lead.carId), 'right', '#ff2a9d', lead.style.replace('-', ' ')));
+  if (lead) row.append(side(lead.id, lead.name, findCar(lead.carId), 'right', '#ff2a9d', t(`style.${lead.style}`)));
   else {
-    const clock = h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${d.def.type === 'drift' ? 'Target' : 'Against'}</div><div style="font-size:clamp(24px,4vw,36px);font-weight:900;font-style:italic">${d.def.type === 'drift' ? `${(d.def.driftTarget ?? 0).toLocaleString()} points` : 'The clock'}</div><div class="rb-sub">${d.def.blurb.slice(0, 80)}…</div>`);
+    const clock = h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${t(d.def.type === 'drift' ? 'vs.target' : 'vs.against')}</div><div style="font-size:clamp(24px,4vw,36px);font-weight:900;font-style:italic">${d.def.type === 'drift' ? t('vs.points', { n: (d.def.driftTarget ?? 0).toLocaleString() }) : t('vs.clock')}</div><div class="rb-sub">${tx(d.def.blurb).slice(0, 80)}…</div>`);
     clock.style.cssText = 'width:min(260px,40vw);text-align:right';
     row.append(clock);
   }
-  if (bark && lead) layer.append(h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${lead.name} says</div><div style="font-size:20px;font-style:italic;max-width:min(620px,88vw);text-align:center">“${bark}”</div>`));
+  if (bark && lead) layer.append(h('div', '', `<div class="rb-sub" style="color:#ff2a9d">${t('vs.says', { name: lead.name })}</div><div style="font-size:20px;font-style:italic;max-width:min(620px,88vw);text-align:center">“${tx(bark)}”</div>`));
   const others = d.rivalIds.filter((id) => id !== lead?.id);
   layer.append(row);
   if (others.length) {
     const f = h('div', 'rb-row');
-    f.append(h('span', 'rb-sub', 'Also on the grid'), ...others.map((id) => portraitEl(id, 'neutral', 44)));
+    f.append(h('span', 'rb-sub', t('vs.grid')), ...others.map((id) => portraitEl(id, 'neutral', 44)));
     layer.append(f);
   }
-  layer.append(h('div', 'rb-sub', 'Enter / click to go'));
+  layer.append(h('div', 'rb-sub', t('vs.go')));
   document.body.appendChild(layer);
   let done = false;
   const finish = (): void => {

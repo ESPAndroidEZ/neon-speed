@@ -2,6 +2,7 @@ import type { SaveSlots, SlotId } from '../core/gameSave';
 import type { PauseMenu } from '../ui/pauseMenu';
 import type { Game } from './game';
 import { canSave, captureGame } from './saveGame';
+import { t } from '../i18n';
 
 /** Pause state and saving: pause on Esc or a hidden tab, autosave when pausing or leaving, manual slots. */
 export class PauseController {
@@ -26,7 +27,7 @@ export class PauseController {
     const snap = captureGame(this.game);
     if (!snap) return false;
     const ok = this.slots.put(slot, snap);
-    if (!quiet) this.say(ok ? 'Saved' : 'Saved for this session only (storage is full or blocked)');
+    if (!quiet) this.say(t(ok ? 'pause.saved' : 'pause.savedSession'));
     return ok;
   }
 

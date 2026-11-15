@@ -4,7 +4,6 @@ import type { TiltPrefs } from './tiltMap';
 /** Phone control schemes: tilt the phone, the drag "touch wheel", or left/right buttons. */
 export type ControlScheme = 'tilt' | 'wheel' | 'buttons';
 export const SCHEMES: readonly ControlScheme[] = ['tilt', 'wheel', 'buttons'];
-export const SCHEME_LABEL: Record<ControlScheme, string> = { tilt: 'Tilt', wheel: 'Touch wheel', buttons: 'Buttons (left/right)' };
 
 export interface ControlPrefs {
   scheme: ControlScheme;

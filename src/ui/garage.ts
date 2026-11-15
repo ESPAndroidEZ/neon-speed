@@ -8,6 +8,7 @@ import { setYawOverride } from '../world/modelPrefs';
 import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
 import { button, h, money } from './uiKit';
+import { t, tx } from '../i18n';
 
 export interface GarageDeps {
   store: SaveStore;
@@ -54,7 +55,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   const paintOf = (c: CarSpec): number => d.store.data.paint[c.id] ?? c.color;
   const glowOf = (c: CarSpec): number => d.store.data.glow[c.id] ?? GLOWS[0];
   const bar = (label: string, v: number, text: string): string =>
-    `<div class="rb-row" style="justify-content:space-between;flex-wrap:nowrap"><span style="width:100px;text-align:left;white-space:nowrap">${label}</span><div class="rb-bar"><i style="width:${Math.round(clamp01(v) * 100)}%"></i></div><span style="width:92px;white-space:nowrap;text-align:right;opacity:.8">${text}</span></div>`;
+    `<div class="rb-row" style="justify-content:space-between;flex-wrap:nowrap"><span style="flex:1 1 auto;text-align:left;min-width:0;overflow-wrap:anywhere">${label}</span><div class="rb-bar"><i style="width:${Math.round(clamp01(v) * 100)}%"></i></div><span style="width:92px;white-space:nowrap;text-align:right;opacity:.8">${text}</span></div>`;
   const swatches = (list: readonly number[], cur: number, pick: (c: number) => void): HTMLElement => {
     const row = h('div', 'rb-row');
     row.style.margin = '6px 0';
@@ -66,8 +67,8 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     }
     return row;
   };
-  const small = (t: string, f: () => void): HTMLButtonElement => {
-    const b = button(t, f);
+  const small = (label: string, f: () => void): HTMLButtonElement => {
+    const b = button(label, f);
     b.style.minWidth = '56px';
     b.style.padding = '8px 10px';
     return b;
@@ -85,9 +86,9 @@ export function buildGarage(d: GarageDeps): HTMLElement {
       yaw = r;
       cal.setYaw(r);
       setYawOverride(c.id, r);
-      label.textContent = `Model yaw ${Math.round((r * 180) / Math.PI)}°  (arrow = game nose)`;
+      label.textContent = `Model yaw ${Math.round((r * 180) / Math.PI)}°`;
     };
-    label.textContent = `Model yaw ${Math.round((yaw * 180) / Math.PI)}°  (arrow = game nose)`;
+    label.textContent = `Model yaw ${Math.round((yaw * 180) / Math.PI)}°`;
     row.append(
       label,
       small('⟲', () => set(yaw - Math.PI / 36)),
@@ -110,23 +111,23 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     title.style.fontSize = c.name.length > 10 ? '26px' : '38px';
     const st = statsOf(c);
     const st2 = modelStatus(c.id);
-    const badge = h('span', '', st2 === 'glb' ? 'GLB model' : st2 === 'procedural' ? 'procedural' : 'checking...');
+    const badge = h('span', '', t(st2 === 'glb' ? 'garage.glb' : st2 === 'procedural' ? 'garage.procedural' : 'garage.checking'));
     badge.style.cssText = `margin-left:8px;padding:1px 7px;border-radius:9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;border:1px solid ${st2 === 'glb' ? '#7dff9a' : '#ffb347'};color:${st2 === 'glb' ? '#7dff9a' : '#ffb347'}`;
     const brand = h('div', 'rb-sub', c.brand);
     brand.append(badge);
-    panel.append(brand, title, h('div', '', c.blurb));
-    if (c.tuning.v2) panel.append(h('div', 'rb-sub', c.tuning.v2.spec.character)); // layout character (data/carSpecs)
-    if (st2 === 'procedural') panel.append(h('div', 'rb-sub', `Put ${c.id}.glb in public/models/`));
-    panel.insertAdjacentHTML('beforeend', bar('Acceleration', 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar('Top speed', (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar('Grip', (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar('Slides easily', st.slide / 1.2, st.slide.toFixed(2)));
+    panel.append(brand, title, h('div', '', tx(c.blurb)));
+    if (c.tuning.v2) panel.append(h('div', 'rb-sub', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
+    if (st2 === 'procedural') panel.append(h('div', 'rb-sub', t('garage.putGlb', { id: c.id })));
+    panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
-      h('div', 'rb-sub', 'Paint'),
+      h('div', 'rb-sub', t('garage.paint')),
       swatches(PAINTS, paintOf(c), (p) => {
         if (owned) d.store.setPaint(c.id, p);
         else d.store.data.paint[c.id] = p; // preview only until bought
         d.visual()?.setPaint(p);
         render();
       }),
-      h('div', 'rb-sub', 'Underglow'),
+      h('div', 'rb-sub', t('garage.underglow')),
       swatches(GLOWS, glowOf(c), (g) => {
         if (owned) d.store.setGlow(c.id, g);
         else d.store.data.glow[c.id] = g;
@@ -134,7 +135,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
         render();
       }),
     );
-    const toggle = small(lookOpen ? 'Appearance ▴' : 'Appearance ▾', () => {
+    const toggle = small(t(lookOpen ? 'garage.appearanceOpen' : 'garage.appearance'), () => {
       lookOpen = !lookOpen;
       render();
     });
@@ -148,11 +149,11 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     row.append(navButton('prev', goPrev));
     if (owned) {
       const sel = d.store.data.selected === c.id;
-      const b = button(sel ? 'Selected' : 'Select', () => { d.store.select(c.id); render(); }, sel ? '' : 'hot');
+      const b = button(t(sel ? 'garage.selected' : 'garage.select'), () => { d.store.select(c.id); render(); }, sel ? '' : 'hot');
       b.style.minWidth = '100px';
       row.append(b);
     } else {
-      const buy = button(`Buy ${money(c.price)}`, () => {
+      const buy = button(t('garage.buy', { price: money(c.price) }), () => {
         if (d.store.buy(c.id, c.price)) {
           d.store.setPaint(c.id, paintOf(c));
           d.store.setGlow(c.id, glowOf(c));
@@ -166,7 +167,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
       buy.style.padding = '8px 6px';
       row.append(buy);
     }
-    const back = button('Back', () => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); d.onBack(); });
+    const back = button(t('common.back'), () => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); d.onBack(); });
     back.style.minWidth = '80px';
     back.style.padding = '8px 10px';
     row.append(navButton('next', goNext), back);
@@ -199,7 +200,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
 
 /** "Sound test": hold to rev any car (owned or not) from idle to the limiter with shifts; release for the lift-off pops. */
 function soundTest(carId: string): HTMLElement {
-  const b = button('Sound test (hold)', () => undefined);
+  const b = button(t('garage.sound'), () => undefined);
   b.style.cssText += ';width:100%;margin-top:6px;touch-action:none';
   const down = (e: Event): void => { e.preventDefault(); if (REV_TEST.carId !== carId) REV_TEST.start(carId); REV_TEST.holding = true; b.classList.add('on'); };
   const up = (): void => { REV_TEST.holding = false; b.classList.remove('on'); };

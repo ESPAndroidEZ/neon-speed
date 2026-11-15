@@ -1,4 +1,5 @@
 import { h, injectCss } from './uiKit';
+import { getLang, tx } from '../i18n';
 
 /** Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. */
 export class Voice {
@@ -9,9 +10,11 @@ export class Voice {
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
+      const es = getLang() === 'es';
+      u.lang = es ? 'es-ES' : 'en-US';
       u.pitch = 0.6;
       u.rate = 0.95;
-      const v = speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang) && /male|david|daniel|alex|google uk english male/i.test(x.name));
+      const v = speechSynthesis.getVoices().find((x) => (es ? /es[-_]/i : /en[-_]/i).test(x.lang) && /male|david|daniel|alex|jorge|diego|pablo|google uk english male/i.test(x.name));
       if (v) u.voice = v;
       speechSynthesis.speak(u);
     } catch {
@@ -57,7 +60,8 @@ export class Subtitles {
 
   /** Show a single line for `dur` seconds. */
   flash(text: string, dur: number, kind: Caption['kind'] = 'switch'): void {
-    const el = h('div', '', text);
+    const line = tx(text);
+    const el = h('div', '', line);
     const styles: Record<Caption['kind'], string> = {
       switch: 'position:absolute;left:0;right:0;bottom:14%;text-align:center;font-size:clamp(18px,3vw,28px);font-style:italic;color:#9fe8ff',
       lower: 'position:absolute;left:max(24px,4vw);bottom:22%;font-size:clamp(16px,2.4vw,22px);letter-spacing:2px;padding:8px 14px;background:#05060d99;border-left:3px solid #ff2a9d',
@@ -66,7 +70,7 @@ export class Subtitles {
     el.style.cssText = `${styles[kind]};opacity:0;transition:opacity .25s`;
     this.layer.appendChild(el);
     requestAnimationFrame(() => (el.style.opacity = '1'));
-    if (kind === 'switch') this.voice.say(text.replace(/^DJ SWITCH:\s*/, ''));
+    if (kind === 'switch') this.voice.say(line.replace(/^DJ SWITCH:\s*/, ''));
     this.timers.push(
       window.setTimeout(() => (el.style.opacity = '0'), Math.max(0, dur * 1000 - 250)),
       window.setTimeout(() => el.remove(), dur * 1000 + 100),
@@ -74,7 +78,7 @@ export class Subtitles {
   }
 
   clear(): void {
-    for (const t of this.timers) clearTimeout(t);
+    for (const id of this.timers) clearTimeout(id);
     this.timers.length = 0;
     this.layer.replaceChildren();
     this.voice.stop();

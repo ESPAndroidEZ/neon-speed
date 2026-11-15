@@ -1,6 +1,7 @@
 import { EVENTS, type ChoiceOption, type Line, type StoryEvent } from '../data/story';
 import { ALL_EVENTS } from '../data/story2';
 import type { SaveData } from './save';
+import { t } from '../i18n';
 
 /** Story progress, stored inside the save. Pure functions over SaveData so they can be tested without a browser. */
 export interface CareerState {
@@ -54,9 +55,9 @@ export interface EventOutcome {
 export function evaluate(ev: StoryEvent, position: number, driftScore: number): EventOutcome {
   if (ev.kind === 'drift') {
     const target = ev.driftTarget ?? 0;
-    return { passed: driftScore >= target, summary: `Drift score ${driftScore.toLocaleString()} / ${target.toLocaleString()}` };
+    return { passed: driftScore >= target, summary: t('career.drift', { score: driftScore.toLocaleString(), target: target.toLocaleString() }) };
   }
-  return { passed: position <= ev.needPosition, summary: ev.needPosition === 1 ? `Win the race (you finished P${position})` : `Finish top ${ev.needPosition} (you finished P${position})` };
+  return { passed: position <= ev.needPosition, summary: t(ev.needPosition === 1 ? 'career.win' : 'career.top', { n: ev.needPosition, p: position }) };
 }
 
 /**

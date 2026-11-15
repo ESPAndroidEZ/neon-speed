@@ -14,7 +14,7 @@ let current: Lang = 'en';
 const listeners = new Set<(l: Lang) => void>();
 
 /** es* browser languages give Spanish, everything else English. */
-export const detectLang = (navLang: string | undefined): Lang => (/^es\b|^es-/i.test(navLang ?? '') ? 'es' : 'en');
+export const detectLang = (navLang: string | undefined): Lang => (/^es([-_]|$)/i.test(navLang ?? '') ? 'es' : 'en');
 
 export const getLang = (): Lang => current;
 

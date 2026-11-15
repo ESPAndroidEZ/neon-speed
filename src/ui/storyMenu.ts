@@ -6,6 +6,7 @@ import { CHAPTER, ENDING, type StoryEvent } from '../data/story';
 import { ALL_EVENTS, CHAPTER_2, EPILOGUE, eventsOf } from '../data/story2';
 import { findTrackDef } from '../data/tracks';
 import { button, h } from './uiKit';
+import { t, tx } from '../i18n';
 
 export interface StoryMenuDeps {
   store: SaveStore;
@@ -13,20 +14,18 @@ export interface StoryMenuDeps {
   onBack: () => void;
 }
 
-const WEATHER_LABEL = { CLEAR: 'Dry', RAIN: 'Rain', SNOW: 'Snow' } as const;
-
 function eventCard(ev: StoryEvent, n: number, career: CareerState, start: (ev: StoryEvent) => void): HTMLElement {
   const done = career.completed.includes(ev.id);
   const open = isUnlocked(career, ev.id);
   const card = h('div', 'rb-card');
   card.style.cssText += `;width:min(250px,86vw);text-align:left;opacity:${open ? 1 : 0.45};${open && !done ? 'border-color:#ff2a9d;box-shadow:0 0 22px #ff2a9d55' : ''}`;
   const car = ev.carId ? findCar(ev.carId) : null;
-  const rivals = ev.rivals.length ? ev.rivals.map((r) => findRival(r).name).join(', ') : 'No rivals: score alone';
-  card.innerHTML = `<div class="rb-sub">${n}. ${done ? 'passed' : open ? 'next' : 'locked'}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
-    <div style="font-size:20px;font-weight:900;margin:4px 0">${ev.title}</div>
-    <div style="opacity:.85;font-size:14px;line-height:1.35">${ev.blurb}</div>
-    <div class="rb-sub" style="margin-top:8px">${WEATHER_LABEL[ev.weather]}${ev.weatherChange ? ` → ${WEATHER_LABEL[ev.weatherChange.to]}` : ''} · ${ev.laps === 1 ? 'one run' : `${ev.laps} laps`}${car ? ` · ${car.name} only` : ''}</div>
-    <div class="rb-sub">vs ${rivals}</div>`;
+  const rivals = ev.rivals.length ? ev.rivals.map((r) => findRival(r).name).join(', ') : t('story.noRivals');
+  card.innerHTML = `<div class="rb-sub">${n}. ${t(done ? 'story.passed' : open ? 'story.next' : 'story.locked')}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
+    <div style="font-size:20px;font-weight:900;margin:4px 0">${tx(ev.title)}</div>
+    <div style="opacity:.85;font-size:14px;line-height:1.35">${tx(ev.blurb)}</div>
+    <div class="rb-sub" style="margin-top:8px">${t(`weather.${ev.weather}`)}${ev.weatherChange ? ` → ${t(`weather.${ev.weatherChange.to}`)}` : ''} · ${ev.laps === 1 ? t('story.oneRun') : t('story.laps', { n: ev.laps })}${car ? ` · ${t('story.only', { car: car.name })}` : ''}</div>
+    <div class="rb-sub">${t('story.vs', { rivals })}</div>`;
   if (open) card.addEventListener('click', () => start(ev));
   return card;
 }
@@ -42,17 +41,17 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
   for (const [ch, title, tag] of [[1, CHAPTER.title, CHAPTER.tagline], [2, CHAPTER_2.title, CHAPTER_2.tagline]] as const) {
     const events = eventsOf(ch);
     if (ch === 2 && !career.completed.includes('finale')) {
-      root.append(h('div', 'rb-sub', `Chapter 2 · ${title}`), h('div', 'rb-sub', 'Finish Chapter 1 to open it.'));
+      root.append(h('div', 'rb-sub', t('story.chapterTitle', { n: 2, title: tx(title) })), h('div', 'rb-sub', t('story.needCh1')));
       break;
     }
-    root.append(h('div', 'rb-sub', `Chapter ${ch}`), h('h2', 'rb-title', title.toUpperCase()), h('div', 'rb-sub', tag));
+    root.append(h('div', 'rb-sub', t('story.chapter', { n: ch })), h('h2', 'rb-title', tx(title).toUpperCase()), h('div', 'rb-sub', tx(tag)));
     const row = h('div', 'rb-row');
     row.style.alignItems = 'stretch';
     for (const ev of events) row.append(eventCard(ev, ++n, career, d.start));
     root.append(row);
   }
-  if (career.completed.length === ALL_EVENTS.length) root.append(h('div', 'rb-sub', 'Story complete. Replay any event.'));
-  root.append(button('Back', d.onBack));
+  if (career.completed.length === ALL_EVENTS.length) root.append(h('div', 'rb-sub', t('story.complete')));
+  root.append(button(t('common.back'), d.onBack));
   return root;
 }
 
@@ -60,6 +59,6 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
 export function buildEnding(career: CareerState, chapter: number, onMenu: () => void): HTMLElement {
   const root = h('div', 'rb-layer dim');
   const card = chapter === 2 ? EPILOGUE[career.flags.sponsor ? 'sponsor' : 'open'] : ENDING;
-  root.append(h('div', 'rb-sub', `Chapter ${chapter} complete`), h('h1', 'rb-title', card.title.toUpperCase()), h('div', '', card.text), button('Menu', onMenu, 'hot'));
+  root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)), button(t('common.menu'), onMenu, 'hot'));
   return root;
 }

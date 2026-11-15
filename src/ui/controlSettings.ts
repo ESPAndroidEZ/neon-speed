@@ -1,10 +1,11 @@
 import type { FullscreenControl } from '../core/fullscreen';
 import type { ControlStore } from '../input/controlPrefs';
-import { SCHEMES, SCHEME_LABEL } from '../input/controlPrefs';
+import { SCHEMES } from '../input/controlPrefs';
 import type { TiltInput } from '../input/tiltInput';
 import { calibrate, enableTilt } from './controlsOnboard';
 import { fullscreenButton } from './fullscreenButton';
 import { button, h } from './uiKit';
+import { t } from '../i18n';
 
 export interface ControlRowsDeps {
   fs: FullscreenControl;
@@ -15,14 +16,14 @@ export interface ControlRowsDeps {
 /** Settings rows for the screen and the phone controls: full screen, scheme, and the tilt options. */
 export function controlRows(d: ControlRowsDeps): HTMLElement[] {
   const c = d.controls.data;
-  const rows: HTMLElement[] = [h('div', 'rb-sub', 'Screen and controls')];
+  const rows: HTMLElement[] = [h('div', 'rb-sub', t('ctl.section'))];
   const fsBtn = fullscreenButton(d.fs);
   if (fsBtn) {
-    const r = h('div', 'rb-row', '<span style="width:90px">Display</span>');
+    const r = h('div', 'rb-row', `<span class="rb-lbl">${t('ctl.display')}</span>`);
     r.append(fsBtn);
     rows.push(r);
   }
-  const scheme = h('div', 'rb-row', '<span style="width:90px">Phone controls</span>');
+  const scheme = h('div', 'rb-row', `<span class="rb-lbl">${t('ctl.phone')}</span>`);
   const tiltBox = h('div');
   tiltBox.style.cssText = 'display:flex;flex-direction:column;gap:10px;align-items:center';
   const refresh = (): void => {
@@ -30,7 +31,7 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
     tiltBox.style.display = c.scheme === 'tilt' ? 'flex' : 'none';
   };
   for (const s of SCHEMES) {
-    const b = button(SCHEME_LABEL[s], () => {
+    const b = button(t(`scheme.${s}`), () => {
       c.chosen = true;
       if (s === 'tilt') void enableTilt(d.controls, d.tilt).then(refresh);
       else {
@@ -44,7 +45,7 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
     scheme.append(b);
   }
   const slider = (label: string, min: number, max: number, step: number, get: () => number, set: (v: number) => void): HTMLElement => {
-    const r = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
+    const r = h('div', 'rb-row', `<span class="rb-lbl">${label}</span>`);
     const i = h('input') as HTMLInputElement;
     i.type = 'range';
     i.min = String(min);
@@ -57,7 +58,7 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
     return r;
   };
   const check = (label: string, get: () => boolean, set: (v: boolean) => void): HTMLElement => {
-    const r = h('label', 'rb-row', `<span style="width:90px">${label}</span>`);
+    const r = h('label', 'rb-row', `<span class="rb-lbl">${label}</span>`);
     const i = h('input') as HTMLInputElement;
     i.type = 'checkbox';
     i.checked = get();
@@ -69,11 +70,11 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
     return r;
   };
   tiltBox.append(
-    slider('Tilt sensitivity', 0.5, 2, 0.05, () => c.tilt.sens, (v) => { c.tilt.sens = v; }),
-    slider('Full lock angle', 15, 60, 1, () => c.tilt.maxDeg, (v) => { c.tilt.maxDeg = v; }),
-    check('Invert tilt', () => c.tilt.invert, (v) => { c.tilt.invert = v; }),
-    check('Auto gas', () => c.autoGas, (v) => { c.autoGas = v; }),
-    button('Recalibrate tilt', () => void calibrate(d.tilt)),
+    slider(t('ctl.tiltSens'), 0.5, 2, 0.05, () => c.tilt.sens, (v) => { c.tilt.sens = v; }),
+    slider(t('ctl.tiltMax'), 15, 60, 1, () => c.tilt.maxDeg, (v) => { c.tilt.maxDeg = v; }),
+    check(t('ctl.invert'), () => c.tilt.invert, (v) => { c.tilt.invert = v; }),
+    check(t('ctl.autoGas'), () => c.autoGas, (v) => { c.autoGas = v; }),
+    button(t('ctl.recal'), () => void calibrate(d.tilt)),
   );
   refresh();
   rows.push(scheme, tiltBox);

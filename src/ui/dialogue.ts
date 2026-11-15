@@ -2,6 +2,7 @@ import { SPEAKERS, type ChoiceOption, type Line, type Speaker } from '../data/st
 import { portraitEl } from './portraits';
 import { Voice } from './subtitles';
 import { h, injectCss } from './uiKit';
+import { t, tx } from '../i18n';
 
 export { Subtitles, Voice, type Caption } from './subtitles';
 
@@ -68,21 +69,22 @@ export class DialogueBox {
     const l = this.lines[this.idx];
     const sp: { name: string; color: number } = SPEAKERS[l.who as Speaker];
     this.asking = false;
+    const who = l.who === 'rookie' ? t('vs.you') : sp.name;
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:pointer;display:flex;gap:16px;align-items:center;text-align:left;width:min(720px,92vw);box-sizing:border-box;border-color:${hex(sp.color)}88`;
     const body = h('div');
-    const head = h('div', 'rb-sub', l.phone ? `\u{1F4DE} ${sp.name} (phone)` : sp.name);
+    const head = h('div', 'rb-sub', l.phone ? `\u{1F4DE} ${who} (${t('dlg.phone')})` : who);
     head.style.color = hex(sp.color);
     this.textEl = h('div');
     this.textEl.style.cssText = 'font-size:18px;line-height:1.4;min-height:50px';
-    const hint = h('div', 'rb-sub', l.choice ? 'Enter to answer' : 'Enter / click to continue · Esc to skip');
+    const hint = h('div', 'rb-sub', t(l.choice ? 'dlg.answer' : 'dlg.continue'));
     hint.style.cssText += ';font-size:11px;opacity:.5;margin-top:6px';
     body.append(head, this.textEl, hint);
     if (l.who !== 'narrator') card.append(portraitEl(l.who, l.mood ?? 'neutral', 76));
     card.append(body);
     this.layer?.replaceChildren(card);
-    if (l.who === 'switch') this.voice.say(l.text);
-    this.type(l.text);
+    if (l.who === 'switch') this.voice.say(tx(l.text));
+    this.type(tx(l.text));
   }
 
   private type(text: string): void {
@@ -124,7 +126,7 @@ export class DialogueBox {
     const row = h('div', 'rb-row');
     row.style.cssText += ';margin-top:10px;justify-content:flex-start';
     c.options.forEach((opt, k) => {
-      const b = h('button', `rb-btn${k === 0 ? ' hot' : ''}`, opt.label);
+      const b = h('button', `rb-btn${k === 0 ? ' hot' : ''}`, tx(opt.label));
       b.style.minWidth = '0';
       b.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -136,7 +138,7 @@ export class DialogueBox {
       });
       row.append(b);
     });
-    this.layer?.firstElementChild?.lastElementChild?.append(h('div', 'rb-sub', c.prompt), row);
+    this.layer?.firstElementChild?.lastElementChild?.append(h('div', 'rb-sub', tx(c.prompt)), row);
   }
 
   /** Esc: skip ahead, but stop at the next unanswered question. */

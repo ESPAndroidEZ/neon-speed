@@ -3,6 +3,7 @@ import type { ControlPrefs, ControlScheme } from '../input/controlPrefs';
 import { SteerRamp } from '../input/steerRamp';
 import { ICONS } from './icons';
 import { holdButton, place, TOUCH_CSS } from './touchButton';
+import { onLangChange, t } from '../i18n';
 
 export interface TouchControls extends InputSource {
   /** Show or hide the overlay (the architect hides it in menus). */
@@ -46,8 +47,8 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
   };
   const pedal = (k: 'gas' | 'brake', cls: string, label: string, sub = ''): HTMLDivElement =>
     holdButton(cls, sub ? `${label}<small>${sub}</small>` : label, () => (k === 'gas' ? (gas = 1) : (brake = 1)), () => (k === 'gas' ? (gas = 0) : (brake = 0)));
-  const n2o = (): HTMLDivElement => holdButton('round n2o', 'NITRO', () => { nitro = true; }, () => { nitro = false; });
-  const hb = (): HTMLDivElement => holdButton('round hb', 'HAND<small>BRAKE</small>', () => { handbrake = true; }, () => { handbrake = false; });
+  const n2o = (): HTMLDivElement => holdButton('round n2o', t('pad.nitro'), () => { nitro = true; }, () => { nitro = false; });
+  const hb = (): HTMLDivElement => holdButton('round hb', `${t('pad.hand')}<small>${t('pad.handSub')}</small>`, () => { handbrake = true; }, () => { handbrake = false; });
   const small = (cls: string, icon: string, fn?: () => void, label = ''): HTMLDivElement => {
     const b = holdButton(`sm ${cls}`, icon, () => fn?.());
     b.setAttribute('aria-label', label);
@@ -63,7 +64,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     const dot = document.createElement('i');
     const hint = document.createElement('div');
     hint.className = 'hint';
-    hint.textContent = 'DRAG TO STEER';
+    hint.textContent = t('pad.drag');
     knob.append(dot);
     zone.append(knob, hint);
     let id: number | null = null, startX = 0;
@@ -97,19 +98,22 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     return zone;
   }
 
+  let lastP: Pick<ControlPrefs, 'scheme' | 'autoGas'> | null = null;
+  onLangChange(() => lastP && setScheme(lastP)); // labels follow the language
   function setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'>): void {
+    lastP = p;
     release();
     layer.replaceChildren();
     root.dataset.scheme = p.scheme;
     auto = p.scheme === 'tilt' && p.autoGas;
-    const reset = small('rst', ICONS.reset, opts?.onReset, 'Reset car');
-    const pause = small('pse', ICONS.pause, opts?.onPause, 'Pause');
+    const reset = small('rst', ICONS.reset, opts?.onReset, t('pad.reset'));
+    const pause = small('pse', ICONS.pause, opts?.onPause, t('pad.pause'));
     const scheme: ControlScheme = p.scheme;
     if (scheme === 'tilt') {
-      const gasPedal = p.autoGas ? null : place(pedal('gas', 'pedal gas', 'GAS'), { right: S.r, bottom: S.b });
+      const gasPedal = p.autoGas ? null : place(pedal('gas', 'pedal gas', t('pad.gas')), { right: S.r, bottom: S.b });
       const col = p.autoGas ? S.r : `calc(${S.r} + ${S.u} * 1.05 + 22px)`;
       layer.append(
-        place(pedal('brake', 'big brk', 'BRAKE', 'REVERSE'), { left: S.l, bottom: S.b }),
+        place(pedal('brake', 'big brk', t('pad.brake'), t('pad.reverse')), { left: S.l, bottom: S.b }),
         place(n2o(), { right: col, bottom: S.b }),
         place(hb(), p.autoGas ? { right: `calc(${S.r} + ${S.u} + 26px)`, bottom: `calc(${S.b} + ${S.u} * 0.45)` } : { right: col, bottom: `calc(${S.b} + ${S.u} + 24px)` }),
         place(pause, { right: p.autoGas ? `calc(${S.r} + ${S.u} / 2 - 22px)` : `calc(${S.r} + ${S.u} * 0.52 - 22px)`, bottom: `calc(${S.b} + ${S.u} * ${p.autoGas ? 1 : 1.55} + 30px)`, top: 'auto' }),
@@ -125,8 +129,8 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
       );
       const above = arrows ? `calc(${S.b} + ${S.u} * 1.15 + 26px)` : `calc(${S.b} + min(40%, ${S.u} * 2.4))`;
       layer.append(
-        place(pedal('gas', 'pedal gas', 'GAS'), { right: S.r, bottom: S.b }),
-        place(pedal('brake', 'pedal brk', 'BRAKE', 'REVERSE'), { right: `calc(${S.r} + ${S.u} * 1.05 + 16px)`, bottom: S.b }),
+        place(pedal('gas', 'pedal gas', t('pad.gas')), { right: S.r, bottom: S.b }),
+        place(pedal('brake', 'pedal brk', t('pad.brake'), t('pad.reverse')), { right: `calc(${S.r} + ${S.u} * 1.05 + 16px)`, bottom: S.b }),
         place(n2o(), { left: S.l, bottom: above }),
         place(hb(), { left: `calc(${S.l} + ${S.u} + 30px)`, bottom: arrows ? above : `calc(${S.b} + min(40%, ${S.u} * 2.4) + 26px)` }),
         place(pause, { left: S.l }),

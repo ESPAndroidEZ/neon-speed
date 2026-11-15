@@ -1,8 +1,10 @@
-import type { ControlScheme, ControlStore } from '../input/controlPrefs';
-import { SCHEMES, SCHEME_LABEL } from '../input/controlPrefs';
+import type { ControlStore } from '../input/controlPrefs';
+import { SCHEMES } from '../input/controlPrefs';
 import type { TiltInput } from '../input/tiltInput';
 import { ICONS } from './icons';
 import { button, h, injectCss, toast } from './uiKit';
+import { t } from '../i18n';
+import { langRow } from './langRow';
 
 const CSS = `
 .rb-ob{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:#05060dd9;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));box-sizing:border-box}
@@ -37,18 +39,18 @@ const overlay = (html: string): { root: HTMLElement; card: HTMLElement } => {
 /** "Hold the phone in your normal driving position, tap to calibrate." Resolves when done or skipped. */
 export function calibrate(tilt: TiltInput): Promise<void> {
   return new Promise((done) => {
-    const { root, card } = overlay(`<h3>Calibrate tilt</h3><div>Hold the phone in your normal driving position, then tap <b>Calibrate</b>.</div>`);
-    const go = button('Calibrate', () => {
+    const { root, card } = overlay(`<h3>${t('tilt.calTitle')}</h3><div>${t('tilt.calBody')}</div>`);
+    const go = button(t('tilt.calibrate'), () => {
       if (!tilt.calibrate()) {
-        toast(tilt.receiving ? 'Hold the phone more upright, like a steering wheel' : 'No motion data yet: move the phone a little');
+        toast(t(tilt.receiving ? 'tilt.holdUpright' : 'tilt.noData'));
         return;
       }
       root.remove();
-      toast('Tilt calibrated');
+      toast(t('tilt.calibrated'));
       done();
     }, 'hot');
     card.append(h('div', 'opts'));
-    card.lastElementChild?.append(go, button('Later', () => { root.remove(); done(); }));
+    card.lastElementChild?.append(go, button(t('common.later'), () => { root.remove(); done(); }));
   });
 }
 
@@ -58,7 +60,7 @@ export async function enableTilt(store: ControlStore, tilt: TiltInput, calib = t
   if (r !== 'granted') {
     store.data.scheme = 'wheel';
     store.commit();
-    toast(r === 'denied' ? 'Motion access was denied: using the touch wheel. (iOS: Settings > Safari > Motion & Orientation Access)' : 'This device has no tilt sensor: using the touch wheel', 6000);
+    toast(t(r === 'denied' ? 'tilt.denied' : 'tilt.unsupported'), 6000);
     return false;
   }
   store.data.scheme = 'tilt';
@@ -69,10 +71,10 @@ export async function enableTilt(store: ControlStore, tilt: TiltInput, calib = t
 
 /** First-run chooser on touch devices: Tilt, Touch wheel or Buttons. */
 export function chooseControls(store: ControlStore, tilt: TiltInput): void {
-  const { root, card } = overlay(`<h3>How do you want to steer?</h3><div>Landscape works best. You can change this any time in Settings.</div>`);
+  const { root, card } = overlay(`<h3>${t('ob.title')}</h3><div>${t('ob.body')}</div>`);
   const opts = h('div', 'opts');
   for (const s of SCHEMES) {
-    opts.append(button(SCHEME_LABEL[s], () => {
+    opts.append(button(t(`scheme.${s}`), () => {
       store.data.chosen = true;
       root.remove();
       if (s === 'tilt') void enableTilt(store, tilt);
@@ -82,23 +84,17 @@ export function chooseControls(store: ControlStore, tilt: TiltInput): void {
       }
     }, s === 'tilt' ? 'hot' : ''));
   }
-  card.append(opts);
+  card.append(opts, langRow(() => { root.remove(); chooseControls(store, tilt); }));
 }
-
-const TUTORIAL: Record<ControlScheme, string> = {
-  tilt: 'Turn the phone like a wheel to steer. Gas is automatic: BRAKE on the left, NITRO and HANDBRAKE on the right.',
-  wheel: 'Drag anywhere on the lower left to steer. GAS and BRAKE on the right, NITRO and HANDBRAKE above your left thumb.',
-  buttons: 'Left arrows steer. GAS and BRAKE on the right, NITRO and HANDBRAKE above the arrows.',
-};
 
 /** Small dismissible tip the first time a scheme is used in a race. */
 export function controlsTutorial(store: ControlStore): void {
   const s = store.data.scheme;
   if (store.data.seen.includes(s) || document.querySelector('.rb-tut')) return;
   style();
-  const tip = h('div', 'rb-tut', `<div>${TUTORIAL[s]}</div>`);
+  const tip = h('div', 'rb-tut', `<div>${t(`tut.${s}`)}</div>`);
   const x = h('button', '', ICONS.close) as HTMLButtonElement;
-  x.setAttribute('aria-label', 'Got it');
+  x.setAttribute('aria-label', t('common.gotIt'));
   const close = (): void => {
     tip.remove();
     if (!store.data.seen.includes(s)) store.data.seen.push(s);

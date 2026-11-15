@@ -9,6 +9,8 @@ import { drivingRows } from './drivingSettings';
 import { graphicsRows } from './graphicsSettings';
 import { button, h } from './uiKit';
 import { CARS } from '../data/cars';
+import { t } from '../i18n';
+import { langRow } from './langRow';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -48,9 +50,9 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const s = d.store.data.settings;
   const root = h('div', 'rb-layer dim');
   root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
-  root.append(h('h2', 'rb-title', 'SETTINGS'));
+  root.append(h('h2', 'rb-title', t('set.title')));
   const slider = (label: string, key: 'volume' | 'sfxVolume' | 'engineVolume' | 'musicVolume'): HTMLElement => {
-    const row = h('div', 'rb-row', `<span style="width:90px">${label}</span>`);
+    const row = h('div', 'rb-row', `<span class="rb-lbl">${label}</span>`);
     const input = h('input') as HTMLInputElement;
     input.type = 'range';
     input.min = '0';
@@ -65,12 +67,12 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     row.append(input);
     return row;
   };
-  const vol = slider('Master', 'volume');
-  const engVol = slider('Engine', 'engineVolume');
-  const sfxVol = slider('Effects', 'sfxVolume');
-  const musVol = slider('Music', 'musicVolume');
+  const vol = slider(t('set.master'), 'volume');
+  const engVol = slider(t('set.engine'), 'engineVolume');
+  const sfxVol = slider(t('set.effects'), 'sfxVolume');
+  const musVol = slider(t('set.music'), 'musicVolume');
 
-  const mute = h('label', 'rb-row', '<span style="width:90px">Mute (M)</span>');
+  const mute = h('label', 'rb-row', `<span class="rb-lbl">${t('set.mute')}</span>`);
   const box = h('input') as HTMLInputElement;
   box.type = 'checkbox';
   box.checked = s.muted;
@@ -81,7 +83,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   mute.append(box);
 
-  const voice = h('label', 'rb-row', '<span style="width:90px">Switch voice</span>');
+  const voice = h('label', 'rb-row', `<span class="rb-lbl">${t('set.voice')}</span>`);
   const vbox = h('input') as HTMLInputElement;
   vbox.type = 'checkbox';
   vbox.checked = s.voice;
@@ -93,7 +95,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   voice.append(vbox);
 
-  const auto = h('label', 'rb-row', '<span style="width:90px">Auto quality</span>');
+  const auto = h('label', 'rb-row', `<span class="rb-lbl">${t('set.autoQuality')}</span>`);
   const abox = h('input') as HTMLInputElement;
   abox.type = 'checkbox';
   abox.checked = s.autoQuality;
@@ -104,10 +106,10 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   auto.append(abox);
 
-  const wp = h('div', 'rb-row', '<span style="width:90px">Rain / snow physics</span>');
-  const shake = h('div', 'rb-row', '<span style="width:90px">Camera shake</span>');
+  const wp = h('div', 'rb-row', `<span class="rb-lbl">${t('set.wphys')}</span>`);
+  const shake = h('div', 'rb-row', `<span class="rb-lbl">${t('set.shake')}</span>`);
   for (const lv of ['OFF', 'LOW', 'NORMAL'] as const) {
-    const b = button(lv.toLowerCase(), () => {
+    const b = button(t(`opt.${lv}`), () => {
       s.cameraShake = lv;
       applySettings(d);
       d.store.commit();
@@ -119,13 +121,8 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     shake.append(b);
   }
   const hint = h('div', 'rb-sub', '');
-  const HINT: Record<PhysicsLevel, string> = {
-    NORMAL: 'Rain 72% grip, snow 45%.',
-    AGGRESSIVE: 'Rain 60%, snow 34%, puddles, snow banks, ice, a loose tail.',
-    EXTREME: 'Rain 50%, snow 26%. Brutal. Hold on.',
-  };
   for (const lv of LEVELS) {
-    const b = button(lv.toLowerCase(), () => {
+    const b = button(t(`opt.${lv}`), () => {
       s.weatherPhysics = lv;
       applySettings(d);
       d.store.commit();
@@ -137,10 +134,10 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   }
   const refreshWp = (): void => {
     wp.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.weatherPhysics));
-    hint.textContent = HINT[s.weatherPhysics];
+    hint.textContent = t(`hint.wphys.${s.weatherPhysics}`);
   };
   refreshWp();
-  root.append(vol, engVol, sfxVol, musVol, mute, voice, ...(d.extraRows?.() ?? []), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', 'Graphics'), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button('Back', d.onBack));
+  root.append(vol, engVol, sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button(t('common.back'), d.onBack));
   return root;
 }
 
@@ -149,9 +146,9 @@ function unlockAll(store: SaveStore): HTMLElement {
   const b = button('', () => {
     for (const c of CARS) if (!store.data.owned.includes(c.id)) store.data.owned.push(c.id);
     store.commit();
-    b.textContent = 'All cars unlocked ✓';
+    b.textContent = t('set.allUnlocked');
   });
   const all = CARS.every((c) => store.data.owned.includes(c.id));
-  b.textContent = all ? 'All cars unlocked ✓' : 'Unlock all cars (free test)';
+  b.textContent = t(all ? 'set.allUnlocked' : 'set.unlockAll');
   return b;
 }

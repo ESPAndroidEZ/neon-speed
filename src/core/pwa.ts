@@ -1,4 +1,5 @@
 import { isNative } from './fullscreen';
+import { t } from '../i18n';
 
 /**
  * Registers the offline service worker in production browsers (not inside the Capacitor shell, not in dev).
@@ -35,7 +36,7 @@ export function showUpdatePrompt(apply: () => void): void {
   const el = document.createElement('div');
   el.className = 'rb-upd';
   el.style.cssText = 'position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));z-index:9000;display:flex;gap:10px;align-items:center;padding:10px 12px;background:#0a0d1cf2;border:1px solid #18d8ff88;border-radius:12px;color:#e8f6ff;font:600 14px system-ui';
-  el.textContent = 'Update ready';
+  el.textContent = t('pwa.ready');
   const btn = (label: string, fn: () => void): HTMLButtonElement => {
     const b = document.createElement('button');
     b.textContent = label;
@@ -43,6 +44,6 @@ export function showUpdatePrompt(apply: () => void): void {
     b.addEventListener('click', fn);
     return b;
   };
-  el.append(btn('Reload', apply), btn('Later', () => el.remove()));
+  el.append(btn(t('guard.reload'), apply), btn(t('common.later'), () => el.remove()));
   document.body.append(el);
 }

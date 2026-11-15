@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 /**
  * Production hardening that must exist before anything else runs:
  * - a global error boundary: an uncaught error or rejection shows a friendly screen (Reload / Continue) instead of a
@@ -19,8 +20,8 @@ export function showErrorScreen(message: string): void {
     'background:#05060df2;color:#e8f6ff;font:600 16px/1.4 system-ui,sans-serif;text-align:center';
   const safe = message.replace(/[<>&]/g, '').slice(0, 160);
   el.innerHTML =
-    '<div style="font:900 italic clamp(26px,6vw,44px) system-ui;color:#fff;text-shadow:0 0 18px #ff2a9d">Engine stalled</div>' +
-    '<div style="max-width:440px;opacity:.85">Something went wrong. Your progress is autosaved. Reload to get back on the road.</div>' +
+    '<div style="font:900 italic clamp(26px,6vw,44px) system-ui;color:#fff;text-shadow:0 0 18px #ff2a9d">' + t('guard.title') + '</div>' +
+    '<div style="max-width:440px;opacity:.85">' + t('guard.body') + '</div>' +
     `<code style="max-width:90vw;opacity:.5;font-size:12px;word-break:break-word">${safe}</code>`;
   const btn = (label: string, fn: () => void): HTMLButtonElement => {
     const b = document.createElement('button');
@@ -29,7 +30,7 @@ export function showErrorScreen(message: string): void {
     b.addEventListener('click', fn);
     return b;
   };
-  el.append(btn('Reload', () => location.reload()), btn('Continue', () => { el.remove(); shown = false; }));
+  el.append(btn(t('guard.reload'), () => location.reload()), btn(t('guard.continue'), () => { el.remove(); shown = false; }));
   document.body.append(el);
 }
 
@@ -58,7 +59,7 @@ export function watchContextLoss(canvas: HTMLCanvasElement, stop: () => void, be
     e.preventDefault(); // allows the browser to restore it
     stop();
     card = document.createElement('div');
-    card.textContent = 'Restoring graphics...';
+    card.textContent = t('guard.restoring');
     card.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9998;padding:14px 20px;background:#0a0d1cf2;border:1px solid #18d8ff88;border-radius:10px;color:#e8f6ff;font:700 16px system-ui';
     document.body.append(card);
   });

@@ -1,5 +1,6 @@
 import type { RaceTelemetry, Weather } from '../types/game';
 import { ArcGauge } from './gauge';
+import { onLangChange, t } from '../i18n';
 
 const CSS = `
 #hud{position:fixed;inset:0;pointer-events:none;font:700 14px/1.1 system-ui,sans-serif;color:#e8f6ff;text-shadow:0 0 8px #18d8ff;--mr:max(18px,env(safe-area-inset-right),2.5vw);--ml:max(18px,env(safe-area-inset-left),2.5vw);--mt:max(14px,env(safe-area-inset-top),2vh);--mb:max(16px,env(safe-area-inset-bottom),2.5vh)}
@@ -33,6 +34,7 @@ export class Hud {
   private lastTier = 0;
   private lastInfo = '';
   private lastScore = -1;
+  private weatherNow: Weather | null = null;
 
   /** Add a small HUD button (full screen) in the top-left button row; null is ignored. */
   mount(el: HTMLElement | null): void {
@@ -61,10 +63,16 @@ export class Hud {
     this.pop.className = 'rb-pop';
     this.root.append(style, this.lines, this.weather, this.info, this.banner, this.drift, this.pop, br);
     parent.appendChild(this.root);
+    onLangChange(() => {
+      this.lastInfo = '';
+      this.lastScore = -1; // labels re-render on the next update
+      if (this.weatherNow) this.setWeather(this.weatherNow);
+    });
   }
 
   setWeather(w: Weather): void {
-    this.weather.innerHTML = `${w}<small>1 clear \u00B7 2 rain \u00B7 3 snow \u00B7 R reset \u00B7 M mute \u00B7 Esc menu</small>`;
+    this.weatherNow = w;
+    this.weather.innerHTML = `${t(`weather.${w}`).toUpperCase()}<small>${t('hud.keys')}</small>`;
   }
 
   /** Centre banner: countdown digits and GO. Empty string hides it. */
@@ -86,24 +94,24 @@ export class Hud {
     this.root.style.display = v ? '' : 'none';
   }
 
-  update(t: RaceTelemetry): void {
-    const secs = Math.floor(t.raceTime * 10) / 10;
-    const info = `LAP ${t.lap}/${t.totalLaps}<br>POS ${t.position}/${t.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
+  update(tel: RaceTelemetry): void {
+    const secs = Math.floor(tel.raceTime * 10) / 10;
+    const info = `${t('hud.lap')} ${tel.lap}/${tel.totalLaps}<br>${t('hud.pos')} ${tel.position}/${tel.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
     if (info !== this.lastInfo) {
       this.lastInfo = info;
       this.info.innerHTML = info;
     }
-    this.gauge.update(t.speedKph, t.rpm / t.redlineRpm, t.gear, t.nitroLevel, t.nitroActive);
+    this.gauge.update(tel.speedKph, tel.rpm / tel.redlineRpm, tel.gear, tel.nitroLevel, tel.nitroActive);
     // edge speed lines fade in between 110 and 220 km/h
-    this.lines.style.opacity = String(Math.max(0, Math.min(1, (t.speedKph - 110) / 110)) * 0.85);
-    if (t.driftScore !== this.lastScore) {
-      const tier = Math.floor(t.driftScore / 1000);
+    this.lines.style.opacity = String(Math.max(0, Math.min(1, (tel.speedKph - 110) / 110)) * 0.85);
+    if (tel.driftScore !== this.lastScore) {
+      const tier = Math.floor(tel.driftScore / 1000);
       if (tier > this.lastTier) this.popUp(`+${tier * 1000}`, '#ff2a9d');
-      else if (t.driftScore === 0 && this.lastScore > 600) this.popUp(`BANKED ${this.lastScore}`, '#7dff9a');
+      else if (tel.driftScore === 0 && this.lastScore > 600) this.popUp(t('hud.banked', { n: this.lastScore }), '#7dff9a');
       this.lastTier = tier;
-      this.lastScore = t.driftScore;
-      this.drift.textContent = `DRIFT ${t.driftScore}`;
-      this.drift.style.opacity = t.driftScore > 0 ? '1' : '0';
+      this.lastScore = tel.driftScore;
+      this.drift.textContent = `${t('hud.drift')} ${tel.driftScore}`;
+      this.drift.style.opacity = tel.driftScore > 0 ? '1' : '0';
     }
   }
 }

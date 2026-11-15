@@ -1,5 +1,6 @@
 import { isNative } from '../core/fullscreen';
 import { ICONS } from './icons';
+import { t } from '../i18n';
 
 /**
  * Small "rotate your phone" pill in portrait on touch screens. Landscape is the recommended way to play, but portrait
@@ -11,7 +12,7 @@ export function installRotateHint(): void {
   const el = document.createElement('div');
   el.className = 'rb-rot';
   el.setAttribute('role', 'status');
-  el.innerHTML = `${ICONS.rotate}<span>Rotate your phone for the best view</span>`;
+  el.innerHTML = `${ICONS.rotate}<span>${t('rotate.hint')}</span>`;
   el.style.cssText =
     'position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);z-index:95;display:none;align-items:center;gap:8px;' +
     'padding:8px 12px;border-radius:999px;background:#0a0d1ccc;border:1px solid #18d8ff66;color:#e8f6ff;font:700 12px system-ui,sans-serif;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 24px)';

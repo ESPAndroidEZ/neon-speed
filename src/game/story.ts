@@ -12,6 +12,7 @@ import { PREVIOUSLY } from '../data/lore';
 import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { Cast } from './cast';
 import type { Game } from './game';
+import { t } from '../i18n';
 
 export interface StoryDeps {
   game: Game;
@@ -105,16 +106,16 @@ export class StoryController {
     if (outcome.passed) {
       const got = completeEvent(d.store.data, ev);
       d.store.commit();
-      if (got.firstTime) notes.push(`Story bonus + $${got.bonus.toLocaleString()}`);
-      for (const id of got.newCars) notes.push(`Unlocked: ${findCar(id).brand} ${findCar(id).name}`);
+      if (got.firstTime) notes.push(t('story.bonus', { n: got.bonus.toLocaleString() }));
+      for (const id of got.newCars) notes.push(t('story.unlocked', { car: `${findCar(id).brand} ${findCar(id).name}` }));
     }
     return {
       objective: outcome.summary,
       passed: outcome.passed,
       notes,
       buttons: outcome.passed
-        ? [{ label: 'Continue', hot: true, action: () => this.after(ev, true) }]
-        : [{ label: 'Retry', hot: true, action: () => this.after(ev, false) }, { label: 'Chapter menu', action: () => this.leave() }],
+        ? [{ label: t('story.continue'), hot: true, action: () => this.after(ev, true) }]
+        : [{ label: t('story.retry'), hot: true, action: () => this.after(ev, false) }, { label: t('story.chapterMenu'), action: () => this.leave() }],
     };
   }
 

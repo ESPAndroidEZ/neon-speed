@@ -1,6 +1,7 @@
 import type { SaveSlots, SlotId } from '../core/gameSave';
 import { slotList } from './saveUi';
 import { button, h, injectCss } from './uiKit';
+import { onLangChange, t } from '../i18n';
 
 export interface PauseHandlers {
   onResume: () => void;
@@ -21,6 +22,7 @@ export class PauseMenu {
     injectCss();
     this.slots = slots;
     this.hnd = handlers;
+    onLangChange(() => (this.layer?.dataset.picker ? this.picker() : this.layer && this.show()));
   }
 
   get open(): boolean {
@@ -31,12 +33,12 @@ export class PauseMenu {
     this.close();
     const el = h('div', 'rb-layer dim');
     el.style.zIndex = '40';
-    el.append(h('h2', 'rb-title', 'PAUSED'));
+    el.append(h('h2', 'rb-title', t('pause.title')));
     el.append(
-      button('Resume (Esc)', () => this.hnd.onResume(), 'hot'),
-      button('Restart', () => this.hnd.onRestart()),
-      button('Save', () => this.picker()),
-      button('Save & Quit to menu', () => this.hnd.onSaveQuit()),
+      button(t('pause.resume'), () => this.hnd.onResume(), 'hot'),
+      button(t('pause.restart'), () => this.hnd.onRestart()),
+      button(t('pause.save'), () => this.picker()),
+      button(t('pause.saveQuit'), () => this.hnd.onSaveQuit()),
     );
     const more = (this.hnd.extra?.() ?? []).filter((x): x is HTMLElement => x !== null);
     if (more.length) el.append(h('div', 'rb-row', ''), ...more);
@@ -57,10 +59,10 @@ export class PauseMenu {
     const el = h('div', 'rb-layer dim');
     el.style.zIndex = '40';
     el.dataset.picker = '1';
-    el.append(h('h2', 'rb-title', 'SAVE TO'), slotList(this.slots, true, (id) => {
+    el.append(h('h2', 'rb-title', t('pause.saveTo')), slotList(this.slots, true, (id) => {
       this.hnd.onSave(id);
       this.show();
-    }), button('Back', () => this.show()));
+    }), button(t('common.back'), () => this.show()));
     this.layer = el;
     document.body.appendChild(el);
   }

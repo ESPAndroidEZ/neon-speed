@@ -8,6 +8,7 @@ import type { Game } from './game';
 import { getBuild } from '../data/carBuild';
 import { buildKey, recordLap } from '../data/upgradeAdvice';
 import { ghostPose, GhostRecorder, isGhostLap, type GhostLap, type Pose } from './ghostData';
+import { t } from '../i18n';
 
 
 const key = (track: string, car: string): string => `rb-ghost:${track}:${car}`;
@@ -67,7 +68,7 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
     const fresh = rec.update(p.lapStart, lt, pose);
     if (fresh) {
       save(k, fresh);
-      hud.popUp('NEW BEST LAP · GHOST SAVED', '#8fd8ff');
+      hud.popUp(t('ghost.saved'), '#8fd8ff');
       if (!body) { body = ghostBody(s.car); engine.scene.add(body); }
     }
     if (!body || !rec.best || p.finished || !ghostPose(rec.best, lt, pose)) { if (body) body.visible = false; return; }

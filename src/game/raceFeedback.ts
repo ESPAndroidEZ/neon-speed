@@ -6,12 +6,14 @@ import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
+import { t } from '../i18n';
 
-const LAUNCH_POP: Record<Exclude<LaunchResult, 'NONE'>, [string, string]> = {
-  PERFECT: ['PERFECT LAUNCH!', '#7dff9a'],
-  GOOD: ['GOOD LAUNCH', '#18d8ff'],
-  EARLY: ['OVER-REVVED', '#ffc23d'],
+const LAUNCH_POP: Record<Exclude<LaunchResult, 'NONE'>, ['launch.perfect' | 'launch.good' | 'launch.early', string]> = {
+  PERFECT: ['launch.perfect', '#7dff9a'],
+  GOOD: ['launch.good', '#18d8ff'],
+  EARLY: ['launch.early', '#ffc23d'],
 };
+const REWARD: Record<string, 'rw.near' | 'rw.slip' | 'rw.clean'> = { 'NEAR MISS': 'rw.near', SLIPSTREAM: 'rw.slip', 'CLEAN CORNER': 'rw.clean' };
 
 /**
  * Race feedback that reads the game and writes the HUD: the corner guide (next corner + BRAKE/EASE warning)
@@ -29,18 +31,18 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
     const racing = game.state === 'RACING' && rm.phase === 'RACING';
     if (game.state === 'RACING' && rm.phase === 'COUNTDOWN' && !countdownHint && rm.countdown < 2.2) {
       countdownHint = true;
-      hud.popUp('HIT THE GAS JUST BEFORE GO', '#e8f6ff');
+      hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
     const a = rm.launch.announce;
     if (a && a !== 'NONE') {
       rm.launch.announce = null;
-      hud.popUp(LAUNCH_POP[a][0], LAUNCH_POP[a][1]);
+      hud.popUp(t(LAUNCH_POP[a][0]), LAUNCH_POP[a][1]);
     }
     if (rm.rewards.seq !== seenReward) {
       seenReward = rm.rewards.seq;
       const k = rm.rewards.last;
-      if (k) hud.popUp(`${k}  +NITRO`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : '#7dff9a');
+      if (k) hud.popUp(`${t(REWARD[k] ?? 'rw.clean')}  +${t('pad.nitro')}`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : '#7dff9a');
     }
     if (!racing || game.player.finished) {
       guide.el.style.opacity = '0';

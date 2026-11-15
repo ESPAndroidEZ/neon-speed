@@ -2,9 +2,9 @@ import type { SaveStore } from '../core/save';
 import { buildTrack, TRACKS, type TrackDef } from '../data/tracks';
 import type { Weather } from '../types/game';
 import { button, h, lapText } from './uiKit';
+import { t, tx } from '../i18n';
 
-const TYPE_LABEL = { circuit: 'Circuit', sprint: 'Sprint', drift: 'Drift event' } as const;
-const WEATHER_ICON: Record<Weather, string> = { CLEAR: '☀ clear', RAIN: '☂ rain', SNOW: '❄ snow' };
+const WEATHER_ICON: Record<Weather, string> = { CLEAR: '☀', RAIN: '☂', SNOW: '❄' };
 
 /** Draw the road outline of a map (north up) on a small canvas; the start line is the white bar, a sprint's finish the pink one. */
 export function drawOutline(c: HTMLCanvasElement, def: TrackDef): void {
@@ -65,7 +65,7 @@ export interface TrackSelectDeps {
 export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
   const root = h('div', 'rb-layer dim');
   root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
-  root.append(h('h2', 'rb-title', 'SELECT MAP'));
+  root.append(h('h2', 'rb-title', t('maps.title')));
   const row = h('div', 'rb-row');
   for (const def of TRACKS) {
     const tr = buildTrack(def);
@@ -73,8 +73,8 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     const climb = Math.max(...tr.heights) - Math.min(...tr.heights);
     const best = d.store.data.trackBest;
     const times = def.type === 'drift'
-      ? `Best score <b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b> (target ${def.driftTarget?.toLocaleString()})`
-      : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${w.toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}`).join(' · ');
+      ? t('maps.bestScore', { score: `<b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b>`, target: def.driftTarget?.toLocaleString() ?? '--' })
+      : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${t(`weather.${w}`).toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}`).join(' · ');
     const card = h('div', 'rb-card');
     card.style.cssText += ';width:min(300px,86vw);text-align:left';
     const cv = document.createElement('canvas');
@@ -84,13 +84,13 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     drawOutline(cv, def);
     card.append(cv);
     card.append(h('div', '', `<div style="font-size:22px;font-weight:900;margin-top:8px">${def.name}</div>
-      <div class="rb-sub">${TYPE_LABEL[def.type]} · ${def.type === 'sprint' ? 'one run' : `${def.laps} laps`} · ${km.toFixed(1)} km${climb > 1 ? ` · climb ${climb.toFixed(0)} m` : ''}</div>
-      <div style="opacity:.85;margin:6px 0;font-size:14px;line-height:1.35">${def.blurb}</div>
-      <div style="font-size:13px;opacity:.9">Suits: ${def.recommendedWeather.map((w) => WEATHER_ICON[w]).join(' · ')}</div>
+      <div class="rb-sub">${t(`maps.type.${def.type}`)} · ${def.type === 'sprint' ? t('story.oneRun') : t('story.laps', { n: def.laps })} · ${km.toFixed(1)} km${climb > 1 ? ` · ${t('maps.climb', { m: climb.toFixed(0) })}` : ''}</div>
+      <div style="opacity:.85;margin:6px 0;font-size:14px;line-height:1.35">${tx(def.blurb)}</div>
+      <div style="font-size:13px;opacity:.9">${t('maps.suits')} ${def.recommendedWeather.map((w) => `${WEATHER_ICON[w]} ${t(`weather.${w}`).toLowerCase()}`).join(' · ')}</div>
       <div style="font-size:12px;opacity:.75;margin-top:4px">${times}</div>`));
     card.addEventListener('click', () => d.onPick(def));
     row.append(card);
   }
-  root.append(row, button('Back', d.onBack));
+  root.append(row, button(t('common.back'), d.onBack));
   return root;
 }

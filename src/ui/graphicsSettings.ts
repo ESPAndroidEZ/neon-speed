@@ -3,6 +3,7 @@ import type { Engine } from '../core/engine';
 import { applyQuality } from '../core/quality';
 import type { Quality, SaveStore } from '../core/save';
 import { button, h } from './uiKit';
+import { t } from '../i18n';
 
 export interface GraphicsDeps {
   store: SaveStore;
@@ -22,27 +23,27 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
     applyQuality(d.engine, s.quality, true);
     if (d.hud) applyGraphics(d.engine, { hud: d.hud, chase: d.chase });
   };
-  const presets = h('div', 'rb-row', '<span style="width:90px">Preset</span>');
+  const presets = h('div', 'rb-row', `<span class="rb-lbl">${t('gfx.preset')}</span>`);
   const note = h('div', 'rb-sub', '');
   const refreshPreset = (): void => presets.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.quality));
-  const choose = (t: Quality): void => {
-    s.quality = t;
-    usePreset(t);
+  const choose = (q: Quality): void => {
+    s.quality = q;
+    usePreset(q);
     apply();
     refreshPreset();
     rebuild();
   };
-  for (const t of TIERS) {
-    const b = button(t, () => choose(t));
-    b.dataset.lv = t;
+  for (const q of TIERS) {
+    const b = button(t(`opt.${q}`), () => choose(q));
+    b.dataset.lv = q;
     b.style.minWidth = '84px';
     presets.append(b);
   }
-  const bench = button('Test my device', () => {
-    note.textContent = 'Testing...';
+  const bench = button(t('gfx.bench'), () => {
+    note.textContent = t('gfx.testing');
     window.setTimeout(() => {
       const r = benchmark(d.engine);
-      note.textContent = `${r.ms.toFixed(1)} ms per frame: ${r.tier.toUpperCase()} selected.`;
+      note.textContent = t('gfx.result', { ms: r.ms.toFixed(1), tier: t(`opt.${r.tier}`).toUpperCase() });
       choose(r.tier);
     }, 60);
   });
@@ -51,7 +52,7 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
   const rebuild = (): void => {
     body.replaceChildren();
     const slider = (name: string, key: keyof Graphics, min: number, max: number, step: number, fmt: (v: number) => string): void => {
-      const row = h('div', 'rb-row', `<span style="width:130px;font-size:13px">${name}</span>`);
+      const row = h('div', 'rb-row', `<span class="rb-lbl" style="font-size:13px">${name}</span>`);
       const i = h('input') as HTMLInputElement;
       i.type = 'range';
       i.min = String(min);
@@ -69,7 +70,7 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
       body.append(row);
     };
     const toggle = (name: string, key: 'bloom' | 'reflections' | 'shadows'): void => {
-      const row = h('label', 'rb-row', `<span style="width:130px;font-size:13px">${name}</span>`);
+      const row = h('label', 'rb-row', `<span class="rb-lbl" style="font-size:13px">${name}</span>`);
       const c = h('input') as HTMLInputElement;
       c.type = 'checkbox';
       c.checked = GRAPHICS[key];
@@ -81,7 +82,7 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
       body.append(row);
     };
     const chips = (name: string, key: 'msaa' | 'fpsCap' | 'drawDistance', opts: readonly [number, string][]): void => {
-      const row = h('div', 'rb-row', `<span style="width:130px;font-size:13px">${name}</span>`);
+      const row = h('div', 'rb-row', `<span class="rb-lbl" style="font-size:13px">${name}</span>`);
       for (const [val, label] of opts) {
         const b = button(label, () => {
           (GRAPHICS as unknown as Record<string, number>)[key] = val;
@@ -94,17 +95,17 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
       }
       body.append(row);
     };
-    slider('Resolution scale', 'resScale', 0.5, 1.5, 0.05, (v) => `${Math.round(v * 100)}%`);
-    toggle('Bloom and glow', 'bloom');
-    toggle('Reflections (planar)', 'reflections');
-    toggle('Shadows', 'shadows');
-    slider('Particle density', 'particles', 0.25, 1.5, 0.05, (v) => `${Math.round(v * 100)}%`);
-    chips('Draw distance', 'drawDistance', [[0, 'short'], [1, 'medium'], [2, 'far']]);
-    chips('Anti-aliasing', 'msaa', [[0, 'off'], [2, '2x'], [4, '4x']]);
-    chips('Frame cap', 'fpsCap', [[0, 'display'], [30, '30'], [60, '60'], [120, '120']]);
-    slider('Field of view', 'fov', 50, 75, 1, (v) => `${Math.round(v)}°`);
-    slider('HUD scale', 'hudScale', 0.8, 1.3, 0.05, (v) => `${Math.round(v * 100)}%`);
-    slider('Motion blur', 'motionBlur', 0, 1, 0.05, (v) => `${Math.round(v * 100)}%`);
+    slider(t('gfx.res'), 'resScale', 0.5, 1.5, 0.05, (v) => `${Math.round(v * 100)}%`);
+    toggle(t('gfx.bloom'), 'bloom');
+    toggle(t('gfx.refl'), 'reflections');
+    toggle(t('gfx.shadows'), 'shadows');
+    slider(t('gfx.particles'), 'particles', 0.25, 1.5, 0.05, (v) => `${Math.round(v * 100)}%`);
+    chips(t('gfx.draw'), 'drawDistance', [[0, t('gfx.short')], [1, t('opt.medium')], [2, t('gfx.far')]]);
+    chips(t('gfx.aa'), 'msaa', [[0, t('opt.OFF')], [2, '2x'], [4, '4x']]);
+    chips(t('gfx.fps'), 'fpsCap', [[0, t('gfx.display')], [30, '30'], [60, '60'], [120, '120']]);
+    slider(t('gfx.fov'), 'fov', 50, 75, 1, (v) => `${Math.round(v)}°`);
+    slider(t('gfx.hud'), 'hudScale', 0.8, 1.3, 0.05, (v) => `${Math.round(v * 100)}%`);
+    slider(t('gfx.blur'), 'motionBlur', 0, 1, 0.05, (v) => `${Math.round(v * 100)}%`);
   };
   rebuild();
   void PRESETS;

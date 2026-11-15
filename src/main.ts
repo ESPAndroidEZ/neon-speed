@@ -39,6 +39,8 @@ import { ResultsScreen } from './ui/results';
 import { installVersus } from './game/versusGate';
 import { Cast } from './game/cast';
 import { applySettings } from './ui/settings';
+import { initLang } from './i18n/langPrefs';
+import { t } from './i18n';
 import { preloadCarModels } from './world/carFactory';
 import { runBootLoader } from './ui/bootLoader';
 import { installRotateHint } from './ui/rotateHint';
@@ -89,10 +91,11 @@ const voice = new Voice(); const auto = new AutoQuality();
 auto.onDowngrade = (tier) => {
   store.data.settings.quality = tier;
   store.commit();
-  toast(`Frame rate was low: graphics lowered to ${tier.toUpperCase()}. (Settings: Auto quality)`);
+  toast(t('main.lowFps', { tier: t(`opt.${tier}`).toUpperCase() }));
 };
 engine.onFrame((_a, dt) => auto.update(dt, engine));
 if (!navigator.webdriver && firstRunTier(store.data.settings, deviceHints(engine.renderer.getContext(), isPhone()), kv)) store.commit(); // tests keep their tier
+initLang(store);
 applySettings({ store, audio: audio.bus, engine, voice, auto, game, hud });
 const applyDriving = (): void => {
   applyDrivingSettings(store, pad);
@@ -143,7 +146,7 @@ story = new StoryController({
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
-  extra: () => [fullscreenButton(fs), controls.prefs.data.scheme === 'tilt' ? button('Recalibrate tilt', () => void calibrate(controls.tilt)) : null],
+  extra: () => [fullscreenButton(fs), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
   onResume: () => pause.resume(),
   onRestart: () => {
     pause.resume();
@@ -169,13 +172,13 @@ function loadSlot(id: import('./core/gameSave').SlotId): void {
     versus.bypass(() => restoreGame(game, snap));
     story.resume(snap.setup.eventId);
     pause.resume();
-    toast('Loaded');
+    toast(t('main.loaded'));
   } catch {
-    toast('That save could not be loaded');
+    toast(t('main.badSave'));
     menu.main();
   }
 }
-if (slots.corrupt) toast('Some saved games were unreadable and were skipped');
+if (slots.corrupt) toast(t('main.corrupt'));
 const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMenu: () => { pause.saveAndQuit(); leaveToMenu(); } });
 game.onFinish = (r) => {
   const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);

@@ -1,5 +1,6 @@
 import { racingLine, speedProfile, type RacingLine } from '../physics/aiLine';
 import type { TrackSample } from '../types/game';
+import { t } from '../i18n';
 
 const CSS = `
 .rb-cg{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top),2vh) + clamp(40px,6vh,56px));transform:translateX(-50%);
@@ -76,8 +77,8 @@ export class CornerGuide {
     const need = speed > vMin ? (speed * speed - vMin * vMin) / (2 * Math.max(dist, 4)) : 0;
     const state = need > this.aBrake * 0.8 ? 'brake' : need > this.aBrake * 0.45 ? 'warn' : '';
     if (sev === 0 && !state) return this.show(false);
-    const kind = ['FAST', 'SHARP', 'HAIRPIN'][sev];
-    const word = state === 'brake' ? 'BRAKE' : state === 'warn' ? 'EASE' : kind;
+    const kind = t(['cg.fast', 'cg.sharp', 'cg.hairpin'][sev] as 'cg.fast');
+    const word = state === 'brake' ? t('cg.brake') : state === 'warn' ? t('cg.ease') : kind;
     const left = turn < 0; // ks > 0 is a RIGHT turn (tests/lab/turn-sign.mts)
     const key = `${state}|${sev}|${left}|${Math.round(dist / 10)}|${word}`;
     this.show(true);
@@ -87,7 +88,7 @@ export class CornerGuide {
     this.path.setAttribute('d', ARROWS[sev]);
     this.path.style.transform = left ? 'scaleX(-1)' : '';
     this.path.style.transformOrigin = '16px 16px';
-    this.text.innerHTML = `${word}<small>${state ? kind + ' ' : ''}${left ? 'LEFT' : 'RIGHT'} · ${Math.round(dist / 10) * 10} m</small>`;
+    this.text.innerHTML = `${word}<small>${state ? kind + ' ' : ''}${t(left ? 'cg.left' : 'cg.right')} · ${Math.round(dist / 10) * 10} m</small>`;
   }
 
   private show(v: boolean): void {

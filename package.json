@@ -28,7 +28,8 @@
     "build:public": "VITE_PUBLIC_BUILD=1 npm run build:prod",
     "assets": "node scripts/asset-report.mjs",
     "viewport": "node scripts/viewport-check.mjs",
-    "e2e": "node scripts/e2e-check.mjs"
+    "e2e": "node scripts/e2e-check.mjs",
+    "lang": "node scripts/lang-check.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",

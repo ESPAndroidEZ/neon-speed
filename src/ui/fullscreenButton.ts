@@ -2,6 +2,7 @@ import type { FullscreenControl } from '../core/fullscreen';
 import { isStandalone } from '../core/fullscreen';
 import { ICONS } from './icons';
 import { h, injectCss } from './uiKit';
+import { t } from '../i18n';
 
 const CSS = `
 .rb-fs{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:0 12px;font:800 13px system-ui,sans-serif;
@@ -23,9 +24,9 @@ export function showHomescreenHint(force = false): void {
     /* no storage: show it anyway */
   }
   if (isStandalone() || document.querySelector('.rb-a2hs')) return;
-  const card = h('div', 'rb-a2hs', `${ICONS.homescreen}<div>For full screen: tap <b>Share</b>, then <b>Add to Home Screen</b>, and start the game from the new icon.</div>`);
+  const card = h('div', 'rb-a2hs', `${ICONS.homescreen}<div>${t('fs.hint')}</div>`);
   const x = h('button', '', ICONS.close) as HTMLButtonElement;
-  x.setAttribute('aria-label', 'Close');
+  x.setAttribute('aria-label', t('common.close'));
   x.addEventListener('click', () => card.remove());
   card.append(x);
   document.body.append(card);
@@ -50,7 +51,7 @@ export function fullscreenButton(fs: FullscreenControl, icon = false): HTMLButto
   const b = h('button', `rb-fs${icon ? ' icon' : ''}`) as HTMLButtonElement;
   b.type = 'button';
   const paint = (on: boolean): void => {
-    const label = fs.mode === 'homescreen' ? 'Add to Home Screen' : on ? 'Exit full screen' : 'Full screen';
+    const label = t(fs.mode === 'homescreen' ? 'fs.homescreen' : on ? 'fs.exit' : 'fs.enter');
     b.innerHTML = `${fs.mode === 'homescreen' ? ICONS.homescreen : on ? ICONS.fullscreenExit : ICONS.fullscreen}<span>${label}</span>`;
     b.setAttribute('aria-label', label);
     b.title = label;

@@ -1,5 +1,6 @@
 import type { TitleCard } from '../data/lore';
 import { h, injectCss } from './uiKit';
+import { t, tx } from '../i18n';
 
 /** Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each card shows for ~4.5 s. */
 export class TitleCards {
@@ -46,12 +47,12 @@ export class TitleCards {
     const c = this.cards[this.idx];
     const box = h('div');
     box.style.cssText = 'max-width:min(760px,90vw);text-align:center;opacity:0;transition:opacity .7s';
-    box.append(h('div', 'rb-sub', this.idx === 0 ? 'Previously in Kestrel Bay' : `${this.idx + 1} / ${this.cards.length}`));
-    const title = h('h2', 'rb-title', c.heading);
+    box.append(h('div', 'rb-sub', this.idx === 0 ? t('cards.previously') : `${this.idx + 1} / ${this.cards.length}`));
+    const title = h('h2', 'rb-title', tx(c.heading));
     title.style.fontSize = 'clamp(32px,7vw,64px)';
-    const text = h('div', '', c.text);
+    const text = h('div', '', tx(c.text));
     text.style.cssText = 'font-size:clamp(16px,2.4vw,22px);line-height:1.5;margin-top:12px;opacity:.9';
-    const hint = h('div', 'rb-sub', 'Click to continue · Esc to skip');
+    const hint = h('div', 'rb-sub', t('cards.skip'));
     hint.style.cssText += ';margin-top:28px;font-size:11px;opacity:.5';
     box.append(title, text, hint);
     this.layer?.replaceChildren(box);

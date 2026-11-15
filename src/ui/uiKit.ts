@@ -8,6 +8,7 @@ const CSS = `
 .rb-btn:hover,.rb-btn:focus{background:#18d8ff33;box-shadow:0 0 22px #18d8ff66;outline:none}
 .rb-btn.hot{border-color:#ff2a9d;box-shadow:0 0 16px #ff2a9d55}
 .rb-btn:disabled{opacity:.4;cursor:default}
+.rb-lbl{flex:0 1 min(160px,40%);min-width:90px;text-align:right;overflow-wrap:anywhere}
 .rb-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
 .rb-card{padding:16px 22px;border:1px solid #18d8ff55;border-radius:10px;background:#0a0d1ccc;min-width:200px;text-align:center;cursor:pointer}
 .rb-card:hover{border-color:#ff2a9d;box-shadow:0 0 20px #ff2a9d55}
