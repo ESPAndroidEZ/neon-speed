@@ -27,5 +27,8 @@
       "Read(./**/*.map)",
       "Read(./**/*.min.js)"
     ]
+  },
+  "env": {
+    "BASH_MAX_OUTPUT_LENGTH": "8000"
   }
 }
