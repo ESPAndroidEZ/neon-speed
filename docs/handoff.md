@@ -27,11 +27,11 @@ Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + proced
 
 ## Next (Claude)
 1. Re-run `CYCLE=1 node scripts/soak.mjs 5 skip` (dev server up): geometry leak verified fixed, texture fix (world.dispose) not yet verified (run was killed).
-2. Review qwen/046-model-350z and qwen/047-model-rx7 (SHOTS=1 model-build, /review-qwen); rerun queue for 048 049.
+2. Rerun `scripts/qwen-queue.sh 048 049` (Evo, Supra models), then review like 046/047.
 3. Owner to confirm the 7-step roadmap (inbox paste) before starting step 1.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
-046 350z DONE, 047 rx7 DONE (awaiting review); 048 evo, 049 supra NOT RUN (queue interrupted) (Blender car models, `Check:` runs model-build + model-check). 045 handbrake: done by Claude.
+046 350z, 047 rx7 MERGED (GLBs in public/models); 048 evo, 049 supra NOT RUN (queue interrupted) (Blender car models, `Check:` runs model-build + model-check). 045 handbrake: done by Claude.
 Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
 Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
 
