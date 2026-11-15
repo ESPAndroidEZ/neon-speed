@@ -7,7 +7,7 @@
 # Hermes has no per-file lock like Aider, so after the run anything outside Files: is reverted.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-n="$1"; TURNS="${TURNS:-80}"; BUDGET="${BUDGET:-1800}"
+n="$1"; TURNS="${TURNS:-80}"; BUDGET="${BUDGET:-2700}"
 
 grep -q '^Baton: qwen' docs/handoff.md || [ "${FORCE:-}" = 1 ] || {
   echo "The baton is not with Qwen (docs/handoff.md). Let Claude finish and run /checkpoint, or use FORCE=1."; exit 1; }

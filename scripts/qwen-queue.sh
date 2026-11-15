@@ -44,7 +44,7 @@ for n in "${TASKS[@]}"; do
 
   # 3. run Qwen (the baton line in the worktree comes from main: it must say 'Baton: qwen')
   start=$(date +%s)
-  run bash -c "cd '$WT' && timeout 35m scripts/qwen.sh '$n' > '$log' 2>&1"
+  run bash -c "cd '$WT' && timeout ${QWEN_TIMEOUT:-35m} scripts/qwen.sh '$n' > '$log' 2>&1"
   rc=$?
   mins=$(( ($(date +%s) - start) / 60 ))
 
