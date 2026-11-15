@@ -3,9 +3,10 @@
 Baton: qwen
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-15 (Claude: drift hold, phone perf, Blender toolkit v2, Evo merged; Qwen queue 049-051 running).
+Updated: 2026-11-15 (Claude: wider corners, corner guide, launch timing, Supra merged; Qwen 050-051 running).
 
 ## Done
+Session 2026-11-15 c: city tracks widened (Kestrel/Neon/Maze corner radii ~1.5-2x, roads 11-18 m; cliff road +2 m; track-check/balance bands/weather-check probe updated; clumsy-bot wall hits Neon 31->7), corner guide HUD (ui/cornerGuide: next corner, HAIRPIN/SHARP/FAST, BRAKE/EASE from the AI speed profile), launch timing at the countdown (core/launch, saved in race snapshot, tests/launch-check), pop-ups via Hud.popUp (game/raceFeedback). Supra model merged (049). Lab: tests/lab/track-survey, corner-radii.
 Session 2026-11-15 b: handbrake drift hold (stability.driftHoldTarget: after a handbrake entry the throttle keeps the rear loose; tests/handling-check), phone perf (world/mergeMeshes merges car meshes by material, ~80 -> ~40 draw calls per car; phones start MEDIUM once via quality.phoneDefaults; AutoQuality 50 fps on phones; scripts/drawcalls.mjs breakdown), Blender toolkit v2 (rb.cut_arches, rb.lamp, rb.surface_z/x, box pivot fix; civic.py reference recipe), Evo model merged (048).
 Handbrake round 2 (2026-11-15): `handbrakeCarry` in physics/stability swings velocity toward the nose while the handbrake works (turn tightens instead of sliding wide; tests/handling-check). Crash fix: cars (RacerViews.clear/swap) and track textures (world.dispose) were never freed, ~400 geometries + ~10 textures leaked per race; new world/disposeVisual. Soak test `node scripts/soak.mjs [min]` (CYCLE=1 switches races). Phone on LAN: scripts/phone-access.ps1 (admin PowerShell, WSL port forward).
 Qwen tooling (2026-11-15): Hermes replaces Aider (scripts/qwen.sh with scope guard + `Check:` line), headless Blender model pipeline (scripts/setup-blender.sh, blender/lib/rb.py, blender/cars/civic.py reference, scripts/model-build.sh, scripts/model-check.mts). Handbrake slide fix (stability.ts: limits stay on past a wider handbrake window, total-speed gate) + regression in tests/handling-check.
@@ -27,12 +28,12 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-1. Review Qwen 049 supra, 050 350z rework, 051 rx7 rework as they land: `git checkout qwen/0NN-model-<id> -- blender/cars/<id>.py && SHOTS=1 scripts/model-build.sh cars/<id>`, look at logs/models/<id>-*.png, commit .py + GLB, delete branch.
+1. Review Qwen 050 350z rework, 051 rx7 rework as they land: `git checkout qwen/0NN-model-<id> -- blender/cars/<id>.py && SHOTS=1 scripts/model-build.sh cars/<id>`, look at logs/models/<id>-*.png, commit .py + GLB, delete branch.
 2. Owner to test on iPhone (drift hold, Medium default); re-run `CYCLE=1 node scripts/soak.mjs 5 skip` to confirm the texture-leak fix.
 3. Owner to confirm the 7-step roadmap before starting step 1.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
-048 evo MERGED. RUNNING (queue started 09:31): 049 supra, 050 350z rework, 051 rx7 rework. 046/047 old-style models are in the game until 050/051 replace them.
+048 evo, 049 supra MERGED. RUNNING: 050 350z rework, 051 rx7 rework. 046/047 old-style models are in the game until 050/051 replace them.
 Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
 Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
 
@@ -56,6 +57,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-15 Claude: Hermes + Blender model pipeline, handbrake fix (wrong-way slide), tasks 046-049 written, baton to Qwen.
 - 2026-11-15 Claude: handbrake momentum carry, per-race GPU leak fixed (cars + track textures), soak test, phone-access.ps1; Qwen 046/047 done.
 - 2026-11-15 Claude: drift hold, car mesh merge + phone MEDIUM default, Blender toolkit v2, Evo merged; Qwen 049-051 running.
+- 2026-11-15 Claude: wider corners, corner guide, launch timing, Supra merged.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
