@@ -15,14 +15,15 @@ except the licensed cars in `data/cars.ts`. Everything is procedural (canvas tex
 Rule: every frame has ONE dominant hue (the district key light), ONE complementary accent, and the rest is dark blue-black.
 
 ## 2. Look presets (`src/core/looks.ts`, switch with `?look=` or Settings > Graphics > Look)
-- **Neon Night** (default): saturated magenta/cyan, bloom 0.9, exposure 1.0, crushed blacks, strong env reflections on wet road.
+- **Neon Night** (default): saturated magenta/cyan (saturation 1.6), bloom 0.9, exposure 1.0, crushed blacks, strong env reflections on wet road.
 - **Dusk Heat**: blue-orange split toning, a warm horizon band in the sky, lower fog density, bloom 0.7, exposure 1.15.
 - **Overcast Grit**: desaturated, low contrast sky, heavier fog, grain up, bloom 0.5, concrete and rust read stronger.
 Weather multiplies a preset (rain: darker, glossier, cooler; snow: brighter ambient, lower saturation) and never breaks the quality bars below.
+Weather grade exposure (`core/grade.ts`, raised 2026-11-15 because nights were too dark): CLEAR 1.0, RAIN 0.9, SNOW 0.76; city hemisphere fill 2.3.
 
 ## 3. Lighting rules
 1. Lights tell the story: lamps, signs, tail lights and headlights are the ONLY bright things. Walls and sky stay dark.
-2. Every emissive surface is `MeshBasicMaterial` colour x 2..4 (HDR) so bloom picks it up; ambient fill stays under 0.35.
+2. Every emissive surface is `MeshBasicMaterial` colour x 2..4 (HDR) so bloom picks it up. Ambient fill is brighter since 2026-11-15 (owner: nights too dark) but walls still read darker than the lights.
 3. Warm key (lamps) against cool fill (moon/sky) in city maps; reverse in Cliffside.
 4. Wet look = low roughness (0.15..0.3), env reflections, additive light pools and neon streaks on the road, puddle mirrors.
 5. Depth layers: foreground kerb detail, mid street and facades, far skyline silhouettes in 2 fog layers, sky glow at the horizon.
@@ -33,6 +34,8 @@ Weather multiplies a preset (rain: darker, glossier, cooler; snow: brighter ambi
 - Road: dark asphalt, albedo noise, patches, lane paint with low roughness, tram rails metallic.
 - Cars: clearcoat body (clearcoat 1, roughness 0.2..0.35), glass with env reflections, chrome rims, emissive lights; finishes gloss, metallic, pearl, matte, chrome, colour-shift.
 - Props: weathered metal and plastic; grime via vertex colour fake AO (darker at the base, near the ground).
+- Car models (Blender, `blender/cars/`): the Supra is the quality bar. Real cut wheel arches, wheels flush with the flank, lights/grille/wings seated ON the body (`rb.lamp`, `rb.surface_z`), one `paint` material, under 30k triangles. Number plates (fictional Kestrel Bay plate, owner text) are seated on each bumper at the centre line.
+- Tyre smoke: subtle. Grey (about 0.6), under the bloom threshold, max size ~1.7 m in the dry; never white puffs that glow.
 
 ## 5. What makes it look great (checklist, review every map screenshot against it)
 - [ ] One clear dominant hue, one accent, dark blue-black rest. Contrast: bright neon against near-black.
@@ -56,4 +59,4 @@ saturation (mean chroma of the brightest 5% pixels) > 0.20 in Neon Night (target
 | Medium | 0.85 | < 400 | < 500k | 1024 map | env + puddles | bloom + vignette | 60% |
 | High | 1.0 | < 600 | < 900k | 2048 map | env + planar mirror in rain | full grade, streaks, DoF in garage | 100% |
 | Ultra | native DPR | < 900 | < 1.4M | 4096 map | planar + SSR-like fake | + haze, motion blur | 150% |
-Geometry is merged per 150 m chunk, instanced props, distance LOD, chunks outside 450 m culled (Low 250 m). Window flicker is one uniform, not per-window logic.
+Auto quality lowers the render resolution in 10 % steps (to 60 %) before dropping a tier. Cars merge their static meshes by material (~40 draw calls per car). Geometry is merged per 150 m chunk, instanced props, distance LOD, chunks outside 450 m culled (Low 250 m). Window flicker is one uniform, not per-window logic.
