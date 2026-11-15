@@ -15,7 +15,7 @@ export interface LookTargets {
 }
 
 const ROAD_DRY = new Color(0xffffff);
-const ROAD_SNOW = new Color(0x6f7889);
+const ROAD_SNOW = new Color(0xc4cee0);
 
 /** Pushes a WeatherProfile into the world's materials: wet = glossy and reflective, snow = pale and matte. */
 export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
@@ -26,8 +26,8 @@ export function applyWorldLook(t: LookTargets, p: WeatherProfile): void {
   t.roadMat.envMap = t.env;
   t.roadMat.envMapIntensity = wet ? LOOK_CONFIG.road.envWet : snow ? LOOK_CONFIG.road.envSnow : LOOK_CONFIG.road.envDry;
   t.roadMat.color.copy(snow ? ROAD_SNOW : ROAD_DRY);
-  t.vergeMat.color.setHex(snow ? 0x5b6577 : 0x1d2128);
-  t.groundMat.color.setHex(snow ? 0x3f4858 : 0x14161c);
+  t.vergeMat.color.setHex(snow ? 0xa3afc6 : 0x1d2128);
+  t.groundMat.color.setHex(snow ? 0x76839c : 0x14161c);
   t.groundMat.roughness = snow ? 0.95 : 0.9;
   t.waterMat.envMap = t.env;
   t.poolMat.opacity = wet ? 0.5 : snow ? 0.18 : 0.34;

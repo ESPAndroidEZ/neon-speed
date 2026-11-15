@@ -23,6 +23,16 @@ export const LOOK_CONFIG = {
     /** Tail lamp colour multiplier while braking (must stay clearly above idle so braking reads). */
     braking: 6,
   },
+  /** Sky/ground fill light (what lifts facades and the road out of black). Multiplies the hemisphere and moon light per weather. */
+  fill: {
+    clear: 4,
+    rain: 4,
+    /** Snow on the ground bounces light: the brightest nights. */
+    snow: 6,
+    /** Hemisphere ground colour: dry/wet street, and the snow bounce. */
+    ground: 0x1a1a26,
+    groundSnow: 0x8494b4,
+  },
   fog: {
     /** Multiplies the weather fog density (1 = approved). */
     densityScale: 1,

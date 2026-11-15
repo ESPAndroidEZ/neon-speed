@@ -1,3 +1,4 @@
+import { LOOK_CONFIG } from '../render/lookConfig';
 import { DirectionalLight, HemisphereLight, type Group, type Scene, type Texture, type WebGLRenderer } from 'three';
 import { qualityNow } from '../core/quality';
 import { findTrackDef, buildTrack, type TrackDef } from '../data/tracks';
@@ -56,6 +57,7 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
   const moon = new DirectionalLight(0x8fa4ff, open ? 1.6 : 0.7);
   moon.position.set(-60, 90, -40);
   const hemi = new HemisphereLight(0x5464a8, 0x1a1a26, open ? 2.6 : def.theme === 'port' ? 2.7 : 2.3); // brighter nights (owner: too dark)
+  const hemiBase = hemi.intensity, moonBase = moon.intensity;
   const pal = paletteOf(def.id);
   const sky = buildSky(pal);
   sky.setLook(look, pal);
@@ -84,6 +86,10 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
     setHandprints: (n) => wall.setHandprints(n),
     setWeather: (p) => {
       wet = p.name === 'RAIN';
+      const fill = LOOK_CONFIG.fill, snowy = p.name === 'SNOW', fk = snowy ? fill.snow : wet ? fill.rain : fill.clear;
+      hemi.intensity = hemiBase * fk;
+      moon.intensity = moonBase * fk;
+      hemi.groundColor.setHex(snowy ? fill.groundSnow : fill.ground);
       sky.setLook(look, pal);
       applyWorldLook(targets, p);
     },

@@ -24,7 +24,7 @@ export interface Grade {
 export const GRADES: Record<Weather, Grade> = {
   CLEAR: { exposure: 1.0, bloomK: 1, bloomThreshold: 0.9, saturation: 1.05, tint: [1, 1, 1], glowK: 1, spotK: 1, spotAngle: 0.5 },
   RAIN: { exposure: 0.9, bloomK: 0.7, bloomThreshold: 1.05, saturation: 0.86, tint: [0.96, 1, 1.05], glowK: 0.55, spotK: 0.65, spotAngle: 0.4 },
-  SNOW: { exposure: 0.76, bloomK: 0.5, bloomThreshold: 1.2, saturation: 0.74, tint: [0.94, 1, 1.1], glowK: 0.4, spotK: 0.45, spotAngle: 0.36 },
+  SNOW: { exposure: 0.9, bloomK: 0.5, bloomThreshold: 1.2, saturation: 0.74, tint: [0.94, 1, 1.1], glowK: 0.4, spotK: 0.45, spotAngle: 0.36 },
 };
 
 /** The grade currently in force (read each frame by the systems that depend on it). */
