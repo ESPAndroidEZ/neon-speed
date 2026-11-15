@@ -14,6 +14,7 @@ const CSS = `
 #hud .ban{position:absolute;left:0;right:0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
 #hud .ds{position:absolute;left:50%;top:var(--mt);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);white-space:nowrap;font-style:italic;color:#ff2a9d;text-shadow:0 0 12px #ff2a9d;opacity:0;transition:opacity .2s}
 @media (max-width:760px){#hud .tl small{display:none}}
+@media (pointer:coarse){#hud .br{right:calc(var(--mr) + 206px);bottom:calc(var(--mb) - 6px);transform:scale(.7);transform-origin:right bottom}#hud .tl small{display:none}}
 `;
 
 /** Plain-DOM HUD. Only touches the DOM when a value actually changes. */
