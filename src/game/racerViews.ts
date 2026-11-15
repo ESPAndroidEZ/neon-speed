@@ -1,4 +1,5 @@
 import { Group, type Scene, type Texture } from 'three';
+import { disposeVisual } from '../world/disposeVisual';
 import type { CarSpec } from '../data/cars';
 import type { Racer } from '../core/raceManager';
 import { createCarVisual } from '../world/carFactory';
@@ -49,13 +50,17 @@ export class RacerViews {
   private swap(v: RacerView, nv: CarVisual): void {
     if (!this.views.includes(v)) return;
     v.holder.remove(v.visual.root);
+    disposeVisual(v.visual.root); // the procedural body it replaces
     v.holder.add(nv.root);
     v.visual = nv;
     this.onSwap?.(v);
   }
 
   clear(): void {
-    for (const v of this.views) this.scene.remove(v.holder);
+    for (const v of this.views) {
+      this.scene.remove(v.holder);
+      disposeVisual(v.holder); // ~70 geometries per car: leaked on every race before (GPU memory, then a crash)
+    }
     this.views.length = 0;
   }
 

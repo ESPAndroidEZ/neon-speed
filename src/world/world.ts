@@ -1,4 +1,4 @@
-import { DirectionalLight, HemisphereLight, type Group, type Mesh, type Scene, type Texture, type WebGLRenderer } from 'three';
+import { DirectionalLight, HemisphereLight, type Group, type Scene, type Texture, type WebGLRenderer } from 'three';
 import { qualityNow } from '../core/quality';
 import { findTrackDef, buildTrack, type TrackDef } from '../data/tracks';
 import type { ObstacleField } from '../physics/obstacles';
@@ -7,6 +7,7 @@ import type { Weather, WeatherProfile } from '../types/game';
 import { look } from '../core/looks';
 import { paletteOf } from '../data/palettes';
 import { buildNeonEnvMap } from './envMap';
+import { disposeVisual } from './disposeVisual';
 import { buildSky } from './sky';
 import { instanceProp, loadPropModel } from './propModels';
 import { layoutProps } from './propsLayout';
@@ -114,13 +115,7 @@ function build(scene: Scene, env: Texture, def: TrackDef): Built {
       scene.remove(root, hemi, moon, sky.group, keyL, accL);
       sky.dispose();
       details?.dispose();
-      root.traverse((o) => {
-        const m = o as Mesh;
-        m.geometry?.dispose();
-        const mat = m.material;
-        if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
-        else mat?.dispose();
-      });
+      disposeVisual(root); // geometries, materials AND their canvas textures (material.dispose() keeps textures)
     },
   };
 }

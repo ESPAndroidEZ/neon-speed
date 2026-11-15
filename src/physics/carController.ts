@@ -8,7 +8,7 @@ import { tireLateral } from './tire';
 import { restoreCar, snapshotCar } from './carSnapshot';
 import { steerAngle } from './steering';
 import { LoadTransfer } from './loadTransfer';
-import { slideDamping, slideYaw } from './stability';
+import { handbrakeCarry, slideDamping, slideYaw } from './stability';
 import { createAssist, type Assist } from './assists';
 
 const G = 9.81;
@@ -89,7 +89,6 @@ export class CarController {
     this.drivetrain.reset();
     this.publish();
   }
-
   step(dt: number, input: CarInput, weather: WeatherProfile | PhysicsEnv): void {
     const t = this.t;
     const s = this.state;
@@ -114,7 +113,6 @@ export class CarController {
     const sf = smoothstep(0.2, 2.5, absU); // no tyre forces at a standstill
     const slipDen = Math.max(absU, 3);
     const delta = steerAngle(t, as, steerIn, u, v, this.steerAuthority, assistMul);
-
     // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
     this.hbFactor = lerp(this.hbFactor, input.handbrake ? t.handbrakeGrip : 1, Math.min(1, dt * (input.handbrake ? 14 : 3)));
 
@@ -153,6 +151,8 @@ export class CarController {
     this.u += du * dt;
     this.v += dv * dt;
     this.r += dr * dt;
+    const cy = handbrakeCarry(t, this.u, this.v, this.hbFactor, g, dt), u1 = this.u; // swings velocity toward the nose
+    if (cy !== 0) { const c = Math.cos(cy), sn = Math.sin(cy); this.u = u1 * c - this.v * sn; this.v = u1 * sn + this.v * c; }
     if (absU < 3 && !input.handbrake) this.v *= Math.exp(-5 * dt * (1 - sf));
     s.heading = wrapAngle(s.heading + this.r * dt);
     this.publish();

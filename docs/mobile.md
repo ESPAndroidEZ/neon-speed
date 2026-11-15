@@ -3,7 +3,7 @@
 Three routes, from easiest to most native. All use the same Vite build.
 
 ## 1. Install from the browser (PWA, works today, no SDK)
-`npm run dev` serves on the LAN (http://<pc-ip>:5173). For a real install host the build over HTTPS:
+`npm run dev` serves on the LAN (http://<pc-ip>:5173). On WSL2 run `scripts/phone-access.ps1` once in an admin PowerShell (port forward + firewall; re-run after a reboot). For a real install host the build over HTTPS:
 `npm run build && npx vite preview --host` (or any static host: Netlify, Cloudflare Pages, GitHub Pages).
 - **iPhone (Safari):** Share, Add to Home Screen. Opens fullscreen, landscape, with the app icon.
 - **Android (Chrome):** menu, Install app. Works offline after the first visit (`public/sw.js`).

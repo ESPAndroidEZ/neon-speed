@@ -1,6 +1,6 @@
-import { findTrackDef } from '../data/tracks';
+import { findTrackDef, TRACKS } from '../data/tracks';
 import type { SaveStore } from '../core/save';
-import { findCar } from '../data/cars';
+import { CARS, findCar } from '../data/cars';
 import { freeRaceField } from '../data/rivals';
 import { findAnyEvent as findEvent } from '../data/story2';
 import type { Juice } from '../fx/juice';
@@ -32,6 +32,20 @@ export interface DevStartDeps {
  */
 export function runDevStart(d: DevStartDeps): void {
   const { q, game, store, world, menu, story, pause, juice, hud } = d;
+  if (q.has('soak')) { // dev: stats for scripts/soak.mjs (leak and crash hunting)
+    const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene } } }).d.engine;
+    let objects = 0;
+    (window as unknown as Record<string, unknown>).__rbStats = () => {
+      const i = eng.renderer.info; objects = 0; eng.scene.traverse(() => { objects++; });
+      return { geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs?.length ?? 0, calls: i.render.calls, triangles: i.render.triangles, objects };
+    };
+    (window as unknown as Record<string, unknown>).__rbCycle = (n: number) => { // new race: next car, track and weather
+      const ws = ['CLEAR', 'RAIN', 'SNOW'] as const, tr = TRACKS[n % TRACKS.length], car = CARS[n % CARS.length], f = freeRaceField(5);
+      game.setWeather(ws[n % 3]);
+      game.startRace({ car, paint: car.color, glow: undefined, weather: ws[n % 3], laps: tr.laps, trackId: tr.id, cinematic: false, agents: f, meta: { rivalIds: f.map((x) => x.agent.id), skillScale: 1, wet: n % 3 !== 0, eventId: null } });
+      if (n % 4 === 3) d.leaveToMenu();
+    };
+  }
 if (d.direct) {
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = freeRaceField(Number(q.get('ai') ?? 0));

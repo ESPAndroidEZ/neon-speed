@@ -33,3 +33,17 @@ export function slideYaw(t: CarTuning, u: number, v: number, hb: number): number
   if (over <= 0) return 0;
   return Math.sign(beta) * t.slideGain * Math.min(over, 0.7) * smoothstep(4, 12, speed);
 }
+
+/**
+ * Handbrake momentum carry (arcade): while the handbrake is working, the velocity is swung toward where the
+ * nose points, so a handbrake turn tightens the line instead of sliding wide and scrubbing off half the speed.
+ * Returns the angle (rad) to rotate (u, v) by this step; scaled by weather grip so snow stays loose. Forward only.
+ */
+const HB_CARRY = 2.6;
+export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, grip: number, dt: number): number {
+  if (u < 2) return 0;
+  const share = hbShare(t, hb);
+  if (share <= 0) return 0;
+  const beta = Math.atan2(v, u);
+  return -HB_CARRY * Math.max(-0.9, Math.min(0.9, beta)) * share * Math.min(1, grip) * smoothstep(2, 8, u) * dt;
+}

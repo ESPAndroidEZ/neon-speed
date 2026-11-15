@@ -131,16 +131,26 @@ const hold = (c: CarController, secs: number, i: CarInput): void => {
   check('higher sensitivity turns harder', yaw(1.4) > yaw(1) * 1.15 && yaw(0.6) < yaw(1) * 0.85, `${yaw(0.6).toFixed(2)} / ${yaw(1).toFixed(2)} / ${yaw(1.4).toFixed(2)} rad/s`);
 }
 {
-  // Owner bug (task 045): handbrake + steer used to pivot past 90 deg, roll backwards and drive off the OTHER way.
+  // Owner bug (task 045): handbrake + steer used to pivot, roll backwards and slide wide / the OTHER way.
+  const civic = { mass: 1180, inertia: 1500, handbrakeGrip: 0.5, slideCap: 0.54 };
+  const travelAfter = (steer: number, hb: boolean): number => {
+    const c = mk(civic);
+    toSpeed(c, 20);
+    for (let i = 0; i < 60; i++) c.step(D, inp({ throttle: 1, steer, handbrake: hb && i < 36 }), WEATHER.CLEAR);
+    return Math.atan2(c.state.velocity.x, c.state.velocity.z);
+  };
   for (const steer of [1, -1]) {
-    const c = mk({ mass: 1180, inertia: 1500, handbrakeGrip: 0.5, slideCap: 0.54 }); // Civic-like
+    const c = mk(civic);
     toSpeed(c, 25);
     let minU = Infinity;
     for (let i = 0; i < 90; i++) { c.step(D, inp({ throttle: 1, steer, handbrake: true }), WEATHER.CLEAR); minU = Math.min(minU, c.u); }
-    hold(c, 1.5, inp({ throttle: 1, steer }));
+    hold(c, 1.0, inp({ throttle: 1, steer }));
     const travel = Math.atan2(c.state.velocity.x, c.state.velocity.z);
-    check(`handbrake slide ${steer > 0 ? 'left' : 'right'} keeps going that way`, minU > 0 && Math.sign(travel) === steer && Math.abs(c.state.heading) < 1.6,
-      `min u ${minU.toFixed(1)} m/s, travel ${(travel * 57.3).toFixed(0)} deg, heading ${(c.state.heading * 57.3).toFixed(0)} deg`);
+    const slip = Math.abs(Math.atan2(c.v, c.u));
+    check(`handbrake slide ${steer > 0 ? 'left' : 'right'}: forward, that way, nose and travel agree`, minU > 0 && Math.sign(travel) === steer && slip < 1.0,
+      `min u ${minU.toFixed(1)} m/s, travel ${(travel * 57.3).toFixed(0)} deg, slip ${(slip * 57.3).toFixed(0)} deg`);
+    const a = travelAfter(steer, false) * steer, b = travelAfter(steer, true) * steer;
+    check(`handbrake ${steer > 0 ? 'left' : 'right'} tightens the turn`, b > a * 1.4, `travel after 1 s: steer ${(a * 57.3).toFixed(0)} deg, + handbrake ${(b * 57.3).toFixed(0)} deg`);
   }
 }
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
