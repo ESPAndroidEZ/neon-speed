@@ -7,9 +7,10 @@ import type { SkidMarks } from './skidMarks';
 
 /** Per-surface look of tyre clouds: colour, size, lift and how many per second at full slide. */
 const LOOK: Record<Weather, { r: number; g: number; b: number; a: number; s0: number; s1: number; rise: number; rate: number; speedKick: number }> = {
-  CLEAR: { r: 0.88, g: 0.88, b: 0.92, a: 0.3, s0: 0.7, s1: 2.6, rise: 0.7, rate: 85, speedKick: 0.15 },
-  RAIN: { r: 0.7, g: 0.8, b: 0.95, a: 0.3, s0: 0.45, s1: 1.8, rise: 2.0, rate: 100, speedKick: 0.45 }, // fine water spray, thrown up and back // fine water spray, thrown up and back
-  SNOW: { r: 0.82, g: 0.88, b: 0.98, a: 0.36, s0: 0.6, s1: 2.3, rise: 1.0, rate: 70, speedKick: 0.3 }, // powder kicked up // powder kicked up
+  // owner (2026-11-15): smoke was too big and too shiny: smaller, greyer (stays under the bloom threshold), thinner
+  CLEAR: { r: 0.6, g: 0.6, b: 0.64, a: 0.22, s0: 0.5, s1: 1.7, rise: 0.6, rate: 65, speedKick: 0.15 },
+  RAIN: { r: 0.55, g: 0.63, b: 0.75, a: 0.24, s0: 0.35, s1: 1.3, rise: 2.0, rate: 85, speedKick: 0.45 }, // fine water spray, thrown up and back
+  SNOW: { r: 0.66, g: 0.71, b: 0.8, a: 0.28, s0: 0.45, s1: 1.6, rise: 1.0, rate: 60, speedKick: 0.3 }, // powder kicked up
 };
 
 /** Smoke / water spray / snow powder from the tyres, and skid marks. Rates follow the quality tier. */
