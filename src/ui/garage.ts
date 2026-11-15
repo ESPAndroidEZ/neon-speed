@@ -1,4 +1,4 @@
-import { carNav, NAV_LABEL } from './carNav';
+import { carNav, navButton } from './carNav';
 import { REV_TEST } from '../audio/revTest';
 import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
@@ -27,6 +27,8 @@ const statsOf = (c: CarSpec): CarStats => {
   return s;
 };
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
+/** Dev-only GLB yaw calibration row and nose arrow (`?calib` in a dev build). */
+const CALIB = import.meta.env.DEV && new URLSearchParams(location.search).has('calib');
 const clamp01 = (v: number): number => Math.max(0.04, Math.min(1, v));
 
 /** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
@@ -44,7 +46,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
   const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
   carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
-  const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); window.clearInterval(watch); } }, 400);
+  const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); window.clearInterval(watch); } }, 400);
   let yaw = 0;
   let lookOpen = false; // the appearance panel is collapsed until asked for
   let shown = d.store.data.selected; // the menu already put the selected car on show
@@ -74,6 +76,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   const calibration = (c: CarSpec): HTMLElement | null => {
     const cal = d.visual()?.calibrate;
     if (!cal) return null;
+    if (!CALIB) { cal.setArrow(false); return null; } // dev tool only (?calib): no arrow in the real garage
     cal.setArrow(true);
     yaw = cal.getYaw();
     const row = h('div', 'rb-row');
@@ -142,7 +145,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     if (cal) panel.append(cal);
     const row = h('div', 'rb-row');
     row.style.flexWrap = 'nowrap';
-    row.append(small(NAV_LABEL.prev, goPrev));
+    row.append(navButton('prev', goPrev));
     if (owned) {
       const sel = d.store.data.selected === c.id;
       const b = button(sel ? 'Selected' : 'Select', () => { d.store.select(c.id); render(); }, sel ? '' : 'hot');
@@ -166,7 +169,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const back = button('Back', () => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); d.onBack(); });
     back.style.minWidth = '80px';
     back.style.padding = '8px 10px';
-    row.append(small(NAV_LABEL.next, goNext), back);
+    row.append(navButton('next', goNext), back);
     panel.append(row, soundTest(c.id));
   };
   const refreshCash = (): void => {

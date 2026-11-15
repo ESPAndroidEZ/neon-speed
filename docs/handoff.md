@@ -37,9 +37,9 @@ Feedback round 1 (all steps): GLB pipeline + 5 cars + garage; Kestrel Bay Street
 Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + procedural audio, lore/radio/crew, camera shake fix + setting, pause/save/continue (Serializable), sound rework, smoke test. Details in the Log and the graphics audit below.
 
 ## Next (Claude)
-1. Carlos on the phone: tilt calibration + feel (sign, sensitivity), full screen enter/exit, thumbs reach every button; then tune `input/tiltMap` defaults.
-2. Switch on GitHub Pages (docs/release.md: private repo needs a paid plan, else Cloudflare Pages); Android immersive (nav bar) line in MainActivity.
-3. Carlos hand-tests v2 handling and decides the default; night-sky shape; Qwen 056 people models then /review-qwen 056.
+1. Phone fix round IN PROGRESS. Done: garage arrow removed (it was the GLB yaw-calibration arrow, now dev-only `?calib`), SVG chevron prev/next (ui/carNav navButton), input/pulseLatch + tests/pulse-latch-check (not yet wired into ui/touchControls), i18n core src/i18n (t, tx, en/es controls table; nothing existed from Qwen), save: lang/subtitleSize/minimapSize, weatherPhysics default NORMAL.
+2. Todo: tilt default + Enable-tilt card + HUD icon + Settings debug (likely root cause: http LAN URL is not a secure context, so no orientation events and no fallback; add https dev + event-arrival check), snow handling + snow brightness (subagent findings pending), wire latch, extract UI strings to t(), Qwen task 057 for esContent, minimap/subtitle sizes.
+3. Then verify (build, tests, screenshots) and /checkpoint.
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
 Models merged: 046-050 (350Z, RX-7 old style, Evo, Supra, 350Z rework). 051 rx7 / 052 civic CANCELLED (owner: no more visual work on existing cars). RUNNING (fresh queue, `QWEN_TIMEOUT=50m`): 053 golf IN PROGRESS, then 054 e61, 055 m3 (Supra template). None finished yet.

@@ -13,6 +13,9 @@ import { defaultCareer, type CareerState } from './career';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 
+/** Small / Medium / Large for HUD elements (subtitles, minimap). */
+export type UiSize = 'S' | 'M' | 'L';
+
 export interface SaveData {
   version: 1;
   cash: number;
@@ -31,7 +34,7 @@ export interface SaveData {
   /** Installed performance upgrades and the tuning setup per car id. */
   upgrades: Record<string, Upgrades>;
   setups: Record<string, Setup>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; engineVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; handlingModel: HandlingModel; stability: StabilityLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; engineVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; handlingModel: HandlingModel; stability: StabilityLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics; lang: '' | 'en' | 'es'; subtitleSize: UiSize; minimapSize: UiSize };
   races: number;
   career: CareerState;
 }
@@ -56,7 +59,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   loadouts: {},
   upgrades: {},
   setups: {},
-  settings: { volume: 0.35, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'AGGRESSIVE', sfxVolume: 0.75, engineVolume: 0.6, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', handlingModel: 'legacy', stability: 'LIGHT', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon', graphics: { ...PRESETS.high } },
+  settings: { volume: 0.35, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'NORMAL', sfxVolume: 0.75, engineVolume: 0.6, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', handlingModel: 'legacy', stability: 'LIGHT', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon', graphics: { ...PRESETS.high }, lang: '', subtitleSize: 'S', minimapSize: 'S' },
   races: 0,
   career: defaultCareer(),
 });

@@ -53,6 +53,8 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.voice = s.voice === true;
   out.settings.autoQuality = s.autoQuality !== false;
   if (s.cameraShake === 'OFF' || s.cameraShake === 'LOW' || s.cameraShake === 'NORMAL') out.settings.cameraShake = s.cameraShake;
+  if (s.lang === 'en' || s.lang === 'es') out.settings.lang = s.lang; // '' = not chosen: follow the browser language
+  for (const k of ['subtitleSize', 'minimapSize'] as const) if (s[k] === 'S' || s[k] === 'M' || s[k] === 'L') out.settings[k] = s[k];
   out.settings.sfxVolume = num(s.sfxVolume, out.settings.sfxVolume, 0, 1);
   out.settings.engineVolume = num(s.engineVolume, out.settings.engineVolume, 0, 1);
   if (s.engineVolume === undefined && out.settings.volume === 0.7) out.settings.volume = 0.35; // 2026-11-15: old default was too loud

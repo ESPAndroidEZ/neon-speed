@@ -55,16 +55,20 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
     rear.push(r);
   }
 
-  const arrow = new Group();
-  const arrowMat = new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(3), depthTest: false });
-  const shaft = new Mesh(new CylinderGeometry(0.07, 0.07, 1.2, 8).rotateX(Math.PI / 2), arrowMat);
-  const head = new Mesh(new ConeGeometry(0.2, 0.5, 12).rotateX(Math.PI / 2), arrowMat);
-  head.position.z = 0.85;
-  arrow.add(shaft, head);
-  arrow.position.set(0, 1.1, len / 2 + 1.3);
-  arrow.renderOrder = 10;
-  arrow.visible = false;
-  root.add(arrow);
+  // yaw-calibration arrow: built only on demand by the dev calibration tool (garage `?calib`), never in normal play
+  let arrow: Group | null = null;
+  const makeArrow = (): Group => {
+    const g = new Group();
+    g.name = 'calib-arrow';
+    const arrowMat = new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(3), depthTest: false });
+    const head = new Mesh(new ConeGeometry(0.2, 0.5, 12).rotateX(Math.PI / 2), arrowMat);
+    head.position.z = 0.85;
+    g.add(new Mesh(new CylinderGeometry(0.07, 0.07, 1.2, 8).rotateX(Math.PI / 2), arrowMat), head);
+    g.position.set(0, 1.1, len / 2 + 1.3);
+    g.renderOrder = 10;
+    root.add(g);
+    return g;
+  };
 
   let curYaw = yaw;
   let pitch = 0;
@@ -81,7 +85,8 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
         setModelYaw(model, r);
       },
       setArrow: (on) => {
-        arrow.visible = on;
+        if (on && !arrow) arrow = makeArrow();
+        if (arrow) arrow.visible = on;
       },
     },
     setPaint: tint,

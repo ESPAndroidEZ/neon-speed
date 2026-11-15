@@ -1,4 +1,4 @@
-import { carNav, NAV_LABEL } from './carNav';
+import { carNav, navButton } from './carNav';
 import { stageSpec } from '../data/carReal';
 import { ADVICE, bestLapFor, buildKey } from '../data/upgradeAdvice';
 import { TRACKS } from '../data/tracks';
@@ -40,8 +40,8 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
     root.replaceChildren();
     root.append(h('h2', 'rb-title', 'TUNING'));
     const head = h('div', 'rb-row');
-    const prev = button(NAV_LABEL.prev, goPrev);
-    const next = button(NAV_LABEL.next, goNext);
+    const prev = navButton('prev', goPrev);
+    const next = navButton('next', goNext);
     prev.style.minWidth = next.style.minWidth = '60px';
     head.append(prev, h('div', '', `<div class="rb-sub">${c.brand}</div><div style="font-size:26px;font-weight:900">${c.name}</div>`), next);
     root.append(head);

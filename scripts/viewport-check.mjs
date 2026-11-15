@@ -80,7 +80,7 @@ async function runViewport(vp) {
     page.on('pageerror', (e) => errors.push(String(e).slice(0, 120)));
     let a = null;
     for (let tries = 0; tries < 3 && !a; tries++) { // a dev-server reload mid-check destroys the page context: retry
-      await page.goto(BASE + s.q, { waitUntil: 'load' });
+      if (!(await page.goto(BASE + s.q, { waitUntil: 'load', timeout: 90000 }).catch(() => null))) continue;
       await page.waitForTimeout(s.wait);
       for (let t = 0; t < 30 && s.q.includes('skip'); t++) { // dev start loads lazily: wait until the race runs
         if (await page.evaluate(() => !!window.__rbProbe && window.__rbProbe().state !== 'MENU').catch(() => false)) break;

@@ -1,5 +1,7 @@
+import { t } from '../i18n';
+
 /**
- * Car-picker navigation without arrow glyphs: Left/Right (and A/D) keys and a horizontal swipe on `root` call
+ * Car-picker navigation: Left/Right (and A/D) keys and a horizontal swipe on `root` call
  * prev/next. The key listener removes itself once `root` leaves the page, so screens never leak listeners.
  * Keys typed into inputs (the plate field) are ignored.
  */
@@ -24,5 +26,24 @@ export function carNav(root: HTMLElement, prev: () => void, next: () => void): v
   });
 }
 
-/** Text label for a prev/next tap target (no glyphs). */
-export const NAV_LABEL = { prev: 'Prev', next: 'Next' } as const;
+const CHEVRON = {
+  prev: '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4.5 7.5 12 15 19.5"/></svg>',
+  next: '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4.5 16.5 12 9 19.5"/></svg>',
+} as const;
+
+/**
+ * Previous / next car button: an inline-SVG chevron (no font glyph), 52 px square touch target, translated
+ * aria-label. The list wraps around, so neither end is ever disabled.
+ */
+export function navButton(dir: 'prev' | 'next', onClick: () => void): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rb-btn rb-nav';
+  b.innerHTML = CHEVRON[dir];
+  const label = t(dir === 'prev' ? 'nav.prev' : 'nav.next');
+  b.setAttribute('aria-label', label);
+  b.title = label;
+  b.style.cssText = 'min-width:52px;width:52px;height:52px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:28px;flex:none';
+  b.addEventListener('click', onClick);
+  return b;
+}
