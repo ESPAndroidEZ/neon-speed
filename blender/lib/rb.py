@@ -222,6 +222,12 @@ def surface_x(body, y, z):
     return loc.x if hit else None
 
 
+def surface_y(body, x, z):
+    """y (height) of the body's top surface at (x, z), seen from above: for roof rails, spoilers, scoops, domes."""
+    hit, loc, _n, _i = body.ray_cast(G(x, 10, z), G(0, -1, 0) - G(0, 0, 0))
+    return loc.z if hit else None
+
+
 def lamp(name, body, x, y, w, h, material, front=True, depth=0.08, inset=0.03):
     """Headlight / tail light sitting on the body surface at (x, y), mirrored to the other side. Its outer face is
     flush with the paint (sunk by `inset`), so it reads as part of the car, not a box stuck on it."""
