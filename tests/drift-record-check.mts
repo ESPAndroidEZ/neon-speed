@@ -1,0 +1,18 @@
+import { DriftRecordCue } from '../src/game/driftRecord.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+const run = (c: DriftRecordCue, scores: number[]): number => { let r = 0; for (const s of scores) r = c.step(s) || r; return r; };
+const c = new DriftRecordCue();
+c.reset(2000);
+check('drift still running says nothing', run(c, [100, 900, 2500]) === 0);
+check('banking above the record reports it', c.step(0) === 2500);
+check('a second zero frame says nothing', c.step(0) === 0);
+check('banking below the new record is quiet', run(c, [300, 1500, 0]) === 0);
+check('banking above again reports the higher one', run(c, [800, 3100, 0]) === 3100);
+check('small drift under 600 never counts', (() => { const d = new DriftRecordCue(); d.reset(100); return run(d, [200, 500, 0]) === 0; })());
+check('first-ever record (best 0) stays quiet', (() => { const d = new DriftRecordCue(); d.reset(0); return run(d, [700, 1200, 0]) === 0; })());
+check('after a quiet first record, beating it speaks', (() => { const d = new DriftRecordCue(); d.reset(0); run(d, [700, 1200, 0]); return run(d, [900, 1500, 0]) === 1500; })());
+check('equal to the record is not a record', (() => { const d = new DriftRecordCue(); d.reset(1500); return run(d, [1500, 0]) === 0; })());
+check('reset forgets a running drift', (() => { const d = new DriftRecordCue(); d.reset(1000); d.step(5000); d.reset(1000); return d.step(0) === 0; })());
+check('abort drops a drift in progress without a record', (() => { const d = new DriftRecordCue(); d.reset(1000); d.step(4000); d.abort(); return d.step(0) === 0; })());
+if (failed) process.exit(1);

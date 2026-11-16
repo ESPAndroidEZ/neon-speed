@@ -5,7 +5,6 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 ## Backlog
 - Race feel: speed lines and FOV kick tied to speed and nitro (never camera shake from plain acceleration), subtle motion blur, better start-line countdown with engine rev.
 - Skid, gear-shift and nitro sound polish using only procedural audio; tyre screech varies with surface (asphalt, wet, snow).
-- Rival banter on the radio during races, driven by position changes (overtakes, close finishes) and weather; short lines, EN + ES.
 - Results screen: lap breakdown, best-lap ghost line, "what you could tune" hint from `data/upgradeAdvice.ts`.
 - Photo mode in the garage and after races (hide HUD, free orbit, filters), saves a PNG download.
 - Accessibility: colour-blind safe HUD palette option, text size options, reduced-flash option, remappable keys.
@@ -16,6 +15,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Drift record pop-up: "DRIFT RECORD n" when a banked drift beats your lifetime best (needs an existing record, so early drifts stay quiet) (`game/driftRecord`, `game/raceFeedback`, i18n `drift.record`, `tests/drift-record-check.mts`).
 - 2026-11-16 Pause menu status line: lap, position and race time under PAUSED (`game/pauseStatus`, `ui/pauseMenu`, `tests/pause-status-check.mts`).
 - 2026-11-16 Nitro tank cues: NITRO EMPTY when a burn runs the tank dry, NITRO READY when it is back to half (`game/nitroCue`, `game/raceFeedback`, `tests/nitro-cue-check.mts`).
 - 2026-11-16 Photo finish badge on the results when the top two (one of them the player) finish within 0.3 s (`game/photoFinish`, `ui/results`, `tests/photo-finish-check.mts`).

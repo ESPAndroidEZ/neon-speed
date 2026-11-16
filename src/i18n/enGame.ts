@@ -38,6 +38,7 @@ export const EN_GAME = {
   'coach.handbrake.key': 'Tap {k} in a corner to slide', 'coach.handbrake.touch': 'Tap HANDBRAKE in a corner to slide',
   'rw.near': 'NEAR MISS', 'rw.slip': 'SLIPSTREAM', 'rw.clean': 'CLEAN CORNER',
   'lap.done': 'LAP {n}',
+  'drift.record': 'DRIFT RECORD {n}',
   'nitro.empty': 'NITRO EMPTY', 'nitro.ready': 'NITRO READY',
   'lap.final': 'FINAL LAP',
   'weather.cueRAIN': 'RAIN SETTING IN: GRIP DROPPING',

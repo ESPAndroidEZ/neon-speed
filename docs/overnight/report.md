@@ -266,3 +266,9 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Pausing a race now shows "LAP 2/3 · P3/6 · 1:24.1" under PAUSED (lap hidden in sprints, position hidden when alone). Before, the pause screen said nothing about where you were in the race.
 - Display only. Files: `game/pauseStatus.ts` (pure), `game/pause.ts`, `ui/pauseMenu.ts` (`setStatus`), `tests/pause-status-check.mts` (10 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: pause mid-race and check the line sits well under the title on a phone. The lap label does not re-translate if you switch language while paused (next pause is right).
+
+## 99 Self-directed: drift record pop-up
+- When you bank a drift bigger than your lifetime best (the Crew screen record) a pink "DRIFT RECORD 3100" pop-up shows (ES: RÉCORD DE DERRAPE). It stays quiet while there is no record yet, under 600 points, on equal scores, and a restart mid-drift does not bank the old drift. Removed the rival-radio idea from the backlog: `game/radio.ts` already does it.
+- Display only. Files: `game/driftRecord.ts` (pure), `game/raceFeedback.ts` (stored record read once per race), i18n `drift.record`, `tests/drift-record-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: bank a big drift after the record exists; it appears next to the green BANKED pop-up, check they do not overlap badly on a phone.
+- Note: `scripts/overnight.sh` and `scripts/overnight-tab.sh` have uncommitted edits that are not mine (the runner itself); I left them untouched.

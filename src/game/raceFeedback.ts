@@ -11,6 +11,8 @@ import { FinalLapCue } from './finalLap';
 import { PosCue } from './posCue';
 import { WeatherCue } from './weatherCue';
 import { NitroCue } from './nitroCue';
+import { DriftRecordCue } from './driftRecord';
+import { loadStats } from './driverStats';
 import { raceStats } from './raceStats';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
@@ -37,6 +39,8 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   const posCue = new PosCue();
   const weatherCue = new WeatherCue();
   const nitroCue = new NitroCue();
+  const driftRecord = new DriftRecordCue();
+  let driftArmed = false; // stored record read once per race, not per frame
   let countdownHint = false;
   let seenReward = 0;
   let finalIn = -1; // seconds until FINAL LAP shows (after the lap-time pop-up)
@@ -45,12 +49,14 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
     const me = rm.player; // rain / snow stop under tunnel roofs and at the car's roof
     if (me) updatePrecipCover(rm.track, me.contact.hit.index, engine.camera.position.x, engine.camera.position.z, me.car.state.position);
     const racing = game.state === 'RACING' && rm.phase === 'RACING';
+    if (game.state !== 'RACING') driftArmed = false;
+    else if (!driftArmed) { driftArmed = true; driftRecord.reset(loadStats().bestDrift); } // once per race, covers restored saves too
     if (game.state === 'RACING' && rm.phase === 'COUNTDOWN' && !countdownHint && rm.countdown < 2.2) {
       countdownHint = true;
       hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
-    else { finalLap.reset(); posCue.reset(); weatherCue.reset(); nitroCue.reset(); raceStats.reset(); finalIn = -1; }
+    else { driftRecord.abort(); finalLap.reset(); posCue.reset(); weatherCue.reset(); nitroCue.reset(); raceStats.reset(); finalIn = -1; }
     if (racing && finalLap.step(rm.playerLap, rm.totalLaps)) finalIn = 1.3;
     if (finalIn >= 0 && !game.paused && (finalIn -= dt) < 0) { finalIn = -1; if (racing) hud.popUp(t('lap.final'), '#ffc23d'); }
     if (racing && !game.paused && weatherCue.step(game.weather !== 'CLEAR', game.weatherIntensity)) hud.popUp(t(game.weather === 'SNOW' ? 'weather.cueSNOW' : 'weather.cueRAIN'), '#18d8ff');
@@ -58,6 +64,8 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       const moved = posCue.step(game.telemetry.position, game.telemetry.racerCount, dt);
       if (moved) hud.flashPosition(moved > 0);
       raceStats.step(game.player.car.state.speed);
+      const rec = driftRecord.step(game.telemetry.driftScore);
+      if (rec) hud.popUp(t('drift.record', { n: rec }), '#ff2a9d');
       const nc = nitroCue.step(game.telemetry.nitroLevel, game.telemetry.nitroActive);
       if (nc) hud.popUp(t(nc === 'EMPTY' ? 'nitro.empty' : 'nitro.ready'), nc === 'EMPTY' ? '#ff5c7a' : '#ff2a9d');
     }
