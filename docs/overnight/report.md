@@ -205,3 +205,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Settings (driving rows) has a "Menu text size" choice A / A+ / A++ (zoom 1, 1.15, 1.3) for accessibility. It scales the menu screens (`.rb-layer`) only; the race HUD is untouched. Stored under its own localStorage key `ns.textsize` (not the game save), junk loads as normal, painted at start-up from `applyDrivingSettings`. EN + ES (`drv.textSize`).
 - Files: `ui/textScale.ts`, `ui/textSizeRow.ts`, `ui/drivingSettings.ts`, i18n, `tests/text-scale-check.mts` (5 checks). Build, all tests, smoke and `lang` green; no leftover processes.
 - Not seen by eye: set A++ on a phone-sized window and check long menus (garage, tuning) still scroll and nothing is clipped.
+
+## 99 Self-directed: position change flash
+- The LAP / POS block at the top right now glows green and pulses when you gain a place and red when you lose one. A new position must hold 0.45 s to count, so two cars swapping side by side do not make it flicker; the first position of a race, single-racer runs, pause and finished players never fire. Calm HUD turns the animation off.
+- Display only. Files: `game/posCue.ts` (pure), `game/raceFeedback.ts`, `ui/hud.ts` (`flashPosition`), `ui/calm.ts`, `tests/pos-cue-check.mts` (7 checks). Build, all tests and smoke green; no leftover processes.
+- Not seen by eye: overtake someone and check the glow is noticeable but not distracting; the colours follow the colour-blind setting through `--green` / `--red`.

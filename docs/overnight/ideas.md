@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Position change flash: the POS line glows green when you overtake and red when you lose a place, after a 0.45 s hold so side-by-side swaps do not flicker; off in Calm HUD (`game/posCue`, `Hud.flashPosition`, `tests/pos-cue-check.mts`).
 - 2026-11-16 Menu text size setting: A / A+ / A++ scales menu screens (not the race HUD), own key `ns.textsize` (`ui/textScale`, `ui/textSizeRow`, `tests/text-scale-check.mts`).
 - 2026-11-16 Save fuzz test: 3000 junk/mutated saves and snapshots never crash the parsers (`tests/save-fuzz-check.mts`).
 - 2026-11-16 FINAL LAP banner at the start of the last lap, after the lap-time pop-up (`game/finalLap`, `tests/final-lap-check.mts`).

@@ -14,6 +14,8 @@ const CSS = `
 #hud .info{position:absolute;right:var(--mr);top:var(--mt);text-align:right;font-size:clamp(14px,2vw,20px);line-height:1.5;white-space:nowrap}
 #hud .ban{position:absolute;left:50%;width:max-content;translate:-50% 0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
 #hud .ban.go{animation:rb-ban .55s var(--ease,ease-out) both}
+#hud .info.pu{animation:rb-pu 1.1s ease-out}#hud .info.pd{animation:rb-pd 1.1s ease-out}
+@keyframes rb-pu{0%,35%{color:var(--green);text-shadow:0 0 14px var(--green);scale:1.12}100%{scale:1}}@keyframes rb-pd{0%,35%{color:var(--red);text-shadow:0 0 14px var(--red);scale:1.12}100%{scale:1}}
 @keyframes rb-ban{0%{opacity:0;scale:1.7}25%{opacity:1}100%{opacity:1;scale:1}}
 #hud .lights{position:absolute;left:0;right:0;top:calc(28% + clamp(84px,14vw,140px));display:flex;gap:clamp(10px,2vw,22px);justify-content:center}
 #hud .lights i{width:clamp(16px,3vw,30px);aspect-ratio:1;border-radius:50%;background:#ffffff22;border:2px solid #ffffff44}
@@ -95,6 +97,13 @@ export class Hud {
     this.pop.classList.remove('go');
     void this.pop.offsetWidth;
     this.pop.classList.add('go');
+  }
+
+  /** Brief green (gained) or red (lost) glow on the lap / position block. */
+  flashPosition(gained: boolean): void {
+    this.info.classList.remove('pu', 'pd');
+    void this.info.offsetWidth;
+    this.info.classList.add(gained ? 'pu' : 'pd');
   }
 
   setBanner(text: string): void {

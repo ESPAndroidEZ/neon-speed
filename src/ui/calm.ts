@@ -1,7 +1,7 @@
 /** Calm HUD (accessibility): stops flashing, pulsing and flickering UI. A root attribute plus one style block; no per-frame work. */
 const CSS = `
 :root[data-calm] .rb-shift.fl i,:root[data-calm] .rb-title,:root[data-calm] .rb-wm em,:root[data-calm] .rb-wm strong,
-:root[data-calm] .rb-layer .rb-btn,:root[data-calm] #hud .ban.go,:root[data-calm] .rb-cg.brake{animation:none!important}
+:root[data-calm] .rb-layer .rb-btn,:root[data-calm] #hud .info.pu,:root[data-calm] #hud .info.pd,:root[data-calm] #hud .ban.go,:root[data-calm] .rb-cg.brake{animation:none!important}
 :root[data-calm] .rb-nitro-burst,:root[data-calm] .rb-pop,:root[data-calm] .rb-lines{display:none!important}
 `;
 
