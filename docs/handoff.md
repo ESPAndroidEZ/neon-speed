@@ -3,7 +3,7 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-16 (Fable: snow handling + brightness block; Qwen queue 058-062 not started).
+Updated: 2026-11-16 (overnight branch: Neon Speed rename, car sounds, house music, story, polish; see docs/overnight/report.md).
 
 ## Done
 Fable block 1 (2026-11-16): snow handling, legacy model, SNOW ONLY (dry and rain bot results bit-identical; grip table untouched): drive traction uses sqrt(grip), full power keeps 0.7 of rear side grip (`SNOW_FEEL` in physics/legacy/legacyStep.ts), FWD yaw pull capped to side grip, snow-bank drag 0.7/1.0 -> 0.15/0.25 (physics/surfaces.ts). AGGRESSIVE snow 0-100: Civic 13.7 -> 8.4 s, 350Z 17.2 -> 9.5 s (155 -> 210 km/h after 30 s), Supra 13.5 -> 7.6 s; RWD steady slide at 80 km/h 35 deg -> 8-11 deg; keyboard bot drift time 28.8 % -> 9.6 %, clumsy bot DNFs 10 -> 0. Lab: tests/lab/snow/feel-sweep.mts. Brightness: hemisphere + moon fill per weather (`LOOK_CONFIG.fill` clear/rain 4x, snow 6x, snow ground bounce; the old fill was near zero under three r187 light units, facades and road rendered black), snow exposure 0.76 -> 0.9, paler snow road/verge/ground (world/worldLook.ts). visual-check mean: snow-grid 0.165 -> 0.246, snow-speed 0.12 -> 0.157, clear-speed 0.13 -> 0.154, clipping unchanged; nitro-check passes. Known: neon-clear fails chroma 0.14 < 0.20 before and after (pre-existing); the snow road is still dark navy, not white (road texture is near black: needs the asphalt/snow shader, task 060 territory). save.ts default weatherPhysics is 'NORMAL' although CLAUDE.md says AGGRESSIVE is the default: unresolved.
@@ -84,6 +84,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-15 Claude: round 9 block 4 (people contract, animator, crowd, cast).
 - 2026-11-15 Claude: round 9 done (blocks 1-6); Qwen task 056 written; Baton: qwen.
 - 2026-11-15 Claude: fix and rebuild round (A1-A4 visual bugs, B plan + car data, C handling v2 behind a setting).
+- 2026-11-16 Claude (overnight/2026-11-16): queue 01-15 done, item 99 self-directed polish running (payout split, crash haptics); details in docs/overnight/report.md. Build green.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
