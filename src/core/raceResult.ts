@@ -31,6 +31,8 @@ export interface RaceResult {
   totalTime: number;
   bestLap: number;
   driftScore: number;
+  /** Personal-best line for the results (set by the free race bookkeeping; empty or absent when there is nothing to say). */
+  note?: string;
 }
 
 const PAYOUT = [3000, 1800, 1100, 600, 300];

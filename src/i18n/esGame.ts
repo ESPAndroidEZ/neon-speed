@@ -24,6 +24,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'story.bonus': 'Bonus de historia + ${n}', 'story.unlocked': 'Desbloqueado: {car}',
   'story.continue': 'Continuar', 'story.retry': 'Reintentar', 'story.chapterMenu': 'Menú del capítulo',
   'free.drift': '{score} puntos de derrape (objetivo {target})', 'free.newBest': '¡nuevo récord!',
+  'free.pbFirst': 'Primera vez aquí. Tiempo a batir: {time}', 'free.pbNew': '¡Récord personal! {delta} s más rápido', 'free.pbMiss': 'Tu mejor tiempo aquí: {time} (+{delta} s)',
   'career.drift': 'Puntos de derrape {score} / {target}', 'career.win': 'Gana la carrera (terminaste P{p})',
   'career.top': 'Termina entre los {n} primeros (terminaste P{p})',
   'cards.previously': 'Anteriormente en Kestrel Bay', 'cards.skip': 'Clic para continuar · Esc para saltar',

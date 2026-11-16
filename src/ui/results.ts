@@ -33,7 +33,8 @@ export class ResultsScreen {
     const color = extra && !extra.passed ? '#ff5470' : '#18d8ff';
     const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? '#7dff9a' : '#ff9aa8'}">${extra.objective}</div>` : '';
     const tip = !extra && r.position > 1 ? this.handlers.tip?.() : null; // lost a free race: suggest an upgrade
-    const notes = (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
+    const pb = !extra && r.note ? [`<div style="color:#18d8ff;font-size:.9em">${r.note}</div>`] : [];
+    const notes = pb.join('') + (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
     this.root.innerHTML = `<div style="min-width:min(340px,86vw);max-width:calc(100vw - 24px);max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:clamp(14px,3vmin,28px) clamp(16px,4vmin,36px);border:1px solid #18d8ff55;border-radius:12px;background:#0a0d1cee;box-shadow:0 0 40px #18d8ff33">
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>

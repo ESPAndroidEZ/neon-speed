@@ -1,0 +1,10 @@
+import { pbNote } from '../src/game/freeRace.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('unfinished run: no line', pbNote(70, 0, false) === '');
+check('first run shows the time to beat', pbNote(undefined, 83.456, true).includes('1:23.46'));
+check('record shows the gain', pbNote(90, 88.5, true).includes('1.50'));
+const miss = pbNote(90, 91.25, false);
+check('miss shows best and gap', miss.includes('1:30.00') && miss.includes('1.25'), miss);
+check('no raw placeholders', !/[{}]/.test(miss));
+if (failed) process.exit(1);

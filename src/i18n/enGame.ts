@@ -22,6 +22,7 @@ export const EN_GAME = {
   'story.bonus': 'Story bonus + ${n}', 'story.unlocked': 'Unlocked: {car}',
   'story.continue': 'Continue', 'story.retry': 'Retry', 'story.chapterMenu': 'Chapter menu',
   'free.drift': '{score} drift points (target {target})', 'free.newBest': 'new best!',
+  'free.pbFirst': 'First run here. Time to beat: {time}', 'free.pbNew': 'Personal best! {delta} s faster', 'free.pbMiss': 'Your best here: {time} (+{delta} s)',
   'career.drift': 'Drift score {score} / {target}', 'career.win': 'Win the race (you finished P{p})',
   'career.top': 'Finish top {n} (you finished P{p})',
   'cards.previously': 'Previously in Kestrel Bay', 'cards.skip': 'Click to continue · Esc to skip',
