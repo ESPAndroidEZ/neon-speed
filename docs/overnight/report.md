@@ -236,3 +236,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Players whose system asks for reduced motion now get the Calm HUD (no flashing, pulsing, speed lines, bursts) even if they never found the setting. The Settings checkbox still shows their own choice; the effective state is choice OR OS preference. Display only.
 - Files: `ui/calm.ts` (`calmEffective`, pure), `tests/calm-effective-check.mts` (4 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: with the OS reduced-motion flag on, the speed lines and pop-ups should be gone in a race.
+
+## 99 Self-directed: loading tips as a shuffled bag
+- The loading card picked its tip with a random index, so the same tip could show two races in a row. Now every tip shows once before any repeats, and a new round never starts with the tip just seen.
+- Display only. Files: `core/tipBag.ts` (pure), `ui/loadingCard.ts`, `tests/tip-bag-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
+- Nothing to look or listen for beyond noticing the tips rotate.

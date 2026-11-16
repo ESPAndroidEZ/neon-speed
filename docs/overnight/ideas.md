@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Loading tips come from a shuffled bag: no repeats until all have been shown (`core/tipBag`, `ui/loadingCard`, `tests/tip-bag-check.mts`).
 - 2026-11-16 Calm HUD also follows the OS reduced-motion preference (`calmEffective` in `ui/calm`, `tests/calm-effective-check.mts`).
 - 2026-11-16 Tyre squeal follows the surface: puddles spray even in clear weather, snow banks crunch, ice is quiet and thin; weather-only behaviour unchanged (`audio/squealMix`, `audio/sfx`, `tests/squeal-mix-check.mts`).
 - 2026-11-16 Pause on window blur (desktop only, not in automated browsers): alt-tab no longer leaves the car driving (`game/blurPause`, `game/platform`, `tests/blur-pause-check.mts`).
