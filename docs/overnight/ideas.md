@@ -18,3 +18,4 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 
 ## Done
 - 2026-11-16 Results screen "what you could tune" hint: after a lost free race the results show one affordable upgrade and why it helps (`affordableTip` in `data/upgradeAdvice`, `ui/tuneTip`, `tests/tune-tip-check.mts`).
+- 2026-11-16 First-races driving coach: gas, brake, nitro, handbrake hints that retire once used (`game/coachLogic`, `ui/coach`, `tests/coach-check.mts`).

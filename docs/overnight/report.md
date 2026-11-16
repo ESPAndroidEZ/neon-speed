@@ -96,3 +96,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 ## 99 Self-directed: results "what you could tune" hint
 - After a LOST free race (position > 1, no story objective) the results screen shows one gold line: the next upgrade level of the selected car that the player can afford right now (order: tyres, suspension, brakes, differential, gearbox, weight, nitrous; never the power stage) plus the first sentence of `ADVICE` for it. Nothing shows when nothing is affordable or everything is bought. EN + ES (`res.tip`).
 - Files: `data/upgradeAdvice.ts` (`affordableTip`, pure), `ui/tuneTip.ts`, `ui/results.ts` (optional `tip` handler), `main.ts` (one wire), `tests/tune-tip-check.mts` (6 checks). Build and all tests green. Not looked at in a browser; the text sits in the existing notes slot of the results card.
+
+## 99 Self-directed: first-races driving coach
+- One calm hint line near the bottom centre in the first races: hold gas (from 1.5 s), brake before corners (after 9 s, above 100 km/h), nitro (tank > 25 %), handbrake (after 16 s). One at a time, each fades for good once the player uses that control, expires after 7 s, and shows in at most 3 races. Keyboard and phone wording, EN + ES (Spain Spanish).
+- Files: `game/coachLogic.ts` (pure, allocation free), `ui/coach.ts` (DOM, own localStorage key `ns.coach`, not the game save, so the save contract is untouched), one line in `game/raceFeedback.ts`, 8 i18n keys, `tests/coach-check.mts`.
+- Verified: build, all tests, smoke 9/9. Not looked at in a browser by eye: check the line does not clash with the touch buttons on a phone (it sits at `bottom: max(130px, 18vh)`). To see it again: clear `ns.coach` in localStorage.

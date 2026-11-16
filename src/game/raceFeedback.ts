@@ -2,6 +2,7 @@ import type { Engine } from '../core/engine';
 import type { LaunchResult } from '../core/launch';
 import { WEATHER } from '../physics/weather';
 import { updatePrecipCover } from '../world/precipCover';
+import { attachCoach } from '../ui/coach';
 import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import type { Hud } from '../ui/hud';
@@ -22,6 +23,7 @@ const REWARD: Record<string, 'rw.near' | 'rw.slip' | 'rw.clean'> = { 'NEAR MISS'
 export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): CornerGuide {
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
   attachGhost(engine, game, hud); // best-lap ghost car
+  attachCoach(engine, game); // first-races control hints
   let countdownHint = false;
   let seenReward = 0;
   engine.onFrame(() => {
