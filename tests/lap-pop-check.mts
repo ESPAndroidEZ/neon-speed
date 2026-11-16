@@ -11,4 +11,5 @@ const d = lapPop('LAP 4', 84.1001, 84.1);
 check('tie: minus zero, green', d.text.endsWith('−0.00') && d.color === 'var(--green)', d.text);
 check('seconds pad (1:05.03)', lapPop('L', 65.03, null).text === 'L  1:05.03');
 check('bad best ignored', lapPop('L', 70, NaN).text === 'L  1:10.00' && lapPop('L', 70, -1).text === 'L  1:10.00');
+check('new best label keeps time and gain', lapPop('NEW BEST LAP', 83.5, 84.1).text === 'NEW BEST LAP  1:23.50  −0.60' && lapPop('NEW BEST LAP', 83.5, null).text === 'NEW BEST LAP  1:23.50');
 if (failed) process.exit(1);

@@ -42,7 +42,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'lap.final': 'ÚLTIMA VUELTA',
   'weather.cueRAIN': 'LLUVIA ENTRANDO: MENOS AGARRE',
   'weather.cueSNOW': 'NIEVE ENTRANDO: MENOS AGARRE',
-  'ghost.saved': 'NUEVA MEJOR VUELTA · FANTASMA GUARDADO', 'gap.best': 'MEJOR', 'radio.pack': 'el pelotón',
+  'ghost.best': 'NUEVA MEJOR VUELTA', 'ghost.saved': 'NUEVA MEJOR VUELTA · FANTASMA GUARDADO', 'gap.best': 'MEJOR', 'radio.pack': 'el pelotón',
   'guard.title': 'Motor calado', 'guard.body': 'Algo salió mal. Tu progreso se guarda automáticamente. Recarga para volver a la carretera.',
   'guard.reload': 'Recargar', 'guard.continue': 'Continuar', 'guard.restoring': 'Restaurando gráficos...', 'pwa.ready': 'Actualización lista',
   'main.lowFps': 'Los fotogramas por segundo eran bajos: gráficos reducidos a {tier}. (Ajustes: Calidad automática)',

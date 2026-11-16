@@ -246,3 +246,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - The HUD pop-ups (drift tiers, lap times, FINAL LAP, weather cue, position messages) and the countdown banner are now polite live regions; the WRONG WAY warning is an alert. Screen readers and phone TalkBack/VoiceOver read them out; sighted players see no change.
 - Display/markup only. Files: `ui/hud.ts` (4 attributes), `ui/wrongWay.ts` (1), `tests/aria-live-check.mts` (3 checks). Build and all tests green; no browser job run, nothing left running.
 - Not tried with a real screen reader.
+
+## 99 Self-directed: new best lap shows its time
+- A new best lap used to show only "NEW BEST LAP · GHOST SAVED" (no time, no gain) and skipped the lap counter, so the next lap pop-up said the wrong number. It now reads "NEW BEST LAP  1:23.68  −0.42" (first ever lap: time only) and counts as a lap. ES: "NUEVA MEJOR VUELTA".
+- Display only. Files: `game/ghost.ts`, i18n `ghost.best`, one more check in `tests/lap-pop-check.mts`. Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: beat your best lap and check the line fits on a phone.

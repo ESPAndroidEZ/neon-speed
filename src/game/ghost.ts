@@ -73,7 +73,8 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): () => number 
     const fresh = rec.update(p.lapStart, lt, pose);
     if (fresh) {
       save(k, fresh);
-      hud.popUp(t('ghost.saved'), '#8fd8ff');
+      if (lapDone > 0) { lapsDone++; hud.popUp(lapPop(t('ghost.best'), lapDone, prevBest).text, '#8fd8ff'); } // time and gain, counted as a lap
+      else hud.popUp(t('ghost.saved'), '#8fd8ff');
       if (!body) { body = ghostBody(s.car); engine.scene.add(body); }
     } else if (lapDone > 0 && !p.finished) { // a normal lap: its time and the gap to your best
       const pop = lapPop(t('lap.done', { n: ++lapsDone }), lapDone, prevBest);
