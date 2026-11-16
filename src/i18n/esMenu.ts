@@ -71,4 +71,5 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'maps.title': 'ELIGE MAPA', 'maps.type.circuit': 'Circuito', 'maps.type.sprint': 'Sprint', 'maps.type.drift': 'Prueba de derrape',
   'maps.bestScore': 'Mejor puntuación {score} (objetivo {target})', 'maps.climb': 'desnivel {m} m', 'maps.suits': 'Ideal con:',
   'crew.title': 'EL EQUIPO', 'crew.wall': 'El Muro de la Mano Roja', 'crew.relationship': 'Relación',
+  'stats.title': 'TU HISTORIAL', 'stats.races': 'Carreras', 'stats.wins': 'Victorias', 'stats.podiums': 'Podios', 'stats.dnf': 'Sin terminar', 'stats.laps': 'Vueltas', 'stats.time': 'Tiempo corrido', 'stats.cash': 'Dinero ganado', 'stats.drift': 'Mejor derrape',
 };

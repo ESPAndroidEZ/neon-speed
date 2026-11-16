@@ -69,4 +69,5 @@ export const EN_MENU = {
   'maps.title': 'SELECT MAP', 'maps.type.circuit': 'Circuit', 'maps.type.sprint': 'Sprint', 'maps.type.drift': 'Drift event',
   'maps.bestScore': 'Best score {score} (target {target})', 'maps.climb': 'climb {m} m', 'maps.suits': 'Suits:',
   'crew.title': 'THE CREW', 'crew.wall': 'The Red Hand Wall', 'crew.relationship': 'Relationship',
+  'stats.title': 'YOUR RECORD', 'stats.races': 'Races', 'stats.wins': 'Wins', 'stats.podiums': 'Podiums', 'stats.dnf': 'Did not finish', 'stats.laps': 'Laps raced', 'stats.time': 'Time raced', 'stats.cash': 'Cash won', 'stats.drift': 'Best drift',
 } as const;

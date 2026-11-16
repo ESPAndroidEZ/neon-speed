@@ -10,7 +10,7 @@ import { CARS, findCar } from './data/cars';
 import { competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
-import { finishFreeRace } from './game/freeRace';
+import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats';
 import { Juice } from './fx/juice';
 import { attachRaceFeedback } from './game/raceFeedback';
 import { Game } from './game/game';
@@ -186,7 +186,7 @@ const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMen
 game.onFinish = (r) => {
   const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
   const extra = story.finish(r) ?? free;
-  world.setHandprints(store.data.career.completed.length);
+  world.setHandprints(store.data.career.completed.length); recordRace(r);
   return extra;
 };
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);

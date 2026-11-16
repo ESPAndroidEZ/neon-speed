@@ -4,6 +4,7 @@ import { drawWall } from '../world/wallArt';
 import { portraitEl } from './portraits';
 import { button, h } from './uiKit';
 import { t, tx } from '../i18n';
+import { statsCard } from './statsCard';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 /** Characters whose relationship value is shown once Chapter 2 starts. */
@@ -46,6 +47,6 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
     if (REL_IDS.includes(c.id) && career.completed.includes('c2-redline')) card.append(relBar(rel));
     grid.append(card);
   }
-  root.append(grid, button(t('common.back'), onBack));
+  root.append(grid, statsCard(), button(t('common.back'), onBack));
   return root;
 }

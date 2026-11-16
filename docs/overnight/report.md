@@ -135,3 +135,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Races with more than one lap now list each lap time under the best lap line on the results card, the fastest one in green (`--green`, so it follows the colour-blind setting). EN + ES (`res.laps`).
 - `Racer.lapTimes` is filled at each lap end and cleared on a new grid; it is saved in the race snapshot as an optional field (old saves load with an empty list). `RaceResult.lapTimes` is optional (`types/game.ts` untouched). `raceManager.ts` is now exactly at the line limit (219).
 - Tests: new check in `tests/race-check.mts` (one entry per lap, sum equals total, min equals best lap). Build and all tests green. Not looked at in a browser; the line wraps under the best lap row.
+
+## 99 Self-directed: driver record (lifetime stats)
+- The Crew screen now ends with a "Your record / Tu historial" strip: races, wins, podiums, did not finish, laps raced, time raced, cash won, best drift. Counted for every finished race (story and free) from `game.onFinish`; EN + ES (Spain Spanish).
+- Stored under its own localStorage key `ns.stats`, not in the game save, so the save contract and `types/game.ts` are untouched; junk values load as 0. A DNF only adds to races and did-not-finish.
+- Files: `game/driverStats.ts` (pure parse/add plus a never-throwing localStorage wrapper), `ui/statsCard.ts`, `ui/crewMenu.ts` (one line), `main.ts` (one call; import shares a line to stay under 220), 9 i18n keys, `tests/driver-stats-check.mts` (6 checks). Build and all tests green. Not looked at in a browser: open Crew after a race and check the cards wrap on a phone.
