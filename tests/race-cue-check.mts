@@ -1,4 +1,4 @@
-import { raceCue, cueNotes } from '../src/audio/raceCue.ts';
+import { raceCue, cueNotes, rewardCue } from '../src/audio/raceCue.ts';
 import type { RaceCueKind } from '../src/audio/raceCue.ts';
 let failed = 0;
 const check = (n: string, ok: boolean): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}`); if (!ok) failed++; };
@@ -9,8 +9,9 @@ check('final line as winner is a win, not a lap chime', raceCue(2, 3, false, tru
 check('final line in 4th is the finish sting', raceCue(2, 3, false, true, 4) === 'finish');
 check('already finished stays silent', raceCue(3, 3, true, true, 1) === null);
 let ok = true;
-for (const k of ['lap', 'win', 'finish'] as RaceCueKind[]) for (const n of cueNotes(k)) if (!(n >= 60 && n <= 96)) ok = false;
+for (const k of ['lap', 'win', 'finish', 'near', 'slip', 'clean'] as RaceCueKind[]) for (const n of cueNotes(k)) if (!(n >= 60 && n <= 96)) ok = false;
 check('notes stay in a pleasant range', ok);
 check('win has more notes than lap', cueNotes('win').length > cueNotes('lap').length);
+check('reward kinds map to cues', rewardCue('NEAR MISS') === 'near' && rewardCue('SLIPSTREAM') === 'slip' && rewardCue('CLEAN CORNER') === 'clean' && rewardCue(null) === null);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

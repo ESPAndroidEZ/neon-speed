@@ -1,6 +1,6 @@
 import type { AudioBus } from './audioBus';
 
-export type RaceCueKind = 'lap' | 'win' | 'finish';
+export type RaceCueKind = 'lap' | 'win' | 'finish' | 'near' | 'slip' | 'clean';
 
 /**
  * Pure: the cue earned by the player's lap count / finished flag changing between two frames.
@@ -12,8 +12,8 @@ export function raceCue(prevLaps: number, laps: number, wasFinished: boolean, fi
   return 'lap';
 }
 
-/** Notes (MIDI) and spacing per cue: rising pair for a lap, major arpeggio for a win, two falling-then-settling notes otherwise. */
-const NOTES: Record<RaceCueKind, readonly number[]> = { lap: [79, 84], win: [72, 76, 79, 84], finish: [76, 72] };
+/** Notes (MIDI) per cue: rising pair for a lap, major arpeggio for a win, falling pair otherwise; one short ping for a near miss or slipstream, a rising pair for a clean corner. */
+const NOTES: Record<RaceCueKind, readonly number[]> = { lap: [79, 84], win: [72, 76, 79, 84], finish: [76, 72], near: [91], slip: [76], clean: [81, 86] };
 
 export function cueNotes(kind: RaceCueKind): readonly number[] {
   return NOTES[kind];
@@ -23,7 +23,7 @@ export function cueNotes(kind: RaceCueKind): readonly number[] {
 export function playRaceCue(bus: AudioBus, kind: RaceCueKind): void {
   const ctx = bus.ctx;
   if (ctx.state !== 'running') return;
-  const notes = NOTES[kind], step = kind === 'win' ? 0.1 : 0.12, level = kind === 'lap' ? 0.07 : 0.11;
+  const notes = NOTES[kind], step = kind === 'win' ? 0.1 : 0.12, level = kind === 'win' || kind === 'finish' ? 0.11 : 0.06;
   for (let i = 0; i < notes.length; i++) {
     const t0 = ctx.currentTime + i * step;
     const o = ctx.createOscillator();
@@ -32,17 +32,25 @@ export function playRaceCue(bus: AudioBus, kind: RaceCueKind): void {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(level, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (i === notes.length - 1 ? 0.7 : 0.25));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (kind === 'near' || kind === 'slip' ? 0.14 : i === notes.length - 1 ? 0.7 : 0.25));
     o.connect(g).connect(bus.sfx);
     o.start(t0);
     o.stop(t0 + 0.75);
   }
 }
 
+/** Pure: the cue for a reward kind from the race rewards (null for anything unknown). */
+export function rewardCue(kind: string | null): RaceCueKind | null {
+  if (kind === 'NEAR MISS') return 'near';
+  if (kind === 'SLIPSTREAM') return 'slip';
+  return kind ? 'clean' : null;
+}
+
 /** Watches the player each frame and plays the matching cue. */
 export class RaceCues {
   private laps = 0;
   private finished = false;
+  private seq = 0;
   private readonly bus: AudioBus;
 
   constructor(bus: AudioBus) {
@@ -54,5 +62,13 @@ export class RaceCues {
     this.laps = laps;
     this.finished = finished;
     if (kind) playRaceCue(this.bus, kind);
+  }
+
+  /** Rewards: a ping each time the reward counter goes up (a drop is a new race). */
+  reward(seq: number, kind: string | null): void {
+    const up = seq > this.seq;
+    this.seq = seq;
+    const c = up ? rewardCue(kind) : null;
+    if (c) playRaceCue(this.bus, c);
   }
 }

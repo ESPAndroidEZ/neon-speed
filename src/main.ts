@@ -87,7 +87,7 @@ engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
 installUiSound(audio.bus, () => audio.music.keyPc); const beeps = new CountdownBeeps(audio.bus), cues = new RaceCues(audio.bus);
 engine.onFrame((_a, dt) => {
-  audio.update(dt); beeps.update(game.rm.banner); cues.update(game.rm.player.lapTimes.length, game.rm.player.finished, game.rm.player.finishRank);
+  audio.update(dt); beeps.update(game.rm.banner); cues.update(game.rm.player.lapTimes.length, game.rm.player.finished, game.rm.player.finishRank); cues.reward(game.rm.rewards.seq, game.rm.rewards.last);
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
 const voice = new Voice(); const auto = new AutoQuality();

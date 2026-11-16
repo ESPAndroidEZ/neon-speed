@@ -293,3 +293,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Crossing a lap line or the finish made no sound. Now a lap gives a quiet rising two-note chime; the final line gives a bright four-note arpeggio for a win or a soft falling pair for any other place. Synthesised on the sfx bus; a new race (laps reset) stays silent.
 - Audio only. Files: `audio/raceCue.ts` (pure `raceCue` plus `RaceCues`), `main.ts` (inline hook, still 219 lines), `tests/race-cue-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
 - Not heard by ear: check the win arpeggio does not clash with the podium music.
+
+## 99 Self-directed: reward pings
+- Near misses, slipstreams and clean corners popped up text only. Now each also pings (near miss: one short high note; slipstream: one softer note; clean corner: a rising pair), quiet on the sfx bus, once per reward and silent after a new race resets the counter.
+- Audio only. Files: `audio/raceCue.ts` (`rewardCue`, `RaceCues.reward`), `main.ts` (inline hook, 219 lines), `tests/race-cue-check.mts` (9 checks). Build and all tests green; no browser job run, nothing left running.
+- Not heard by ear: in dense traffic the pings could get busy; check they stay under the engine.
