@@ -1,0 +1,16 @@
+import { surfaceCue } from '../src/audio/surfaceCue.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('no cue when the surface is unchanged', surfaceCue('ice', 'ice', 40) === null);
+check('no cue when crawling', surfaceCue('dry', 'ice', 3) === null && surfaceCue('dry', 'snowbank', 5.9) === null);
+check('back to dry is silent, a puddle splashes as before', surfaceCue('ice', 'dry', 40) === null && Math.abs(surfaceCue('dry', 'puddle', 20)!.level - 0.35) < 1e-9);
+const ice = surfaceCue('dry', 'ice', 40)!;
+const iceLevel = ice.level, iceCut = ice.cutoff;
+const bank = surfaceCue('dry', 'snowbank', 40)!;
+check('ice is high and quiet, a bank is low and heavier', iceCut > 6000 && bank.cutoff < 1500 && bank.level > iceLevel);
+const slow = surfaceCue('dry', 'snowbank', 10)!.level;
+const fast = surfaceCue('dry', 'snowbank', 70)!.level;
+check('faster is louder, capped below clipping', fast > slow && fast <= 0.55);
+check('durations are short and finite', bank.dur > 0.2 && bank.dur < 1 && Number.isFinite(iceLevel));
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);

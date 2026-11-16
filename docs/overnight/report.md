@@ -186,3 +186,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - The results table showed only raw times. Each finisher behind the winner now also has a small dim "+0.83" next to the time (blank for the winner, DNFs and ties under 5 ms).
 - Display only. Files: `game/resultGap.ts` (pure), `ui/results.ts` (one extra column), `tests/result-gap-check.mts` (7 checks). Build and all tests green. Not seen by eye: finish a race and check the extra column fits on a narrow phone.
 - Skipped a survey result: radio banter, FOV kick, surface squeals, neon title and bot-lap tests already existed, so ideas.md backlog is mostly done; remaining big ones are replay and wet-asphalt reflections.
+
+## 99 Self-directed: surface change sounds (ice, snow bank)
+- Ice patches and snow banks were silent when you drove onto them (only puddles splashed). Now rolling onto ice gives a short thin glassy hiss, and a snow bank a soft low thump, both louder with speed and ignored below 6 m/s. The puddle splash is the same sound as before (same numbers), now produced by the same pure function.
+- Files: `audio/surfaceCue.ts` (pure, returns cue numbers), `Sfx.puff` replaces `Sfx.splash`, 3 lines in `audio/audioManager.ts`, `tests/surface-cue-check.mts` (6 checks). Build and all tests green; no leftover processes. Audio-only, no physics or save change.
+- Not heard by ear: AGGRESSIVE/EXTREME weather, drive onto the tunnel ice and a corner snow bank and judge whether the cues are too loud or too quiet (levels are the first 3 numbers in `surfaceCue.ts`).

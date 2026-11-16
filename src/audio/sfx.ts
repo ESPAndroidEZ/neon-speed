@@ -130,10 +130,8 @@ export class Sfx {
     if (k > 0.5) this.burst(0.18 * cv * k, 7000, 0.45); // glass and trim bits on a big hit
   }
 
-  /** Splash of a car through a puddle. */
-  splash(speed: number): void {
-    this.burst(Math.min(0.5, 0.15 + speed * 0.01), 2600, 0.35);
-  }
+  /** One-shot noise puff for surface changes (puddle splash, ice hiss, snow bank thump). */
+  puff(level: number, cutoff: number, dur: number): void { this.burst(level * AUDIO.crashVolume, cutoff, dur); }
 
   private burst(level: number, cutoff: number, dur: number): void {
     const ctx = this.bus.ctx;

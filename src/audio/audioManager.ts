@@ -1,3 +1,4 @@
+import { surfaceCue } from './surfaceCue';
 import { smoothstep } from '../core/math';
 import type { Game } from '../game/game';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventReader } from '../physics/driveEvents';
@@ -188,9 +189,8 @@ export class AudioManager {
     if (hasTurbo && this.lastPedal > 0.75 && pedal > 0.15 && pedal < 0.6 && dtn.boost > 0.5) this.turbo.flutter(dtn.boost);
     this.lastPedal = pedal;
 
-    // surface sounds
-    const surf = racer.contact.surface.kind;
-    if (surf === 'puddle' && this.lastSurface !== 'puddle' && speed > 6) this.sfx.splash(speed);
+    const surf = racer.contact.surface.kind, cue = surfaceCue(this.lastSurface, surf, speed); // surface change cue
+    if (cue) this.sfx.puff(cue.level, cue.cutoff, cue.dur);
     this.lastSurface = surf;
     this.sfx.scrape(this.clock - this.lastHit < 0.15 && inGame, speed);
     this.bed.update(g.state === 'MENU' ? 0.6 : 1, this.bus);
