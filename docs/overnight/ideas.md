@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Lap time pop-up: "LAP n  m:ss.cc ±x.xx" at each lap end vs your best (`game/lapPop`, `game/ghost`, `tests/lap-pop-check.mts`).
 - 2026-11-16 Speed units: km/h or mph in Settings for the gauge, garage and tuning screens (`game/speedUnit`, `ui/unitsRow`, `tests/speed-unit-check.mts`).
 - 2026-11-16 Live delta to your best lap: "BEST ±x.x" under the gap tags, from the stored ghost lap (`ghostDelta` in `game/ghostData`, `ui/gapTags`, `tests/ghost-check.mts`).
 - 2026-11-16 Gap tags: seconds to the rival just ahead (red, +) and just behind (green, −) under lap/position (`game/gapLogic`, `ui/gapTags`, `tests/gap-check.mts`).

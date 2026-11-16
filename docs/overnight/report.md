@@ -170,3 +170,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 ## 99 Self-directed: speed units (km/h / mph)
 - Settings (driving rows) has a "Speed units" choice. It switches the big gauge, the garage top-speed bar and the tuning screen stats and gains between km/h and mph. Display only; physics stays in m/s. Stored under its own localStorage key `ns.units` (not the game save), junk values load as km/h; read lazily so `main.ts` is untouched. EN + ES.
 - Files: `game/speedUnit.ts`, `ui/unitsRow.ts`, `ui/gauge.ts`, `ui/garage.ts`, `ui/tuneMenu.ts`, `ui/drivingSettings.ts`, i18n (`drv.units`, `tune.stats/next` no longer hard-code km/h), `tests/speed-unit-check.mts` (8 checks). Build, all tests, smoke and `lang` green. Not seen by eye: switch to MPH in Settings and check the gauge label and tuning lines.
+
+## 99 Self-directed: lap time pop-up
+- Every finished lap that is not the last one (and not a new best, which keeps its "NEW BEST LAP · GHOST SAVED" pop-up) now flashes "LAP 2  1:24.41  +0.31" through the existing HUD pop-up: green with a minus when faster than your stored best on this track and car, red with a plus when slower, plain time on the first lap with no best. EN + ES (`lap.done`).
+- Display only. Files: `game/lapPop.ts` (pure text), `game/ghost.ts` (captures the previous best before the recorder updates; 89 lines), 2 i18n keys, `tests/lap-pop-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
+- Not seen by eye: race a 2+ lap track and check the pop-up is readable and not hidden by the gap tags.

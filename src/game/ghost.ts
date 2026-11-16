@@ -7,6 +7,7 @@ import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 import { getBuild } from '../data/carBuild';
 import { buildKey, recordLap } from '../data/upgradeAdvice';
+import { lapPop } from './lapPop';
 import { ghostDelta, ghostPose, GhostRecorder, isGhostLap, type GhostLap, type Pose } from './ghostData';
 import { t } from '../i18n';
 
@@ -45,7 +46,7 @@ function ghostBody(spec: CarSpec): Object3D {
  */
 export function attachGhost(engine: Engine, game: Game, hud: Hud): () => number {
   let delta = NaN; // seconds ahead (-) / behind (+) of the stored best lap; NaN = no ghost here
-  let rec = new GhostRecorder(), setupRef: unknown = null, k = '', body: Object3D | null = null, lastLap = -1;
+  let rec = new GhostRecorder(), setupRef: unknown = null, k = '', body: Object3D | null = null, lastLap = -1, lapsDone = 0;
   const pose: Pose = { x: 0, y: 0, z: 0, h: 0 };
   const clear = (): void => {
     if (body) { engine.scene.remove(body); disposeVisual(body); body = null; }
@@ -55,23 +56,28 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): () => number 
     delta = NaN;
     if (!s || game.state !== 'RACING') { if (body) body.visible = false; return; }
     if (s !== setupRef) { // new race: load this track + car's ghost
-      setupRef = s; clear(); lastLap = -1;
+      setupRef = s; clear(); lastLap = -1; lapsDone = 0;
       k = key(s.trackId ?? 'kestrel', s.car.id);
       rec = new GhostRecorder(load(k));
       if (rec.best) { body = ghostBody(s.car); body.visible = false; engine.scene.add(body); }
     }
     if (rm.phase !== 'RACING') return;
     const p = game.player, st = p.car.state, lt = rm.raceTime - p.lapStart;
+    let lapDone = -1; // time of the lap that just ended, for the lap pop-up
     if (p.lapStart !== lastLap) { // a lap ended: keep the best lap per exact build (tuning menu shows it)
-      if (lastLap >= 0) { const b = getBuild(s.car.id); recordLap(s.trackId ?? 'kestrel', s.car.id, buildKey(b.upgrades, b.setup), p.lapStart - lastLap); }
+      if (lastLap >= 0) { lapDone = p.lapStart - lastLap; const b = getBuild(s.car.id); recordLap(s.trackId ?? 'kestrel', s.car.id, buildKey(b.upgrades, b.setup), lapDone); }
       lastLap = p.lapStart;
     }
     pose.x = st.position.x; pose.y = st.position.y; pose.z = st.position.z; pose.h = st.heading;
+    const prevBest = rec.best ? rec.best.t : null;
     const fresh = rec.update(p.lapStart, lt, pose);
     if (fresh) {
       save(k, fresh);
       hud.popUp(t('ghost.saved'), '#8fd8ff');
       if (!body) { body = ghostBody(s.car); engine.scene.add(body); }
+    } else if (lapDone > 0 && !p.finished) { // a normal lap: its time and the gap to your best
+      const pop = lapPop(t('lap.done', { n: ++lapsDone }), lapDone, prevBest);
+      hud.popUp(pop.text, pop.color);
     }
     if (rec.best && !p.finished) delta = ghostDelta(rec.best, lt, st.position.x, st.position.z);
     if (!body || !rec.best || p.finished || !ghostPose(rec.best, lt, pose)) { if (body) body.visible = false; return; }
