@@ -1,0 +1,15 @@
+import { NitroCue } from '../src/game/nitroCue.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+const c = new NitroCue();
+check('full tank says nothing', c.step(1, false) === null && c.step(0.8, true) === null);
+check('burning dry says EMPTY once', c.step(0.01, true) === 'EMPTY' && c.step(0, true) === null && c.step(0, false) === null);
+check('tank reading 0 one frame after the burn ended still counts', (() => { const d = new NitroCue(); d.step(0.05, true); return d.step(0, false) === 'EMPTY'; })());
+check('refilling below half says nothing', c.step(0.3, false) === null && c.step(0.49, false) === null);
+check('half tank says READY once', c.step(0.5, false) === 'READY' && c.step(0.7, false) === null);
+check('can empty again after READY', c.step(0.02, true) === 'EMPTY');
+const r = new NitroCue();
+check('tank low but not burning (restored save) says nothing', r.step(0, false) === null && r.step(0.1, false) === null && r.step(0.6, false) === null);
+c.reset();
+check('reset: forgets EMPTY', c.step(0.6, false) === null);
+if (failed) process.exit(1);

@@ -256,3 +256,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - When the player wins or loses by under 0.3 s, the results show a gold "PHOTO FINISH" (ES: "FOTO FINISH") under the title. Not shown if the player is outside the top two, or a time is missing.
 - Display only. Files: `game/photoFinish.ts` (pure), `ui/results.ts`, i18n `res.photo`, `tests/photo-finish-check.mts` (10 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: a very close finish; check the badge fits on a narrow phone.
+
+## 99 Self-directed: nitro tank cues
+- You could not tell the nitro was gone until it stopped pushing, or that drifting had refilled it. A pop-up "NITRO EMPTY" shows when a burn drains the tank, and "NITRO READY" once it is back to half (ES: NITRO VACÍO / NITRO LISTO). They strictly alternate, so no spam, and a restored save with a low tank says nothing.
+- Display only, nitro physics untouched. Files: `game/nitroCue.ts` (pure), `game/raceFeedback.ts`, i18n `nitro.empty/ready`, `tests/nitro-cue-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: burn a full tank dry, then drift to refill; check the colours read on the pop-up line.

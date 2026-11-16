@@ -40,6 +40,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'coach.handbrake.key': 'Pulsa {k} en una curva para derrapar', 'coach.handbrake.touch': 'Pulsa FRENO DE MANO en una curva para derrapar',
   'rw.near': 'POR LOS PELOS', 'rw.slip': 'ESTELA', 'rw.clean': 'CURVA LIMPIA',
   'lap.done': 'VUELTA {n}',
+  'nitro.empty': 'NITRO VACÍO', 'nitro.ready': 'NITRO LISTO',
   'lap.final': 'ÚLTIMA VUELTA',
   'weather.cueRAIN': 'LLUVIA ENTRANDO: MENOS AGARRE',
   'weather.cueSNOW': 'NIEVE ENTRANDO: MENOS AGARRE',
