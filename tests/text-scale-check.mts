@@ -1,0 +1,10 @@
+import { parseTextSize, getTextSize, setTextSize, TEXT_ZOOM, TEXT_SIZES } from '../src/ui/textScale.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('junk and null parse as normal', parseTextSize(null) === 'N' && parseTextSize('x') === 'N' && parseTextSize('') === 'N' && parseTextSize('l') === 'N');
+check('L and XL parse', parseTextSize('L') === 'L' && parseTextSize('XL') === 'XL');
+check('default is normal without storage', getTextSize() === 'N');
+check('zoom grows with each step and normal is 1', TEXT_ZOOM.N === 1 && TEXT_ZOOM.L > 1 && TEXT_ZOOM.XL > TEXT_ZOOM.L && TEXT_SIZES.length === 3);
+setTextSize('XL');
+check('setTextSize without document or localStorage does not throw and sticks', getTextSize() === 'XL');
+if (failed) process.exit(1);

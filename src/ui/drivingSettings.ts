@@ -9,6 +9,8 @@ import { t, tx } from '../i18n';
 import type { StringKey } from '../i18n';
 import { applyCalm } from './calm';
 import { applyColorSafe } from './colorSafe';
+import { getTextSize, setTextSize } from './textScale';
+import { textSizeRow } from './textSizeRow';
 
 /** Copy the saved driving preferences into the physics singleton and the gamepad. */
 export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number; rumbleOn: boolean }): void {
@@ -20,6 +22,7 @@ export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number;
   setLook(s.look);
   applyCalm(s.calmUi);
   applyColorSafe(s.colorSafe);
+  setTextSize(getTextSize()); // paints the stored menu text size
   AI_SETTING.level = s.difficulty === 'LEGEND' && !storyComplete(store.data.career) ? 'STREET' : s.difficulty;
   if (pad) {
     pad.deadZone = s.padDeadzone;
@@ -149,5 +152,5 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
   cb.append(cbBox);
   const model = choiceRow(t('drv.handling'), ['legacy', 'v2'] as const, () => s.handlingModel, (v) => { s.handlingModel = v; save(); }, 'hint.model');
   const stab = choiceRow(t('drv.stability'), ['OFF', 'LIGHT', 'FULL'] as const, () => s.stability, (v) => { s.stability = v; save(); }, 'hint.stab');
-  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow()];
+  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow(), textSizeRow()];
 }

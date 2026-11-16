@@ -30,6 +30,7 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'hint.wphys.AGGRESSIVE': 'Lluvia 60 %, nieve 34 %, charcos, bancos de nieve, hielo y la trasera suelta.',
   'hint.wphys.EXTREME': 'Lluvia 50 %, nieve 26 %. Brutal. Agárrate fuerte.',
   'drv.units': 'Unidades de velocidad',
+  'drv.textSize': 'Tamaño del texto de menús',
   'drv.assists': 'Ayudas a la conducción', 'drv.look': 'Ambiente', 'drv.opponents': 'Rivales', 'drv.rumble': 'Vibración del mando', 'drv.cb': 'HUD para daltonismo (azul y naranja)', 'drv.calm': 'Interfaz tranquila (sin parpadeos ni pulsos)',
   'drv.handling': 'Conducción', 'drv.stability': 'Estabilidad (v2)', 'drv.steerSens': 'Sensibilidad de dirección', 'drv.deadzone': 'Zona muerta del stick',
   'hint.assist.BEGINNER': 'Ayuda de dirección y frenos, contravolante automático fuerte. Es difícil perder el control.',

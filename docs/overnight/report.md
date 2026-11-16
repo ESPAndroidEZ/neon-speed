@@ -200,3 +200,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 ## 99 Self-directed: save fuzz test
 - Saves must never crash the game. New `tests/save-fuzz-check.mts` throws 3000 junk or field-mutated saves, truncated save texts and malformed snapshots at `parseSave` / `parseSnapshot` (seeded, reproducible). Result: no throws, invariants hold (finite cash, known cars, at least one owned), junk snapshots are rejected. No game code changed; the parsers were already robust.
 - Build and all tests green. Nothing to look at or listen to.
+
+## 99 Self-directed: menu text size
+- Settings (driving rows) has a "Menu text size" choice A / A+ / A++ (zoom 1, 1.15, 1.3) for accessibility. It scales the menu screens (`.rb-layer`) only; the race HUD is untouched. Stored under its own localStorage key `ns.textsize` (not the game save), junk loads as normal, painted at start-up from `applyDrivingSettings`. EN + ES (`drv.textSize`).
+- Files: `ui/textScale.ts`, `ui/textSizeRow.ts`, `ui/drivingSettings.ts`, i18n, `tests/text-scale-check.mts` (5 checks). Build, all tests, smoke and `lang` green; no leftover processes.
+- Not seen by eye: set A++ on a phone-sized window and check long menus (garage, tuning) still scroll and nothing is clipped.
