@@ -13,7 +13,7 @@ import { TurboSound } from './turboSound';
 import { findCar } from '../data/cars';
 import { voiceIndex } from '../data/engineVoices';
 import { createSampleVoice, loadEngineSamples } from './engineSamples';
-import { REV_TEST } from './revTest';
+import { REV_TEST } from './revTest'; import { LaunchRev } from './launchRev';
 import type { MoodId } from './musicPatterns';
 import { MUSIC_CUE } from './audioParams';
 
@@ -41,7 +41,7 @@ export class AudioManager {
   private wasRacing = false;
   private reader = new EventReader();
   private lastDtn: unknown = null;
-  private lastPedal = 0;
+  private lastPedal = 0; private readonly rev = new LaunchRev();
   private lastSurface = 'dry';
   private testT = 0;
   private test: AudioTest | null = null;
@@ -156,6 +156,7 @@ export class AudioManager {
       if (this.testT > (this.test === 'sweep' ? 4.5 : 2)) this.test = null;
     }
 
+    if (g.state === 'RACING' && g.rm.phase === 'COUNTDOWN') { this.rev.hold(dt, g.ctl.throttle, car2?.tuning.idleRpm ?? 900, redline); rpm = this.rev.rpm; load = this.rev.load; } else rpm = this.rev.release(dt, rpm); // gas flat at the lights revs the engine
     if (this.voice) {
       const layout = voiceIndex(car2?.id ?? '');
       const vol = (inGame ? 1 : 0) * AUDIO.engineVolume, cutNow = rpm >= redline * 0.995 && load > 0.5, burble = pedal < 0.05 && speed > 8 ? 1 : 0;

@@ -175,3 +175,9 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Every finished lap that is not the last one (and not a new best, which keeps its "NEW BEST LAP · GHOST SAVED" pop-up) now flashes "LAP 2  1:24.41  +0.31" through the existing HUD pop-up: green with a minus when faster than your stored best on this track and car, red with a plus when slower, plain time on the first lap with no best. EN + ES (`lap.done`).
 - Display only. Files: `game/lapPop.ts` (pure text), `game/ghost.ts` (captures the previous best before the recorder updates; 89 lines), 2 i18n keys, `tests/lap-pop-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
 - Not seen by eye: race a 2+ lap track and check the pop-up is readable and not hidden by the gap tags.
+
+## 99 Self-directed: engine revs at the start line
+- During the 3-2-1 the car is locked, so the engine sat at idle even with the gas flat (the launch timing rewards holding gas, but gave no sound feedback). Gas down on the grid now winds the engine up to about 64 % of redline with a small flutter, lifting drops it again, and at GO the sound falls smoothly to the real rpm instead of snapping.
+- Audio only: `audio/launchRev.ts` (pure, allocation free) and one line in `audio/audioManager.ts` (219 lines). Physics, saves, and the locked turbo model and sound are untouched (no boost is faked on the line). `tests/launch-rev-check.mts` (9 checks). Build and all tests green.
+- Not heard by ear: on the grid hold gas during the countdown with a few cars (a turbo car and an N/A one) and check the rev sounds right and the drop at GO is not odd.
+- Note for Carlos: the uncommitted change in `scripts/overnight.sh` has `$CLAUDE_BIN--dangerously-skip-permissions` with no space (the tmux launch command in `session_open`), which would break the next fresh session. I left your runner edits alone.
