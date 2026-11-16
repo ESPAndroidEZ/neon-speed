@@ -13,9 +13,9 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Tutorial: first race teaches throttle, braking line, handbrake and nitro with unobtrusive prompts that disappear once used.
 - Replay of the last race from the save snapshot machinery (deterministic physics), cinematic cameras.
 - Neon identity: animated neon sign title, city signage using the Neon Speed name and fictional brands, reflections in wet asphalt (keep `npm run visual` passing).
-- Daily challenge generated from a date seed (track, weather, car tier), shown on the main menu.
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Daily challenge on the main menu from a date seed (`data/dailyChallenge`, `ui/dailyButton`, `tests/daily-check.mts`); main menu scrolls on short phones.
 - 2026-11-16 Results screen "what you could tune" hint: after a lost free race the results show one affordable upgrade and why it helps (`affordableTip` in `data/upgradeAdvice`, `ui/tuneTip`, `tests/tune-tip-check.mts`).
 - 2026-11-16 First-races driving coach: gas, brake, nitro, handbrake hints that retire once used (`game/coachLogic`, `ui/coach`, `tests/coach-check.mts`).

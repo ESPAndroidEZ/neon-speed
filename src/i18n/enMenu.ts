@@ -17,7 +17,7 @@ export const EN_MENU = {
   'menu.chapter': 'Chapter 1 · Harbor Loop',
   'menu.press': 'Press Enter / Tap',
   'menu.keys': 'W/S gas+brake · A/D steer · Space handbrake · Shift nitro · M mute · R reset',
-  'menu.continue': 'Continue', 'menu.story': 'Story', 'menu.freeRace': 'Free Race', 'menu.garage': 'Garage',
+  'menu.continue': 'Continue', 'menu.story': 'Story', 'menu.freeRace': 'Free Race', 'menu.daily': 'Daily challenge', 'menu.garage': 'Garage',
   'menu.tuning': 'Tuning', 'menu.crew': 'Crew', 'menu.load': 'Load', 'menu.settings': 'Settings',
   'menu.timeTrial': 'Time trial', 'menu.rivals3': '3 rivals', 'menu.rivals5': '5 rivals',
   'menu.grip': 'Grip {n}%', 'menu.best': 'Best', 'menu.pink': 'Pink outline: suits this map',

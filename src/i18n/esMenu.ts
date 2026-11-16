@@ -19,7 +19,7 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'menu.chapter': 'Capítulo 1 · Harbor Loop',
   'menu.press': 'Pulsa Intro / Toca',
   'menu.keys': 'W/S acelerar y frenar · A/D girar · Espacio freno de mano · Mayús nitro · M silenciar · R reiniciar',
-  'menu.continue': 'Continuar', 'menu.story': 'Historia', 'menu.freeRace': 'Carrera libre', 'menu.garage': 'Garaje',
+  'menu.continue': 'Continuar', 'menu.story': 'Historia', 'menu.freeRace': 'Carrera libre', 'menu.daily': 'Reto diario', 'menu.garage': 'Garaje',
   'menu.tuning': 'Puesta a punto', 'menu.crew': 'Equipo', 'menu.load': 'Cargar', 'menu.settings': 'Ajustes',
   'menu.timeTrial': 'Contrarreloj', 'menu.rivals3': '3 rivales', 'menu.rivals5': '5 rivales',
   'menu.grip': 'Agarre {n} %', 'menu.best': 'Mejor', 'menu.pink': 'Borde rosa: va bien con este mapa',

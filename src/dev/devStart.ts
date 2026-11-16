@@ -94,7 +94,8 @@ if (d.direct) {
     hud.setVisible(false);
   } else menu.title();
   const scr = q.get('screen');
-  if (scr === 'garage') menu.garage();
+  if (scr === 'main') menu.main();
+  else if (scr === 'garage') menu.garage();
   else if (scr === 'weather' || scr === 'maps') menu.maps();
   else if (scr === 'settings') menu.settings();
   else if (scr === 'tune') menu.tune();

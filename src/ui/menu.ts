@@ -18,6 +18,7 @@ import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
+import { dailyButton } from './dailyButton';
 import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
 import { onLangChange, t } from '../i18n';
@@ -122,15 +123,16 @@ export class Menu {
   main(): void {
     this.backdrop();
     const el = h('div', 'rb-layer');
-    el.style.justifyContent = 'flex-end';
-    el.style.paddingBottom = '10vh';
+    el.style.paddingBottom = window.innerHeight < 500 ? '12px' : '10vh'; // short landscape phones: every button reachable
+    el.style.overflowY = 'auto';
     const latest = this.d.slots.latest();
     if (latest) {
       const c = button(t('menu.continue'), () => this.d.loadSlot(latest.id), 'hot');
       c.title = describe(latest.snap);
       el.append(c);
     }
-    el.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    el.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    (el.firstElementChild as HTMLElement).style.marginTop = 'auto'; // bottom-aligned when it fits, scrolls from the top when not
     this.mount(el, 'main', 'menu', () => this.main());
   }
 

@@ -18,6 +18,7 @@ const SCREENS = [
   { name: 'race', q: '?skip&ai=2&probe&ff=1', wait: 2500 },
   { name: 'title', q: '?probe', wait: 3600 },
   { name: 'chooser', q: '?chooser', wait: 3600 },
+  { name: 'main', q: '?screen=main', wait: 3600 },
   { name: 'garage', q: '?screen=garage', wait: 3600 },
   { name: 'settings', q: '?screen=settings', wait: 3600 },
   { name: 'tune', q: '?screen=tune', wait: 3600 },
