@@ -8,18 +8,20 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - crowd.ts (98) Spectators: a pool of rigs (shared geometry and materials come from the people factory)... | fn crowdSpec; class Crowd; iface Spot
 ## src/audio
 - audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
-- audioManager.ts (200) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
-- audioParams.ts (23) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO; type AudioParams
+- audioManager.ts (218) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
+- audioParams.ts (26) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO, MUSIC_CUE; type AudioParams
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
-- engineDsp.ts (181) Engine sound synthesis, written as ONE self-contained class (no imports, no module-leve... | class EngineDsp
+- engineDsp.ts (173) Engine sound synthesis, written as ONE self-contained class (no imports, no module-leve... | class EngineDsp
 - engineSamples.ts (92) Sample-based engine: looping recordings at fixed rpm, crossfaded by rpm (equal power be... | fn loadEngineSamples, layerMix, createSampleVoice
-- engineVoice.ts (103) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
-- music.ts (99) Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (spe... | class Music
-- musicPatterns.ts (72) Pure note logic for the generative synthwave track (no Web Audio), so it can be unit te... | fn chordTones, bassNote, arpNote, leadNote, drumHit, layers; const BPM, STEPS_PER_BAR, SECONDS_PER_STEP, midiToHz; iface DrumHit, Layers
+- engineVoice.ts (105) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
+- music.ts (164) How far ahead of the audio clock notes are queued. update() runs every frame, so this c... | class Music
+- musicPatterns.ts (139) Pure note logic for the procedural house music (no Web Audio), so it is deterministic p... | fn rng, makeSong, activeMask, stepEvents; const STEPS_PER_BAR, SONG_BARS, midiToHz, PROGRESSIONS, GROOVES, K, MOODS, newEvents; iface Groove, Song, Mood, StepEvents; type SectionId, MoodId
+- musicVoices.ts (129) What a voice needs to make sound. `lite` (phones) drops detuned partners and the pad. | fn noiseHit, kick, clap, hat, crash, riser, bass, stab, pad, pluck, lead; iface VoiceKit
 - revTest.ts (54) Garage "Sound test": a simulated rev run for any car (no driving, no purchase). Hold = ... | class RevTest; const REV_TEST; iface RevSample
-- rivalEngines.ts (85) Engine sound of the nearest rivals, positioned in 3D with distance falloff and a manual... | class RivalEngines
+- rivalEngines.ts (84) Engine sound of the nearest rivals, positioned in 3D with distance falloff and a manual... | class RivalEngines
 - sfx.ts (153) Looping noise voice: filter into a gain, both set from outside each frame. | class Sfx
 - turboSound.ts (184) Per-kind whistle character: base pitch multiplier and the level of a second, higher whi... | class TurboSound; type TurboKind
+- uiSound.ts (56) Scale degrees (semitones above the song key, pentatonic so it never clashes with the me... | fn uiNotes, playUi, installUiSound; type UiKind
 ## src/camera
 - aspectFrame.ts (52) Reference shape the chase camera was tuned on. | fn framing; const REF_ASPECT, horizontalFov; iface Framing
 - chaseCam.ts (160) Fraction of the slip angle the camera yaw follows. | fn createChaseTuning; class ChaseCam; iface ChaseTuning
@@ -27,7 +29,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - shotSampler.ts (44) Working pose: a CameraPose plus roll (radians). | fn buildCurves, samplePath, addShake; const makePose, copyPose; iface Pose
 - shots.ts (99) Circular orbit around the subject. `angle` 0 = in front of the nose; increasing angle s... | fn createIntroShots; iface OrbitPath, SplinePath, CameraShot; type Pair, ShotPath
 ## src/core
-- career.ts (78) Story progress, stored inside the save. Pure functions over SaveData so they can be tes... | fn nextEvent, applyChoice, evaluate, completeEvent; const defaultCareer, isDone, storyComplete, playable, clampRel, isUnlocked, driftCash; iface CareerState, EventOutcome
+- career.ts (80) Story progress, stored inside the save. Pure functions over SaveData so they can be tes... | fn nextEvent, applyChoice, evaluate, completeEvent; const defaultCareer, isDone, storyComplete, playable, clampRel, isUnlocked, driftCash; iface CareerState, EventOutcome
 - engine.ts (211) Luminance above which pixels bloom. The pipeline is HDR, so emissive > 1 glows. | class Engine; const FIXED_DT; iface BloomSettings, EngineOptions
 - fullscreen.ts (119) Full screen through the Fullscreen API with the webkit-prefixed fallback. The state alw... | fn lockLandscape; class FullscreenControl; const isNative, isIPhone, isStandalone; iface FsDocument; type FsMode
 - gameSave.ts (127) Bump when the snapshot layout changes, and add a step to MIGRATIONS. | fn parseSnapshot; class SaveSlots; const SAVE_VERSION, MANUAL_SLOTS; iface SaveSummary, GameSnapshot; type SlotId
@@ -52,27 +54,33 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - viewport.ts (44) Keeps the game sized to the REAL visible viewport: ResizeObserver on the container, vis... | fn watchViewport; const isPortrait
 - wakeLock.ts (50) Screen wake lock while a race runs, so the phone does not dim mid-race. `set(true)` req... | class WakeLock
 ## src/data
-- barks.ts (63) Pre-race taunts for the versus screen (task 014). Keyed by rival id, four lines each. | const BARKS
+- barks.ts (83) Pre-race taunts for the versus screen (task 014). Keyed by rival id, four lines each. | const BARKS
 - carBuild.ts (21) What the player has done to each car: installed upgrades and the tuning setup (the save... | fn applyBuild; const getBuild, setBuild
 - carReal.ts (56) Real-world reference specs per car (typical published figures for the version named) an... | fn stageSpec; const REAL; iface StageSpec, RealSpec; type Drive
 - carSpecs.ts (76) Real specs for the v2 handling model (contract: types/cars.ts), from docs/car-data.md. ... | fn withSpec; const SPECS
 - cars.ts (144) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
 - characters.ts (38) What a person looks like. The 2D portraits and the 3D figures are both built from this.... | const LOOKS, lookOf; iface Look; type HairStyle, Accessory, Build
 - engineSounds.ts (37) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
+- engineVoices.ts (55) Procedural engine voices, one per car (same order as CARS). Pure data: audio/engineDsp ... | const ENGINE_VOICES, voiceIndex; iface EngineVoiceSpec
 - loadout.ts (110) How a car looks and sits: everything the garage can change without touching performance... | fn sanitizeLoadout, stanceEffect, applyStance; const FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, CALIPERS, defaultLoadout; iface Vinyl, Loadout; type Finish, GlowPattern
-- lore.ts (48) World lore: title cards, crew bios and loading tips. Text only; no brand names. | const PREVIOUSLY, CREW, TIPS; iface TitleCard, CrewEntry
+- lore.ts (49) World lore: title cards, crew bios and loading tips. Text only; no brand names. | const PREVIOUSLY, CREW, TIPS; iface TitleCard, CrewEntry
 - palettes.ts (25) District colour identity (docs/art-direction.md): the key light, an accent, and how the... | const PALETTES, paletteOf; iface Palette
 - partsCatalog.ts (27) One purchasable body part. Brand names are FICTIONAL aftermarket makers. | const SLOT_BASE, partPrice, CATALOG; iface CatalogPart
 - partsCatalogAll.ts (5) Every purchasable body part (base + Qwen task 041). Import this, not CATALOG, in shops ... | const ALL_PARTS
 - partsCatalogMore.ts (23) | const CATALOG_MORE
 - radio.ts (34) DJ Switch's in-race radio lines. Placeholders: {name} rival, {pos} {n} position, {lap} ... | const RADIO
-- radio2.ts (79) DJ Switch's lines for the three new maps (task 012). Data only, no imports. | const TRACK_RADIO, RIVAL_RADIO_2
+- radio2.ts (82) DJ Switch's lines for the three new maps (task 012). Data only, no imports. | const TRACK_RADIO, RIVAL_RADIO_2
 - rivals.ts (96) Everyone you can race against. Brand names stay in cars.ts: rivals only name a car id. | fn buildField, freeRaceField, aiTuning, competitiveField; const RIVALS, findRival, carTier; iface Rival, FieldEntry
 - setup.ts (55) Fine-tuning sliders with safe ranges. They trade one thing for another, so they never c... | fn sanitizeSetup, applySetup; const defaultSetup, SETUP_RANGES; iface Setup
-- story.ts (163) One of two answers in a branching line. `set` writes story flags, `rel` shifts relation... | const SPEAKERS, OPENING_CAPTIONS, CHAPTER, INTRO_LINES, EVENTS, ENDING, findEvent; iface ChoiceOption, Choice, Line, StoryEvent; type Speaker, Mood
-- story2.ts (18) The two chapters in play order: the career walks this list. | const CHAPTER_2, ALL_EVENTS, eventsOf, EPILOGUE, findAnyEvent
-- story2a.ts (51) Chapter 2, part one: Dante's retaliation, then the Neon Strip and the Container Maze. | const EVENTS_2A
-- story2b.ts (59) Chapter 2, part two: the yard drift night, the Cliffside Run and the finale with its br... | const EVENTS_2B
+- story.ts (116) One of two answers in a branching line. `set` writes story flags, `rel` shifts relation... | const SPEAKERS, OPENING_CAPTIONS, CHAPTER, ENDING, findEvent; iface ChoiceOption, Choice, Line, StoryEvent, Cue; type Speaker, Mood
+- story1.ts (37) Chapter 1, "Wet Asphalt". The first run skips `before` of the warm-up: the race IS the ... | const EVENTS
+- story2.ts (26) The two chapters in play order: the career walks this list. | const CHAPTER_2, ALL_EVENTS, eventsOf, EPILOGUE, findAnyEvent
+- story2a.ts (24) Chapter 2, part one: Dante's retaliation, then the Neon Strip and the Container Maze. T... | const EVENTS_2A
+- story2b.ts (45) Chapter 2, part two: the yard drift night, the Cliffside Run and the finale with its br... | const EVENTS_2B
+- storyLines1.ts (123) | const WARMUP_BEFORE, WARMUP_WIN, WARMUP_LOSE, WARMUP_LOSE_2, WARMUP_LOSE_3, DOCK_BEFORE, DOCK_WIN, DOCK_LOSE, DOCK_LOSE_2, DOCK_LOSE_3, DRIFT_BEFORE, DRIFT_WIN, DRIFT_LOSE, DRIFT_LOSE_2, DRIFT_LOSE_3, FINALE_BEFORE, FINALE_WIN, FINALE_LOSE, FINALE_LOSE_2, FINALE_LOSE_3
+- storyLines2a.ts (82) | const REDLINE_BEFORE, REDLINE_WIN, REDLINE_LOSE, REDLINE_LOSE_2, REDLINE_LOSE_3, NEON_BEFORE, NEON_WIN, NEON_LOSE, NEON_LOSE_2, NEON_LOSE_3, MAZE_BEFORE, MAZE_WIN, MAZE_LOSE, MAZE_LOSE_2, MAZE_LOSE_3
+- storyLines2b.ts (52) | const YARD_BEFORE, YARD_WIN, YARD_LOSE, YARD_LOSE_2, YARD_LOSE_3, CLIFF_BEFORE, CLIFF_WIN, CLIFF_LOSE, CLIFF_LOSE_2, CLIFF_LOSE_3
+- storyLines2c.ts (63) | const FINAL_BEFORE, FINAL_OPEN_REPLY, FINAL_SPONSOR_REPLY, FINAL_WIN, FINAL_LOSE, FINAL_LOSE_2, FINAL_LOSE_3
 - tips.ts (33) Loading-screen tips: lore (never reveals Switch) and driving advice. | const TIPS
 - tips2.ts (20) | const TIPS_2
 ## src/data/tracks
@@ -122,7 +130,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - saveGame.ts (67) Can this moment be saved? Only a race in progress (countdown or racing) that was set up... | fn canSave, captureGame, restoreGame
 - showroomCam.ts (37) Slow orbit around the car for the menu and garage. The car's screen position comes from... | class ShowroomCam
-- story.ts (154) The people beside the showroom car (optional: tests run without it). | class StoryController; iface StoryDeps
+- story.ts (182) The people beside the showroom car (optional: tests run without it). | class StoryController; iface StoryDeps
 - telemetry.ts (18) Keep the strongest hit of the frame (for sparks, shake and bloom). | fn recordImpact; const createTelemetry, createViewState
 - versusGate.ts (28) Puts the versus screen in front of every race start (story and free). Restarts, loaded ... | fn installVersus
 - weatherApply.ts (32) Push a weather into fog, background, HUD label and the world's materials. | fn applyWeather
@@ -132,11 +140,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enGame.ts (36) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enMenu.ts (72) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - es.ts (11) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
-- esContent.ts (11) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
+- esContent.ts (14) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
 - esContentA.ts (153) Spanish for long content, part A: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_A
-- esContentB.ts (153) Spanish for long content, part B: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_B
-- esContentC.ts (156) Spanish for long content, part C: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_C
+- esContentB.ts (131) Spanish for long content, part B: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_B
+- esContentC.ts (127) Spanish for long content, part C: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_C
 - esContentD.ts (30) Spanish for the power-stage parts lists (data/carReal), keyed by the exact English text. | const ES_CONTENT_D
+- esContentE.ts (173) Spanish for the story rewrite, keyed by the exact English text (see esContent.ts). | const ES_CONTENT_E
+- esContentF.ts (17) Spanish for the story rewrite, keyed by the exact English text (see esContent.ts). | const ES_CONTENT_F
+- esContentG.ts (39) Spanish for the story rewrite: barks and radio, keyed by the exact English text (see es... | const ES_CONTENT_G
 - esControls.ts (67) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
 - esGame.ts (38) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esMenu.ts (74) Menús, ajustes, garaje, puesta a punto y mapas (español neutro). Mismas claves que enMe... | const ES_MENU
@@ -152,7 +163,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tiltInput.ts (98) Screen angle in degrees (0 portrait, 90 / 270 landscape). | class TiltInput; const screenAngle; type TiltPermission
 - tiltMap.ts (103) Tilt steering maths, pure (no DOM), so tests can feed synthetic orientation events. | fn rollFrom, steerFromRoll, smoothSteer, sanitizeTilt; const defaultTilt, MIN_INPLANE, wrapDeg; iface TiltPrefs, Roll
 ## src
-- main.ts (216) Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip...
+- main.ts (218) Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip...
 ## src/physics
 - aiDifficulty.ts (59) AI difficulty levels and personalities. Pure data: the AI reads these, nothing else cha... | const DIFFICULTIES, AI_SETTING, RUBBER_MAX, LEVELS, STYLES; iface Level, Style; type Difficulty, DriveStyle
 - aiLine.ts (108) The racing line of a track: lateral offsets from the centre line, line points, and the ... | fn racingLine, speedProfile; const marginFor; iface RacingLine, SpeedLimits
@@ -200,52 +211,55 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - carNav.ts (49) Car-picker navigation: Left/Right (and A/D) keys and a horizontal swipe on `root` call | fn carNav, navButton
 - controlSettings.ts (82) Settings rows for the screen and the phone controls: full screen, scheme, and the tilt ... | fn controlRows; iface ControlRowsDeps
 - controlsOnboard.ts (107) "Hold the phone in your normal driving position, tap to calibrate." Resolves when done ... | fn calibrate, enableTilt, chooseControls, controlsTutorial
-- cornerGuide.ts (98) Corner guide: the next corner's direction and severity (HAIRPIN / SHARP, or FAST when y... | class CornerGuide
+- cornerGuide.ts (101) Corner guide: the next corner's direction and severity (HAIRPIN / SHARP, or FAST when y... | class CornerGuide
 - crewMenu.ts (51) Characters whose relationship value is shown once Chapter 2 starts. | fn buildCrewMenu
-- dialogue.ts (171) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox; const DIALOGUE
+- dialogue.ts (187) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox; const DIALOGUE
 - drivingSettings.ts (128) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
 - fullscreenButton.ts (74) One-time "Add to Home Screen" card for iPhone Safari (no Fullscreen API there). `force`... | fn showHomescreenHint, fullscreenButton
-- garage.ts (211) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (199) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageConfig.ts (31) Menu / garage camera framing. Plain data plus one helper: no imports. | const GARAGE_CONFIG, garageLayout; type GarageLayout
 - garageLook.ts (102) Garage appearance panel: finish, vinyl (pattern, colour, scale, number), rims (design, ... | fn lookRows
-- gauge.ts (112) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
+- garageParts.ts (26) Small helpers of the garage screen: cached stats, colour hex, bar clamp and the hold-to... | fn soundTest; const statsOf, hex, clamp01
+- gauge.ts (133) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
 - graphicsSettings.ts (113) Graphics screen rows: presets, resolution scale, toggles, particle density, draw distan... | fn graphicsRows; iface GraphicsDeps
 - handlingOverlay.ts (52) Handling debug overlay (plan section 7), toggled with F4: per-axle load (N), slip angle... | const handlingOverlay
 - haptics.ts (22) Short haptic tick: Capacitor Haptics in the app, navigator.vibrate on Android browsers,... | fn buzz
-- hud.ts (117) Plain-DOM HUD. Only touches the DOM when a value actually changes. | class Hud
+- hud.ts (136) Plain-DOM HUD. Only touches the DOM when a value actually changes. | class Hud
 - icons.ts (16) Inline SVG icons (stroke = currentColor), so no font glyphs ever show up as boxes. 24x2... | const ICONS
 - langRow.ts (18) Language chooser row (one button per language, named in its own language). `after` runs... | fn langRow
 - loadingCard.ts (23) Short loading card with a lore tip while a race is being set up. Also masks the car mod... | class LoadingCard
 - loadoutList.ts (30) | fn buildLoadoutList
-- menu.ts (194) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
+- menu.ts (196) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - pauseMenu.ts (74) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
-- results.ts (68) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
+- results.ts (70) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - rotateHint.ts (39) Small "rotate your phone" pill in portrait on touch screens. Landscape is the recommend... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
 - settings.ts (170) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
-- storyMenu.ts (64) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
-- subtitles.ts (86) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; iface Caption
-- theme.ts (26) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
+- storyMenu.ts (70) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
+- subtitles.ts (88) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; iface Caption
+- theme.ts (31) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
 - titleCards.ts (71) Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each c... | class TitleCards
 - touchButton.ts (67) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
 - touchControls.ts (167) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - trackSelect.ts (96) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
 - tuneMenu.ts (121) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
-- uiKit.ts (57) Small transient message at the bottom centre. | fn injectCss, h, button, toast; const money, lapText
+- uiKit.ts (62) The NEON SPEED title treatment (styles in ui/theme). | fn injectCss, wordmark, h, button, toast; const money, lapText
 - uiSizes.ts (14) Scale for the S / M / L size settings (subtitle box, minimap). | fn applyUiSizes; const SIZE_SCALE
 - versus.ts (92) The versus screen before a race: your portrait, car and stats against the strongest riv... | fn showVersus
 ## src/world
 - assetLoader.ts (144) Longest horizontal extent after normalising, metres. Default 4.4. | fn loadCarModel, normaliseCarScene, setModelYaw, findBodyMaterial, disposeCarModel, clearModelCache; const hasFailed; iface LoadOptions
 - carAppearance.ts (65) The pieces of a procedural car the appearance system drives. | fn applyAppearance, glowAt; iface AppearanceTargets
-- carBody.ts (119) Proportion data for one body style (metres). Pure data; names and brands live in data/c... | fn buildBody; const RIDE; iface BodyShape, BodyParts
-- carDetails.ts (42) Bolt-on details: front splitter, side skirts, rear wing or lip with end plates, hood sc... | fn addDetails
+- carBody.ts (122) Proportion data for one body style (metres). Pure data; names and brands live in data/c... | fn buildBody; const RIDE; iface BodyShape, BodyParts
+- carDetails.ts (41) Bolt-on details: front splitter, side skirts, rear wing or lip with end plates, hood sc... | fn addDetails
+- carExtras.ts (75) Second detail pass (after carSignature): the things that make each car read at chase di... | fn addExtras
 - carFactory.ts (68) Front and rear plates with the loadout's text; garage edits (setAppearance) update them... | fn withPlates, createCarVisual, preloadCarModels; const statusListeners, modelStatus; type ModelStatus
 - carLights.ts (39) Scale every car's lamp glow (bad weather: fog would turn big halos into a white-out). | fn setLightGlow, addLightsAndShadow
 - carLoft.ts (85) Half cross-section (x >= 0) as (x, y) points from one end to the other; the loft mirror... | fn loft; iface LoftOptions; type HalfRing
 - carParts.ts (84) Body parts a car can wear. Procedural cars and GLB cars take the same add-on parts at a... | fn attachParts; const PART_SLOTS, PARTS; iface PartAnchors; type PartSlot, PartBuilder, PartChoice
+- carSignature.ts (105) Which car's face, tail and flanks to draw. Pure visual data: the physics never reads it. | fn addSignature; iface SignatureMats; type CarLook
 - carWheels.ts (54) Materials one car owns (so a rim or caliper colour change never touches other cars). | fn buildWheel, buildArch; const makeWheelMats; iface WheelMats
 - characters.ts (123) A small stylised person (about 2000 triangles) built from boxes and spheres, with an id... | fn createCharacter; iface Character; type Pose
 ## src/world/city
@@ -259,13 +273,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - signs.ts (95) A shop sign design. Brands are FICTIONAL (docs/art-direction.md): never use a real comp... | fn makeSignAtlas, signGeometry; const SIGNS; iface SignSpec
 - signsA.ts (12) | const SIGNS_A
 - signsB.ts (11) | const SIGNS_B
-- textures.ts (208) The four maps of a PBR-style facade sheet. One tile is 16 m x 16 m: 5 floors by 5 windo... | fn makeFacadeSheet, makeShopfrontTexture, makeContainerSheet; iface FacadeSheet; type FacadeKind
+- textures.ts (140) The four maps of a PBR-style facade sheet. One tile is 16 m x 16 m: 5 floors by 5 windo... | fn normalFrom, makeFacadeSheet; const N, tex; iface FacadeSheet; type FacadeKind
+- texturesProps.ts (72) A shopfront tile (one 6 m bay, ground floor): a dark frame, a big glass window whose in... | fn makeShopfrontTexture, makeContainerSheet
 ## src/world
 - cliffside.ts (84) A strip of terrain along the road: each row is a lateral offset and a height rule (road... | fn buildCliffside; const SEA_LEVEL
 - disposeVisual.ts (25) Material slots that may hold a texture this object owns (envMap is never one: it is the... | fn disposeVisual
 - dock.ts (99) Dock strip: water and a chain rail on the left, container stacks flush with the right w... | fn crane, buildDock; iface Dock
 - envMap.ts (64) Procedural night-city environment baked once into a PMREM: a dusk gradient dome (deep b... | fn buildNeonEnvMap
-- facades.ts (140) Facade height per sample for the left (index 0) and right (index 1) side; 0 = no buildi... | fn buildFacades; iface Plaza, Facades
+- facades.ts (141) Facade height per sample for the left (index 0) and right (index 1) side; 0 = no buildi... | fn buildFacades; iface Plaza, Facades
 - furniture.ts (164) Additive light pools under the lamps; weather raises their opacity when wet. | fn buildFurniture; iface Furniture
 - kestrelBay.ts (31) "Kestrel Bay Streets": about 1.4 km of city street, 8.5 to 11 m wide. Clockwise from th... | const KESTREL_VERTICES, createKestrelBay, PLAZA
 - landmarks.ts (108) Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pas... | fn buildLandmarks
@@ -284,7 +299,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - precipMath.ts (121) CPU side of the precipitation volume (pure TS, no three, no allocation). Particles neve... | fn createPrecipState, stepPrecip, resetPrecip, particleWorld; const TIME_WRAP, CUT_SPEED, wrapN; iface PrecipBox, PrecipState, P3
 - precipMeshes.ts (92) Deterministic 0..1 sequence (mulberry32): the same seeds every run, so screenshots and ... | fn makeStreaks, makeSplashes, makeDrops; iface StreakLook
 - precipShaders.ts (125) GLSL for the precipitation system. Rain and snow share one vertex shader: world-space w... | const STREAK_VERT, STREAK_FRAG, SPLASH_VERT, SPLASH_FRAG, DROPS_VERT, DROPS_FRAG
-- proceduralCar.ts (162) Present on GLB-based cars: lets the garage fix a model that faces the wrong way. | fn buildProceduralCar; iface Calibration, CarVisual
+- proceduralCar.ts (167) Present on GLB-based cars: lets the garage fix a model that faces the wrong way. | fn buildProceduralCar; iface Calibration, CarVisual
 - propModels.ts (76) Target size per prop: `height` for upright props, `length` for containers (their long a... | fn loadPropModel, normaliseProp, instanceProp; iface Placement; type PropName
 - propYard.ts (88) | fn buildBarrel, buildPallet, buildForklift, buildFloodlight
 - props.ts (67) Visible props: parked cars, cones, manhole covers, zebra crossings, steam-vent grates, ... | fn buildProps
@@ -294,7 +309,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - propsLayout.ts (93) Static circles for the parked cars, bucketed by track sample. | fn layoutProps; iface Placed, PropsLayout
 - redHandWall.ts (34) The Red Hand Wall at the finish line: a painted wall panel on the street, with one red ... | class RedHandWall
 - ribbon.ts (65) A lateral offset from the centre line: constant, or per sample (left of travel = positi... | fn lateralPoint, ribbon, wallStrip; type Off, Keep
-- rims.ts (41) Rim designs. A builder returns the face parts of one wheel (spokes, lips, bolts) in whe... | const RIM_DESIGNS, RIM_IDS, centreCap; type RimBuilder
+- rims.ts (45) Rim designs. A builder returns the face parts of one wheel (spokes, lips, bolts) in whe... | const RIM_DESIGNS, RIM_IDS, centreCap; type RimBuilder
 - roadMirror.ts (35) Planar mirror under the road for real wet-street reflections. Expensive (renders the sc... | class RoadMirror
 ## src/world/roads
 - generate.ts (102) Build the road graph for the slice from a seed. One lattice (XS x ZS) is shared by all ... | fn generateRoads, reachable

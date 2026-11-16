@@ -17,7 +17,7 @@ Carlos's priorities tonight (2026-11-16): the rename to Neon Speed, different go
 - [x] 05 Language switch keeps garage car and open subtitle (tasks/05-lang-switch-state.md) -- garage keeps browsed car, shown subtitle and open dialogue line switch language in place
 - [x] 04 Spanish pass: leftovers and tone, after the story rewrite (tasks/04-spanish-pass.md) -- audited, no LatAm leftovers, no changes needed
 - [x] 06 Per-frame / per-step allocation audit (tasks/06-allocation-audit.md) -- physics/core/camera/fx already clean; removed per-frame strings in HUD, gauge, corner guide
-- [ ] 07 Structural debt: split the biggest files at their seams (tasks/07-structural-debt.md)
+- [x] 07 Structural debt: split the biggest files at their seams (tasks/07-structural-debt.md) -- two splits (garageParts, city/texturesProps); main.ts judged unsafe
 - [ ] 08 Review finished Qwen branches (tasks/08-qwen-review.md)
 - [ ] 09 Docs in sync, full verification (tasks/09-final.md)
 - [ ] 99 Self-directed improvements, standing item, never ticked (docs/overnight/ideas.md)
