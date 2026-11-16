@@ -41,5 +41,7 @@ c.recordRace(100, 60, 'SNOW');
 check('blocked storage does not throw', c.data.cash === 2600, '');
 const d = new SaveStore(null, base, CARS);
 check('no storage works', d.buy('350z', 12000) === false, '');
+const calmOn = parseSave(JSON.stringify({ settings: { calmUi: true } }), base, CARS);
+check('calm HUD: default off, loads on, junk is off', base.settings.calmUi === false && calmOn.settings.calmUi === true && parseSave(JSON.stringify({ settings: { calmUi: 'yes' } }), base, CARS).settings.calmUi === false && parseSave(JSON.stringify({}), base, CARS).settings.calmUi === false, '');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

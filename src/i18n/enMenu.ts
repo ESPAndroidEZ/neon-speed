@@ -27,7 +27,7 @@ export const EN_MENU = {
   'hint.wphys.NORMAL': 'Rain 72% grip, snow 45%.',
   'hint.wphys.AGGRESSIVE': 'Rain 60%, snow 34%, puddles, snow banks, ice, a loose tail.',
   'hint.wphys.EXTREME': 'Rain 50%, snow 26%. Brutal. Hold on.',
-  'drv.assists': 'Driving assists', 'drv.look': 'Look', 'drv.opponents': 'Opponents', 'drv.rumble': 'Gamepad rumble',
+  'drv.assists': 'Driving assists', 'drv.look': 'Look', 'drv.opponents': 'Opponents', 'drv.rumble': 'Gamepad rumble', 'drv.calm': 'Calm HUD (no flashing or pulsing)',
   'drv.handling': 'Handling', 'drv.stability': 'Stability (v2)', 'drv.steerSens': 'Steering sensitivity', 'drv.deadzone': 'Stick deadzone',
   'hint.assist.BEGINNER': 'Steering and brake assist, strong auto counter-steer. Hard to spin.',
   'hint.assist.STANDARD': 'The balanced default.',
