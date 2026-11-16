@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Save fuzz test: 3000 junk/mutated saves and snapshots never crash the parsers (`tests/save-fuzz-check.mts`).
 - 2026-11-16 FINAL LAP banner at the start of the last lap, after the lap-time pop-up (`game/finalLap`, `tests/final-lap-check.mts`).
 - 2026-11-16 Surface change sounds: glassy hiss on ice, soft thump on snow banks, puddle splash unified (`audio/surfaceCue`, `tests/surface-cue-check.mts`).
 - 2026-11-16 Results gap to the winner: dim "+0.83" per finisher in the results table (`game/resultGap`, `ui/results`, `tests/result-gap-check.mts`).

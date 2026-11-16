@@ -196,3 +196,7 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - When the player starts the last lap of a multi-lap race, an amber "FINAL LAP" (ES "ÚLTIMA VUELTA") pop-up shows. It waits 1.3 s so it does not overwrite the lap-time pop-up of the lap that just ended. Sprints (1 lap) and restored saves that resume on the last lap never show it (it fires only on a real step up to the last lap); restart resets it.
 - Display only. Files: `game/finalLap.ts` (pure `FinalLapCue`), `game/raceFeedback.ts`, i18n `lap.final`, `tests/final-lap-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
 - Not seen by eye mid-race: run a 3-lap race and check the banner appears about a second after the lap-2 time and does not clash with the gap tags.
+
+## 99 Self-directed: save fuzz test
+- Saves must never crash the game. New `tests/save-fuzz-check.mts` throws 3000 junk or field-mutated saves, truncated save texts and malformed snapshots at `parseSave` / `parseSnapshot` (seeded, reproducible). Result: no throws, invariants hold (finite cash, known cars, at least one owned), junk snapshots are rejected. No game code changed; the parsers were already robust.
+- Build and all tests green. Nothing to look at or listen to.
