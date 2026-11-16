@@ -37,7 +37,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'coach.nitro.key': 'Mantén {k} para un empujón de nitro', 'coach.nitro.touch': 'Mantén NITRO para un empujón',
   'coach.handbrake.key': 'Pulsa {k} en una curva para derrapar', 'coach.handbrake.touch': 'Pulsa FRENO DE MANO en una curva para derrapar',
   'rw.near': 'POR LOS PELOS', 'rw.slip': 'ESTELA', 'rw.clean': 'CURVA LIMPIA',
-  'ghost.saved': 'NUEVA MEJOR VUELTA · FANTASMA GUARDADO', 'radio.pack': 'el pelotón',
+  'ghost.saved': 'NUEVA MEJOR VUELTA · FANTASMA GUARDADO', 'gap.best': 'MEJOR', 'radio.pack': 'el pelotón',
   'guard.title': 'Motor calado', 'guard.body': 'Algo salió mal. Tu progreso se guarda automáticamente. Recarga para volver a la carretera.',
   'guard.reload': 'Recargar', 'guard.continue': 'Continuar', 'guard.restoring': 'Restaurando gráficos...', 'pwa.ready': 'Actualización lista',
   'main.lowFps': 'Los fotogramas por segundo eran bajos: gráficos reducidos a {tier}. (Ajustes: Calidad automática)',

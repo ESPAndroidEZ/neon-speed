@@ -24,10 +24,10 @@ const REWARD: Record<string, 'rw.near' | 'rw.slip' | 'rw.clean'> = { 'NEAR MISS'
  */
 export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): CornerGuide {
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
-  attachGhost(engine, game, hud); // best-lap ghost car
+  const bestDelta = attachGhost(engine, game, hud); // best-lap ghost car
   attachCoach(engine, game); // first-races control hints
   attachWrongWay(engine, game); // WRONG WAY banner after a spin
-  attachGapTags(engine, game); // seconds to the rival ahead and behind
+  attachGapTags(engine, game, bestDelta); // seconds to the rivals ahead / behind, and to your best lap
   let countdownHint = false;
   let seenReward = 0;
   engine.onFrame(() => {

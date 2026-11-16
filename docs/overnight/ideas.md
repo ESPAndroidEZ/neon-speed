@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Live delta to your best lap: "BEST ±x.x" under the gap tags, from the stored ghost lap (`ghostDelta` in `game/ghostData`, `ui/gapTags`, `tests/ghost-check.mts`).
 - 2026-11-16 Gap tags: seconds to the rival just ahead (red, +) and just behind (green, −) under lap/position (`game/gapLogic`, `ui/gapTags`, `tests/gap-check.mts`).
 - 2026-11-16 Gamepad menu navigation: d-pad or left stick moves focus, A presses, B goes back, left/right steps sliders and the garage car picker; only outside races (`input/padNavLogic`, `input/padMenu`, `tests/pad-nav-check.mts`).
 - 2026-11-16 Wrong-way warning: red banner after 1.2 s of fast driving against the road (with the R hint on keyboards), clears once turned around (`game/wrongWayLogic`, `ui/wrongWay`, `tests/wrong-way-check.mts`).

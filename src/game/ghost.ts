@@ -7,7 +7,7 @@ import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 import { getBuild } from '../data/carBuild';
 import { buildKey, recordLap } from '../data/upgradeAdvice';
-import { ghostPose, GhostRecorder, isGhostLap, type GhostLap, type Pose } from './ghostData';
+import { ghostDelta, ghostPose, GhostRecorder, isGhostLap, type GhostLap, type Pose } from './ghostData';
 import { t } from '../i18n';
 
 
@@ -43,7 +43,8 @@ function ghostBody(spec: CarSpec): Object3D {
  * Records the player 10 times a second; a lap faster than the stored one replaces it ("NEW BEST LAP").
  * On every later lap a translucent car drives the best lap alongside you.
  */
-export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
+export function attachGhost(engine: Engine, game: Game, hud: Hud): () => number {
+  let delta = NaN; // seconds ahead (-) / behind (+) of the stored best lap; NaN = no ghost here
   let rec = new GhostRecorder(), setupRef: unknown = null, k = '', body: Object3D | null = null, lastLap = -1;
   const pose: Pose = { x: 0, y: 0, z: 0, h: 0 };
   const clear = (): void => {
@@ -51,6 +52,7 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
   };
   engine.onFrame(() => {
     const rm = game.rm, s = game.setup;
+    delta = NaN;
     if (!s || game.state !== 'RACING') { if (body) body.visible = false; return; }
     if (s !== setupRef) { // new race: load this track + car's ghost
       setupRef = s; clear(); lastLap = -1;
@@ -71,9 +73,11 @@ export function attachGhost(engine: Engine, game: Game, hud: Hud): void {
       hud.popUp(t('ghost.saved'), '#8fd8ff');
       if (!body) { body = ghostBody(s.car); engine.scene.add(body); }
     }
+    if (rec.best && !p.finished) delta = ghostDelta(rec.best, lt, st.position.x, st.position.z);
     if (!body || !rec.best || p.finished || !ghostPose(rec.best, lt, pose)) { if (body) body.visible = false; return; }
     body.position.set(pose.x, pose.y, pose.z);
     body.rotation.y = pose.h;
     body.visible = true;
   });
+  return () => delta;
 }
