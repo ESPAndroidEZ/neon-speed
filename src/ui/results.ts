@@ -17,9 +17,9 @@ export interface ResultsExtra {
 /** Post-race overlay: positions, times, cash payout and buttons. Plain DOM. */
 export class ResultsScreen {
   private readonly root = document.createElement('div');
-  private readonly handlers: { onAgain: () => void; onMenu?: () => void };
+  private readonly handlers: { onAgain: () => void; onMenu?: () => void; tip?: () => string | null };
 
-  constructor(parent: HTMLElement, handlers: { onAgain: () => void; onMenu?: () => void }) {
+  constructor(parent: HTMLElement, handlers: { onAgain: () => void; onMenu?: () => void; tip?: () => string | null }) {
     this.handlers = handlers;
     this.root.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#05060dcc;color:#e8f6ff;font:600 16px system-ui,sans-serif;z-index:20;padding:16px;box-sizing:border-box;overflow:auto';
     parent.appendChild(this.root);
@@ -32,7 +32,8 @@ export class ResultsScreen {
     const head = t(extra ? (extra.passed ? 'res.passed' : 'res.failed') : r.position === 1 ? 'res.victory' : 'res.finished', { p: r.position });
     const color = extra && !extra.passed ? '#ff5470' : '#18d8ff';
     const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? '#7dff9a' : '#ff9aa8'}">${extra.objective}</div>` : '';
-    const notes = (extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
+    const tip = !extra && r.position > 1 ? this.handlers.tip?.() : null; // lost a free race: suggest an upgrade
+    const notes = (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
     this.root.innerHTML = `<div style="min-width:min(340px,86vw);max-width:calc(100vw - 24px);max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:clamp(14px,3vmin,28px) clamp(16px,4vmin,36px);border:1px solid #18d8ff55;border-radius:12px;background:#0a0d1cee;box-shadow:0 0 40px #18d8ff33">
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>

@@ -1,5 +1,6 @@
 import { AudioManager } from './audio/audioManager';
 import { installUiSound } from './audio/uiSound';
+import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
 import { AutoQuality, isPhone } from './core/quality';
 import { deviceHints, firstRunTier } from './core/perfTier';
@@ -76,7 +77,7 @@ const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
 let story: StoryController;
-const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
+const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main(), tip: () => tuneTip(store) });
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);

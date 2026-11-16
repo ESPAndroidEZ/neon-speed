@@ -92,3 +92,7 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Handoff "Overnight round" added, code map regenerated. build:q OK, test:q ALL PASS, smoke 9/9, `lang` ok, `visual` 1 FAIL (`neon-clear`, clipped 0.62 
 ## 09 Final verification
 - Handoff "Overnight round" added, code map regenerated. build:q OK, test:q ALL PASS, smoke 9/9, `lang` ok, `visual` 1 FAIL (`neon-clear`, clipped 0.62 %, pre-existing, was 0.73 %). Nothing left running (vite/chrome checked).
+
+## 99 Self-directed: results "what you could tune" hint
+- After a LOST free race (position > 1, no story objective) the results screen shows one gold line: the next upgrade level of the selected car that the player can afford right now (order: tyres, suspension, brakes, differential, gearbox, weight, nitrous; never the power stage) plus the first sentence of `ADVICE` for it. Nothing shows when nothing is affordable or everything is bought. EN + ES (`res.tip`).
+- Files: `data/upgradeAdvice.ts` (`affordableTip`, pure), `ui/tuneTip.ts`, `ui/results.ts` (optional `tip` handler), `main.ts` (one wire), `tests/tune-tip-check.mts` (6 checks). Build and all tests green. Not looked at in a browser; the text sits in the existing notes slot of the results card.
