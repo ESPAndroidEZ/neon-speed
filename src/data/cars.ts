@@ -40,7 +40,7 @@ export const CARS: readonly CarSpec[] = [
     brand: 'Honda',
     name: 'Civic',
     price: 0,
-    color: 0xe8e8ee,
+    color: 0xbfc4d0,
     blurb: 'Light, tail-happy and forgiving. The perfect first drift car.',
     tuning: withSpec('civic', { mass: 1070, inertia: 1360, engineTorque: 160, dragCoef: 0.5, driftAssist: 0.75, handbrakeGrip: 0.33, slideCap: 0.54, gripRear: 1.2, yawDamping: 3000, cgHeight: 0.46, rollFront: 0.44, brakeBias: 0.74, throttleLag: 0.1, engineBraking: 0.05, peakRpm: 7500, torqueWidth: 7500, redlineRpm: 8400, driveFront: 1, cgToFront: 1.1, cgToRear: 1.5, finalDrive: 4.4, topRatio: 0.82 }),
     shape: { length: 4.25, width: 1.72, height: 1.4, hoodLength: 1.2, windshieldRun: 0.85, rearWindowRun: 0.55, roofLength: 1.4, beltHeight: 0.84, wheelbase: 2.62, wheelRadius: 0.3, spoiler: 'lip', haunch: 0.02, noseLow: 0.02, scoop: false, look: 'civic' },

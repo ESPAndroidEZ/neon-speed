@@ -30,8 +30,8 @@ export function addLightsAndShadow(root: Group, width: number, length: number, l
       }
     }
   };
-  glow(0xdff2ff, 1.5, length / 2, 1);
-  glow(0xff1a10, 1.8, -length / 2, -1);
+  glow(0xdff2ff, 0.5, length / 2, 1);
+  glow(0xff1a10, 0.3, -length / 2, -1);
   const sh = new Mesh(new PlaneGeometry(width * 1.7, length * 1.25).rotateX(-Math.PI / 2), new MeshBasicMaterial({ map: shadow, transparent: true, depthWrite: false, opacity: 0.8 }));
   sh.position.y = 0.035;
   sh.renderOrder = 1;

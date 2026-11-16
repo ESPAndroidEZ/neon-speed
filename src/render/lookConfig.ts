@@ -19,7 +19,7 @@ export const LOOK_CONFIG = {
   },
   brakeLight: {
     /** Tail lamp colour multiplier with the lights on and not braking (HDR: above ~1 starts to bloom). */
-    idle: 2.2,
+    idle: 1.0,
     /** Tail lamp colour multiplier while braking (must stay clearly above idle so braking reads). */
     braking: 6,
   },

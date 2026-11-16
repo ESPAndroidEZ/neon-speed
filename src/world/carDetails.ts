@@ -23,7 +23,9 @@ export function addDetails(body: Group, s: BodyShape, parts: BodyParts, paint: M
     add(new BoxGeometry(0.06, 0.1, s.wheelbase - s.wheelRadius * 2.5), trim, x, 0.28, 0); // side skirt
     add(new BoxGeometry(0.014, 0.42, 0.01), trim, sx * (parts.halfWidth(parts.zWindshield - 0.9) + 0.002), s.beltHeight - 0.2, parts.zWindshield - 0.9); // door lines
     add(new BoxGeometry(0.014, 0.42, 0.01), trim, sx * (parts.halfWidth(parts.zWindshield - 1.9) + 0.002), s.beltHeight - 0.2, parts.zWindshield - 1.9);
-    add(new BoxGeometry(0.14, 0.1, 0.2), paint, sx * (parts.halfWidth(parts.zWindshield) + 0.05), s.beltHeight + 0.14, parts.zWindshield - 0.05); // mirror
+    const mx = parts.halfWidth(parts.zWindshield) * 0.84;
+    add(new BoxGeometry(0.1, 0.012, 0.04), trim, sx * (mx + 0.04), s.beltHeight + 0.06, parts.zWindshield - 0.1); // mirror stalk
+    add(new BoxGeometry(0.1, 0.095, 0.17), paint, sx * (mx + 0.11), s.beltHeight + 0.1, parts.zWindshield - 0.1); // mirror
     add(new CylinderGeometry(0.052, 0.052, 0.16, 12), metal, sx * w * 0.28, 0.33, -zf - 0.04, Math.PI / 2); // exhaust tips
   }
   if (s.scoop) add(new BoxGeometry(0.55, 0.1, 0.55), trim, 0, parts.hoodY(zf - s.hoodLength * 0.55) + 0.05, zf - s.hoodLength * 0.55);

@@ -16,7 +16,7 @@ export function buildStage(env: Texture): Group {
   };
   // key and rim lights so the car reads as a product shot (they are far from the street, so they never touch it)
   // point lights with a hard distance cut-off: directional lights would light the whole street, far away
-  const key = new PointLight(0xfff0e0, 260, 26, 1.8);
+  const key = new PointLight(0xfff0e0, 150, 26, 1.8);
   key.position.set(6, 8, 7);
   const rim = new PointLight(0x4aa8ff, 150, 24, 1.8);
   rim.position.set(-8, 5, -7);
