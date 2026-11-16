@@ -216,3 +216,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Display only. Files: `game/raceStats.ts` (pure counter, shared instance), `game/raceFeedback.ts` (feeds it, resets at the countdown), `ui/results.ts`, `tests/race-stats-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
 - Not seen by eye: finish a race and check the extra line fits on a narrow phone.
 - Note: `scripts/overnight.sh` still has the `$CLAUDE_BIN--dangerously-skip-permissions` missing space (uncommitted runner edit, left alone).
+
+## 99 Self-directed: weather build-up cue
+- Rain and snow ramp in over ~20 s and the grip leaves before you see it. A pop-up "RAIN / SNOW SETTING IN: GRIP DROPPING" (ES too) now shows once when the build-up reaches 50 %. Clear weather, restored saves already past 50 % and finished players never see it; it re-arms at every countdown.
+- Display only, physics untouched. Files: `game/weatherCue.ts` (pure), `game/raceFeedback.ts`, i18n `weather.cueRAIN/SNOW`, `tests/weather-cue-check.mts` (6 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: start a rain race and check the pop-up appears about 6 s in and does not clash with other pop-ups.

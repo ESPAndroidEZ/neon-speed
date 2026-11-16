@@ -38,6 +38,8 @@ export const EN_GAME = {
   'rw.near': 'NEAR MISS', 'rw.slip': 'SLIPSTREAM', 'rw.clean': 'CLEAN CORNER',
   'lap.done': 'LAP {n}',
   'lap.final': 'FINAL LAP',
+  'weather.cueRAIN': 'RAIN SETTING IN: GRIP DROPPING',
+  'weather.cueSNOW': 'SNOW SETTING IN: GRIP DROPPING',
   'ghost.saved': 'NEW BEST LAP · GHOST SAVED', 'gap.best': 'BEST', 'radio.pack': 'the pack',
   'guard.title': 'Engine stalled', 'guard.body': 'Something went wrong. Your progress is autosaved. Reload to get back on the road.',
   'guard.reload': 'Reload', 'guard.continue': 'Continue', 'guard.restoring': 'Restoring graphics...', 'pwa.ready': 'Update ready',

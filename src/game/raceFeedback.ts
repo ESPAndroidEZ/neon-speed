@@ -9,6 +9,7 @@ import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import { FinalLapCue } from './finalLap';
 import { PosCue } from './posCue';
+import { WeatherCue } from './weatherCue';
 import { raceStats } from './raceStats';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
@@ -33,6 +34,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   attachGapTags(engine, game, bestDelta); // seconds to the rivals ahead / behind, and to your best lap
   const finalLap = new FinalLapCue();
   const posCue = new PosCue();
+  const weatherCue = new WeatherCue();
   let countdownHint = false;
   let seenReward = 0;
   let finalIn = -1; // seconds until FINAL LAP shows (after the lap-time pop-up)
@@ -46,9 +48,10 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
-    else { finalLap.reset(); posCue.reset(); raceStats.reset(); finalIn = -1; }
+    else { finalLap.reset(); posCue.reset(); weatherCue.reset(); raceStats.reset(); finalIn = -1; }
     if (racing && finalLap.step(rm.playerLap, rm.totalLaps)) finalIn = 1.3;
     if (finalIn >= 0 && !game.paused && (finalIn -= dt) < 0) { finalIn = -1; if (racing) hud.popUp(t('lap.final'), '#ffc23d'); }
+    if (racing && !game.paused && weatherCue.step(game.weather !== 'CLEAR', game.weatherIntensity)) hud.popUp(t(game.weather === 'SNOW' ? 'weather.cueSNOW' : 'weather.cueRAIN'), '#18d8ff');
     if (racing && !game.paused && !game.player.finished) {
       const moved = posCue.step(game.telemetry.position, game.telemetry.racerCount, dt);
       if (moved) hud.flashPosition(moved > 0);

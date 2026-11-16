@@ -1,0 +1,18 @@
+import { WeatherCue } from '../src/game/weatherCue.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+const c = new WeatherCue();
+const fires: number[] = [];
+for (const i of [0.2, 0.3, 0.45, 0.5, 0.6, 0.8, 1]) if (c.step(true, i)) fires.push(i);
+check('fires once, when the build-up reaches 0.5', fires.length === 1 && fires[0] === 0.5, fires.join());
+const clear = new WeatherCue();
+check('clear weather never fires', ![1, 1, 1].some((i) => clear.step(false, i)));
+const r = new WeatherCue();
+check('first sighting past the threshold (restored save) does not fire', !r.step(true, 0.8) && !r.step(true, 0.9));
+c.reset();
+check('reset: a new race fires again', !c.step(true, 0.2) && c.step(true, 0.55));
+const j = new WeatherCue();
+check('a jump over the threshold still fires once', !j.step(true, 0.3) && j.step(true, 0.7) && !j.step(true, 0.8));
+const k = new WeatherCue();
+check('intensity dropping back (restart) then rising fires', !k.step(true, 0.4) && k.step(true, 0.5) && (k.reset(), !k.step(true, 0.2)) && k.step(true, 0.5));
+if (failed) process.exit(1);
