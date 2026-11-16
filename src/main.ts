@@ -150,7 +150,7 @@ story = new StoryController({
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
   extra: () => [fullscreenButton(fs), photoButton({ canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) }), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
-  onResume: () => pause.resume(),
+  onResume: () => pause.resume(), settings: (back) => menu.settingsPanel(back),
   onRestart: () => {
     pause.resume();
     game.restart();

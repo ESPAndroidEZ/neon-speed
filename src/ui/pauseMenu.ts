@@ -10,6 +10,8 @@ export interface PauseHandlers {
   onSaveQuit: () => void;
   /** Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. */
   extra?: () => (HTMLElement | null)[];
+  /** Builds the settings screen; `back` closes it. Adds a Settings button to the pause menu. */
+  settings?: (back: () => void) => HTMLElement;
 }
 
 /** Pause overlay: Resume, Restart, Save (slot picker), Save & Quit. */
@@ -17,12 +19,14 @@ export class PauseMenu {
   private layer: HTMLElement | null = null;
   private readonly slots: SaveSlots;
   private readonly hnd: PauseHandlers;
+  /** Settings screen drawn over the pause menu, if open. */
+  private sub: HTMLElement | null = null;
 
   constructor(slots: SaveSlots, handlers: PauseHandlers) {
     injectCss();
     this.slots = slots;
     this.hnd = handlers;
-    onLangChange(() => (this.layer?.dataset.picker ? this.picker() : this.layer && this.show()));
+    onLangChange(() => (this.sub ? this.openSettings() : this.layer?.dataset.picker ? this.picker() : this.layer && this.show()));
   }
 
   get open(): boolean {
@@ -38,6 +42,7 @@ export class PauseMenu {
       button(t('pause.resume'), () => this.hnd.onResume(), 'hot'),
       button(t('pause.restart'), () => this.hnd.onRestart()),
       button(t('pause.save'), () => this.picker()),
+      ...(this.hnd.settings ? [button(t('menu.settings'), () => this.openSettings())] : []),
       button(t('pause.saveQuit'), () => this.hnd.onSaveQuit()),
     );
     const more = (this.hnd.extra?.() ?? []).filter((x): x is HTMLElement => x !== null);
@@ -49,6 +54,10 @@ export class PauseMenu {
 
   /** Esc inside the slot picker goes back to the pause menu; returns true if it handled the key. */
   back(): boolean {
+    if (this.sub) {
+      this.closeSettings();
+      return true;
+    }
     if (!this.layer?.dataset.picker) return false;
     this.show();
     return true;
@@ -67,7 +76,24 @@ export class PauseMenu {
     document.body.appendChild(el);
   }
 
+  private openSettings(): void {
+    this.sub?.remove();
+    this.sub = this.hnd.settings?.(() => this.closeSettings()) ?? null;
+    if (!this.sub) return;
+    this.sub.style.zIndex = '45';
+    document.body.appendChild(this.sub);
+    this.sub.querySelector('button')?.focus({ preventScroll: true });
+  }
+
+  private closeSettings(): void {
+    this.sub?.remove();
+    this.sub = null;
+    this.layer?.querySelector('button')?.focus({ preventScroll: true });
+  }
+
   close(): void {
+    this.sub?.remove();
+    this.sub = null;
     this.layer?.remove();
     this.layer = null;
   }

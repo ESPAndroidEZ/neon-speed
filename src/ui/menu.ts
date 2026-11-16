@@ -192,7 +192,12 @@ export class Menu {
     this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage());
   }
 
+  /** The settings screen as an element; `back` is what its Back button does (main menu, or closing the overlay in the pause menu). */
+  settingsPanel(back: () => void): HTMLElement {
+    return buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: back });
+  }
+
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other', 'main', () => this.settings());
+    this.mount(this.settingsPanel(() => this.main()), 'other', 'main', () => this.settings());
   }
 }
