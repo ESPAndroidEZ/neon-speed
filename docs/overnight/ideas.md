@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Remappable keyboard keys: gas, brake, left, right, handbrake, nitro in Settings (desktop), swap on conflict, reserved keys refused, coach hints show the bound key (`input/keyBindings`, `ui/keyRemap`, `tests/key-bindings-check.mts`).
 - 2026-11-16 Colour-blind safe HUD setting: good/bad (green/red) become blue/orange through the theme tokens (`ui/colorSafe`, `settings.colorSafe`, `tests/save-check.mts`).
 - 2026-11-16 Photo mode in the pause menu: clean-frame PNG download (`ui/photo`, `tests/photo-check.mts`).
 - 2026-11-16 Calm HUD accessibility setting: stops the limiter shift-light flash, title flicker, brake-hint pulse, nitro/pop bursts and speed lines (`ui/calm`, `settings.calmUi`, row in the driving settings, `tests/save-check.mts`).

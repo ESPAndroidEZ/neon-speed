@@ -1,3 +1,6 @@
+import { DEFAULT_KEYS, KeyBindings } from '../input/keyBindings';
+import type { KeyAction } from '../input/keyBindings';
+import { niceKey } from './keyName';
 import type { Engine } from '../core/engine';
 import { isPhone } from '../core/quality';
 import { COACH_STEPS, coachUpdate, newCoachMemory, newCoachRun, type CoachMemory } from '../game/coachLogic';
@@ -32,6 +35,14 @@ function store(m: CoachMemory): void {
   }
 }
 
+const KEY_FOR: Record<string, KeyAction> = { gas: 'gas', brake: 'brake', nitro: 'nitro', handbrake: 'handbrake' };
+/** Current key for a coach step, upper case, as the player has it bound. */
+function coachKey(step: string): string {
+  const a = KEY_FOR[step];
+  const code = (KeyBindings.live?.codes ?? DEFAULT_KEYS)[a ?? 'gas'];
+  return niceKey(code).toUpperCase();
+}
+
 /** One calm hint line in the first races (gas, brake, nitro, handbrake). Each vanishes for good once the player uses that control. Display only. */
 export function attachCoach(engine: Engine, game: Game): void {
   const style = document.createElement('style');
@@ -56,7 +67,7 @@ export function attachCoach(engine: Engine, game: Game): void {
     const step = coachUpdate(mem, run, game.ctl, tel.raceTime, tel.speedKph, tel.nitroLevel, dt);
     if (step !== shown) {
       shown = step;
-      if (step >= 0) el.textContent = t(`coach.${COACH_STEPS[step]}.${touch ? 'touch' : 'key'}`);
+      if (step >= 0) el.textContent = t(`coach.${COACH_STEPS[step]}.${touch ? 'touch' : 'key'}`, { k: coachKey(COACH_STEPS[step]) });
       el.classList.toggle('on', step >= 0);
     }
     if (mem.dirty) {

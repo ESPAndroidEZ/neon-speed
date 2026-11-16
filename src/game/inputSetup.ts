@@ -3,6 +3,7 @@ import type { Engine } from '../core/engine';
 import { CombinedInput } from '../input/combinedInput';
 import { GamepadInput } from '../input/gamepad';
 import { KeyboardInput } from '../input/keyboard';
+import { KeyBindings } from '../input/keyBindings';
 import { createTouchControls } from '../ui/touchControls';
 import { ControlStore } from '../input/controlPrefs';
 import { TiltInput } from '../input/tiltInput';
@@ -17,6 +18,8 @@ export interface Controls {
   touch: ReturnType<typeof createTouchControls>;
   /** Phone control prefs (scheme, auto gas, tilt calibration), saved on their own key. */
   prefs: ControlStore;
+  /** Remappable keyboard keys (own storage key). */
+  bindings: KeyBindings;
   tilt: TiltInput;
   /** Wire what needs the Game: speed-sensitive keyboard steering and gamepad rumble on impacts. Call once the Game exists. */
   attach(engine: Engine, game: Game): void;
@@ -27,7 +30,8 @@ export interface Controls {
 /** All input devices in one place. `pause` and `reset` are what the pad's Start and Y and the touch buttons do. */
 export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }, kv: Storage | null): Controls {
   const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
-  const keys = new KeyboardInput();
+  const bindings = new KeyBindings(kv);
+  const keys = new KeyboardInput(bindings);
   const pad = new GamepadInput({ onPause: actions.pause, onReset: actions.reset });
   const prefs = new ControlStore(kv);
   const tilt = new TiltInput(prefs);
@@ -47,7 +51,7 @@ export function createControls(demo: string | null, actions: { pause: () => void
     window.addEventListener('pointerup', again, true);
   }
   return {
-    input, pad, touch, prefs, tilt,
+    input, pad, touch, prefs, tilt, bindings,
     onboard: () => {
       if (isPhone() && !prefs.data.chosen) chooseControls(prefs, tilt);
     },

@@ -140,7 +140,7 @@ menu = new Menu({
   startEvent: (ev) => story.start(ev),
   slots,
   onDriving: applyDriving,
-  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt }),
+  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt, keys: controls.bindings }),
   loadSlot: (id) => loadSlot(id),
 });
 const subs = new Subtitles(voice);

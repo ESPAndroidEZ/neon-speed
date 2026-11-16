@@ -4,13 +4,18 @@ import { SCHEMES } from '../input/controlPrefs';
 import type { TiltInput } from '../input/tiltInput';
 import { calibrate, enableTilt } from './controlsOnboard';
 import { fullscreenButton } from './fullscreenButton';
+import { keyRows } from './keyRemap';
+import type { KeyBindings } from '../input/keyBindings';
 import { button, h } from './uiKit';
+import { isPhone } from '../core/quality';
 import { t } from '../i18n';
 
 export interface ControlRowsDeps {
   fs: FullscreenControl;
   controls: ControlStore;
   tilt: TiltInput;
+  /** Remappable keyboard keys; their rows show on devices with a keyboard. */
+  keys?: KeyBindings;
 }
 
 /** Settings rows for the screen and the phone controls: full screen, scheme, and the tilt options. */
@@ -78,5 +83,6 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
   );
   refresh();
   rows.push(scheme, tiltBox);
+  if (d.keys && !isPhone()) rows.push(...keyRows(d.keys));
   return rows;
 }
