@@ -73,6 +73,11 @@ export class Music {
     if (seed !== this.song.seed) this.pendingSeed = seed;
   }
 
+  /** Pitch class (0..11) of the current song's key. */
+  get keyPc(): number {
+    return this.song.keyPc;
+  }
+
   get bpm(): number {
     return this.song.bpm;
   }

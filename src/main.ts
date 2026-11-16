@@ -1,4 +1,5 @@
 import { AudioManager } from './audio/audioManager';
+import { installUiSound } from './audio/uiSound';
 import { Engine } from './core/engine';
 import { AutoQuality, isPhone } from './core/quality';
 import { deviceHints, firstRunTier } from './core/perfTier';
@@ -83,6 +84,7 @@ attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
+installUiSound(audio.bus, () => audio.music.keyPc);
 engine.onFrame((_a, dt) => {
   audio.update(dt);
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());

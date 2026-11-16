@@ -30,7 +30,7 @@ export class AudioManager {
   private sampleCar = '';
   private readonly sfx: Sfx;
   private readonly turbo: TurboSound;
-  private readonly music: Music;
+  readonly music: Music;
   private readonly rivals: RivalEngines;
   private readonly bed: AmbienceBed;
   private lastHit = -9;
