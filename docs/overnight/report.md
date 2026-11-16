@@ -261,3 +261,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - You could not tell the nitro was gone until it stopped pushing, or that drifting had refilled it. A pop-up "NITRO EMPTY" shows when a burn drains the tank, and "NITRO READY" once it is back to half (ES: NITRO VACÍO / NITRO LISTO). They strictly alternate, so no spam, and a restored save with a low tank says nothing.
 - Display only, nitro physics untouched. Files: `game/nitroCue.ts` (pure), `game/raceFeedback.ts`, i18n `nitro.empty/ready`, `tests/nitro-cue-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: burn a full tank dry, then drift to refill; check the colours read on the pop-up line.
+
+## 99 Self-directed: pause menu status line
+- Pausing a race now shows "LAP 2/3 · P3/6 · 1:24.1" under PAUSED (lap hidden in sprints, position hidden when alone). Before, the pause screen said nothing about where you were in the race.
+- Display only. Files: `game/pauseStatus.ts` (pure), `game/pause.ts`, `ui/pauseMenu.ts` (`setStatus`), `tests/pause-status-check.mts` (10 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: pause mid-race and check the line sits well under the title on a phone. The lap label does not re-translate if you switch language while paused (next pause is right).

@@ -21,6 +21,8 @@ export class PauseMenu {
   private readonly hnd: PauseHandlers;
   /** Settings screen drawn over the pause menu, if open. */
   private sub: HTMLElement | null = null;
+  /** Line under the title (lap, position, time); set by the controller before show(). */
+  private status = '';
 
   constructor(slots: SaveSlots, handlers: PauseHandlers) {
     injectCss();
@@ -33,11 +35,17 @@ export class PauseMenu {
     return this.layer !== null;
   }
 
+  /** Text under PAUSED; empty hides it. Takes effect on the next show(). */
+  setStatus(text: string): void {
+    this.status = text;
+  }
+
   show(): void {
     this.close();
     const el = h('div', 'rb-layer dim');
     el.style.zIndex = '40';
     el.append(h('h2', 'rb-title', t('pause.title')));
+    if (this.status) el.append(h('div', 'rb-sub', this.status));
     el.append(
       button(t('pause.resume'), () => this.hnd.onResume(), 'hot'),
       button(t('pause.restart'), () => this.hnd.onRestart()),
