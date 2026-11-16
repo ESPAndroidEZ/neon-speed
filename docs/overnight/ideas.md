@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Results gap to the winner: dim "+0.83" per finisher in the results table (`game/resultGap`, `ui/results`, `tests/result-gap-check.mts`).
 - 2026-11-16 Start-line rev: gas flat during the countdown winds the engine up, smooth fall to real rpm at GO (`audio/launchRev`, `tests/launch-rev-check.mts`).
 - 2026-11-16 Lap time pop-up: "LAP n  m:ss.cc ±x.xx" at each lap end vs your best (`game/lapPop`, `game/ghost`, `tests/lap-pop-check.mts`).
 - 2026-11-16 Speed units: km/h or mph in Settings for the gauge, garage and tuning screens (`game/speedUnit`, `ui/unitsRow`, `tests/speed-unit-check.mts`).

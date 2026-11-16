@@ -181,3 +181,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Audio only: `audio/launchRev.ts` (pure, allocation free) and one line in `audio/audioManager.ts` (219 lines). Physics, saves, and the locked turbo model and sound are untouched (no boost is faked on the line). `tests/launch-rev-check.mts` (9 checks). Build and all tests green.
 - Not heard by ear: on the grid hold gas during the countdown with a few cars (a turbo car and an N/A one) and check the rev sounds right and the drop at GO is not odd.
 - Note for Carlos: the uncommitted change in `scripts/overnight.sh` has `$CLAUDE_BIN--dangerously-skip-permissions` with no space (the tmux launch command in `session_open`), which would break the next fresh session. I left your runner edits alone.
+
+## 99 Self-directed: gap to the winner on the results table
+- The results table showed only raw times. Each finisher behind the winner now also has a small dim "+0.83" next to the time (blank for the winner, DNFs and ties under 5 ms).
+- Display only. Files: `game/resultGap.ts` (pure), `ui/results.ts` (one extra column), `tests/result-gap-check.mts` (7 checks). Build and all tests green. Not seen by eye: finish a race and check the extra column fits on a narrow phone.
+- Skipped a survey result: radio banter, FOV kick, surface squeals, neon title and bot-lap tests already existed, so ideas.md backlog is mostly done; remaining big ones are replay and wet-asphalt reflections.

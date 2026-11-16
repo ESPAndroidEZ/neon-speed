@@ -2,6 +2,7 @@ import type { RaceResult } from '../core/raceManager';
 import { injectCss } from './uiKit';
 import { isPhone } from '../core/quality';
 import { t } from '../i18n';
+import { resultGap } from '../game/resultGap';
 
 const fmt = (sec: number): string => `${Math.floor(sec / 60)}:${(sec % 60).toFixed(2).padStart(5, '0')}`;
 
@@ -26,8 +27,9 @@ export class ResultsScreen {
   }
 
   show(r: RaceResult, extra?: ResultsExtra): void {
+    const win = r.racers.find((x) => x.position === 1)?.time ?? null;
     const rows = r.racers
-      .map((x) => `<tr style="${x.isPlayer ? 'color:#ff2a9d' : ''}"><td>P${x.position}</td><td>${x.isPlayer ? t('vs.you') : x.name}</td><td style="text-align:right">${x.time === null ? t('res.dnf') : fmt(x.time)}</td></tr>`)
+      .map((x) => `<tr style="${x.isPlayer ? 'color:#ff2a9d' : ''}"><td>P${x.position}</td><td>${x.isPlayer ? t('vs.you') : x.name}</td><td style="text-align:right">${x.time === null ? t('res.dnf') : fmt(x.time)}</td><td style="text-align:right;opacity:.65;font-size:.8em;padding-left:10px">${resultGap(x.time, win)}</td></tr>`)
       .join('');
     const head = t(extra ? (extra.passed ? 'res.passed' : 'res.failed') : r.position === 1 ? 'res.victory' : 'res.finished', { p: r.position });
     const color = extra && !extra.passed ? 'var(--red)' : '#18d8ff';
