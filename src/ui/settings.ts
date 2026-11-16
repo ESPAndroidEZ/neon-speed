@@ -12,6 +12,8 @@ import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
 import { applyUiSizes } from './uiSizes';
+import { engineSoundRow, soundCredits } from './soundSettings';
+import { ENGINE_SOURCE } from '../audio/audioParams';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -37,6 +39,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setSfxVolume(s.sfxVolume);
   d.audio.setEngineVolume(s.engineVolume);
   d.audio.setMusicVolume(s.musicVolume);
+  ENGINE_SOURCE.samples = s.engineSound !== 'synth';
   if (phoneDefaults(s)) d.store.commit();
   Object.assign(GRAPHICS, s.graphics);
   applyQuality(d.engine, s.quality, true);
@@ -153,7 +156,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = t(`hint.wphys.${s.weatherPhysics}`);
   };
   refreshWp();
-  root.append(vol, engVol, sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button(t('common.back'), d.onBack));
+  root.append(vol, engVol, engineSoundRow(s, () => d.store.commit()), sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), soundCredits(), button(t('common.back'), d.onBack));
   return root;
 }
 

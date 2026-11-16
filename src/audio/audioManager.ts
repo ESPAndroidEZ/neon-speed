@@ -3,7 +3,7 @@ import type { Game } from '../game/game';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventReader } from '../physics/driveEvents';
 import { WEATHER } from '../physics/weather';
 import { AudioBus } from './audioBus';
-import { AUDIO } from './audioParams';
+import { AUDIO, ENGINE_SOURCE } from './audioParams';
 import { createOscillatorVoice, createWorkletVoice, type EngineVoice } from './engineVoice';
 import { AmbienceBed } from './bed';
 import { Music } from './music';
@@ -140,7 +140,7 @@ export class AudioManager {
       if (s.lift) { if (rt.sound.turbo !== 'none') this.turbo.bov(Math.max(0.6, s.boost)); this.turbo.pop(0.8); }
     }
     const car2 = rt ?? spec, redline = rt?.tuning.redlineRpm ?? t.redlineRpm;
-    this.useCar(car2?.id ?? '');
+    this.useCar(ENGINE_SOURCE.samples ? car2?.id ?? '' : ''); // '' = no samples: the synth plays
     if (this.test) {
       this.testT += dt;
       if (this.test === 'sweep') {

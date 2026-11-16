@@ -52,6 +52,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.muted = s.muted === true;
   out.settings.voice = s.voice === true;
   out.settings.autoQuality = s.autoQuality !== false;
+  if (s.engineSound === 'rec' || s.engineSound === 'synth') out.settings.engineSound = s.engineSound;
   if (s.cameraShake === 'OFF' || s.cameraShake === 'LOW' || s.cameraShake === 'NORMAL') out.settings.cameraShake = s.cameraShake;
   if (s.lang === 'en' || s.lang === 'es') out.settings.lang = s.lang; // '' = not chosen: follow the browser language
   for (const k of ['subtitleSize', 'minimapSize'] as const) if (s[k] === 'S' || s[k] === 'M' || s[k] === 'L') out.settings[k] = s[k];

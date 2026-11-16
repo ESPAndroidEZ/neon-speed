@@ -9,10 +9,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/audio
 - audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
 - audioManager.ts (200) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
-- audioParams.ts (23) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO; type AudioParams
+- audioParams.ts (26) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO, ENGINE_SOURCE; type AudioParams
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
 - engineDsp.ts (202) Engine sound synthesis, written as ONE self-contained class (no runtime imports, no mod... | class EngineDsp
-- engineSamples.ts (92) Sample-based engine: looping recordings at fixed rpm, crossfaded by rpm (equal power be... | fn loadEngineSamples, layerMix, createSampleVoice
+- engineSamples.ts (96) Sample-based engine: looping recordings at fixed rpm, crossfaded by rpm (equal power be... | fn loadEngineSamples, layerMix, createSampleVoice
 - engineVoice.ts (105) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
 - music.ts (99) Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (spe... | class Music
 - musicPatterns.ts (72) Pure note logic for the generative synthwave track (no Web Audio), so it can be unit te... | fn chordTones, bassNote, arpNote, leadNote, drumHit, layers; const BPM, STEPS_PER_BAR, SECONDS_PER_STEP, midiToHz; iface DrumHit, Layers
@@ -48,7 +48,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rewards.ts (90) Racer fields the rewards read (structural, so tests can pass plain objects). | class RaceRewards; const REWARD; iface RewardRacer, RewardData; type RewardKind
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - save.ts (173) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
-- saveParse.ts (82) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- saveParse.ts (83) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - viewport.ts (44) Keeps the game sized to the REAL visible viewport: ResizeObserver on the container, vis... | fn watchViewport; const isPortrait
 - wakeLock.ts (50) Screen wake lock while a race runs, so the phone does not dim mid-race. `set(true)` req... | class WakeLock
 ## src/data
@@ -58,7 +58,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - carSpecs.ts (76) Real specs for the v2 handling model (contract: types/cars.ts), from docs/car-data.md. ... | fn withSpec; const SPECS
 - cars.ts (144) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
 - characters.ts (38) What a person looks like. The 2D portraits and the 3D figures are both built from this.... | const LOOKS, lookOf; iface Look; type HairStyle, Accessory, Build
-- engineSounds.ts (37) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
+- engineSounds.ts (38) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
 - engineVoices.ts (71) Engine voices for the procedural engine synth (audio/engineDsp). One profile per car, p... | fn engineVoiceIndex; const ENGINE_VOICES, VOICE_IDS; iface EngineProfile
 - loadout.ts (110) How a car looks and sits: everything the garage can change without touching performance... | fn sanitizeLoadout, stanceEffect, applyStance; const FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, CALIPERS, defaultLoadout; iface Vinyl, Loadout; type Finish, GlowPattern
 - lore.ts (48) World lore: title cards, crew bios and loading tips. Text only; no brand names. | const PREVIOUSLY, CREW, TIPS; iface TitleCard, CrewEntry
@@ -226,7 +226,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - results.ts (68) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - rotateHint.ts (39) Small "rotate your phone" pill in portrait on touch screens. Landscape is the recommend... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
-- settings.ts (170) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- settings.ts (173) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- soundSettings.ts (44) Settings row: engine sound from the recorded loops or from the procedural synth. | fn engineSoundRow, soundCredits
 - storyMenu.ts (64) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
 - subtitles.ts (86) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; iface Caption
 - theme.ts (26) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS

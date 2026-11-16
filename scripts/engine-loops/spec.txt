@@ -1,0 +1,49 @@
+# car load clip track ord t0 len [static_rpm]
+civic both evo_idle_lancer.mp3 - 0 3.0 1.5 732
+civic on civic_fn2.opus v_civic 2 122.0 0.85
+civic on civic_fn2.opus v_civic 2 114.2 0.85
+civic on civic_fn2.opus v_civic 2 29.6 0.85
+civic on civic_fn2.opus v_civic 2 84.4 0.85
+civic on civic_fn2.opus v_civic 2 49.1 0.85
+civic off civic_fn2.opus v_civic 2 118.5 0.85
+civic off civic_fn2.opus v_civic 2 65.5 0.85
+civic off civic_fn2.opus v_civic 2 43.9 0.85
+golf both golf_18_idle.mp3 - 0 10.0 1.5 1107
+golf both golf_mk6.opus v_golf2 2 57.1 0.85
+golf on golf_mk6.opus v_golf2 2 58.9 0.85
+golf on golf_mk6.opus v_golf2 2 53.3 0.85
+golf on golf_mk6.opus v_golf2 2 51.9 0.85
+golf off golf_mk6.opus v_golf2 2 65.6 0.85
+350z both z_g35.opus - 0 54.5 1.5 1152
+350z on z_g35.opus v_g35 3 48.9 0.85
+350z on z_g35.opus v_g35 3 51.1 0.85
+350z on z_g35.opus v_g35 3 77.1 0.85
+350z on z_g35.opus v_g35 3 82.6 0.85
+350z off z_g35.opus v_g35 3 16.4 0.85
+350z off z_g35.opus v_g35 3 9.5 0.85
+rx7 both rx7.opus - 0 14.0 1.5 880
+rx7 on rx7.opus v_rx7 2 246.4 0.85
+rx7 on rx7.opus v_rx7 2 132.5 0.85
+rx7 on rx7.opus v_rx7 2 249.0 0.85
+rx7 on rx7.opus v_rx7 2 46.0 0.85
+evo both evo_idle_lancer.mp3 - 0 6.0 1.5 732
+evo both evo6.opus v_evo 2 58.2 0.6
+evo on evo6.opus v_evo 2 80.2 0.85
+evo on evo6.opus v_evo 2 78.7 0.85
+evo off evo6.opus v_evo 2 106.6 0.85
+evo off evo6.opus v_evo 2 78.9 0.85
+m3 both m_coupe.opus - 0 30.3 1.5 1270
+m3 on m3_track1.mp3 v_m3a 3 72.8 0.85
+m3 on m3_track1.mp3 v_m3a 3 79.0 0.85
+m3 on m3_track1.mp3 v_m3a 3 10.4 0.85
+m3 on m3_track1.mp3 v_m3a 3 86.1 0.85
+m3 off m3_track1.mp3 v_m3a 3 89.7 0.85
+m3 off m3_track1.mp3 v_m3a 3 14.8 0.85
+supra both is300.opus - 0 122.0 1.5 1230
+supra on is300.opus v_is300 3 158.0 0.85
+supra on is300.opus v_is300 3 46.0 0.85
+supra on is300.opus v_is300 3 8.5 0.85
+supra on is300.opus v_is300 3 10.0 0.6
+e61 both e61_640d.mp3 - 0 43.0 1.5 834
+e61 both e61_530d_interior.mp3 - 0 16.3 1.5 1507
+e61 on e61_640d.mp3 v_640d 3 39.6 0.9

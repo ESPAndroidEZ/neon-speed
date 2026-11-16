@@ -7,6 +7,9 @@ import type { EngineVoice } from './engineVoice';
  * Loaded once per car with fetch + decodeAudioData and cached. Returns null when a car has no samples or any file
  * fails, so the caller keeps the procedural synth.
  */
+/** Loops are mastered at -12 dBFS RMS; this lifts them to about the synth's level. */
+const SAMPLE_GAIN = 1.5;
+
 const cache = new Map<string, Promise<{ layer: EngineLayer; buf: AudioBuffer }[] | null>>();
 
 export function loadEngineSamples(ctx: BaseAudioContext, carId: string): Promise<{ layer: EngineLayer; buf: AudioBuffer }[] | null> {
@@ -67,7 +70,8 @@ export function createSampleVoice(ctx: AudioContext, loops: { layer: EngineLayer
     }
     return { src, g, rpm: group.map((l) => l.layer.rpm), gains: new Float32Array(group.length), rates: new Float32Array(group.length), bus };
   };
-  const A = mk(on), B = off.length && off !== on ? mk(off) : null;
+  // a separate off-throttle group only when there are real off-throttle loops (idle 'both' loops alone would be pitched up)
+  const A = mk(on), B = loops.some((l) => l.layer.load === 'off') ? mk(off) : null;
   const apply = (m: ReturnType<typeof mk>, rpm: number, level: number, t: number): void => {
     layerMix(rpm, m.rpm, m.gains, m.rates);
     for (let i = 0; i < m.src.length; i++) {
@@ -79,7 +83,7 @@ export function createSampleVoice(ctx: AudioContext, loops: { layer: EngineLayer
     out,
     set(rpm, load, _layout, cut, _burble, volume) {
       const t = ctx.currentTime;
-      const v = cut ? volume * 0.35 : volume; // limiter bounce
+      const v = (cut ? volume * 0.35 : volume) * SAMPLE_GAIN; // limiter bounce
       const l = Math.min(1, Math.max(0, load));
       apply(A, rpm, B ? v * (0.35 + 0.65 * l) : v * (0.55 + 0.45 * l), t);
       if (B) apply(B, rpm, v * (1 - l) * 0.8, t);

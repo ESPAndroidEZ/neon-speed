@@ -21,3 +21,6 @@ export const AUDIO = {
 };
 
 export type AudioParams = typeof AUDIO;
+
+/** Engine sound source (Settings > Engine sound): the recorded loops (data/engineSounds) when a car has them, or always the synth. */
+export const ENGINE_SOURCE = { samples: true };

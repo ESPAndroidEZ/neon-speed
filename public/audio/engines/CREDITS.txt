@@ -1,0 +1,25 @@
+ENGINE SOUND CREDITS
+The engine sounds are short loops cut from the recordings below. Changes: cut into steady-rpm loops, pitch-flattened,
+crossfaded into seamless loops and level-matched. The recordings are not endorsed by their authors.
+
+Civic: "Civic Type R FN2 - stock exhaust sound" by Vigor, https://www.youtube.com/watch?v=qxhgUfPQ4Cc
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+Civic and Evo idle: "idle_mitsubishi_lancer_exhaust_rear_side.wav" by gladkiy, https://freesound.org/s/332387/, CC0 1.0
+Golf: "Volkswagen Golf MK6 GTI X Fi Exhaust X McChip DKR stage 2 Revs & Acceleration!" by FiExhaust,
+  https://www.youtube.com/watch?v=n1sqDV2vyZ0 (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+Golf idle: "CAR-ENGINE, Volkswagen Golf GLE 1.8 1992 Automatic, engine running idle, interior" by JoniHeinonen,
+  https://freesound.org/s/236903/, CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+350Z: "Infiniti G35 Start up, Exhaust Clip & fly by" by ken smith, https://www.youtube.com/watch?v=l-n8eLKDbQg
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+RX-7: "Mazda RX-7 Twib Rotar Engine Sound" (original title) by Taz Ringer, https://www.youtube.com/watch?v=4z0y1H2REvE
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+535d Touring: "BMW 640D Gran Coupe engine reverse mono.wav" by Soundholder, https://freesound.org/s/425508/,
+  and "BMW 530D E60 Interior Driving Medium Speed Drivers Perspective 2 Mono.wav" by Soundholder,
+  https://freesound.org/s/425502/, CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+M3: "BMWM3_01.wav" by ikbenraar, https://freesound.org/s/415276/, CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+M3 idle: "2007 BMW Z4 M Coupe cold start" by Team HQ Autosport Racing, https://www.youtube.com/watch?v=XwL8KdiaN1I
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+Evo: "Evo VI Noise" by prone, https://www.youtube.com/watch?v=p2UANOqploM
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
+Supra: "IS300 Exhaust Sound" by Mathieu Bernier, https://www.youtube.com/watch?v=686ZpNvX1sY
+  (via Wikimedia Commons), CC BY 3.0, https://creativecommons.org/licenses/by/3.0/
