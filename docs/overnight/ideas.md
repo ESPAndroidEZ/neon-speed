@@ -15,6 +15,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Payout split on the results: "Prize $x · Drifting $y" under the cash (`game/cashSplit`, `ui/results`, `tests/cash-split-check.mts`).
 - 2026-11-16 Drift record pop-up: "DRIFT RECORD n" when a banked drift beats your lifetime best (needs an existing record, so early drifts stay quiet) (`game/driftRecord`, `game/raceFeedback`, i18n `drift.record`, `tests/drift-record-check.mts`).
 - 2026-11-16 Pause menu status line: lap, position and race time under PAUSED (`game/pauseStatus`, `ui/pauseMenu`, `tests/pause-status-check.mts`).
 - 2026-11-16 Nitro tank cues: NITRO EMPTY when a burn runs the tank dry, NITRO READY when it is back to half (`game/nitroCue`, `game/raceFeedback`, `tests/nitro-cue-check.mts`).

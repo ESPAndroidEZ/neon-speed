@@ -12,7 +12,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'save.lap': 'vuelta {lap}/{laps}', 'save.overwrite': '¿Sobrescribir {slot}?',
   'res.victory': 'VICTORIA', 'res.finished': 'TERMINASTE P{p}', 'res.passed': 'EVENTO SUPERADO', 'res.failed': 'ESTA VEZ NO',
   'res.dnf': 'NT', 'res.bestLap': 'Mejor vuelta', 'res.laps': 'Vueltas', 'res.drift': 'Derrape',
-  'res.photo': 'FOTO FINISH', 
+  'res.photo': 'FOTO FINISH', 'res.split': 'Premio {prize} $ · Derrapes {drift} $',
   'res.top': 'Vel. máxima', 'res.near': 'Roces', 'res.slip': 'Estelas', 'res.clean': 'Curvas limpias',
   'res.tip': 'Consejo: {name} ({price} $). {why}',
   'res.again': 'Correr otra vez', 'res.againKey': 'Correr otra vez (Intro)', 'res.menuKey': 'Menú (Esc)',

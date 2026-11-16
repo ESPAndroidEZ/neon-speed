@@ -4,6 +4,7 @@ import { isPhone } from '../core/quality';
 import { t } from '../i18n';
 import { resultGap } from '../game/resultGap';
 import { isPhotoFinish } from '../game/photoFinish';
+import { cashSplit } from '../game/cashSplit';
 import { raceStats } from '../game/raceStats';
 import { speedText } from '../game/speedUnit';
 
@@ -43,13 +44,15 @@ export class ResultsScreen {
     const best = Math.min(...lt);
     const splits = lt.length > 1 ? `<div style="font-size:.85em;opacity:.85;margin-top:4px">${t('res.laps')}: ${lt.map((v, i) => `<span style="${v === best ? 'color:var(--green)' : ''}">${i + 1}&nbsp;${fmt(v)}</span>`).join(' &nbsp;·&nbsp; ')}</div>` : '';
     const st = raceStats.any ? `<div style="font-size:.8em;opacity:.75;margin-top:4px">${t('res.top')} <b>${speedText(raceStats.topKph)}</b> · ${t('res.near')} <b>${raceStats.near}</b> · ${t('res.slip')} <b>${raceStats.slip}</b> · ${t('res.clean')} <b>${raceStats.clean}</b></div>` : '';
+    const cs = extra ? null : cashSplit(r.cash, r.driftScore);
+    const split = cs ? `<div style="font-size:.8em;opacity:.75;margin-bottom:8px">${t('res.split', { prize: cs.prize.toLocaleString(), drift: cs.drift.toLocaleString() })}</div>` : '';
     const pb = !extra && r.note ? [`<div style="color:#18d8ff;font-size:.9em">${r.note}</div>`] : [];
     const notes = pb.join('') + (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
     this.root.innerHTML = `<div style="min-width:min(340px,86vw);max-width:calc(100vw - 24px);max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:clamp(14px,3vmin,28px) clamp(16px,4vmin,36px);border:1px solid #18d8ff55;border-radius:12px;background:#0a0d1cee;box-shadow:0 0 40px #18d8ff33">
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>
       <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>${splits}${st}
-      <div style="font-size:30px;margin:10px 0;color:var(--green)">+ $${r.cash.toLocaleString()}</div>${notes}
+      <div style="font-size:30px;margin:10px 0 ${split ? '2px' : '10px'};color:var(--green)">+ $${r.cash.toLocaleString()}</div>${split}${notes}
       <div id="rs-btns" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div></div>`;
     injectCss();
     const touch = isPhone();

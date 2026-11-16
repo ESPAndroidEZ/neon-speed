@@ -272,3 +272,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Display only. Files: `game/driftRecord.ts` (pure), `game/raceFeedback.ts` (stored record read once per race), i18n `drift.record`, `tests/drift-record-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: bank a big drift after the record exists; it appears next to the green BANKED pop-up, check they do not overlap badly on a phone.
 - Note: `scripts/overnight.sh` and `scripts/overnight-tab.sh` have uncommitted edits that are not mine (the runner itself); I left them untouched.
+
+## 99 Self-directed: payout split on the results
+- Under the green "+ $3,310" the results now say where it came from: "Prize $3,000 · Drifting $310" (ES: Premio / Derrapes). Hidden when there is no drift income or drift is the whole payout, and on drift events (they show their own verdict).
+- Display only, payout maths untouched. Files: `game/cashSplit.ts` (pure), `ui/results.ts`, i18n `res.split`, `tests/cash-split-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: finish a race with a few drifts and check the small line sits well under the cash on a phone.
