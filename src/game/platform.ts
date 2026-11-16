@@ -2,6 +2,7 @@ import type { Engine } from '../core/engine';
 import { FullscreenControl, isNative } from '../core/fullscreen';
 import { WakeLock } from '../core/wakeLock';
 import { showHomescreenHint } from '../ui/fullscreenButton';
+import { shouldPauseOnBlur } from './blurPause';
 import type { Game } from './game';
 import type { PauseController } from './pause';
 
@@ -44,6 +45,11 @@ export function installPlatform(d: PlatformDeps): FullscreenControl {
     wake.refresh();
   };
   document.addEventListener('visibilitychange', () => (document.hidden ? background() : foreground()));
+  window.addEventListener('blur', () =>
+    window.setTimeout(() => {
+      if (shouldPauseOnBlur({ finePointer: window.matchMedia('(pointer: fine)').matches, automated: navigator.webdriver === true, stillFocused: document.hasFocus() })) d.pause.pause();
+    }, 120),
+  );
   window.addEventListener('pagehide', () => d.pause.autosave());
   if (isNative()) void nativeShell(d, background, foreground);
   return fs;

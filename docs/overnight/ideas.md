@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Pause on window blur (desktop only, not in automated browsers): alt-tab no longer leaves the car driving (`game/blurPause`, `game/platform`, `tests/blur-pause-check.mts`).
 - 2026-11-16 Weather build-up cue: "RAIN/SNOW SETTING IN: GRIP DROPPING" pop-up once when the ramp-in reaches 50 % (`game/weatherCue`, `game/raceFeedback`, `tests/weather-cue-check.mts`).
 - 2026-11-16 Race stats on the results: top speed, near misses, slipstreams, clean corners (`game/raceStats`, `ui/results`, `tests/race-stats-check.mts`).
 - 2026-11-16 Position change flash: the POS line glows green when you overtake and red when you lose a place, after a 0.45 s hold so side-by-side swaps do not flicker; off in Calm HUD (`game/posCue`, `Hud.flashPosition`, `tests/pos-cue-check.mts`).

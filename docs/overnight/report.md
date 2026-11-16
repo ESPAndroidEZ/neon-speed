@@ -221,3 +221,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Rain and snow ramp in over ~20 s and the grip leaves before you see it. A pop-up "RAIN / SNOW SETTING IN: GRIP DROPPING" (ES too) now shows once when the build-up reaches 50 %. Clear weather, restored saves already past 50 % and finished players never see it; it re-arms at every countdown.
 - Display only, physics untouched. Files: `game/weatherCue.ts` (pure), `game/raceFeedback.ts`, i18n `weather.cueRAIN/SNOW`, `tests/weather-cue-check.mts` (6 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: start a rain race and check the pop-up appears about 6 s in and does not clash with other pop-ups.
+
+## 99 Self-directed: pause when the window loses focus
+- Alt-tabbing on a desktop left the car driving (only a hidden tab paused). A window blur now pauses a running race, after a 120 ms re-check that focus really left the page. Skipped on touch devices and in automated browsers (`navigator.webdriver`) so bots and smoke tests are unaffected. The audio is not suspended (only a hidden tab does that).
+- Files: `game/blurPause.ts` (pure policy), 5 lines in `game/platform.ts`, `tests/blur-pause-check.mts` (4 checks). Build and all tests green; no browser job run, nothing left running.
+- Not tried by hand: race on desktop, alt-tab away, come back: the pause menu should be showing.
