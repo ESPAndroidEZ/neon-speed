@@ -280,8 +280,34 @@ def _triangles():
     return total
 
 
+def merge_parts():
+    """Draw-call saver: apply modifiers and join every single-material part (not the wheels, which spin) into one object
+    per material; loose paint parts (mirrors, wings, scoops) join the body shell."""
+    groups = {}
+    for o in list(bpy.context.scene.objects):
+        if o.type != 'MESH' or o.name.startswith('wheel_') or o.name == 'body' or len(o.data.materials) != 1:
+            continue
+        groups.setdefault(o.data.materials[0].name, []).append(o)
+    body = bpy.data.objects.get('body')
+    for name, objs in groups.items():
+        for o in objs:
+            _apply_all(o)
+        target = body if (name == 'paint' and body) else objs[0]
+        for o in bpy.context.selected_objects:
+            o.select_set(False)
+        for o in objs + ([target] if target not in objs else []):
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = target
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        if len(bpy.context.selected_objects) > 1:
+            bpy.ops.object.join()
+        target.name = target.name if target is body else f'part_{name}'
+        target.select_set(False)
+
+
 def finish(out, budget=30000):
     """Flatten the hierarchy, apply transforms (wheels keep their hub location), export GLB, print stats JSON."""
+    merge_parts()
     for o in bpy.context.scene.objects:
         o.select_set(False)  # transform_apply works on the whole selection: one object at a time
     for o in bpy.context.scene.objects:

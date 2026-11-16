@@ -8,6 +8,6 @@ const html = `<body style="margin:0;background:#000;display:grid;grid-template-c
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 360 * Math.ceil(cars.length / 2) } });
 await page.setContent(html);
-await page.screenshot({ path: out });
+await page.screenshot(out.endsWith('.jpg') ? { path: out, type: 'jpeg', quality: 78 } : { path: out });
 await browser.close();
 console.log('wrote', out);
