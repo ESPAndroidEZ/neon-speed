@@ -33,12 +33,15 @@ export class ResultsScreen {
     const color = extra && !extra.passed ? 'var(--red)' : '#18d8ff';
     const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? 'var(--green)' : '#ff9aa8'}">${extra.objective}</div>` : '';
     const tip = !extra && r.position > 1 ? this.handlers.tip?.() : null; // lost a free race: suggest an upgrade
+    const lt = r.lapTimes ?? [];
+    const best = Math.min(...lt);
+    const splits = lt.length > 1 ? `<div style="font-size:.85em;opacity:.85;margin-top:4px">${t('res.laps')}: ${lt.map((v, i) => `<span style="${v === best ? 'color:var(--green)' : ''}">${i + 1}&nbsp;${fmt(v)}</span>`).join(' &nbsp;·&nbsp; ')}</div>` : '';
     const pb = !extra && r.note ? [`<div style="color:#18d8ff;font-size:.9em">${r.note}</div>`] : [];
     const notes = pb.join('') + (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
     this.root.innerHTML = `<div style="min-width:min(340px,86vw);max-width:calc(100vw - 24px);max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;padding:clamp(14px,3vmin,28px) clamp(16px,4vmin,36px);border:1px solid #18d8ff55;border-radius:12px;background:#0a0d1cee;box-shadow:0 0 40px #18d8ff33">
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>
-      <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>
+      <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>${splits}
       <div style="font-size:30px;margin:10px 0;color:var(--green)">+ $${r.cash.toLocaleString()}</div>${notes}
       <div id="rs-btns" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div></div>`;
     injectCss();

@@ -9,7 +9,7 @@ export const EN_GAME = {
   'save.load': 'LOAD', 'save.auto': 'Autosave', 'save.slot': 'Slot {n}', 'save.empty': 'empty', 'save.freeRace': 'Free race',
   'save.lap': 'lap {lap}/{laps}', 'save.overwrite': 'Overwrite {slot}?',
   'res.victory': 'VICTORY', 'res.finished': 'FINISHED P{p}', 'res.passed': 'EVENT PASSED', 'res.failed': 'NOT THIS TIME',
-  'res.dnf': 'DNF', 'res.bestLap': 'Best lap', 'res.drift': 'Drift',
+  'res.dnf': 'DNF', 'res.bestLap': 'Best lap', 'res.laps': 'Laps', 'res.drift': 'Drift',
   'res.tip': 'Tip: {name} (${price}). {why}',
   'res.again': 'Race again', 'res.againKey': 'Race again (Enter)', 'res.menuKey': 'Menu (Esc)',
   'vs.accel': 'Accel', 'vs.top': 'Top', 'vs.slide': 'Slide', 'vs.grip': 'Grip', 'vs.you': 'You', 'vs.driver': 'Driver',

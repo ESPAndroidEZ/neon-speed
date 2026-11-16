@@ -78,7 +78,7 @@ export class RaceManager {
     contact.surfaces = this.surfaces;
     const r: Racer = {
       id, name, isPlayer, car, contact, laps: new LapCounter(this.track), agent,
-      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, finishRank: 0, stuck: 0, progress: 0,
+      input: createNeutralInput(), finished: false, finishTime: 0, lapStart: 0, bestLap: Infinity, lapTimes: [], finishRank: 0, stuck: 0, progress: 0,
     };
     if (isPlayer) {
       this.playerIdx = this.racers.length;
@@ -105,8 +105,8 @@ export class RaceManager {
       r.finished = false;
       r.finishTime = 0;
       r.finishRank = 0;
-      r.lapStart = 0;
-      r.bestLap = Infinity;
+      r.lapStart = 0; r.bestLap = Infinity;
+      r.lapTimes.length = 0;
     });
     this.phase = 'GRID';
     this.countdown = COUNTDOWN_SECONDS;
@@ -184,6 +184,7 @@ export class RaceManager {
       r.laps.update(r.contact.hit.index);
       if (r.laps.laps > before) {
         r.bestLap = Math.min(r.bestLap, this.raceTime - r.lapStart);
+        r.lapTimes.push(this.raceTime - r.lapStart);
         r.lapStart = this.raceTime;
       }
       if (r.laps.laps >= this.totalLaps) {
