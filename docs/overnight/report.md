@@ -191,3 +191,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Ice patches and snow banks were silent when you drove onto them (only puddles splashed). Now rolling onto ice gives a short thin glassy hiss, and a snow bank a soft low thump, both louder with speed and ignored below 6 m/s. The puddle splash is the same sound as before (same numbers), now produced by the same pure function.
 - Files: `audio/surfaceCue.ts` (pure, returns cue numbers), `Sfx.puff` replaces `Sfx.splash`, 3 lines in `audio/audioManager.ts`, `tests/surface-cue-check.mts` (6 checks). Build and all tests green; no leftover processes. Audio-only, no physics or save change.
 - Not heard by ear: AGGRESSIVE/EXTREME weather, drive onto the tunnel ice and a corner snow bank and judge whether the cues are too loud or too quiet (levels are the first 3 numbers in `surfaceCue.ts`).
+
+## 99 Self-directed: FINAL LAP banner
+- When the player starts the last lap of a multi-lap race, an amber "FINAL LAP" (ES "ÚLTIMA VUELTA") pop-up shows. It waits 1.3 s so it does not overwrite the lap-time pop-up of the lap that just ended. Sprints (1 lap) and restored saves that resume on the last lap never show it (it fires only on a real step up to the last lap); restart resets it.
+- Display only. Files: `game/finalLap.ts` (pure `FinalLapCue`), `game/raceFeedback.ts`, i18n `lap.final`, `tests/final-lap-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
+- Not seen by eye mid-race: run a 3-lap race and check the banner appears about a second after the lap-2 time and does not clash with the gap tags.

@@ -1,0 +1,18 @@
+import { FinalLapCue } from '../src/game/finalLap.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+const c = new FinalLapCue();
+const fires: number[] = [];
+for (const lap of [1, 1, 2, 2, 3, 3, 3]) if (c.step(lap, 3)) fires.push(lap);
+check('fires once, on the step into lap 3 of 3', fires.length === 1 && fires[0] === 3, fires.join());
+const s = new FinalLapCue();
+check('sprint (1 lap) never fires', !s.step(1, 1) && !s.step(1, 1));
+const r = new FinalLapCue();
+check('first sighting on the last lap (restored save) does not fire', !r.step(3, 3) && !r.step(3, 3));
+const two = new FinalLapCue();
+check('2-lap race: lap 2 fires', !two.step(1, 2) && two.step(2, 2));
+c.reset();
+check('reset: a new race fires again', !c.step(1, 3) && !c.step(2, 3) && c.step(3, 3));
+const m = new FinalLapCue();
+check('middle lap does not fire', !m.step(1, 4) && !m.step(2, 4) && !m.step(3, 4) && m.step(4, 4));
+if (failed) process.exit(1);

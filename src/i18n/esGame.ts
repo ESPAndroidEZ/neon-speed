@@ -38,6 +38,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'coach.handbrake.key': 'Pulsa {k} en una curva para derrapar', 'coach.handbrake.touch': 'Pulsa FRENO DE MANO en una curva para derrapar',
   'rw.near': 'POR LOS PELOS', 'rw.slip': 'ESTELA', 'rw.clean': 'CURVA LIMPIA',
   'lap.done': 'VUELTA {n}',
+  'lap.final': 'ÚLTIMA VUELTA',
   'ghost.saved': 'NUEVA MEJOR VUELTA · FANTASMA GUARDADO', 'gap.best': 'MEJOR', 'radio.pack': 'el pelotón',
   'guard.title': 'Motor calado', 'guard.body': 'Algo salió mal. Tu progreso se guarda automáticamente. Recarga para volver a la carretera.',
   'guard.reload': 'Recargar', 'guard.continue': 'Continuar', 'guard.restoring': 'Restaurando gráficos...', 'pwa.ready': 'Actualización lista',

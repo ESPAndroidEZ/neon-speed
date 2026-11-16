@@ -7,6 +7,7 @@ import { attachWrongWay } from '../ui/wrongWay';
 import { attachGapTags } from '../ui/gapTags';
 import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
+import { FinalLapCue } from './finalLap';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 import { t } from '../i18n';
@@ -28,9 +29,11 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   attachCoach(engine, game); // first-races control hints
   attachWrongWay(engine, game); // WRONG WAY banner after a spin
   attachGapTags(engine, game, bestDelta); // seconds to the rivals ahead / behind, and to your best lap
+  const finalLap = new FinalLapCue();
   let countdownHint = false;
   let seenReward = 0;
-  engine.onFrame(() => {
+  let finalIn = -1; // seconds until FINAL LAP shows (after the lap-time pop-up)
+  engine.onFrame((_a, dt) => {
     const rm = game.rm;
     const me = rm.player; // rain / snow stop under tunnel roofs and at the car's roof
     if (me) updatePrecipCover(rm.track, me.contact.hit.index, engine.camera.position.x, engine.camera.position.z, me.car.state.position);
@@ -40,6 +43,9 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
+    else { finalLap.reset(); finalIn = -1; }
+    if (racing && finalLap.step(rm.playerLap, rm.totalLaps)) finalIn = 1.3;
+    if (finalIn >= 0 && !game.paused && (finalIn -= dt) < 0) { finalIn = -1; if (racing) hud.popUp(t('lap.final'), '#ffc23d'); }
     const a = rm.launch.announce;
     if (a && a !== 'NONE') {
       rm.launch.announce = null;
