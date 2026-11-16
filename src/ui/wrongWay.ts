@@ -18,6 +18,7 @@ export function attachWrongWay(engine: Engine, game: Game): void {
   document.head.append(style);
   const el = document.createElement('div');
   el.className = 'rb-ww';
+  el.setAttribute('role', 'alert');
   (document.getElementById('hud') ?? document.body).append(el);
   const mem = newWrongWay();
   const phone = isPhone();

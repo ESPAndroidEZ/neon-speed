@@ -71,6 +71,10 @@ export class Hud {
     br.append(this.gauge.el);
     this.lines.className = 'rb-lines';
     this.pop.className = 'rb-pop';
+    this.pop.setAttribute('role', 'status'); // screen readers announce pop-ups and the countdown
+    this.pop.setAttribute('aria-live', 'polite');
+    this.banner.setAttribute('role', 'status');
+    this.banner.setAttribute('aria-live', 'polite');
     this.lights.className = 'lights';
     this.lights.style.display = 'none';
     for (let i = 0; i < 3; i++) { const d = document.createElement('i'); this.lamps.push(d); this.lights.append(d); }

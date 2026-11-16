@@ -241,3 +241,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - The loading card picked its tip with a random index, so the same tip could show two races in a row. Now every tip shows once before any repeats, and a new round never starts with the tip just seen.
 - Display only. Files: `core/tipBag.ts` (pure), `ui/loadingCard.ts`, `tests/tip-bag-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
 - Nothing to look or listen for beyond noticing the tips rotate.
+
+## 99 Self-directed: screen-reader announcements for the HUD
+- The HUD pop-ups (drift tiers, lap times, FINAL LAP, weather cue, position messages) and the countdown banner are now polite live regions; the WRONG WAY warning is an alert. Screen readers and phone TalkBack/VoiceOver read them out; sighted players see no change.
+- Display/markup only. Files: `ui/hud.ts` (4 attributes), `ui/wrongWay.ts` (1), `tests/aria-live-check.mts` (3 checks). Build and all tests green; no browser job run, nothing left running.
+- Not tried with a real screen reader.
