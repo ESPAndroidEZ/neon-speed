@@ -12,9 +12,9 @@ const CSS = `
 #hud .tl{position:absolute;left:var(--ml);top:var(--mt);font-size:13px;opacity:.85;max-width:48vw}
 #hud .tl small{display:block;opacity:.7;font-size:11px;margin-top:3px}
 #hud .info{position:absolute;right:var(--mr);top:var(--mt);text-align:right;font-size:clamp(14px,2vw,20px);line-height:1.5;white-space:nowrap}
-#hud .ban{position:absolute;left:0;right:0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
+#hud .ban{position:absolute;left:50%;width:max-content;translate:-50% 0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
 #hud .ban.go{animation:rb-ban .55s var(--ease,ease-out) both}
-@keyframes rb-ban{0%{opacity:0;transform:scale(1.7)}25%{opacity:1}100%{opacity:1;transform:scale(1)}}
+@keyframes rb-ban{0%{opacity:0;scale:1.7}25%{opacity:1}100%{opacity:1;scale:1}}
 #hud .lights{position:absolute;left:0;right:0;top:calc(28% + clamp(84px,14vw,140px));display:flex;gap:clamp(10px,2vw,22px);justify-content:center}
 #hud .lights i{width:clamp(16px,3vw,30px);aspect-ratio:1;border-radius:50%;background:#ffffff22;border:2px solid #ffffff44}
 #hud .lights i.r{background:#ff2a4a;border-color:#ff9aa8;box-shadow:0 0 18px #ff2a4a}#hud .lights i.g{background:#7dff9a;border-color:#d8ffe0;box-shadow:0 0 22px #7dff9a}

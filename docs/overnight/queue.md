@@ -13,7 +13,7 @@ Carlos's priorities tonight (2026-11-16): the rename to Neon Speed, different go
 - [x] 14 Story rewrite: better arcs, characters, dialogue, EN + ES (tasks/14-story.md) -- cold open, mystery with clues, branch changes final race and ending, 3 lose variants, graph test, see report
 - [x] 15 Menus, HUD and first impression polish (tasks/15-ux-polish.md) -- shift light, start lamps, UI blips, results fade; see report
 - [x] 03 Hide dev-only keys from the player HUD (tasks/03-hud-dev-keys.md) -- player HUD shows R reset, M mute, Esc menu; weather keys only in dev (hud.keysDev)
-- [ ] 02 Main menu layout + viewport check in EN and ES (tasks/02-menu-viewport.md)
+- [x] 02 Main menu layout + viewport check in EN and ES (tasks/02-menu-viewport.md) -- viewport check clean at all 10 sizes (EN) + 3 in ES; fixed start banner overflow
 - [ ] 05 Language switch keeps garage car and open subtitle (tasks/05-lang-switch-state.md)
 - [ ] 04 Spanish pass: leftovers and tone, after the story rewrite (tasks/04-spanish-pass.md)
 - [ ] 06 Per-frame / per-step allocation audit (tasks/06-allocation-audit.md)

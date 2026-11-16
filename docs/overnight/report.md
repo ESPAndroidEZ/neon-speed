@@ -59,3 +59,7 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 
 ## 03 Hide dev keys from the HUD
 - `hud.keys` now lists only R / M / Esc; the 1/2/3 weather hint is `hud.keysDev` and only shown when `import.meta.env.DEV` (the hotkeys themselves were already dev-only). EN+ES in sync (`i18n-check` ok). `npm run lang` needs a dev server, not run.
+
+## 02 Main menu layout + viewport check
+- Ran the viewport check at all 10 viewports (EN) and 390x844, 844x390, 1280x720 in ES (one viewport at a time; running all 10 in one go times out on this box). Title/main-menu screenshots at 1366x768 and 360x640 looked at: wordmark, buttons and car do not overlap, `menu.x` left as is.
+- It caught a REAL regression from task 15: the scaling start banner (full-width box) overflowed the screen at 360x640, 768x1024, 1024x768, 1920x1080 and 2560x1080. Fixed (`width:max-content`, animate the `scale` property); re-ran those: ALL PASS. Qwen task 062 not checked (task 08 covers Qwen branches).
