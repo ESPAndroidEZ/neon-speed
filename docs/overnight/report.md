@@ -79,3 +79,6 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 ## 07 Structural debt
 - Split `ui/garage.ts` (218 -> 200 lines): stats cache, `hex`, `clamp01` and the hold-to-rev `soundTest` moved to `ui/garageParts.ts`. Split `world/city/textures.ts` (208 -> 140): shop-front and container textures moved to `world/city/texturesProps.ts` (importers in `facades.ts`/`yard.ts` updated, `tex`/`normalFrom`/`N` exported). Code only moved, build and all tests green, code map regenerated.
 - Left alone: `main.ts` (218), `game/game.ts` (219), `core/raceManager.ts` (218), `audio/audioManager.ts` (218, turbo wiring is LOCKED-adjacent): bootstrap order or LOCKED code makes a move riskier than the gain; they have only 1-2 lines of headroom, so the next feature touching them must split first (suggested seam: `launchFree`/`loadSlot` out of main.ts).
+
+## 08 Review Qwen branches
+- Qwen is not running (the server is stopped on purpose). There are no branches for tasks 056-062 (task files exist in `docs/tasks/`, never started) and `logs/qwen/summary.txt` has no entries for them; the branches that exist (003-055) predate this work and were handled in earlier sessions (055 is checked out in another worktree, left alone). Nothing merged, nothing archived. 056-062 stay queued for Qwen.
