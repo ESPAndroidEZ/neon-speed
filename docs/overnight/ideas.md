@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Gamepad menu navigation: d-pad or left stick moves focus, A presses, B goes back, left/right steps sliders and the garage car picker; only outside races (`input/padNavLogic`, `input/padMenu`, `tests/pad-nav-check.mts`).
 - 2026-11-16 Wrong-way warning: red banner after 1.2 s of fast driving against the road (with the R hint on keyboards), clears once turned around (`game/wrongWayLogic`, `ui/wrongWay`, `tests/wrong-way-check.mts`).
 - 2026-11-16 Settings from the pause menu: volume, camera shake, keys, accessibility and the rest can be changed mid-race; the screen opens over the pause menu, Back or Esc closes it (`PauseHandlers.settings`, `Menu.settingsPanel`).
 - 2026-11-16 Driver record: lifetime races, wins, podiums, DNFs, laps, time raced, cash won and best drift on the Crew screen, kept under its own localStorage key `ns.stats` (`game/driverStats`, `ui/statsCard`, `tests/driver-stats-check.mts`).

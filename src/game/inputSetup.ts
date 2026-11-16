@@ -2,6 +2,7 @@ import { DemoInput } from '../dev/demoInput';
 import type { Engine } from '../core/engine';
 import { CombinedInput } from '../input/combinedInput';
 import { GamepadInput } from '../input/gamepad';
+import { PadMenu } from '../input/padMenu';
 import { KeyboardInput } from '../input/keyboard';
 import { KeyBindings } from '../input/keyBindings';
 import { createTouchControls } from '../ui/touchControls';
@@ -57,7 +58,9 @@ export function createControls(demo: string | null, actions: { pause: () => void
     },
     attach: (engine, game) => {
       let was = game.state;
-      engine.onFrame(() => {
+      const padMenu = new PadMenu(); // gamepad drives the menus (not while racing: A is the handbrake)
+      engine.onFrame((_a, dt) => {
+        padMenu.update(dt, game.paused || game.state !== 'RACING');
         keys.speedKph = game.telemetry.speedKph;
         tilt.speedKph = touch.speedKph = Math.abs(game.telemetry.speedKph);
         if (game.state === 'RACING' && was !== 'RACING' && isPhone()) controlsTutorial(prefs);
