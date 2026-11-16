@@ -8,7 +8,7 @@ import { setYawOverride } from '../world/modelPrefs';
 import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
 import { button, h, money } from './uiKit';
-import { t, tx } from '../i18n';
+import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
 
 export interface GarageDeps {
@@ -34,6 +34,11 @@ const CALIB = import.meta.env.DEV && new URLSearchParams(location.search).has('c
 const clamp01 = (v: number): number => Math.max(0.04, Math.min(1, v));
 
 /** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
+/** Browsed car index and when the language last changed (registered at import time, so it runs before the menu rebuilds the screen). */
+let browsed = -1;
+let langAt = -1e9;
+onLangChange(() => { langAt = performance.now(); });
+
 export function buildGarage(d: GarageDeps): HTMLElement {
   const root = h('div', 'rb-layer');
   // desktop: panel on the left, car on the right; narrow screens: bottom sheet
@@ -45,8 +50,10 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   panel.style.cssText += ';cursor:default;width:min(400px,92vw);box-sizing:border-box;max-height:88vh;overflow:auto';
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
-  const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
-  const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
+  if (performance.now() - langAt < 400 && browsed >= 0) idx = browsed; // rebuilt by a language switch: keep the browsed car
+  browsed = idx;
+  const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = browsed = (idx + CARS.length - 1) % CARS.length; render(); };
+  const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = browsed = (idx + 1) % CARS.length; render(); };
   carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
   const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); window.clearInterval(watch); } }, 400);
   let yaw = 0;

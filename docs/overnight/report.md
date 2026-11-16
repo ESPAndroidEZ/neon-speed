@@ -63,3 +63,7 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 ## 02 Main menu layout + viewport check
 - Ran the viewport check at all 10 viewports (EN) and 390x844, 844x390, 1280x720 in ES (one viewport at a time; running all 10 in one go times out on this box). Title/main-menu screenshots at 1366x768 and 360x640 looked at: wordmark, buttons and car do not overlap, `menu.x` left as is.
 - It caught a REAL regression from task 15: the scaling start banner (full-width box) overflowed the screen at 360x640, 768x1024, 1024x768, 1920x1080 and 2560x1080. Fixed (`width:max-content`, animate the `scale` property); re-ran those: ALL PASS. Qwen task 062 not checked (task 08 covers Qwen branches).
+
+## 05 Language switch keeps UI state
+- `ui/subtitles`: every shown caption keeps its English source (`data-src`) and is re-translated in place on a language change (remaining display time untouched). `ui/dialogue`: the open line (and its choice buttons, if asked) redraws in the new language, finished text stays finished, typing lines restart. `ui/garage`: browsed car index survives a rebuild caused by a language switch (module-level `browsed` + a 400 ms window from a listener registered at import time, so the browsed car does not leak into the next fresh garage visit; the selected car and the save are never touched).
+- Verified: build, all tests. NOT verified in a browser (UI-only, no pure logic to test); the garage has no language row today, so the garage case only triggers if a language change happens while it is open.

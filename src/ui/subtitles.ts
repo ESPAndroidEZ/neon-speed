@@ -1,5 +1,5 @@
 import { h, injectCss } from './uiKit';
-import { getLang, tx } from '../i18n';
+import { getLang, onLangChange, tx } from '../i18n';
 
 /** Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. */
 export class Voice {
@@ -49,6 +49,7 @@ export class Subtitles {
     this.voice = voice;
     this.layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:25;font:700 20px system-ui,sans-serif;color:#fff;text-shadow:0 0 10px #000';
     document.body.appendChild(this.layer);
+    onLangChange(() => { for (const el of Array.from(this.layer.children) as HTMLElement[]) if (el.dataset.src) el.textContent = tx(el.dataset.src); }); // a shown line switches language in place
   }
 
   schedule(list: readonly Caption[]): void {
@@ -62,6 +63,7 @@ export class Subtitles {
   flash(text: string, dur: number, kind: Caption['kind'] = 'switch'): void {
     const line = tx(text);
     const el = h('div', '', line);
+    el.dataset.src = text;
     const styles: Record<Caption['kind'], string> = {
       switch: 'position:absolute;left:0;right:0;bottom:14%;text-align:center;font-size:clamp(18px,3vw,28px);font-style:italic;color:#9fe8ff',
       lower: 'position:absolute;left:max(24px,4vw);bottom:22%;font-size:clamp(16px,2.4vw,22px);letter-spacing:2px;padding:8px 14px;background:#05060d99;border-left:3px solid #ff2a9d',
