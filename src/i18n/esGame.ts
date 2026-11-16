@@ -31,7 +31,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'cards.previously': 'Anteriormente en Kestrel Bay', 'cards.skip': 'Clic para continuar · Esc para saltar',
   'dlg.phone': 'móvil', 'dlg.answer': 'Intro para responder', 'dlg.continue': 'Intro / clic para continuar · Esc para saltar',
   'cg.fast': 'RÁPIDA', 'cg.sharp': 'CERRADA', 'cg.hairpin': 'HORQUILLA', 'cg.brake': 'FRENA', 'cg.ease': 'SUELTA', 'cg.left': 'IZQUIERDA', 'cg.right': 'DERECHA',
-  'launch.perfect': '¡SALIDA PERFECTA!', 'launch.good': 'BUENA SALIDA', 'launch.early': '¡REVOLUCIONADO!', 'launch.hint': 'ACELERA JUSTO ANTES DE LA SALIDA',
+  'ww.title': 'SENTIDO CONTRARIO', 'ww.hint': 'Date la vuelta o pulsa R para volver a la pista', 'launch.perfect': '¡SALIDA PERFECTA!', 'launch.good': 'BUENA SALIDA', 'launch.early': '¡REVOLUCIONADO!', 'launch.hint': 'ACELERA JUSTO ANTES DE LA SALIDA',
   'coach.gas.key': 'Mantén {k} o ARRIBA para acelerar', 'coach.gas.touch': 'Mantén ACELERAR para acelerar',
   'coach.brake.key': 'Pulsa {k} o ABAJO antes de las curvas', 'coach.brake.touch': 'Pulsa FRENO antes de las curvas',
   'coach.nitro.key': 'Mantén {k} para un empujón de nitro', 'coach.nitro.touch': 'Mantén NITRO para un empujón',

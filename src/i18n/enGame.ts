@@ -29,7 +29,7 @@ export const EN_GAME = {
   'cards.previously': 'Previously in Kestrel Bay', 'cards.skip': 'Click to continue · Esc to skip',
   'dlg.phone': 'phone', 'dlg.answer': 'Enter to answer', 'dlg.continue': 'Enter / click to continue · Esc to skip',
   'cg.fast': 'FAST', 'cg.sharp': 'SHARP', 'cg.hairpin': 'HAIRPIN', 'cg.brake': 'BRAKE', 'cg.ease': 'EASE', 'cg.left': 'LEFT', 'cg.right': 'RIGHT',
-  'launch.perfect': 'PERFECT LAUNCH!', 'launch.good': 'GOOD LAUNCH', 'launch.early': 'OVER-REVVED', 'launch.hint': 'HIT THE GAS JUST BEFORE GO',
+  'ww.title': 'WRONG WAY', 'ww.hint': 'Turn around, or press R to get back on track', 'launch.perfect': 'PERFECT LAUNCH!', 'launch.good': 'GOOD LAUNCH', 'launch.early': 'OVER-REVVED', 'launch.hint': 'HIT THE GAS JUST BEFORE GO',
   'coach.gas.key': 'Hold {k} or UP to accelerate', 'coach.gas.touch': 'Hold GAS to accelerate',
   'coach.brake.key': 'Tap {k} or DOWN before corners', 'coach.brake.touch': 'Tap BRAKE before corners',
   'coach.nitro.key': 'Hold {k} for a nitro boost', 'coach.nitro.touch': 'Hold NITRO for a boost',

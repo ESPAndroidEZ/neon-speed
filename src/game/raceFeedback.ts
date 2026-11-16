@@ -3,6 +3,7 @@ import type { LaunchResult } from '../core/launch';
 import { WEATHER } from '../physics/weather';
 import { updatePrecipCover } from '../world/precipCover';
 import { attachCoach } from '../ui/coach';
+import { attachWrongWay } from '../ui/wrongWay';
 import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import type { Hud } from '../ui/hud';
@@ -24,6 +25,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
   attachGhost(engine, game, hud); // best-lap ghost car
   attachCoach(engine, game); // first-races control hints
+  attachWrongWay(engine, game); // WRONG WAY banner after a spin
   let countdownHint = false;
   let seenReward = 0;
   engine.onFrame(() => {
