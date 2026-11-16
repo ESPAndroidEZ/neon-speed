@@ -9,6 +9,7 @@ import { CornerGuide } from '../ui/cornerGuide';
 import { attachGhost } from './ghost';
 import { FinalLapCue } from './finalLap';
 import { PosCue } from './posCue';
+import { raceStats } from './raceStats';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 import { t } from '../i18n';
@@ -45,12 +46,13 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
-    else { finalLap.reset(); posCue.reset(); finalIn = -1; }
+    else { finalLap.reset(); posCue.reset(); raceStats.reset(); finalIn = -1; }
     if (racing && finalLap.step(rm.playerLap, rm.totalLaps)) finalIn = 1.3;
     if (finalIn >= 0 && !game.paused && (finalIn -= dt) < 0) { finalIn = -1; if (racing) hud.popUp(t('lap.final'), '#ffc23d'); }
     if (racing && !game.paused && !game.player.finished) {
       const moved = posCue.step(game.telemetry.position, game.telemetry.racerCount, dt);
       if (moved) hud.flashPosition(moved > 0);
+      raceStats.step(game.player.car.state.speed);
     }
     const a = rm.launch.announce;
     if (a && a !== 'NONE') {
@@ -60,6 +62,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
     if (rm.rewards.seq !== seenReward) {
       seenReward = rm.rewards.seq;
       const k = rm.rewards.last;
+      raceStats.count(k);
       if (k) hud.popUp(`${t(REWARD[k] ?? 'rw.clean')}  +${t('pad.nitro')}`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : 'var(--green)');
     }
     if (!racing || game.player.finished) {

@@ -210,3 +210,9 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - The LAP / POS block at the top right now glows green and pulses when you gain a place and red when you lose one. A new position must hold 0.45 s to count, so two cars swapping side by side do not make it flicker; the first position of a race, single-racer runs, pause and finished players never fire. Calm HUD turns the animation off.
 - Display only. Files: `game/posCue.ts` (pure), `game/raceFeedback.ts`, `ui/hud.ts` (`flashPosition`), `ui/calm.ts`, `tests/pos-cue-check.mts` (7 checks). Build, all tests and smoke green; no leftover processes.
 - Not seen by eye: overtake someone and check the glow is noticeable but not distracting; the colours follow the colour-blind setting through `--green` / `--red`.
+
+## 99 Self-directed: race stats on the results
+- The results screen now has a small dim line under the lap breakdown: Top speed (in your km/h or mph setting), Near misses, Slipstreams, Clean corners for that race. Hidden if the player never moved. EN + ES (`res.top/near/slip/clean`).
+- Display only. Files: `game/raceStats.ts` (pure counter, shared instance), `game/raceFeedback.ts` (feeds it, resets at the countdown), `ui/results.ts`, `tests/race-stats-check.mts` (6 checks). Build, all tests, smoke and `lang` green; no leftover processes.
+- Not seen by eye: finish a race and check the extra line fits on a narrow phone.
+- Note: `scripts/overnight.sh` still has the `$CLAUDE_BIN--dangerously-skip-permissions` missing space (uncommitted runner edit, left alone).
