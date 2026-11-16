@@ -1,5 +1,10 @@
 # Overnight report
 
+**Morning summary (branch `overnight/2026-11-16`, `git log main..HEAD --oneline`):**
+1. Done: Neon Speed rename, per-car engine voices, procedural house music, detailing pass on all eight cars, story rewrite (EN+ES), menu blips, HUD shift light + start lights + results fade, language switch keeps state, dev keys hidden, allocation cleanup, two file splits. Build, all tests, smoke (9), `lang` green; `visual` has one FAIL, `neon-clear` clipped 0.62 % (0.73 % on the untouched branch, so slightly better, not caused by tonight).
+2. Blocked / not done: needs Carlos (handling v2 default, tilt, licences, merge to main); Qwen 056-062 never ran; slow-mo finish, boot/loading polish and Chapter 3 not built; `neon-clear` clipping.
+3. Look first: play a fresh save for the cold open (Mara's captions are time based), listen to the Garage "Sound test" for the eight engines and the menu music, check the title screen and the start lights.
+
 Newest entries at the bottom. One entry per finished or blocked task: what changed, what was verified, what Carlos should look at.
 
 ## 01 Baseline (branch overnight/2026-11-16 at 87cb1df)
@@ -82,3 +87,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 
 ## 08 Review Qwen branches
 - Qwen is not running (the server is stopped on purpose). There are no branches for tasks 056-062 (task files exist in `docs/tasks/`, never started) and `logs/qwen/summary.txt` has no entries for them; the branches that exist (003-055) predate this work and were handled in earlier sessions (055 is checked out in another worktree, left alone). Nothing merged, nothing archived. 056-062 stay queued for Qwen.
+
+## 09 Final verification
+- Handoff "Overnight round" added, code map regenerated. build:q OK, test:q ALL PASS, smoke 9/9, `lang` ok, `visual` 1 FAIL (`neon-clear`, clipped 0.62 
+## 09 Final verification
+- Handoff "Overnight round" added, code map regenerated. build:q OK, test:q ALL PASS, smoke 9/9, `lang` ok, `visual` 1 FAIL (`neon-clear`, clipped 0.62 %, pre-existing, was 0.73 %). Nothing left running (vite/chrome checked).

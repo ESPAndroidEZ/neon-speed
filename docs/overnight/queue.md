@@ -19,7 +19,7 @@ Carlos's priorities tonight (2026-11-16): the rename to Neon Speed, different go
 - [x] 06 Per-frame / per-step allocation audit (tasks/06-allocation-audit.md) -- physics/core/camera/fx already clean; removed per-frame strings in HUD, gauge, corner guide
 - [x] 07 Structural debt: split the biggest files at their seams (tasks/07-structural-debt.md) -- two splits (garageParts, city/texturesProps); main.ts judged unsafe
 - [x] 08 Review finished Qwen branches (tasks/08-qwen-review.md) -- no unreviewed Qwen branches exist (056-062 never ran), nothing to merge
-- [ ] 09 Docs in sync, full verification (tasks/09-final.md)
+- [x] 09 Docs in sync, full verification (tasks/09-final.md) -- docs synced, build+tests+smoke+lang green, visual: only the pre-existing neon-clear fail
 - [ ] 99 Self-directed improvements, standing item, never ticked (docs/overnight/ideas.md)
 
 ## Needs Carlos (never do these overnight)
