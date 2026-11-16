@@ -35,7 +35,7 @@ export class ArcGauge {
   private readonly shift = document.createElement('div');
   private readonly leds: HTMLElement[] = [];
   private ledN = -1;
-  private key = '';
+  private key = -1;
   private nitroWas = false;
 
   constructor() {
@@ -55,7 +55,7 @@ export class ArcGauge {
   }
 
   update(kph: number, rpmFrac: number, gear: number, nitro: number, nitroActive: boolean): void {
-    const k = `${Math.round(kph)}|${Math.round(rpmFrac * 60)}|${gear}|${Math.round(nitro * 50)}`;
+    const k = Math.round(kph) + 1000 * Math.round(rpmFrac * 60) + 1e5 * (gear + 2) + 1e7 * Math.round(nitro * 50); // numeric key: no string per frame
     if (nitroActive && !this.nitroWas) {
       this.burst.classList.remove('go');
       void this.burst.offsetWidth; // restart the animation

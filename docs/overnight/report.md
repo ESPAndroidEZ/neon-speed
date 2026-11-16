@@ -70,3 +70,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 
 ## 04 Spanish pass
 - Grepped all `src/i18n/es*.ts` for LatAm vocabulary (carro, auto, celular, computadora, ahorita, manejar, llantas/rines, cajuela, boletos, ustedes-imperatives such as pulsen/elijan/toquen, voseo, bare Enter/Shift/Ctrl): zero hits. Spain markers are present (coche, móvil, conducir, matrícula, Intro, Mayús, neumáticos, latiguillo). Read a random sample of the new story strings (esContentF): register, tuteo and Spain Spanish are consistent, no calques found. 0 strings changed. `i18n-check` ok (331 UI keys, 618 content strings translated). `npm run lang` needs a dev server, not run.
+
+## 06 Allocation audit
+- Purity: `grep "from 'three'" src/physics` is empty. Grepped `src/physics src/core src/camera src/fx src/game` for `new Vector/Quaternion/Color/Euler`, `.clone()`, `.map/.filter/.slice/spread`: every hit is setup, snapshot or stats code (assists factory, carSnapshot, carStats, carRating, raceManager.place, engine ctor, ghost recording), none per step/frame. Telemetry and weather env use fill-style reuse already.
+- Fixed (per-frame string building, all UI): `ui/hud.ts` `update` (info string rebuilt 60x/s, now a numeric key, rebuilt on change only), `ui/gauge.ts` `update` (string key, now numeric), `ui/cornerGuide.ts` `update` (string key plus an array literal per frame, now a numeric key, a module const and a `lastWord` compare). Behaviour identical; build and all tests green.
+- LOCKED areas (drivetrain boost, stability, weather physics) were not opened. `scripts/soak.mjs` not run (browser, RAM rule).

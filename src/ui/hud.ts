@@ -40,7 +40,7 @@ export class Hud {
   private readonly lines = document.createElement('div');
   private readonly pop = document.createElement('div');
   private lastTier = 0;
-  private lastInfo = '';
+  private lastInfoKey = -1;
   private lastScore = -1;
   private weatherNow: Weather | null = null;
 
@@ -75,7 +75,7 @@ export class Hud {
     this.root.append(style, this.lines, this.weather, this.info, this.banner, this.lights, this.drift, this.pop, br);
     parent.appendChild(this.root);
     onLangChange(() => {
-      this.lastInfo = '';
+      this.lastInfoKey = -1;
       this.lastScore = -1; // labels re-render on the next update
       if (this.weatherNow) this.setWeather(this.weatherNow);
     });
@@ -113,11 +113,12 @@ export class Hud {
   }
 
   update(tel: RaceTelemetry): void {
-    const secs = Math.floor(tel.raceTime * 10) / 10;
-    const info = `${t('hud.lap')} ${tel.lap}/${tel.totalLaps}<br>${t('hud.pos')} ${tel.position}/${tel.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
-    if (info !== this.lastInfo) {
-      this.lastInfo = info;
-      this.info.innerHTML = info;
+    const tenths = Math.floor(tel.raceTime * 10);
+    const ik = tenths + 1e7 * tel.lap + 1e9 * tel.position + 1e11 * tel.racerCount + 1e13 * tel.totalLaps; // numeric key: the string is built only when it changes
+    if (ik !== this.lastInfoKey) {
+      this.lastInfoKey = ik;
+      const secs = tenths / 10;
+      this.info.innerHTML = `${t('hud.lap')} ${tel.lap}/${tel.totalLaps}<br>${t('hud.pos')} ${tel.position}/${tel.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
     }
     this.gauge.update(tel.speedKph, tel.rpm / tel.redlineRpm, tel.gear, tel.nitroLevel, tel.nitroActive);
     // edge speed lines fade in between 110 and 220 km/h
