@@ -1,42 +1,36 @@
+import type { EngineProfile } from '../data/engineVoices';
+
 /*
- * Engine sound synthesis, written as ONE self-contained class (no imports, no module-level constants) so that
+ * Engine sound synthesis, written as ONE self-contained class (no runtime imports, no module-level constants) so that
  * `EngineDsp.toString()` can be shipped into an AudioWorklet as source text. The same class runs in Node for tests.
+ * The engine voices are plain data (data/engineVoices) handed to the constructor; `layout` selects one of them.
  *
- * Model: a wavetable of the firing-order harmonics (per engine layout, morphing from a soft low-load tone to a rich
- * full-load tone), plus intake roar (filtered noise ~ load), exhaust resonance (two band emphasis filters), a rev
- * limiter gate, and deceleration burble and pops.
- *   layout: 0 inline-4, 1 V6, 2 inline-6, 3 rotary.
+ * Model: a wavetable of the firing-order harmonics (per voice, morphing from a soft low-load tone to a rich
+ * full-load tone), a half-order lump for uneven firing, intake roar (filtered noise ~ load, chopped by the firing
+ * pulses), an optional cam switch, diesel knock, exhaust resonance (three band filters), output darkening,
+ * a rev limiter gate, and deceleration burble and pops.
  */
 export class EngineDsp {
-  sr: number; N: number; tables: Float32Array[][]; phase: number; rpm: number; rpmT: number; load: number; loadT: number;
-  layout: number; cut: number; burble: number; volume: number; seed: number; lp: number; lp2: number; cutPh: number;
-  pop: number; popPh: number; z: number[]; coef: number[][]; voicing: number; voicingBuilt: number; jit: number; overrun: number; prevLoad: number; ik1: number; ik2: number;
+  sr: number; N: number; prof: EngineProfile[]; tables: Float32Array[][]; phase: number; ph2: number; rpm: number; rpmT: number;
+  load: number; loadT: number; layout: number; cut: number; burble: number; volume: number; seed: number; cutPh: number;
+  pop: number; popPh: number; z: number[]; coef: number[][]; fg: number[]; voicing: number; built: number; jit: number;
+  overrun: number; prevLoad: number; ik1: number; ik2: number; kEnv: number; kLp: number; dk: number; dy: number;
 
-  constructor(sampleRate: number) {
+  constructor(sampleRate: number, profiles: EngineProfile[]) {
     this.sr = sampleRate;
     this.N = 1024;
-    // one wavetable per layout and load level (0 = light, 1 = full load)
-    const amps: number[][][] = [
-      // inline-4: strong firing order (2nd crank order), lumpy half order, thin top end
-      [[1, 0.5, 0.18, 0.1, 0.05, 0.03], [1, 0.7, 0.55, 0.4, 0.3, 0.22, 0.16, 0.12, 0.09, 0.07]],
-      // V6: smoother, strong 3rd order with a gruff mid
-      [[1, 0.35, 0.3, 0.12, 0.08, 0.04], [1, 0.6, 0.65, 0.45, 0.4, 0.28, 0.22, 0.17, 0.12, 0.1]],
-      // inline-6: very smooth, silky harmonics up high
-      [[1, 0.3, 0.12, 0.2, 0.05, 0.08], [1, 0.5, 0.4, 0.5, 0.35, 0.38, 0.22, 0.25, 0.14, 0.15, 0.09, 0.1]],
-      // rotary: dense buzzy harmonics, slow roll-off
-      [[1, 0.6, 0.5, 0.42, 0.36, 0.3, 0.26, 0.22], [1, 0.9, 0.82, 0.75, 0.68, 0.6, 0.54, 0.48, 0.42, 0.37, 0.32, 0.28, 0.24, 0.2]],
-    ];
+    this.prof = profiles;
     this.tables = [];
-    for (let l = 0; l < 4; l++) {
+    for (let l = 0; l < profiles.length; l++) {
+      const p = profiles[l];
       const row: Float32Array[] = [];
       for (let lv = 0; lv < 2; lv++) {
         const t = new Float32Array(this.N + 1);
         let peak = 0;
-        const a = amps[l][lv];
+        const a = lv ? p.hi : p.lo;
         for (let i = 0; i < this.N; i++) {
           let s = 0;
-          for (let k = 0; k < a.length; k++) s += (a[k] * Math.sin(2 * Math.PI * (k + 1) * (i / this.N) + k * 0.7 * (l + 1))) / (1 + 0.15 * k);
-          // half-order lumpiness: every second firing slightly weaker (uneven cylinders)
+          for (let k = 0; k < a.length; k++) s += (a[k] * Math.sin(2 * Math.PI * (k + 1) * (i / this.N) + k * p.phase)) / (1 + 0.15 * k);
           s += 0.12 * Math.sin(Math.PI * (i / this.N)) * Math.sin(2 * Math.PI * (i / this.N));
           t[i] = s;
           peak = Math.max(peak, Math.abs(s));
@@ -48,6 +42,7 @@ export class EngineDsp {
       this.tables.push(row);
     }
     this.phase = 0;
+    this.ph2 = 0;
     this.rpm = 1000;
     this.rpmT = 1000;
     this.load = 0;
@@ -57,31 +52,41 @@ export class EngineDsp {
     this.burble = 0;
     this.volume = 1;
     this.seed = 12345;
-    this.lp = 0; // intake noise one-pole
-    this.lp2 = 0;
     this.cutPh = 0;
     this.pop = 0;
     this.popPh = 0;
     this.z = [0, 0, 0, 0, 0, 0];
     this.voicing = 1;
-    this.voicingBuilt = -1;
+    this.built = -1;
     this.coef = [[], [], []];
+    this.fg = [0, 0, 0];
     this.jit = 0;
     this.overrun = 0;
     this.prevLoad = 0;
     this.ik1 = 0;
     this.ik2 = 0;
-    this.build(1);
+    this.kEnv = 0;
+    this.kLp = 0;
+    this.dk = 1;
+    this.dy = 0;
+    this.build();
   }
 
-  /** Exhaust formants for a voicing (0 smooth, 1 raspy, 2 aggressive): three resonances, sharper and hotter as it gets angrier. */
-  build(voicing: number): void {
-    const q = [1, 1.35, 1.9][voicing];
-    this.coef = [this.band(140, 1.2 * q), this.band(430, 1.6 * q), this.band(1150, 1.1 * q)];
-    this.voicingBuilt = voicing;
+  /** Exhaust formants and output darkening for the current voice and voicing (0 smooth, 1 raspy, 2 aggressive). */
+  build(): void {
+    const p = this.prof[this.layout];
+    const q = p.q * [1, 1.35, 1.9][this.voicing];
+    const vg = [0.8, 1, 1.25][this.voicing];
+    for (let k = 0; k < 3; k++) {
+      this.coef[k] = this.band(p.formant[k], [1.2, 1.6, 1.1][k] * q);
+      this.fg[k] = p.fGain[k] * vg;
+    }
+    const fc = 12000 * (1 - p.dark) * (1 - p.dark) + 500;
+    this.dk = 1 - Math.exp((-2 * Math.PI * fc) / this.sr);
+    this.built = this.layout * 3 + this.voicing;
   }
 
-  /** RBJ band-pass-ish peaking helper: returns [b0, b2, a1, a2] normalised (constant skirt gain). */
+  /** RBJ band-pass helper: returns [b0, b2, a1, a2] normalised (constant skirt gain). */
   band(f: number, q: number): number[] {
     const w = (2 * Math.PI * f) / this.sr;
     const al = Math.sin(w) / (2 * q);
@@ -94,32 +99,31 @@ export class EngineDsp {
     return this.seed / 2147483648 - 1;
   }
 
-  /** Set the target state (cheap; call once per block). `cut`: rev limiter engaged. `burble`: 0..1 pops on overrun. */
+  /** Set the target state (cheap; call once per block). `layout`: voice index. `cut`: rev limiter. `burble`: 0..1 pops on overrun. */
   set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number, voicing = 1): void {
     this.rpmT = Math.max(300, rpm);
     this.loadT = Math.min(1, Math.max(0, load));
-    this.layout = layout | 0;
+    this.layout = Math.min(this.prof.length - 1, Math.max(0, layout | 0));
     this.cut = cut ? 1 : 0;
     this.burble = burble;
     this.volume = volume;
     this.voicing = Math.min(2, Math.max(0, voicing | 0));
-    if (this.voicing !== this.voicingBuilt) this.build(this.voicing);
+    if (this.layout * 3 + this.voicing !== this.built) this.build();
   }
 
-  /** Firing frequency in Hz for a layout and rpm (4-stroke: cylinders / 2 firings per revolution). */
-  static firingHz(rpm: number, layout: number): number {
-    const per = [2, 3, 3, 2][layout | 0];
+  /** Firing frequency in Hz (4-stroke: cylinders / 2 firings per revolution; `per` from the voice). */
+  static firingHz(rpm: number, per: number): number {
     return (rpm / 60) * per;
   }
 
   process(out: Float32Array, n: number): void {
     const sr = this.sr;
+    const p = this.prof[this.layout];
     const tabs = this.tables[this.layout];
     const N = this.N;
     const v = this.voicing;
     const drive = [0.95, 1.35, 2.0][v];
-    const roarMix = [0.3, 0.55, 0.85][v];
-    const gains = [[0.8, 0.45, 0.2], [0.95, 0.75, 0.5], [1.05, 1.0, 0.9]][v];
+    const roarMix = [0.3, 0.55, 0.85][v] * p.roar;
     const bright = [0, 0.12, 0.25][v];
     for (let i = 0; i < n; i++) {
       this.rpm += (this.rpmT - this.rpm) * 0.0015; // smooth rpm: no zipper noise when the telemetry steps
@@ -130,23 +134,39 @@ export class EngineDsp {
       this.overrun *= 0.99998;
       // lumpy idle: firing irregularity that fades out as the engine revs
       this.jit += (this.rand() * 0.03 - this.jit) * 0.0008;
-      const lump = 1 + this.jit * Math.max(0, 1 - this.rpm / 2600);
-      const f = EngineDsp.firingHz(this.rpm, this.layout) * lump;
+      const idleFade = Math.max(0, 1 - this.rpm / 2600);
+      const lump = 1 + this.jit * p.idle * idleFade;
+      const f = (this.rpm / 60) * p.per * lump;
       this.phase += f / sr;
-      if (this.phase >= 1) this.phase -= 1;
+      if (this.phase >= 1) {
+        this.phase -= 1;
+        // diesel knock: one click per firing, loudest at idle and light load
+        if (p.clatter > 0) this.kEnv = p.clatter * (1 - 0.5 * this.load) * Math.max(0.2, 1 - this.rpm / 4200);
+      }
+      this.ph2 += f / (2 * sr);
+      if (this.ph2 >= 1) this.ph2 -= 1;
       const pos = this.phase * N;
       const i0 = pos | 0;
       const fr = pos - i0;
       const lo = tabs[0][i0] + (tabs[0][i0 + 1] - tabs[0][i0]) * fr;
       const hi = tabs[1][i0] + (tabs[1][i0 + 1] - tabs[1][i0]) * fr;
-      const tone = lo + (hi - lo) * Math.min(1, this.load + bright);
-      // intake roar: band-limited noise whose centre rises with rpm and whose level follows load^1.5
+      const cam = p.cam > 0 ? Math.min(1, Math.max(0, (this.rpm - p.cam) / 300 + 0.5)) : 0;
+      let tone = lo + (hi - lo) * Math.min(1, this.load + bright + 0.35 * cam * this.load);
+      // uneven firing: every other firing a little stronger (half order), plus a rotary-style choppy idle
+      tone *= 1 + p.sub * Math.sin(2 * Math.PI * this.ph2) + this.jit * p.idle * 4 * idleFade;
+      // intake roar: band-limited noise whose centre rises with rpm, level ~ load^1.5, chopped by the firing pulses
       const w = this.rand();
       const fc = 0.04 + 0.22 * Math.min(1, this.rpm / 7500);
       this.ik1 += (w - this.ik1) * fc;
       this.ik2 += (this.ik1 - this.ik2) * fc * 0.7;
-      const roar = (this.ik1 - this.ik2) * 9 * Math.pow(this.load, 1.5) * (0.35 + 0.65 * Math.min(1, this.rpm / 5000));
+      const chop = 1 - p.pulse + p.pulse * 2.2 * tone * tone;
+      const roar = (this.ik1 - this.ik2) * 9 * Math.pow(this.load, 1.5) * (0.35 + 0.65 * Math.min(1, this.rpm / 5000)) * chop * (1 + 1.2 * cam);
       let x = tone * (0.55 + 0.25 * this.load) + roar * roarMix;
+      if (this.kEnv > 0.001) {
+        this.kLp += (w - this.kLp) * 0.3;
+        x += (w - this.kLp) * this.kEnv * 1.4;
+        this.kEnv *= 0.9965;
+      }
       // exhaust formants: three band-passed copies add the body of the pipe
       let add = 0;
       for (let k = 0; k < 3; k++) {
@@ -155,7 +175,7 @@ export class EngineDsp {
         const y = c[0] * x + this.z[zi];
         this.z[zi] = this.z[zi + 1] - c[2] * y;
         this.z[zi + 1] = c[1] * x - c[3] * y;
-        add += y * gains[k];
+        add += y * this.fg[k];
       }
       x += add;
       // rev limiter: hard stutter gate
@@ -175,7 +195,8 @@ export class EngineDsp {
         x += (this.rand() * 1.2 + Math.sin(2 * Math.PI * this.popPh) * 1.1) * this.pop * 1.3;
         this.pop *= 0.9972;
       }
-      out[i] = Math.tanh(x * (drive + 0.9 * this.load)) * 0.7 * this.volume;
+      this.dy += (Math.tanh(x * (drive + 0.9 * this.load)) - this.dy) * this.dk;
+      out[i] = this.dy * 0.7 * p.level * this.volume;
     }
   }
 }

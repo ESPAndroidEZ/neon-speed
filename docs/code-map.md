@@ -11,9 +11,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - audioManager.ts (200) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
 - audioParams.ts (23) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO; type AudioParams
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
-- engineDsp.ts (181) Engine sound synthesis, written as ONE self-contained class (no imports, no module-leve... | class EngineDsp
+- engineDsp.ts (202) Engine sound synthesis, written as ONE self-contained class (no runtime imports, no mod... | class EngineDsp
 - engineSamples.ts (92) Sample-based engine: looping recordings at fixed rpm, crossfaded by rpm (equal power be... | fn loadEngineSamples, layerMix, createSampleVoice
-- engineVoice.ts (103) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
+- engineVoice.ts (105) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
 - music.ts (99) Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (spe... | class Music
 - musicPatterns.ts (72) Pure note logic for the generative synthwave track (no Web Audio), so it can be unit te... | fn chordTones, bassNote, arpNote, leadNote, drumHit, layers; const BPM, STEPS_PER_BAR, SECONDS_PER_STEP, midiToHz; iface DrumHit, Layers
 - revTest.ts (54) Garage "Sound test": a simulated rev run for any car (no driving, no purchase). Hold = ... | class RevTest; const REV_TEST; iface RevSample
@@ -59,6 +59,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - cars.ts (144) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
 - characters.ts (38) What a person looks like. The 2D portraits and the 3D figures are both built from this.... | const LOOKS, lookOf; iface Look; type HairStyle, Accessory, Build
 - engineSounds.ts (37) Engine sound sets per car. Files live in public/audio/engines/<carId>/ and are picked u... | const ENGINE_SOUNDS, engineSoundUrl; iface EngineLayer, EngineSoundSet; type EngineCharacter
+- engineVoices.ts (71) Engine voices for the procedural engine synth (audio/engineDsp). One profile per car, p... | fn engineVoiceIndex; const ENGINE_VOICES, VOICE_IDS; iface EngineProfile
 - loadout.ts (110) How a car looks and sits: everything the garage can change without touching performance... | fn sanitizeLoadout, stanceEffect, applyStance; const FINISHES, FINISH_IDS, GLOW_PATTERNS, HEADLIGHTS, CALIPERS, defaultLoadout; iface Vinyl, Loadout; type Finish, GlowPattern
 - lore.ts (48) World lore: title cards, crew bios and loading tips. Text only; no brand names. | const PREVIOUSLY, CREW, TIPS; iface TitleCard, CrewEntry
 - palettes.ts (25) District colour identity (docs/art-direction.md): the key light, an accent, and how the... | const PALETTES, paletteOf; iface Palette
