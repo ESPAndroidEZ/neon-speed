@@ -5,8 +5,14 @@ const CSS = `
 :root[data-calm] .rb-nitro-burst,:root[data-calm] .rb-pop,:root[data-calm] .rb-lines{display:none!important}
 `;
 
-/** Turn the calm HUD on or off. Safe to call often; the style block is added once. */
-export function applyCalm(on: boolean): void {
+/** Calm is on when the player chose it, or when the system asks for reduced motion. Pure. */
+export const calmEffective = (chosen: boolean, osReducedMotion: boolean): boolean => chosen || osReducedMotion;
+
+const osReduced = (): boolean => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/** Turn the calm HUD on or off (the OS reduced-motion preference also turns it on). Safe to call often; the style block is added once. */
+export function applyCalm(chosen: boolean): void {
+  const on = calmEffective(chosen, osReduced());
   const root = document.documentElement;
   if (!document.getElementById('rb-calm-css')) {
     const st = document.createElement('style');
