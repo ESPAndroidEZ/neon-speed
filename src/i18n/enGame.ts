@@ -1,6 +1,6 @@
 /** Race, story, HUD, pause, save and system messages: English UI strings. */
 export const EN_GAME = {
-  'hud.keys': '1 clear · 2 rain · 3 snow · R reset · M mute · Esc menu',
+  'hud.keys': 'R reset · M mute · Esc menu', 'hud.keysDev': '1 clear · 2 rain · 3 snow · R reset · M mute · Esc menu',
   'hud.lap': 'LAP', 'hud.pos': 'POS', 'hud.drift': 'DRIFT', 'hud.banked': 'BANKED {n}',
   'pause.title': 'PAUSED', 'pause.resume': 'Resume (Esc)', 'pause.restart': 'Restart', 'pause.save': 'Save',
   'pause.saveQuit': 'Save & Quit to menu', 'pause.saveTo': 'SAVE TO',

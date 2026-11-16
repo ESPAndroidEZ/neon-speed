@@ -56,3 +56,6 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Verified: build, all tests, smoke (9 scenarios), viewport check at 390x844 and 1280x720 (all 8 screens ok), countdown and race screenshots looked at (good; lamps sit just above the car roof).
 - Not done: boot/loading transition polish, slow-mo finish (fixed-step physics, left alone), full 10-viewport sweep and `--lang es` (the full sweep timed out at 8 min on this box; ran 2 viewports instead), `npm run visual` not re-run (untouched lights).
 - Listen/look: any menu button (hover and click blips), start a race (lamps), rev to the limiter (shift LEDs).
+
+## 03 Hide dev keys from the HUD
+- `hud.keys` now lists only R / M / Esc; the 1/2/3 weather hint is `hud.keysDev` and only shown when `import.meta.env.DEV` (the hotkeys themselves were already dev-only). EN+ES in sync (`i18n-check` ok). `npm run lang` needs a dev server, not run.

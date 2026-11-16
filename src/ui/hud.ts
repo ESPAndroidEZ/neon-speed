@@ -83,7 +83,7 @@ export class Hud {
 
   setWeather(w: Weather): void {
     this.weatherNow = w;
-    this.weather.innerHTML = `${t(`weather.${w}`).toUpperCase()}<small>${t('hud.keys')}</small>`;
+    this.weather.innerHTML = `${t(`weather.${w}`).toUpperCase()}<small>${t(import.meta.env.DEV ? 'hud.keysDev' : 'hud.keys')}</small>`;
   }
 
   /** Centre banner: countdown digits and GO. Empty string hides it. */
