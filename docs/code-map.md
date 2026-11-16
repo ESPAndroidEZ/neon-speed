@@ -219,24 +219,25 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - langRow.ts (18) Language chooser row (one button per language, named in its own language). `after` runs... | fn langRow
 - loadingCard.ts (23) Short loading card with a lore tip while a race is being set up. Also masks the car mod... | class LoadingCard
 - loadoutList.ts (30) | fn buildLoadoutList
-- menu.ts (194) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
+- menu.ts (197) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
+- menuCss.ts (89) Base menu styles (docs/ui-style.md): dark glass panels, cyan hairlines, magenta for the... | const MENU_CSS
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - pauseMenu.ts (74) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (68) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - rotateHint.ts (39) Small "rotate your phone" pill in portrait on touch screens. Landscape is the recommend... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
-- settings.ts (173) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- settings.ts (185) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
 - soundSettings.ts (44) Settings row: engine sound from the recorded loops or from the procedural synth. | fn engineSoundRow, soundCredits
-- storyMenu.ts (64) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
+- storyMenu.ts (69) Story screen: chapter 1 and chapter 2 with status, conditions and rivals. Only unlocked... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
 - subtitles.ts (86) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; iface Caption
-- theme.ts (26) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
+- theme.ts (27) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
 - titleCards.ts (71) Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each c... | class TitleCards
 - touchButton.ts (67) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
 - touchControls.ts (167) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
-- trackSelect.ts (96) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
+- trackSelect.ts (98) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
 - tuneMenu.ts (121) Tuning screen: PR and class, the 11 upgrade categories (buy the next level), setup slid... | fn buildTuneMenu
-- uiKit.ts (57) Small transient message at the bottom centre. | fn injectCss, h, button, toast; const money, lapText
+- uiKit.ts (36) Small transient message at the bottom centre. | fn injectCss, h, button, toast; const money, lapText
 - uiSizes.ts (14) Scale for the S / M / L size settings (subtitle box, minimap). | fn applyUiSizes; const SIZE_SCALE
 - versus.ts (92) The versus screen before a race: your portrait, car and stats against the strongest riv... | fn showVersus
 ## src/world

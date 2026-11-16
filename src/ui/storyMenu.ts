@@ -17,16 +17,21 @@ export interface StoryMenuDeps {
 function eventCard(ev: StoryEvent, n: number, career: CareerState, start: (ev: StoryEvent) => void): HTMLElement {
   const done = career.completed.includes(ev.id);
   const open = isUnlocked(career, ev.id);
-  const card = h('div', 'rb-card');
-  card.style.cssText += `;width:min(250px,86vw);text-align:left;opacity:${open ? 1 : 0.45};${open && !done ? 'border-color:#ff2a9d;box-shadow:0 0 22px #ff2a9d55' : ''}`;
+  const card = h('div', open ? 'rb-card rb-pick' : 'rb-card');
+  card.style.cssText += `;width:min(250px,86vw);text-align:left;opacity:${open ? 1 : 0.5};${open && !done ? 'border-color:#ff2a9d;box-shadow:0 0 22px #ff2a9d55' : ''}`;
   const car = ev.carId ? findCar(ev.carId) : null;
   const rivals = ev.rivals.length ? ev.rivals.map((r) => findRival(r).name).join(', ') : t('story.noRivals');
-  card.innerHTML = `<div class="rb-sub">${n}. ${t(done ? 'story.passed' : open ? 'story.next' : 'story.locked')}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
+  const tag = done ? 'var(--green)' : open ? 'var(--magenta)' : 'var(--text-faint)';
+  card.innerHTML = `<div class="rb-sub" style="color:${tag};font-weight:800">${open ? '' : '🔒 '}${n}. ${t(done ? 'story.passed' : open ? 'story.next' : 'story.locked')}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
     <div style="font-size:20px;font-weight:900;margin:4px 0">${tx(ev.title)}</div>
     <div style="opacity:.85;font-size:14px;line-height:1.35">${tx(ev.blurb)}</div>
     <div class="rb-sub" style="margin-top:8px">${t(`weather.${ev.weather}`)}${ev.weatherChange ? ` → ${t(`weather.${ev.weatherChange.to}`)}` : ''} · ${ev.laps === 1 ? t('story.oneRun') : t('story.laps', { n: ev.laps })}${car ? ` · ${t('story.only', { car: car.name })}` : ''}</div>
     <div class="rb-sub">${t('story.vs', { rivals })}</div>`;
-  if (open) card.addEventListener('click', () => start(ev));
+  if (open) {
+    card.tabIndex = 0;
+    card.addEventListener('click', () => start(ev));
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') start(ev); });
+  }
   return card;
 }
 

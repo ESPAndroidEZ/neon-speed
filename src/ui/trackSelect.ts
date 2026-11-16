@@ -75,12 +75,14 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     const times = def.type === 'drift'
       ? t('maps.bestScore', { score: `<b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b>`, target: def.driftTarget?.toLocaleString() ?? '--' })
       : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${t(`weather.${w}`).toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}`).join(' · ');
-    const card = h('div', 'rb-card');
+    const card = h('div', 'rb-card rb-pick');
     card.style.cssText += ';width:min(300px,86vw);text-align:left';
+    card.tabIndex = 0;
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') d.onPick(def); });
     const cv = document.createElement('canvas');
     cv.width = 270;
     cv.height = 150;
-    cv.style.cssText = 'width:100%;height:auto;background:#05060d99;border-radius:8px';
+    cv.style.cssText = 'width:100%;height:auto;background:radial-gradient(ellipse at center,#10183acc,#05060dcc);border-radius:8px;border:1px solid #18d8ff22';
     drawOutline(cv, def);
     card.append(cv);
     card.append(h('div', '', `<div style="font-size:22px;font-weight:900;margin-top:8px">${def.name}</div>

@@ -108,27 +108,28 @@ export class Menu {
 
   title(): void {
     this.backdrop();
-    const el = h('div', 'rb-layer');
+    const el = h('div', 'rb-layer rb-hero');
     el.style.justifyContent = 'flex-end';
-    el.style.paddingBottom = '12vh';
+    el.style.paddingBottom = 'max(6vh,env(safe-area-inset-bottom))';
     el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
-    if (!isPhone()) el.append(h('div', 'rb-sub', t('menu.keys')));
+    if (!isPhone()) el.append(h('div', 'rb-hint', t('menu.keys')));
     el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
     this.mount(el, 'title', 'main', () => this.title());
   }
 
   main(): void {
     this.backdrop();
-    const el = h('div', 'rb-layer');
-    el.style.justifyContent = 'flex-end';
-    el.style.paddingBottom = '10vh';
+    const el = h('div', 'rb-layer rb-main');
+    el.append(h('div', 'rb-logo', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')));
+    const stack = h('div', 'rb-stack');
     const latest = this.d.slots.latest();
     if (latest) {
       const c = button(t('menu.continue'), () => this.d.loadSlot(latest.id), 'hot');
       c.title = describe(latest.snap);
-      el.append(c);
+      stack.append(c);
     }
-    el.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    el.append(stack);
     this.mount(el, 'main', 'menu', () => this.main());
   }
 
@@ -174,8 +175,10 @@ export class Menu {
     setRivals(this.rivals);
     const row = h('div', 'rb-row');
     for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
-      const card = h('div', 'rb-card', `<div style="font-size:26px;font-weight:900">${t(`weather.${w}`)}</div><div style="opacity:.8;margin:6px 0">${t(`weather.${w}.blurb`)}</div><div class="rb-sub">${t('menu.grip', { n: Math.round(WEATHER[w].grip * 100) })}<br>${t('menu.best')} ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
+      const card = h('div', 'rb-card rb-pick', `<div style="font-size:26px;font-weight:900">${t(`weather.${w}`)}</div><div style="opacity:.8;margin:6px 0">${t(`weather.${w}.blurb`)}</div><div class="rb-sub">${t('menu.grip', { n: Math.round(WEATHER[w].grip * 100) })}<br>${t('menu.best')} ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
       card.addEventListener('click', () => this.d.startRace(w, def.type === 'circuit' ? this.rivals : 0, def.id));
+      card.tabIndex = 0;
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') card.click(); });
       if (def.recommendedWeather.includes(w)) card.style.borderColor = '#ff2a9d';
       row.append(card);
     }
