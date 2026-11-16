@@ -2,11 +2,11 @@ import { carNav, navButton } from './carNav';
 import { REV_TEST } from '../audio/revTest';
 import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
-import { measureCar, type CarStats } from '../physics/carStats';
 import type { CarVisual } from '../world/proceduralCar';
 import { setYawOverride } from '../world/modelPrefs';
 import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
+import { clamp01, hex, soundTest, statsOf } from './garageParts';
 import { button, h, money } from './uiKit';
 import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
@@ -22,23 +22,15 @@ export interface GarageDeps {
   onBack: () => void;
 }
 
-const statCache = new Map<string, CarStats>();
-const statsOf = (c: CarSpec): CarStats => {
-  let s = statCache.get(c.id);
-  if (!s) statCache.set(c.id, (s = measureCar(c.tuning)));
-  return s;
-};
-const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 /** Dev-only GLB yaw calibration row and nose arrow (`?calib` in a dev build). */
 const CALIB = import.meta.env.DEV && new URLSearchParams(location.search).has('calib');
-const clamp01 = (v: number): number => Math.max(0.04, Math.min(1, v));
 
-/** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
 /** Browsed car index and when the language last changed (registered at import time, so it runs before the menu rebuilds the screen). */
 let browsed = -1;
 let langAt = -1e9;
 onLangChange(() => { langAt = performance.now(); });
 
+/** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
 export function buildGarage(d: GarageDeps): HTMLElement {
   const root = h('div', 'rb-layer');
   // desktop: panel on the left, car on the right; narrow screens: bottom sheet
@@ -204,15 +196,4 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   statusListeners.add(rerender);
   render();
   return root;
-}
-
-/** "Sound test": hold to rev any car (owned or not) from idle to the limiter with shifts; release for the lift-off pops. */
-function soundTest(carId: string): HTMLElement {
-  const b = button(t('garage.sound'), () => undefined);
-  b.style.cssText += ';width:100%;margin-top:6px;touch-action:none';
-  const down = (e: Event): void => { e.preventDefault(); if (REV_TEST.carId !== carId) REV_TEST.start(carId); REV_TEST.holding = true; b.classList.add('on'); };
-  const up = (): void => { REV_TEST.holding = false; b.classList.remove('on'); };
-  b.addEventListener('pointerdown', down);
-  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, up);
-  return b;
 }
