@@ -3,6 +3,7 @@ export const EN_GAME = {
   'hud.keys': 'R reset · M mute · Esc menu', 'hud.keysDev': '1 clear · 2 rain · 3 snow · R reset · M mute · Esc menu',
   'hud.lap': 'LAP', 'hud.pos': 'POS', 'hud.drift': 'DRIFT', 'hud.banked': 'BANKED {n}',
   'pause.title': 'PAUSED', 'pause.resume': 'Resume (Esc)', 'pause.restart': 'Restart', 'pause.save': 'Save',
+  'pause.photo': 'Photo (PNG)', 'pause.photoSaved': 'Photo saved', 'pause.photoFail': 'Could not save photo',
   'pause.saveQuit': 'Save & Quit to menu', 'pause.saveTo': 'SAVE TO',
   'pause.saved': 'Saved', 'pause.savedSession': 'Saved for this session only (storage is full or blocked)',
   'save.load': 'LOAD', 'save.auto': 'Autosave', 'save.slot': 'Slot {n}', 'save.empty': 'empty', 'save.freeRace': 'Free race',

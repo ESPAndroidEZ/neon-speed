@@ -5,6 +5,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'hud.keys': 'R reiniciar · M silenciar · Esc menú', 'hud.keysDev': '1 despejado · 2 lluvia · 3 nieve · R reiniciar · M silenciar · Esc menú',
   'hud.lap': 'VUELTA', 'hud.pos': 'POS', 'hud.drift': 'DERRAPE', 'hud.banked': 'GUARDADO {n}',
   'pause.title': 'PAUSA', 'pause.resume': 'Reanudar (Esc)', 'pause.restart': 'Reiniciar', 'pause.save': 'Guardar',
+  'pause.photo': 'Foto (PNG)', 'pause.photoSaved': 'Foto guardada', 'pause.photoFail': 'No se pudo guardar la foto',
   'pause.saveQuit': 'Guardar y salir al menú', 'pause.saveTo': 'GUARDAR EN',
   'pause.saved': 'Guardado', 'pause.savedSession': 'Guardado solo en esta sesión (el almacenamiento está lleno o bloqueado)',
   'save.load': 'CARGAR', 'save.auto': 'Autoguardado', 'save.slot': 'Ranura {n}', 'save.empty': 'vacía', 'save.freeRace': 'Carrera libre',

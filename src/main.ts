@@ -19,7 +19,7 @@ import { applyDrivingSettings } from './ui/drivingSettings';
 import { registerServiceWorker, showUpdatePrompt } from './core/pwa';
 import { installPlatform } from './game/platform';
 import { installHotkeys } from './game/hotkeys';
-import { fullscreenButton } from './ui/fullscreenButton';
+import { fullscreenButton } from './ui/fullscreenButton'; import { photoButton } from './ui/photo';
 import { controlRows } from './ui/controlSettings';
 import { createControls } from './game/inputSetup';
 import { installMinimap } from './game/extras';
@@ -149,7 +149,7 @@ story = new StoryController({
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
-  extra: () => [fullscreenButton(fs), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
+  extra: () => [fullscreenButton(fs), photoButton({ canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) }), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
   onResume: () => pause.resume(),
   onRestart: () => {
     pause.resume();

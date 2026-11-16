@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Photo mode in the pause menu: clean-frame PNG download (`ui/photo`, `tests/photo-check.mts`).
 - 2026-11-16 Calm HUD accessibility setting: stops the limiter shift-light flash, title flicker, brake-hint pulse, nitro/pop bursts and speed lines (`ui/calm`, `settings.calmUi`, row in the driving settings, `tests/save-check.mts`).
 - 2026-11-16 Personal-best line on the free-race results: first run, new record with the gain, or best time plus gap (`pbNote` in `game/freeRace`, `RaceResult.note`, `tests/pb-note-check.mts`).
 - 2026-11-16 Daily challenge on the main menu from a date seed (`data/dailyChallenge`, `ui/dailyButton`, `tests/daily-check.mts`); main menu scrolls on short phones.
