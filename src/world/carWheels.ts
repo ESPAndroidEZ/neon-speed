@@ -34,7 +34,7 @@ export function buildWheel(r: number, side: number, mats: WheelMats, design = 'f
   spin.add(new Mesh(tyreGeometry(r, 0.27), tyreMat));
   spin.add(new Mesh(new CylinderGeometry(r * Math.min(0.8, 0.66 * (size / 18)), r * Math.min(0.8, 0.66 * (size / 18)), 0.24, 20).rotateZ(Math.PI / 2), rimMat));
   const face = side * 0.125;
-  const dish = new Mesh(new CylinderGeometry(r * 0.5, r * 0.5, 0.03, 16).rotateZ(Math.PI / 2), dishMat);
+  const dish = new Mesh(new CylinderGeometry(r * 0.62, r * 0.62, 0.03, 20).rotateZ(Math.PI / 2), dishMat);
   dish.position.x = face - side * 0.015;
   spin.add(dish);
   for (const p of (RIM_DESIGNS[design] ?? RIM_DESIGNS.five)(r, face, rimMat)) spin.add(p);

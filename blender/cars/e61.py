@@ -6,6 +6,7 @@ Build: scripts/model-build.sh cars/e61   (SHOTS=1 for renders in logs/models/)
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.84, 1.85, 1.49, 2.89, 0.33
 TYRE_W = 0.24
@@ -53,6 +54,15 @@ rb.box('kidney_l', (0.10, 0.55, zg - 0.02), (0.16, 0.14, 0.06), 'trim', bevel=0.
 rb.box('kidney_r', (-0.10, 0.55, zg - 0.02), (0.16, 0.14, 0.06), 'trim', bevel=0.01)
 # slim tail lights wrapping onto the tailgate
 rb.lamp('tail', body, W - 0.20, 0.96, 0.36, 0.10, 'light_rear', front=False)
+
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.75, 0.0, -0.85, -1.6], 0.3, 0.84)
+detail.handle(body, 0.30, 0.80)
+detail.window_trim(body, 0.87, -2.20, 0.89)
+detail.sill(body, 0.99, -0.99)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.11)
+detail.exhaust(body, 0.62, 0.31)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)

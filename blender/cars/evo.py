@@ -7,6 +7,7 @@ Recipe (civic.py): loft (plain sections, no arch rows) -> paint_faces glass -> c
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.51, 1.77, 1.45, 2.63, 0.32
 TYRE_W = 0.22
@@ -59,6 +60,16 @@ rb.box('scoop', (0, 0.88, (zr + zf) / 2), (0.5, 0.06, 0.3), 'trim', bevel=0.01)
 rb.box('wing', (0, 1.18, -1.90), (1.5, 0.04, 0.28), 'trim', bevel=0.01)
 for px in (0.45, -0.45):
     rb.box(f'wing_post_{px}', (px, 1.08, -1.95), (0.08, 0.20, 0.08), 'trim')
+
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.68, -0.2, -0.95], 0.3, 0.82)
+detail.handle(body, 0.23, 0.78)
+detail.window_trim(body, 0.76, -1.60, 0.87)
+detail.sill(body, 0.87, -0.87)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.06)
+detail.exhaust(body, 0.55, 0.31)
+detail.grille(body, 0.38, 0.70, 0.12, slats=4)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)

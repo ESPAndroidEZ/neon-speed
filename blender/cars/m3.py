@@ -8,6 +8,7 @@ import math, os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import bpy
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.49, 1.78, 1.37, 2.73, 0.32
 TYRE_W = 0.24
@@ -77,6 +78,15 @@ exhaust('ex1', 0.13)
 exhaust('ex2', 0.27)
 exhaust('ex3', -0.13)
 exhaust('ex4', -0.27)
+
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.62, -0.6], 0.3, 0.78)
+detail.handle(body, 0.17, 0.74)
+detail.window_trim(body, 0.70, -1.60, 0.83)
+detail.sill(body, 0.92, -0.92)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.07)
+detail.ducts(body, 0.55, 0.32, 0.36, 0.10)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)

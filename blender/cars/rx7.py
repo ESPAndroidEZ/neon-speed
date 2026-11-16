@@ -3,6 +3,7 @@ Build: scripts/model-build.sh cars/rx7   (SHOTS=1 for renders in logs/models/)""
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.28, 1.77, 1.23, 2.43, 0.31
 W = WIDTH / 2
@@ -58,6 +59,17 @@ rb.mirror_x(rb.box('spoiler_post', (0.5, 0.90, -1.92), (0.05, 0.08, 0.10), 'trim
 rb.mirror_x(rb.box('mirror', (W - 0.01, 0.80, 0.45), (0.08, 0.08, 0.14), 'paint', bevel=0.02))
 
 TRACK = W - 0.13
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.5, -0.7], 0.3, 0.72)
+detail.handle(body, 0.05, 0.68)
+detail.window_trim(body, 0.54, -1.40, 0.77)
+detail.sill(body, 0.79, -0.79)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.06)
+detail.exhaust(body, 0.5, 0.31)
+detail.grille(body, 0.36, 0.56, 0.09, slats=3)
+detail.ducts(body, 0.62, 0.34, 0.24, 0.09)
+
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, 0.22)
 

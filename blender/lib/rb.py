@@ -19,8 +19,9 @@ PALETTE = {  # name: (rgb, metallic, roughness, emission strength)
     'tyre': ((0.02, 0.02, 0.02), 0.0, 0.9, 0.0),
     'rim': ((0.55, 0.56, 0.6), 1.0, 0.3, 0.0),
     'chrome': ((0.9, 0.9, 0.9), 1.0, 0.1, 0.0),
+    'brake': ((0.32, 0.32, 0.36), 1.0, 0.45, 0.0),
     'light_front': ((1.0, 0.97, 0.9), 0.0, 0.2, 0.6),  # the game adds real headlights + bloom: keep this low
-    'light_rear': ((0.9, 0.02, 0.02), 0.0, 0.3, 0.8),
+    'light_rear': ((0.85, 0.02, 0.02), 0.0, 0.3, 0.3),
 }
 
 
@@ -131,24 +132,35 @@ def box(name, center, size, material='trim', bevel=0.0):
 
 def wheel(corner, x, z, radius, width, rim_ratio=0.68, spokes=5, segments=24):
     """One wheel named wheel_<corner> (fl, fr, rl, rr), origin at the hub, axle along X, touching y = 0.
-    Tyre (material tyre) and rim face (material rim) are one object so the game can spin it later."""
+    Rounded tyre, rim lip, dark dish, thin spokes, centre cap and a brake disc behind them, all one object (material
+    tyre / rim / trim / chrome / brake) so the game can spin it."""
     side = 1 if corner[1] == 'l' else -1
-    bpy.ops.mesh.primitive_cylinder_add(vertices=segments, radius=radius, depth=width, location=(0, 0, 0), rotation=(0, math.pi / 2, 0))
-    tyre = bpy.context.active_object
-    tyre.data.materials.append(mat('tyre'))
-    bpy.ops.mesh.primitive_cylinder_add(vertices=segments, radius=radius * rim_ratio, depth=0.02,
-                                        location=(side * width * 0.5, 0, 0), rotation=(0, math.pi / 2, 0))
-    face = bpy.context.active_object
-    face.data.materials.append(mat('rim'))
-    parts = [face]
+
+    def cyl(r, depth, xpos, material, verts=segments):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=depth, location=(xpos, 0, 0), rotation=(0, math.pi / 2, 0))
+        o = bpy.context.active_object
+        o.data.materials.append(mat(material))
+        return o
+
+    tyre = cyl(radius, width, 0, 'tyre')
+    bev = tyre.modifiers.new('round', 'BEVEL')
+    bev.width, bev.segments = min(0.045, width * 0.2), 1
+    _apply_all(tyre)
+    ro = side * width * 0.5
+    rr = radius * rim_ratio
+    parts = [
+        cyl(rr, 0.03, ro - side * 0.005, 'rim'),                    # outer lip
+        cyl(rr * 0.88, 0.03, ro - side * 0.012, 'trim'),            # dark dish between the spokes
+        cyl(radius * 0.09, 0.05, ro + side * 0.01, 'chrome', 16),   # centre cap
+        cyl(radius * 0.5, 0.025, ro - side * 0.09, 'brake'),        # brake disc seen through the spokes
+    ]
     for k in range(spokes):
         a = 2 * math.pi * k / spokes
-        bpy.ops.mesh.primitive_cube_add(size=1, location=(side * width * 0.52, math.cos(a) * radius * 0.33, math.sin(a) * radius * 0.33),
-                                        rotation=(-a, 0, 0))
-        s = bpy.context.active_object
-        s.scale = (0.03, radius * 0.6, 0.06)
-        s.data.materials.append(mat('chrome'))
-        parts.append(s)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(ro + side * 0.004, math.cos(a) * rr * 0.5, math.sin(a) * rr * 0.5), rotation=(-a, 0, 0))
+        sp = bpy.context.active_object
+        sp.scale = (0.03, rr * 0.88, 0.05)
+        sp.data.materials.append(mat('chrome'))
+        parts.append(sp)
     for o in [tyre] + parts:
         o.select_set(True)
     bpy.context.view_layer.objects.active = tyre

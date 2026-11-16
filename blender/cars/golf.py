@@ -5,6 +5,7 @@ Build: scripts/model-build.sh cars/golf   (SHOTS=1 for renders in logs/models/)
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.15, 1.73, 1.44, 2.51, 0.3
 TYRE_W = 0.2
@@ -50,6 +51,15 @@ rb.box('spoiler', (0, rb.surface_y(body, 0, zs) + 0.015, zs), (1.35, 0.035, 0.16
 # mirrors at the A-pillar, flank found by surface_x
 xm = rb.surface_x(body, 0.90, 0.95)
 rb.mirror_x(rb.box('mirror', (xm + 0.05, 0.90, 0.95), (0.10, 0.08, 0.14), 'paint', bevel=0.02))
+
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.85, -0.05, -0.95], 0.3, 0.82)
+detail.handle(body, 0.40, 0.78)
+detail.window_trim(body, 0.97, -1.70, 0.87)
+detail.sill(body, 0.83, -0.83)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.04)
+detail.exhaust(body, 0.55, 0.31)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)

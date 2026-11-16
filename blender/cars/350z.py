@@ -4,6 +4,7 @@ Build: scripts/model-build.sh cars/350z   (SHOTS=1 for renders in logs/models/)"
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.31, 1.82, 1.32, 2.65, 0.32
 TYRE_W = 0.22
@@ -48,6 +49,17 @@ zt = rb.surface_z(body, 0, 0.90, front=False)
 rb.box('spoiler', (0, 0.835, zt - 0.03), (WIDTH - 0.45, 0.03, 0.08), 'trim')      # small lip on the tail edge
 xm = rb.surface_x(body, 0.82, 0.35)
 rb.mirror_x(rb.box('mirror', (xm + 0.05, 0.84, 0.35), (0.10, 0.08, 0.14), 'paint', bevel=0.02))
+
+# detailing (lib/detail.py): door gaps, handles, belt moulding, sills, splitter, diffuser, exhausts
+detail.door_lines(body, [0.4, -0.8], 0.3, 0.76)
+detail.handle(body, -0.05, 0.72)
+detail.window_trim(body, 0.46, -1.60, 0.81)
+detail.sill(body, 0.88, -0.88)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.09)
+detail.exhaust(body, 0.58, 0.31)
+detail.ducts(body, 0.55, 0.36, 0.30, 0.10)
+detail.grille(body, 0.38, 0.60, 0.10, slats=3)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)
