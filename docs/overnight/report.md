@@ -282,3 +282,9 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - On phones, hard hits now buzz (12-70 ms, stronger past 9 m/s closing speed; native Capacitor haptics in the app, `navigator.vibrate` on Android browsers; iOS Safari has no vibrate API). Light scrapes stay silent and a 160 ms gap stops a wall grind from droning. It follows the existing "Rumble" setting, so turning that off silences phones too.
 - Feel only, physics untouched. Files: `input/impactHaptic.ts` (pure), `game/inputSetup.ts` (hook next to the gamepad rumble), `tests/impact-haptic-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
 - Not felt on a real phone: hit a wall at speed on Android and check the strength is pleasant, not annoying; thresholds are constants at the top of `impactHaptic.ts`.
+
+## 99 Self-directed: start-line beeps
+- The 3-2-1-GO countdown was silent apart from the engine rev. Now each new digit gives a short low square beep (440 Hz) and GO! a higher, longer one (880 Hz), quiet on the sfx bus. Triggered by banner text change, so pausing or restored saves never repeat a beep.
+- Audio only, no physics. Files: `audio/countdownBeep.ts`, `main.ts` (two inline hooks, file still 219 lines), `tests/countdown-beep-check.mts` (6 checks). Build and all tests green; no browser job run, nothing left running.
+- Not heard by ear: check the beeps sit well over the revving engine and the music.
+- Note: `docs/overnight/prompt.md`, `scripts/overnight.sh` and `scripts/overnight-tab.sh` had uncommitted edits at session start (runner infrastructure, not task work). I left them untouched and did not commit them.

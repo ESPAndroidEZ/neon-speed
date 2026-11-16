@@ -1,0 +1,11 @@
+import { beepFor } from '../src/audio/countdownBeep.ts';
+let failed = 0;
+const check = (n: string, ok: boolean): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}`); if (!ok) failed++; };
+check('first digit ticks', beepFor('', '3') === 'tick');
+check('each new digit ticks', beepFor('3', '2') === 'tick' && beepFor('2', '1') === 'tick');
+check('same digit is silent', beepFor('3', '3') === null);
+check('GO! goes once', beepFor('1', 'GO!') === 'go' && beepFor('GO!', 'GO!') === null);
+check('clearing the banner is silent', beepFor('GO!', '') === null && beepFor('1', '') === null);
+check('0 and junk are silent', beepFor('1', '0') === null && beepFor('', 'x') === null);
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);
