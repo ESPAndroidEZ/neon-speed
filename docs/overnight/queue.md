@@ -10,7 +10,7 @@ Carlos's priorities tonight (2026-11-16): the rename to Neon Speed, different go
 - [x] 11 Every car gets its own engine sound (tasks/11-car-sounds.md) -- per-car voice specs in data/engineVoices.ts, test + report done
 - [x] 12 Procedural house music engine, menu + race (tasks/12-house-music.md) -- done, pure generator tested, smoke + audio-level green
 - [x] 13 Redesign all eight cars (tasks/13-car-design.md) -- detailing pass on all eight, see report
-- [ ] 14 Story rewrite: better arcs, characters, dialogue, EN + ES (tasks/14-story.md)
+- [x] 14 Story rewrite: better arcs, characters, dialogue, EN + ES (tasks/14-story.md) -- cold open, mystery with clues, branch changes final race and ending, 3 lose variants, graph test, see report
 - [ ] 15 Menus, HUD and first impression polish (tasks/15-ux-polish.md)
 - [ ] 03 Hide dev-only keys from the player HUD (tasks/03-hud-dev-keys.md)
 - [ ] 02 Main menu layout + viewport check in EN and ES (tasks/02-menu-viewport.md)

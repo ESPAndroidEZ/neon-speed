@@ -36,7 +36,7 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
   for (const c of CREW) {
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:default;width:min(270px,88vw);text-align:left;border-color:${hex(c.color)}66`;
-    const bio = tx(career.endingSeen && c.revealed ? c.revealed : c.bio);
+    const bio = tx(career.epilogueSeen && c.truth ? c.truth : career.endingSeen && c.revealed ? c.revealed : c.bio);
     const rel = career.rel[c.id] ?? 0;
     const mood = rel > 0 ? 'smirk' : rel < 0 ? 'angry' : 'neutral';
     const top = h('div');

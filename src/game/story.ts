@@ -1,10 +1,10 @@
-import { applyChoice, completeEvent, driftCash, evaluate, isDone, playable, storyComplete } from '../core/career';
+import { applyChoice, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
-import { buildField, findRival } from '../data/rivals';
+import { buildField, carTier, findRival } from '../data/rivals';
 import { AI_SETTING } from '../physics/aiDifficulty';
-import { EVENTS, INTRO_LINES, OPENING_CAPTIONS, type StoryEvent } from '../data/story';
+import { EVENTS, OPENING_CAPTIONS, type Line, type StoryEvent } from '../data/story';
 import { findAnyEvent as findEvent } from '../data/story2';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
 import type { TitleCards } from '../ui/titleCards';
@@ -35,6 +35,8 @@ export class StoryController {
   /** The event being played, null in free race. */
   current: StoryEvent | null = null;
   private readonly d: StoryDeps;
+  /** Failed attempts per event this session: repeated failures get different lines. */
+  private readonly tries = new Map<string, number>();
 
   constructor(d: StoryDeps) {
     this.d = d;
@@ -49,8 +51,22 @@ export class StoryController {
       return playable(reply, d.store.data.career);
     };
     g.onCountdown = () => {
-      if (this.current) d.subs.flash(this.current.card, 3.2);
+      const ev = this.current;
+      if (!ev) return;
+      const flags = this.view(ev).flags;
+      d.subs.schedule((ev.cues ?? []).filter((c) => (!c.if || flags[c.if]) && (!c.unless || !flags[c.unless])));
+      d.subs.flash(ev.card, 3.2);
     };
+  }
+
+  /** Career state plus what the game knows right now: replay, retry, the car and its tier. Lines can test these like story flags. */
+  private view(ev: StoryEvent): CareerState {
+    const save = this.d.store.data;
+    const car = findCar(ev.carId ?? save.selected);
+    const flags = { ...save.career.flags, [`car-${car.id}`]: true, [`tier-${carTier(car)}`]: true };
+    if (save.career.completed.includes(ev.id)) flags.replay = true;
+    if ((this.tries.get(ev.id) ?? 0) > 0) flags.retry = true;
+    return { ...save.career, flags };
   }
 
   /** A restored race belongs to this event (or to none): the results screen then judges it as story. */
@@ -70,24 +86,25 @@ export class StoryController {
     if (ev.id === 'finale' || ev.id === 'c2-final') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
     else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
     d.cast?.stage(ev.id === 'finale' || ev.id === 'c2-final' ? 'dante' : 'mara');
-    const lines = playable(first ? [...INTRO_LINES, ...ev.before] : ev.before, save.career);
-    const run = (): void => d.dialogue.play(lines, () => this.launch(ev, first));
-    if (first) d.cards.play(PREVIOUSLY, run); // skippable "Previously in Kestrel Bay" cards before the intro
-    else run();
+    // cold open: the very first run goes straight to the cinematic and the race; the first conversation comes after it
+    const lines = first ? [] : playable(ev.before, this.view(ev));
+    if (lines.length) d.dialogue.play(lines, () => this.launch(ev, false));
+    else this.launch(ev, first);
   }
 
   private launch(ev: StoryEvent, cinematic: boolean): void {
     const d = this.d;
     const save = d.store.data;
     const car = findCar(ev.carId ?? save.selected);
+    const rivals = Object.entries(ev.rivalsIf ?? {}).find(([flag]) => save.career.flags[flag])?.[1] ?? ev.rivals;
     if (cinematic) {
       save.career.seenIntro = true;
       d.store.commit();
     }
     d.game.startRace({
       car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, trackId: ev.trackId, cinematic,
-      weatherChange: ev.weatherChange, agents: buildField(ev.rivals, ev.skillScale, ev.weather !== 'CLEAR'),
-      meta: { rivalIds: ev.rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id, level: AI_SETTING.level },
+      weatherChange: ev.weatherChange, agents: buildField(rivals, ev.skillScale, ev.weather !== 'CLEAR'),
+      meta: { rivalIds: rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id, level: AI_SETTING.level },
     });
   }
 
@@ -122,7 +139,12 @@ export class StoryController {
   private after(ev: StoryEvent, won: boolean): void {
     const d = this.d;
     d.results.hide();
-    d.dialogue.play(playable(won ? ev.afterWin : ev.afterLose, d.store.data.career), () => {
+    const n = this.tries.get(ev.id) ?? 0;
+    const sets: Line[][] = [ev.afterLose, ...(ev.loseAlt ?? [])];
+    const lines = won ? ev.afterWin : sets[n % sets.length];
+    if (won) this.tries.delete(ev.id);
+    else this.tries.set(ev.id, n + 1);
+    const play = (): void => d.dialogue.play(playable(lines, this.view(ev)), () => {
       if (!won) this.launch(ev, false);
       else if (storyComplete(d.store.data.career) && !d.store.data.career.epilogueSeen) {
         d.store.data.career.epilogueSeen = true;
@@ -135,6 +157,12 @@ export class StoryController {
         d.showEnding(1);
       } else this.leave();
     });
+    const career = d.store.data.career;
+    if (won && ev.id === EVENTS[0].id && !career.flags.cardsSeen) {
+      career.flags.cardsSeen = true;
+      d.store.commit();
+      d.cards.play(PREVIOUSLY, play); // skippable "Previously in Kestrel Bay" cards, once, after the first race
+    } else play();
   }
 
   private leave(): void {

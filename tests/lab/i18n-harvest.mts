@@ -2,7 +2,7 @@ import { RADIO } from '../../src/data/radio';
 import { RIVAL_RADIO_2, TRACK_RADIO } from '../../src/data/radio2';
 import { BARKS } from '../../src/data/barks';
 import { CREW, PREVIOUSLY, TIPS } from '../../src/data/lore';
-import { CHAPTER, ENDING, EVENTS, INTRO_LINES, OPENING_CAPTIONS } from '../../src/data/story';
+import { CHAPTER, ENDING, EVENTS, OPENING_CAPTIONS } from '../../src/data/story';
 import { ALL_EVENTS, CHAPTER_2, EPILOGUE } from '../../src/data/story2';
 import { ADVICE } from '../../src/data/upgradeAdvice';
 import { UPGRADES } from '../../src/data/upgrades';
@@ -13,7 +13,7 @@ import { TRACKS } from '../../src/data/tracks';
 import { REAL } from '../../src/data/carReal';
 
 /** Keys whose string values are player-visible prose in the story data. */
-const PROSE = new Set(['text', 'title', 'blurb', 'tagline', 'label', 'prompt', 'heading', 'bio', 'role', 'revealed', 'objective', 'summary']);
+const PROSE = new Set(['text', 'title', 'blurb', 'tagline', 'label', 'prompt', 'heading', 'bio', 'role', 'revealed', 'objective', 'summary', 'truth', 'credits']);
 
 function walk(v: unknown, out: Set<string>, key = ''): void {
   if (typeof v === 'string') {
@@ -32,7 +32,7 @@ export function harvest(): string[] {
   for (const l of Object.values(RIVAL_RADIO_2)) list(l);
   for (const l of Object.values(BARKS)) list(l);
   list(TIPS);
-  walk([PREVIOUSLY, CREW, CHAPTER, ENDING, INTRO_LINES, EVENTS, ALL_EVENTS, CHAPTER_2, EPILOGUE], out);
+  walk([PREVIOUSLY, CREW, CHAPTER, ENDING, EVENTS, ALL_EVENTS, CHAPTER_2, EPILOGUE], out);
   for (const c of OPENING_CAPTIONS) out.add(c.text);
   for (const a of Object.values(ADVICE)) out.add(a);
   for (const u of UPGRADES) { out.add(u.name); for (const l of u.levels) out.add(l.name); }

@@ -59,6 +59,12 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
 export function buildEnding(career: CareerState, chapter: number, onMenu: () => void): HTMLElement {
   const root = h('div', 'rb-layer dim');
   const card = chapter === 2 ? EPILOGUE[career.flags.sponsor ? 'sponsor' : 'open'] : ENDING;
-  root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)), button(t('common.menu'), onMenu, 'hot'));
+  root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)));
+  const credits = 'credits' in card ? (card.credits as string[]) : [];
+  if (credits.length) {
+    const cr = h('div', 'rb-sub', credits.map((c, i) => `<div style="margin-top:${i ? 4 : 18}px;${i ? '' : 'font-weight:900;letter-spacing:6px;font-size:20px'}">${tx(c)}</div>`).join(''));
+    root.append(cr);
+  }
+  root.append(button(t('common.menu'), onMenu, 'hot'));
   return root;
 }
