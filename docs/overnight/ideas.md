@@ -15,6 +15,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Lap chime and finish stings: rising pair each lap, major arpeggio for a win, soft falling pair otherwise (`audio/raceCue`, `main.ts`, `tests/race-cue-check.mts`).
 - 2026-11-16 Start-line beeps: low tick on 3, 2, 1 and a higher longer GO, synthesised on the sfx bus from the banner text (`audio/countdownBeep`, `main.ts`, `tests/countdown-beep-check.mts`).
 - 2026-11-16 Phone vibration on crashes, gated by the Rumble setting (`input/impactHaptic`, `game/inputSetup`, `tests/impact-haptic-check.mts`).
 - 2026-11-16 Payout split on the results: "Prize $x · Drifting $y" under the cash (`game/cashSplit`, `ui/results`, `tests/cash-split-check.mts`).

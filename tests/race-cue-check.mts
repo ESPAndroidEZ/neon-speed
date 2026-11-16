@@ -1,0 +1,16 @@
+import { raceCue, cueNotes } from '../src/audio/raceCue.ts';
+import type { RaceCueKind } from '../src/audio/raceCue.ts';
+let failed = 0;
+const check = (n: string, ok: boolean): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}`); if (!ok) failed++; };
+check('new lap chimes', raceCue(0, 1, false, false, 0) === 'lap');
+check('same lap is silent', raceCue(1, 1, false, false, 0) === null);
+check('a new race (laps drop) is silent', raceCue(3, 0, true, false, 1) === null);
+check('final line as winner is a win, not a lap chime', raceCue(2, 3, false, true, 1) === 'win');
+check('final line in 4th is the finish sting', raceCue(2, 3, false, true, 4) === 'finish');
+check('already finished stays silent', raceCue(3, 3, true, true, 1) === null);
+let ok = true;
+for (const k of ['lap', 'win', 'finish'] as RaceCueKind[]) for (const n of cueNotes(k)) if (!(n >= 60 && n <= 96)) ok = false;
+check('notes stay in a pleasant range', ok);
+check('win has more notes than lap', cueNotes('win').length > cueNotes('lap').length);
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);

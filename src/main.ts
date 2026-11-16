@@ -1,5 +1,5 @@
 import { AudioManager } from './audio/audioManager';
-import { installUiSound } from './audio/uiSound'; import { CountdownBeeps } from './audio/countdownBeep';
+import { installUiSound } from './audio/uiSound'; import { CountdownBeeps } from './audio/countdownBeep'; import { RaceCues } from './audio/raceCue';
 import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
 import { AutoQuality, isPhone } from './core/quality';
@@ -85,9 +85,9 @@ attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
-installUiSound(audio.bus, () => audio.music.keyPc); const beeps = new CountdownBeeps(audio.bus);
+installUiSound(audio.bus, () => audio.music.keyPc); const beeps = new CountdownBeeps(audio.bus), cues = new RaceCues(audio.bus);
 engine.onFrame((_a, dt) => {
-  audio.update(dt); beeps.update(game.rm.banner);
+  audio.update(dt); beeps.update(game.rm.banner); cues.update(game.rm.player.lapTimes.length, game.rm.player.finished, game.rm.player.finishRank);
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
 const voice = new Voice(); const auto = new AutoQuality();

@@ -288,3 +288,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Audio only, no physics. Files: `audio/countdownBeep.ts`, `main.ts` (two inline hooks, file still 219 lines), `tests/countdown-beep-check.mts` (6 checks). Build and all tests green; no browser job run, nothing left running.
 - Not heard by ear: check the beeps sit well over the revving engine and the music.
 - Note: `docs/overnight/prompt.md`, `scripts/overnight.sh` and `scripts/overnight-tab.sh` had uncommitted edits at session start (runner infrastructure, not task work). I left them untouched and did not commit them.
+
+## 99 Self-directed: lap chime and finish stings
+- Crossing a lap line or the finish made no sound. Now a lap gives a quiet rising two-note chime; the final line gives a bright four-note arpeggio for a win or a soft falling pair for any other place. Synthesised on the sfx bus; a new race (laps reset) stays silent.
+- Audio only. Files: `audio/raceCue.ts` (pure `raceCue` plus `RaceCues`), `main.ts` (inline hook, still 219 lines), `tests/race-cue-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
+- Not heard by ear: check the win arpeggio does not clash with the podium music.
