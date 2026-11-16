@@ -195,7 +195,7 @@ export class AudioManager {
     this.sfx.scrape(this.clock - this.lastHit < 0.15 && inGame, speed);
     this.bed.update(g.state === 'MENU' ? 0.6 : 1, this.bus);
     this.bus.setMusicMul(AUDIO.musicVolume);
-    this.sfx.update(slide, speed, g.weather, nitro, WEATHER[g.weather].precipitation * g.weatherIntensity, inGame);
+    this.sfx.update(slide, speed, g.weather, nitro, WEATHER[g.weather].precipitation * g.weatherIntensity, inGame, surf);
     this.rivals.update(g.views.views, this.game.chase.camera, this.vel, g.state === 'RACING' || g.state === 'PODIUM');
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);
 

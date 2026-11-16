@@ -226,3 +226,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Alt-tabbing on a desktop left the car driving (only a hidden tab paused). A window blur now pauses a running race, after a 120 ms re-check that focus really left the page. Skipped on touch devices and in automated browsers (`navigator.webdriver`) so bots and smoke tests are unaffected. The audio is not suspended (only a hidden tab does that).
 - Files: `game/blurPause.ts` (pure policy), 5 lines in `game/platform.ts`, `tests/blur-pause-check.mts` (4 checks). Build and all tests green; no browser job run, nothing left running.
 - Not tried by hand: race on desktop, alt-tab away, come back: the pause menu should be showing.
+
+## 99 Self-directed: tyre squeal follows the surface
+- The tyre noise used to depend only on the weather. Now the surface under the car also picks the voice: a puddle gives the hissy spray even in clear weather, a snow bank gives the crunch, and ice is quiet and thin (the body of the sound drops, the top stays). On ordinary road the sound is identical to before in CLEAR, RAIN and SNOW.
+- Audio only, no physics or save change. Files: `audio/squealMix.ts` (pure, returns 0..1 multipliers), `audio/sfx.ts` (one optional parameter), one argument in `audio/audioManager.ts`, `tests/squeal-mix-check.mts` (10 checks). Build and all tests green; no browser job run, nothing left running.
+- Not heard by ear: AGGRESSIVE weather, slide through a puddle in rain and on tunnel ice; the multipliers are in `squealMix.ts` if ice is too quiet.
