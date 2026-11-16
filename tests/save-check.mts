@@ -43,5 +43,7 @@ const d = new SaveStore(null, base, CARS);
 check('no storage works', d.buy('350z', 12000) === false, '');
 const calmOn = parseSave(JSON.stringify({ settings: { calmUi: true } }), base, CARS);
 check('calm HUD: default off, loads on, junk is off', base.settings.calmUi === false && calmOn.settings.calmUi === true && parseSave(JSON.stringify({ settings: { calmUi: 'yes' } }), base, CARS).settings.calmUi === false && parseSave(JSON.stringify({}), base, CARS).settings.calmUi === false, '');
+const cbOn = parseSave(JSON.stringify({ settings: { colorSafe: true } }), base, CARS);
+check('colour-safe HUD: default off, loads on, junk is off', base.settings.colorSafe === false && cbOn.settings.colorSafe === true && parseSave(JSON.stringify({ settings: { colorSafe: 1 } }), base, CARS).settings.colorSafe === false && parseSave(JSON.stringify({}), base, CARS).settings.colorSafe === false, '');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

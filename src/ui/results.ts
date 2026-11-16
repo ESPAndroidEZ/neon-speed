@@ -30,8 +30,8 @@ export class ResultsScreen {
       .map((x) => `<tr style="${x.isPlayer ? 'color:#ff2a9d' : ''}"><td>P${x.position}</td><td>${x.isPlayer ? t('vs.you') : x.name}</td><td style="text-align:right">${x.time === null ? t('res.dnf') : fmt(x.time)}</td></tr>`)
       .join('');
     const head = t(extra ? (extra.passed ? 'res.passed' : 'res.failed') : r.position === 1 ? 'res.victory' : 'res.finished', { p: r.position });
-    const color = extra && !extra.passed ? '#ff5470' : '#18d8ff';
-    const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? '#7dff9a' : '#ff9aa8'}">${extra.objective}</div>` : '';
+    const color = extra && !extra.passed ? 'var(--red)' : '#18d8ff';
+    const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? 'var(--green)' : '#ff9aa8'}">${extra.objective}</div>` : '';
     const tip = !extra && r.position > 1 ? this.handlers.tip?.() : null; // lost a free race: suggest an upgrade
     const pb = !extra && r.note ? [`<div style="color:#18d8ff;font-size:.9em">${r.note}</div>`] : [];
     const notes = pb.join('') + (tip ? [tip] : extra?.notes ?? []).map((n) => `<div style="color:#ffd27d">${n}</div>`).join('');
@@ -39,7 +39,7 @@ export class ResultsScreen {
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>
       <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>
-      <div style="font-size:30px;margin:10px 0;color:#7dff9a">+ $${r.cash.toLocaleString()}</div>${notes}
+      <div style="font-size:30px;margin:10px 0;color:var(--green)">+ $${r.cash.toLocaleString()}</div>${notes}
       <div id="rs-btns" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div></div>`;
     injectCss();
     const touch = isPhone();

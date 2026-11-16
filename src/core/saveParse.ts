@@ -66,6 +66,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.steerSens = num(s.steerSens, 1, 0.6, 1.4);
   out.settings.rumble = s.rumble !== false;
   out.settings.calmUi = s.calmUi === true;
+  out.settings.colorSafe = s.colorSafe === true;
   if (s.look === 'neon' || s.look === 'dusk' || s.look === 'grit') out.settings.look = s.look;
   if (s.difficulty === 'ROOKIE' || s.difficulty === 'STREET' || s.difficulty === 'PRO' || s.difficulty === 'LEGEND') out.settings.difficulty = s.difficulty;
   out.settings.padDeadzone = num(s.padDeadzone, 0.12, 0.02, 0.4);

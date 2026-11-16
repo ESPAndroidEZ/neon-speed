@@ -17,7 +17,7 @@ const CSS = `
 @keyframes rb-ban{0%{opacity:0;scale:1.7}25%{opacity:1}100%{opacity:1;scale:1}}
 #hud .lights{position:absolute;left:0;right:0;top:calc(28% + clamp(84px,14vw,140px));display:flex;gap:clamp(10px,2vw,22px);justify-content:center}
 #hud .lights i{width:clamp(16px,3vw,30px);aspect-ratio:1;border-radius:50%;background:#ffffff22;border:2px solid #ffffff44}
-#hud .lights i.r{background:#ff2a4a;border-color:#ff9aa8;box-shadow:0 0 18px #ff2a4a}#hud .lights i.g{background:#7dff9a;border-color:#d8ffe0;box-shadow:0 0 22px #7dff9a}
+#hud .lights i.r{background:var(--red);border-color:#ff9aa8;box-shadow:0 0 18px var(--red)}#hud .lights i.g{background:var(--green);border-color:#d8ffe0;box-shadow:0 0 22px var(--green)}
 @media (prefers-reduced-motion:reduce){#hud .ban.go{animation:none}}
 #hud .ds{position:absolute;left:50%;top:var(--mt);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);white-space:nowrap;font-style:italic;color:#ff2a9d;text-shadow:0 0 12px #ff2a9d;opacity:0;transition:opacity .2s}
 #hud .hb-fs{position:absolute;left:var(--ml);top:calc(var(--mt) + 40px)}
@@ -126,7 +126,7 @@ export class Hud {
     if (tel.driftScore !== this.lastScore) {
       const tier = Math.floor(tel.driftScore / 1000);
       if (tier > this.lastTier) this.popUp(`+${tier * 1000}`, '#ff2a9d');
-      else if (tel.driftScore === 0 && this.lastScore > 600) this.popUp(t('hud.banked', { n: this.lastScore }), '#7dff9a');
+      else if (tel.driftScore === 0 && this.lastScore > 600) this.popUp(t('hud.banked', { n: this.lastScore }), 'var(--green)');
       this.lastTier = tier;
       this.lastScore = tel.driftScore;
       this.drift.textContent = `${t('hud.drift')} ${tel.driftScore}`;

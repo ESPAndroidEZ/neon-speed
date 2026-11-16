@@ -10,7 +10,7 @@ import type { Game } from './game';
 import { t } from '../i18n';
 
 const LAUNCH_POP: Record<Exclude<LaunchResult, 'NONE'>, ['launch.perfect' | 'launch.good' | 'launch.early', string]> = {
-  PERFECT: ['launch.perfect', '#7dff9a'],
+  PERFECT: ['launch.perfect', 'var(--green)'],
   GOOD: ['launch.good', '#18d8ff'],
   EARLY: ['launch.early', '#ffc23d'],
 };
@@ -44,7 +44,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
     if (rm.rewards.seq !== seenReward) {
       seenReward = rm.rewards.seq;
       const k = rm.rewards.last;
-      if (k) hud.popUp(`${t(REWARD[k] ?? 'rw.clean')}  +${t('pad.nitro')}`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : '#7dff9a');
+      if (k) hud.popUp(`${t(REWARD[k] ?? 'rw.clean')}  +${t('pad.nitro')}`, k === 'NEAR MISS' ? '#ffc23d' : k === 'SLIPSTREAM' ? '#18d8ff' : 'var(--green)');
     }
     if (!racing || game.player.finished) {
       guide.el.style.opacity = '0';

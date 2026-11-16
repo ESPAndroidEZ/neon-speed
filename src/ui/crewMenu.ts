@@ -13,7 +13,7 @@ const REL_IDS = ['mara', 'cain', 'dante', 'nova', 'brick'];
 function relBar(v: number): HTMLElement {
   const bar = h('div', 'rb-bar');
   bar.style.cssText += ';width:100%;margin-top:8px;position:relative';
-  bar.innerHTML = `<i style="position:absolute;left:${v >= 0 ? 50 : 50 + v * 10}%;width:${Math.abs(v) * 10}%;background:${v >= 0 ? '#7dff9a' : '#ff5470'}"></i>`;
+  bar.innerHTML = `<i style="position:absolute;left:${v >= 0 ? 50 : 50 + v * 10}%;width:${Math.abs(v) * 10}%;background:${v >= 0 ? 'var(--green)' : 'var(--red)'}"></i>`;
   const wrap = h('div', '', `<div class="rb-sub" style="font-size:11px;margin-top:6px">${t('crew.relationship')}</div>`);
   wrap.append(bar);
   return wrap;

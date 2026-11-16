@@ -66,7 +66,7 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
         applyUpgrades(tn, { ...(store.data.upgrades[c.id] ?? {}), [u.id]: level + 1 }, c.id);
         applySetup(tn, store.data.setups[c.id] ?? defaultSetup());
         const rn = rate(tn), f = (x: number, d = 1): string => { const v = Number(x.toFixed(d)); return v > 0 ? `+${v}` : v < 0 ? String(v) : '0'; };
-        gain = `<div style="font-size:11px;color:#7dff9a">${t('tune.next', { pr: f(rn.pr - r.pr, 0), accel: f(rn.accel - r.accel), top: f(rn.topKph - r.topKph, 0), stop: f(rn.brake30 - r.brake30, 0) })}</div>`;
+        gain = `<div style="font-size:11px;color:var(--green)">${t('tune.next', { pr: f(rn.pr - r.pr, 0), accel: f(rn.accel - r.accel), top: f(rn.topKph - r.topKph, 0), stop: f(rn.brake30 - r.brake30, 0) })}</div>`;
       }
       const row = h('div', 'rb-row', `<div style="flex:1;min-width:150px"><b>${tx(u.name)}</b> ${'●'.repeat(level)}${'○'.repeat(u.levels.length - level)}${u.id === 'stage' ? ` <span style="font-size:11px;opacity:.8">${stageSpec(c.id, level).ps} PS / ${stageSpec(c.id, level).nm} Nm${next ? ` → ${stageSpec(c.id, level + 1).ps} PS / ${stageSpec(c.id, level + 1).nm} Nm (${tx(stageSpec(c.id, level + 1).parts)})` : ''}</span>` : ''}<div style="font-size:11px;opacity:.7">${absent ? t('tune.needsTurbo') : next ? tx(next.name) : t('tune.maxed')}</div>${gain}<div style="font-size:11px;opacity:.55;max-width:330px">${tx(ADVICE[u.id])}</div></div>`);
       row.style.justifyContent = 'space-between';
