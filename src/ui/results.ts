@@ -3,6 +3,7 @@ import { injectCss } from './uiKit';
 import { isPhone } from '../core/quality';
 import { t } from '../i18n';
 import { resultGap } from '../game/resultGap';
+import { isPhotoFinish } from '../game/photoFinish';
 import { raceStats } from '../game/raceStats';
 import { speedText } from '../game/speedUnit';
 
@@ -35,7 +36,8 @@ export class ResultsScreen {
       .join('');
     const head = t(extra ? (extra.passed ? 'res.passed' : 'res.failed') : r.position === 1 ? 'res.victory' : 'res.finished', { p: r.position });
     const color = extra && !extra.passed ? 'var(--red)' : '#18d8ff';
-    const verdict = extra ? `<div style="margin:6px 0;color:${extra.passed ? 'var(--green)' : '#ff9aa8'}">${extra.objective}</div>` : '';
+    const photo = isPhotoFinish(r.racers) ? `<div style="color:#ffd27d;letter-spacing:.2em;font-size:.85em">${t('res.photo')}</div>` : '';
+    const verdict = photo + (extra ? `<div style="margin:6px 0;color:${extra.passed ? 'var(--green)' : '#ff9aa8'}">${extra.objective}</div>` : '');
     const tip = !extra && r.position > 1 ? this.handlers.tip?.() : null; // lost a free race: suggest an upgrade
     const lt = r.lapTimes ?? [];
     const best = Math.min(...lt);

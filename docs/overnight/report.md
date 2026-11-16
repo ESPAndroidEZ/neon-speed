@@ -251,3 +251,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - A new best lap used to show only "NEW BEST LAP · GHOST SAVED" (no time, no gain) and skipped the lap counter, so the next lap pop-up said the wrong number. It now reads "NEW BEST LAP  1:23.68  −0.42" (first ever lap: time only) and counts as a lap. ES: "NUEVA MEJOR VUELTA".
 - Display only. Files: `game/ghost.ts`, i18n `ghost.best`, one more check in `tests/lap-pop-check.mts`. Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: beat your best lap and check the line fits on a phone.
+
+## 99 Self-directed: photo finish badge
+- When the player wins or loses by under 0.3 s, the results show a gold "PHOTO FINISH" (ES: "FOTO FINISH") under the title. Not shown if the player is outside the top two, or a time is missing.
+- Display only. Files: `game/photoFinish.ts` (pure), `ui/results.ts`, i18n `res.photo`, `tests/photo-finish-check.mts` (10 checks). Build and all tests green; no browser job run, nothing left running.
+- Not seen by eye: a very close finish; check the badge fits on a narrow phone.

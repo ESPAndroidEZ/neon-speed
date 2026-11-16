@@ -16,6 +16,7 @@ Pick the highest-value one, do it, move it to "Done" with a date and commit hash
 - Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
 
 ## Done
+- 2026-11-16 Photo finish badge on the results when the top two (one of them the player) finish within 0.3 s (`game/photoFinish`, `ui/results`, `tests/photo-finish-check.mts`).
 - 2026-11-16 New best lap pop-up shows time and gain and counts as a lap (`game/ghost`, i18n `ghost.best`, `tests/lap-pop-check.mts`).
 - 2026-11-16 Screen-reader announcements: HUD pop-ups and countdown banner are polite live regions, WRONG WAY is an alert (`ui/hud`, `ui/wrongWay`, `tests/aria-live-check.mts`).
 - 2026-11-16 Loading tips come from a shuffled bag: no repeats until all have been shown (`core/tipBag`, `ui/loadingCard`, `tests/tip-bag-check.mts`).
