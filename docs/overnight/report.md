@@ -277,3 +277,8 @@ In Chapter 2 each district boss (Nova, Brick, Calloway, plus Lola and Rook on th
 - Under the green "+ $3,310" the results now say where it came from: "Prize $3,000 · Drifting $310" (ES: Premio / Derrapes). Hidden when there is no drift income or drift is the whole payout, and on drift events (they show their own verdict).
 - Display only, payout maths untouched. Files: `game/cashSplit.ts` (pure), `ui/results.ts`, i18n `res.split`, `tests/cash-split-check.mts` (11 checks). Build and all tests green; no browser job run, nothing left running.
 - Not seen by eye: finish a race with a few drifts and check the small line sits well under the cash on a phone.
+
+## 99 Self-directed: phone vibration on crashes
+- On phones, hard hits now buzz (12-70 ms, stronger past 9 m/s closing speed; native Capacitor haptics in the app, `navigator.vibrate` on Android browsers; iOS Safari has no vibrate API). Light scrapes stay silent and a 160 ms gap stops a wall grind from droning. It follows the existing "Rumble" setting, so turning that off silences phones too.
+- Feel only, physics untouched. Files: `input/impactHaptic.ts` (pure), `game/inputSetup.ts` (hook next to the gamepad rumble), `tests/impact-haptic-check.mts` (8 checks). Build and all tests green; no browser job run, nothing left running.
+- Not felt on a real phone: hit a wall at speed on Android and check the strength is pleasant, not annoying; thresholds are constants at the top of `impactHaptic.ts`.

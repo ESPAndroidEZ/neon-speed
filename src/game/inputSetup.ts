@@ -10,6 +10,8 @@ import { ControlStore } from '../input/controlPrefs';
 import { TiltInput } from '../input/tiltInput';
 import { chooseControls, controlsTutorial, enableTilt } from '../ui/controlsOnboard';
 import { isPhone } from '../core/quality';
+import { ImpactHaptic } from '../input/impactHaptic';
+import { buzz } from '../ui/haptics';
 import type { Game } from './game';
 
 export interface Controls {
@@ -67,9 +69,12 @@ export function createControls(demo: string | null, actions: { pause: () => void
         was = game.state;
       });
       const base = game.onImpact;
+      const haptic = new ImpactHaptic();
       game.onImpact = (s) => {
         base?.(s);
         pad.rumble(Math.min(1, s / 18), Math.min(1, s / 10), 0.25);
+        const p = pad.rumbleOn && isPhone() ? haptic.pulse(s, performance.now()) : null; // phones: the same Rumble setting
+        if (p) buzz(p.ms, p.strong);
       };
     },
   };
