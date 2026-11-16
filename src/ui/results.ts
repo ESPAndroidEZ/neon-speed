@@ -55,6 +55,8 @@ export class ResultsScreen {
       add(t(touch ? 'res.again' : 'res.againKey'), this.handlers.onAgain, true);
       if (this.handlers.onMenu) add(t(touch ? 'common.menu' : 'res.menuKey'), () => this.handlers.onMenu?.());
     }
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    this.root.style.animation = calm ? 'none' : 'rb-fade .7s var(--ease) 1.2s both'; // the car rolls out first, then the results fade in
     this.root.style.display = 'flex';
   }
 

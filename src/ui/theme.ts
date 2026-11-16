@@ -26,5 +26,6 @@ export const THEME_CSS = `
 .rb-wm em{color:#d8f8ff;text-shadow:0 0 10px var(--cyan),0 0 32px var(--cyan),0 0 64px #18d8ff88;animation:rb-flicker 7s infinite}
 .rb-wm strong{color:#ffe0f0;text-shadow:0 0 10px var(--magenta),0 0 32px var(--magenta),0 0 64px #ff2a9d88;animation:rb-flicker 9s 2s infinite}
 @media (prefers-reduced-motion:reduce){.rb-title,.rb-wm em,.rb-wm strong,.rb-layer .rb-btn{animation:none}}
+@keyframes rb-fade{from{opacity:0}to{opacity:1}}
 @keyframes rb-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 `;

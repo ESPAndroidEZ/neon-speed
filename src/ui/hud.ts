@@ -13,6 +13,12 @@ const CSS = `
 #hud .tl small{display:block;opacity:.7;font-size:11px;margin-top:3px}
 #hud .info{position:absolute;right:var(--mr);top:var(--mt);text-align:right;font-size:clamp(14px,2vw,20px);line-height:1.5;white-space:nowrap}
 #hud .ban{position:absolute;left:0;right:0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
+#hud .ban.go{animation:rb-ban .55s var(--ease,ease-out) both}
+@keyframes rb-ban{0%{opacity:0;transform:scale(1.7)}25%{opacity:1}100%{opacity:1;transform:scale(1)}}
+#hud .lights{position:absolute;left:0;right:0;top:calc(28% + clamp(84px,14vw,140px));display:flex;gap:clamp(10px,2vw,22px);justify-content:center}
+#hud .lights i{width:clamp(16px,3vw,30px);aspect-ratio:1;border-radius:50%;background:#ffffff22;border:2px solid #ffffff44}
+#hud .lights i.r{background:#ff2a4a;border-color:#ff9aa8;box-shadow:0 0 18px #ff2a4a}#hud .lights i.g{background:#7dff9a;border-color:#d8ffe0;box-shadow:0 0 22px #7dff9a}
+@media (prefers-reduced-motion:reduce){#hud .ban.go{animation:none}}
 #hud .ds{position:absolute;left:50%;top:var(--mt);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);white-space:nowrap;font-style:italic;color:#ff2a9d;text-shadow:0 0 12px #ff2a9d;opacity:0;transition:opacity .2s}
 #hud .hb-fs{position:absolute;left:var(--ml);top:calc(var(--mt) + 40px)}
 @media (pointer:coarse){#hud .hb-fs{left:calc(max(14px,env(safe-area-inset-left)) + 112px);top:calc(max(10px,env(safe-area-inset-top)) + 34px)}}
@@ -28,6 +34,8 @@ export class Hud {
   private readonly weather = document.createElement('div');
   private readonly info = document.createElement('div');
   private readonly banner = document.createElement('div');
+  private readonly lights = document.createElement('div');
+  private readonly lamps: HTMLElement[] = [];
   private readonly gauge = new ArcGauge();
   private readonly lines = document.createElement('div');
   private readonly pop = document.createElement('div');
@@ -61,7 +69,10 @@ export class Hud {
     br.append(this.gauge.el);
     this.lines.className = 'rb-lines';
     this.pop.className = 'rb-pop';
-    this.root.append(style, this.lines, this.weather, this.info, this.banner, this.drift, this.pop, br);
+    this.lights.className = 'lights';
+    this.lights.style.display = 'none';
+    for (let i = 0; i < 3; i++) { const d = document.createElement('i'); this.lamps.push(d); this.lights.append(d); }
+    this.root.append(style, this.lines, this.weather, this.info, this.banner, this.lights, this.drift, this.pop, br);
     parent.appendChild(this.root);
     onLangChange(() => {
       this.lastInfo = '';
@@ -87,7 +98,14 @@ export class Hud {
   }
 
   setBanner(text: string): void {
-    if (this.banner.textContent !== text) this.banner.textContent = text;
+    if (this.banner.textContent === text) return;
+    this.banner.textContent = text;
+    this.banner.classList.remove('go');
+    if (text) { void this.banner.offsetWidth; this.banner.classList.add('go'); }
+    // start light bar: one red lamp per second left (3 = all three), green on GO
+    const n = Number(text), go = text === 'GO!';
+    for (let i = 0; i < 3; i++) this.lamps[i].className = go ? 'g' : n > 0 && i >= 3 - n ? 'r' : '';
+    this.lights.style.display = go || n > 0 ? '' : 'none';
   }
 
   setVisible(v: boolean): void {
