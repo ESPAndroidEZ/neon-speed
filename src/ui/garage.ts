@@ -10,6 +10,7 @@ import { clamp01, hex, soundTest, statsOf } from './garageParts';
 import { button, h, money } from './uiKit';
 import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
+import { speedText } from '../game/speedUnit';
 
 export interface GarageDeps {
   store: SaveStore;
@@ -118,7 +119,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     panel.append(brand, title, h('div', '', tx(c.blurb)));
     if (c.tuning.v2) panel.append(h('div', 'rb-sub', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
     if (st2 === 'procedural') panel.append(h('div', 'rb-sub', t('garage.putGlb', { id: c.id })));
-    panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
+    panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, speedText(st.topKph)) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
       h('div', 'rb-sub', t('garage.paint')),
       swatches(PAINTS, paintOf(c), (p) => {

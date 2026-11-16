@@ -3,6 +3,7 @@ import { LOOK_IDS, LOOKS, setLook } from '../core/looks';
 import { storyComplete } from '../core/career';
 import { AI_SETTING, DIFFICULTIES } from '../physics/aiDifficulty';
 import { DRIVING, HANDLING } from '../physics/assists';
+import { unitsRow } from './unitsRow';
 import { button, h } from './uiKit';
 import { t, tx } from '../i18n';
 import type { StringKey } from '../i18n';
@@ -148,5 +149,5 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
   cb.append(cbBox);
   const model = choiceRow(t('drv.handling'), ['legacy', 'v2'] as const, () => s.handlingModel, (v) => { s.handlingModel = v; save(); }, 'hint.model');
   const stab = choiceRow(t('drv.stability'), ['OFF', 'LIGHT', 'FULL'] as const, () => s.stability, (v) => { s.stability = v; save(); }, 'hint.stab');
-  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb];
+  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow()];
 }

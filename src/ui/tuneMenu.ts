@@ -13,6 +13,7 @@ import { applyTuning, createDefaultTuning, type CarTuning } from '../physics/car
 import { drawDyno } from './dynoGraph';
 import { button, h, money } from './uiKit';
 import { t, tx } from '../i18n';
+import { getUnit, speedText, toUnit, unitLabel } from '../game/speedUnit';
 
 const CLASS_COLOR = { D: '#8a8f99', C: '#7dff9a', B: '#18d8ff', A: '#ffb347', S: '#ff2a9d' } as const;
 
@@ -45,7 +46,7 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
     prev.style.minWidth = next.style.minWidth = '60px';
     head.append(prev, h('div', '', `<div class="rb-sub">${c.brand}</div><div style="font-size:26px;font-weight:900">${c.name}</div>`), next);
     root.append(head);
-    const badge = h('div', 'rb-row', `<div style="font-size:30px;font-weight:900;color:${CLASS_COLOR[r.cls]}">${r.cls} ${r.pr}</div><div class="rb-sub">${t('tune.stats', { cls: r0.cls, pr: r0.pr, accel: r.accel.toFixed(1), top: Math.round(r.topKph), stop: r.brake30.toFixed(0) })}</div>`);
+    const badge = h('div', 'rb-row', `<div style="font-size:30px;font-weight:900;color:${CLASS_COLOR[r.cls]}">${r.cls} ${r.pr}</div><div class="rb-sub">${t('tune.stats', { cls: r0.cls, pr: r0.pr, accel: r.accel.toFixed(1), top: speedText(r.topKph), stop: r.brake30.toFixed(0) })}</div>`);
     root.append(badge);
     const bk = buildKey(store.data.upgrades[c.id] ?? {}, store.data.setups[c.id] ?? defaultSetup());
     const laps = TRACKS.map((tr) => { const b = bestLapFor(tr.id, c.id, bk); return b ? `${tr.name} ${Math.floor(b / 60)}:${(b % 60).toFixed(1).padStart(4, '0')}` : ''; }).filter(Boolean);
@@ -66,7 +67,7 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
         applyUpgrades(tn, { ...(store.data.upgrades[c.id] ?? {}), [u.id]: level + 1 }, c.id);
         applySetup(tn, store.data.setups[c.id] ?? defaultSetup());
         const rn = rate(tn), f = (x: number, d = 1): string => { const v = Number(x.toFixed(d)); return v > 0 ? `+${v}` : v < 0 ? String(v) : '0'; };
-        gain = `<div style="font-size:11px;color:var(--green)">${t('tune.next', { pr: f(rn.pr - r.pr, 0), accel: f(rn.accel - r.accel), top: f(rn.topKph - r.topKph, 0), stop: f(rn.brake30 - r.brake30, 0) })}</div>`;
+        gain = `<div style="font-size:11px;color:var(--green)">${t('tune.next', { pr: f(rn.pr - r.pr, 0), accel: f(rn.accel - r.accel), top: f(toUnit(rn.topKph - r.topKph, getUnit()), 0) + ' ' + unitLabel(), stop: f(rn.brake30 - r.brake30, 0) })}</div>`;
       }
       const row = h('div', 'rb-row', `<div style="flex:1;min-width:150px"><b>${tx(u.name)}</b> ${'●'.repeat(level)}${'○'.repeat(u.levels.length - level)}${u.id === 'stage' ? ` <span style="font-size:11px;opacity:.8">${stageSpec(c.id, level).ps} PS / ${stageSpec(c.id, level).nm} Nm${next ? ` → ${stageSpec(c.id, level + 1).ps} PS / ${stageSpec(c.id, level + 1).nm} Nm (${tx(stageSpec(c.id, level + 1).parts)})` : ''}</span>` : ''}<div style="font-size:11px;opacity:.7">${absent ? t('tune.needsTurbo') : next ? tx(next.name) : t('tune.maxed')}</div>${gain}<div style="font-size:11px;opacity:.55;max-width:330px">${tx(ADVICE[u.id])}</div></div>`);
       row.style.justifyContent = 'space-between';

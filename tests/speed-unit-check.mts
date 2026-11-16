@@ -1,0 +1,13 @@
+import { parseUnit, speedText, toUnit, unitLabel, getUnit, setUnit } from '../src/game/speedUnit.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('junk and null parse as km/h', parseUnit(null) === 'kmh' && parseUnit('x') === 'kmh' && parseUnit('') === 'kmh');
+check('mph parses', parseUnit('mph') === 'mph');
+check('default is km/h without storage', getUnit() === 'kmh');
+check('100 km/h is 62 mph', Math.round(toUnit(100, 'mph')) === 62);
+check('km/h text', speedText(187.4, 'kmh') === '187 km/h');
+check('mph text', speedText(200, 'mph') === '124 mph');
+check('labels', unitLabel('kmh') === 'km/h' && unitLabel('mph') === 'mph');
+setUnit('mph');
+check('setUnit without localStorage does not throw and sticks', getUnit() === 'mph' && speedText(100) === '62 mph');
+if (failed) process.exit(1);

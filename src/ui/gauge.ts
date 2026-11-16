@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { getUnit, toUnit, unitLabel } from '../game/speedUnit';
 const CSS = `
 .rb-gauge{position:relative;width:clamp(170px,22vw,250px);aspect-ratio:1;margin-left:auto}
 .rb-gauge canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -55,7 +56,8 @@ export class ArcGauge {
   }
 
   update(kph: number, rpmFrac: number, gear: number, nitro: number, nitroActive: boolean): void {
-    const k = Math.round(kph) + 1000 * Math.round(rpmFrac * 60) + 1e5 * (gear + 2) + 1e7 * Math.round(nitro * 50); // numeric key: no string per frame
+    const shown = Math.round(toUnit(kph));
+    const k = shown + (getUnit() === 'mph' ? 1e9 : 0) + 1000 * Math.round(rpmFrac * 60) + 1e5 * (gear + 2) + 1e7 * Math.round(nitro * 50); // numeric key: no string per frame
     if (nitroActive && !this.nitroWas) {
       this.burst.classList.remove('go');
       void this.burst.offsetWidth; // restart the animation
@@ -65,7 +67,7 @@ export class ArcGauge {
     this.setShift(rpmFrac);
     if (k === this.key) return;
     this.key = k;
-    this.num.innerHTML = `${Math.round(kph)}<small>KM/H</small>`;
+    this.num.innerHTML = `${shown}<small>${unitLabel().toUpperCase()}</small>`;
     this.gear.textContent = gear < 0 ? 'R' : String(gear);
     this.draw(rpmFrac, nitro);
   }
