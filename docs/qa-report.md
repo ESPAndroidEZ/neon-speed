@@ -18,4 +18,10 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 11 | Launch tip pop-up behind the speedo in portrait | pop-up position | open | open |
 | 12 | Rotate hint probably expires behind the loading card | 6 s timer starts under z 65 card | open (unconfirmed) | open |
 | 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | pre-existing since the merge of main | open | open |
-Menus and race-scene review reports: pending (subagents still running at checkpoint time).
+| 14 | Radio subtitles stack on top of each other | `Subtitles.flash` never removed the line in its slot | a new line replaces the one of the same kind | fixed |
+| 15 | Every rival shows plate RB-0001 | rivals got the default loadout | `rivalPlate(name)` (two letters + four digits, stable) | fixed |
+| 16 | HIGH: white glare blob and streaks on the player car roof (same as the garage glare) | bloom + streaks on a roof highlight (suspected headlights/stage light + streak pass) | open | open |
+| 17 | Tunnel (city HIGH): cyan wall strip blows out half the screen; countdown: green-white glare on the grid's right | emissive strength through bloom | open | open |
+| 18 | Coast HIGH: dark specks on the red sky | cloud cells (`world/sky`) | open | open |
+| 19 | `demo` autopilot crashes in the first corners | dev pilot, not visual | open (dev tool) | open |
+Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). Menus review: pending.

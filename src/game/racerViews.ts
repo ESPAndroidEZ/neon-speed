@@ -4,6 +4,7 @@ import type { CarSpec } from '../data/cars';
 import type { Racer } from '../core/raceManager';
 import { createCarVisual } from '../world/carFactory';
 import { getLoadout } from '../world/loadoutStore';
+import { defaultLoadout } from '../data/loadout';
 import { applyCarLod } from '../world/carLod';
 import type { CarVisual } from '../world/proceduralCar';
 
@@ -18,6 +19,14 @@ export interface RacerView {
   heading: number;
   longAccel: number;
   lastSpeed: number;
+}
+
+/** A rival's own plate from its name: two letters and four digits (e.g. DANTE -> DA-4821), stable per name. */
+export function rivalPlate(name: string): string {
+  const letters = (name.toUpperCase().replace(/[^A-Z]/g, '') + 'XX').slice(0, 2);
+  let h = 7;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return `${letters}-${String(1000 + (h % 9000))}`;
 }
 
 /** One visual car per racer, posed by interpolating the physics state between fixed steps. */
@@ -39,7 +48,7 @@ export class RacerViews {
   add(racer: Racer, spec: CarSpec, paint: number, glow = 0x2a6bff): RacerView {
     const holder = new Group();
     let v: RacerView;
-    const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv), racer.isPlayer ? getLoadout(spec.id) : undefined);
+    const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv), racer.isPlayer ? getLoadout(spec.id) : { ...defaultLoadout(), plate: rivalPlate(racer.name) });
     holder.add(visual.root);
     this.scene.add(holder);
     v = { racer, spec, holder, visual, x: 0, z: 0, heading: 0, longAccel: 0, lastSpeed: 0 };

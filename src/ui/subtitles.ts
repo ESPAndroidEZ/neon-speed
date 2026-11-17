@@ -64,6 +64,8 @@ export class Subtitles {
     const line = tx(text);
     const el = h('div', '', line);
     el.dataset.src = text;
+    el.dataset.kind = kind;
+    for (const old of Array.from(this.layer.children) as HTMLElement[]) if (old.dataset.kind === kind) old.remove(); // a new line replaces the one in its slot, never stacks on it
     const styles: Record<Caption['kind'], string> = {
       switch: 'position:absolute;left:0;right:0;bottom:14%;text-align:center;font-size:clamp(18px,3vw,28px);font-style:italic;color:#9fe8ff',
       lower: 'position:absolute;left:max(24px,4vw);bottom:22%;font-size:clamp(16px,2.4vw,22px);letter-spacing:2px;padding:8px 14px;background:#05060d99;border-left:3px solid #ff2a9d',
