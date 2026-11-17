@@ -25,5 +25,5 @@ export type AudioParams = typeof AUDIO;
 /** Engine sound source (Settings > Engine sound): the recorded loops (data/engineSounds) when a car has them, or always the synth. */
 export const ENGINE_SOURCE = { samples: true };
 
-/** Background music style (Settings > Music style): generative deep house or the original synthwave. */
-export const MUSIC_SOURCE: { style: 'house' | 'synth' } = { style: 'house' };
+/** Background music (Settings > Music style): deep house or synthwave. Bump `skip` to jump to the next house song; `song` = now playing. */
+export const MUSIC_SOURCE: { style: 'house' | 'synth'; skip: number; song: string } = { style: 'house', skip: 0, song: '' };

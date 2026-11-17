@@ -35,6 +35,17 @@ export function musicStyleRow(s: { musicStyle: 'house' | 'synth' }, commit: () =
     b.style.minWidth = '90px';
     row.append(b);
   }
+  // skip to the next deep house song; the label shows what is playing
+  const skip = button('', () => {
+    MUSIC_SOURCE.style = s.musicStyle = 'house';
+    MUSIC_SOURCE.skip++;
+    commit();
+    row.querySelectorAll('button[data-v]').forEach((x) => x.classList.toggle('hot', (x as HTMLElement).dataset.v === 'house'));
+    window.setTimeout(label, 120);
+  });
+  const label = (): void => { skip.textContent = t('set.nextSong', { song: MUSIC_SOURCE.song || '-' }); };
+  label();
+  row.append(skip);
   return row;
 }
 

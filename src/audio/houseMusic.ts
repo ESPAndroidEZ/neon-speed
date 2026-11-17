@@ -1,13 +1,16 @@
 import type { AudioBus } from './audioBus';
 import { midiToHz } from './musicPatterns';
-import { HOUSE_STEP_S, HOUSE_STEPS, houseBass, houseChord, houseDrums, houseLayers, housePluck, houseStab, swingOffset } from './housePatterns';
+import { HOUSE_STEPS, houseBass, houseChord, houseDrums, houseLayers, housePluck, houseStab, SONG_BARS, stepSeconds, swingOffset } from './housePatterns';
+import { HOUSE_SONGS, type HouseSong } from './houseSongs';
+import { MUSIC_SOURCE } from './audioParams';
+import { createHouseSends } from './houseFx';
 
 const LOOKAHEAD = 0.2;
 
 /**
- * Generative deep house (122 BPM): round kick, off-beat bass, warm pad and filtered chord stabs pumped by a
- * sidechain duck, swung hats, clap and shaker, a pluck on top at speed. Reverb and a dotted-8th delay are shared
- * sends. Notes come from housePatterns; layers fade in with intensity (speed).
+ * Generative deep house: the songs of houseSongs follow each other every SONG_BARS bars. Round kick, off-beat bass,
+ * warm pad and chord stabs pumped by a sidechain duck, swung hats, clap and shaker, a pluck on top at speed, shared
+ * reverb and delay sends (houseFx). Notes come from housePatterns; layers fade in with intensity (speed).
  */
 export class HouseMusic {
   private readonly bus: AudioBus;
@@ -15,6 +18,10 @@ export class HouseMusic {
   private next = 0;
   private started = false;
   private intensity = 0;
+  private song: HouseSong;
+  private songIdx: number;
+  private skip = MUSIC_SOURCE.skip;
+  private readonly delay: DelayNode;
   private readonly out: GainNode;
   /** Bass, pad and stabs go through here; every kick ducks it (the house pump). */
   private readonly duck: GainNode;
@@ -25,6 +32,9 @@ export class HouseMusic {
   constructor(bus: AudioBus) {
     this.bus = bus;
     const ctx = bus.ctx;
+    this.songIdx = Math.floor(Math.random() * HOUSE_SONGS.length);
+    this.song = HOUSE_SONGS[this.songIdx];
+    MUSIC_SOURCE.song = this.song.name;
     this.out = ctx.createGain();
     this.out.gain.value = 0;
     this.out.connect(bus.music);
@@ -35,32 +45,10 @@ export class HouseMusic {
     this.padLp.frequency.value = 900;
     this.padLp.Q.value = 0.7;
     this.padLp.connect(this.duck);
-    // reverb send: decaying stereo noise impulse
-    this.verb = ctx.createGain();
-    const conv = ctx.createConvolver();
-    const len = Math.floor(ctx.sampleRate * 2.4);
-    const ir = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let c = 0; c < 2; c++) {
-      const d = ir.getChannelData(c);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2);
-    }
-    conv.buffer = ir;
-    const verbOut = ctx.createGain();
-    verbOut.gain.value = 0.32;
-    this.verb.connect(conv).connect(verbOut).connect(this.out);
-    // dotted-8th delay send with a darkening feedback loop
-    this.echo = ctx.createGain();
-    const dl = ctx.createDelay(1);
-    dl.delayTime.value = HOUSE_STEP_S * 3;
-    const fb = ctx.createGain();
-    fb.gain.value = 0.34;
-    const dark = ctx.createBiquadFilter();
-    dark.type = 'lowpass';
-    dark.frequency.value = 2200;
-    this.echo.connect(dl).connect(dark).connect(fb).connect(dl);
-    const echoOut = ctx.createGain();
-    echoOut.gain.value = 0.5;
-    dark.connect(echoOut).connect(this.out);
+    const fx = createHouseSends(ctx, this.out, stepSeconds(this.song) * 3);
+    this.verb = fx.verb;
+    this.echo = fx.echo;
+    this.delay = fx.delay;
   }
 
   /** Call every frame. `playing` fades the music in/out; `intensity` 0..1. */
@@ -77,26 +65,42 @@ export class HouseMusic {
       this.started = true;
       this.next = ctx.currentTime + 0.1;
     }
-    while (this.next < ctx.currentTime + LOOKAHEAD) {
-      this.play(this.step, this.next + swingOffset(this.step));
-      this.step++;
-      this.next += HOUSE_STEP_S;
+    if (this.skip !== MUSIC_SOURCE.skip) {
+      this.skip = MUSIC_SOURCE.skip;
+      this.nextSong(ctx.currentTime);
     }
+    while (this.next < ctx.currentTime + LOOKAHEAD) {
+      if (this.step >= SONG_BARS * HOUSE_STEPS) this.nextSong(this.next);
+      this.play(this.step, this.next + swingOffset(this.song, this.step));
+      this.step++;
+      this.next += stepSeconds(this.song);
+    }
+  }
+
+  /** Starts the following song from its intro (song names: MUSIC_SOURCE.song). */
+  private nextSong(t: number): void {
+    this.songIdx = (this.songIdx + 1) % HOUSE_SONGS.length;
+    this.song = HOUSE_SONGS[this.songIdx];
+    MUSIC_SOURCE.song = this.song.name;
+    this.step = 0;
+    this.next = Math.max(this.next, t);
+    this.delay.delayTime.setTargetAtTime(stepSeconds(this.song) * 3, t, 0.05);
   }
 
   private play(step: number, t: number): void {
     const L = houseLayers(this.intensity);
     const d = houseDrums(step);
     if (d.kick) this.kick(t);
-    if (step % HOUSE_STEPS === 0) for (const n of houseChord(step)) this.pad(midiToHz(n), t);
-    const b = houseBass(step);
-    if (b) this.bass(midiToHz(b[0]), t, b[1] * HOUSE_STEP_S);
-    if (houseStab(step)) this.stab(houseChord(step), t, L.cutoff);
+    const S = this.song;
+    if (step % HOUSE_STEPS === 0) for (const n of houseChord(S, step)) this.pad(midiToHz(n), t);
+    const b = houseBass(S, step);
+    if (b) this.bass(midiToHz(b[0]), t, b[1] * stepSeconds(S));
+    if (houseStab(S, step)) this.stab(houseChord(S, step), t, L.cutoff);
     if (d.openHat) this.noise(t, 0.16, 7500, 0.06, 'highpass', 0.1);
     if (L.hats && d.hat > 0) this.noise(t, 0.035, 9000, 0.05 * d.hat, 'highpass', 0);
     if (L.shaker && d.shaker) this.noise(t, 0.06, 5200, 0.03, 'bandpass', 0);
     if (L.clap && d.clap) this.clap(t);
-    const p = L.pluck ? housePluck(step) : null;
+    const p = L.pluck ? housePluck(S, step) : null;
     if (p !== null) this.pluck(midiToHz(p), t);
   }
 
@@ -104,7 +108,7 @@ export class HouseMusic {
     const ctx = this.bus.ctx;
     const o = ctx.createOscillator();
     o.frequency.setValueAtTime(150, t);
-    o.frequency.exponentialRampToValueAtTime(46, t + 0.09);
+    o.frequency.exponentialRampToValueAtTime(this.song.kickHz, t + 0.09);
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(0.75, t + 0.004);
@@ -115,7 +119,7 @@ export class HouseMusic {
     // sidechain pump
     this.duck.gain.cancelScheduledValues(t);
     this.duck.gain.setValueAtTime(0.3, t);
-    this.duck.gain.linearRampToValueAtTime(1, t + HOUSE_STEP_S * 3);
+    this.duck.gain.linearRampToValueAtTime(1, t + stepSeconds(this.song) * 3);
   }
 
   private bass(hz: number, t: number, dur: number): void {
@@ -141,7 +145,7 @@ export class HouseMusic {
   }
 
   private pad(hz: number, t: number): void {
-    const dur = HOUSE_STEP_S * HOUSE_STEPS;
+    const dur = stepSeconds(this.song) * HOUSE_STEPS;
     for (const det of [-9, 9]) this.osc('sawtooth', hz, det, t, 0.5, dur, 0.018, this.padLp, true);
   }
 
@@ -156,7 +160,8 @@ export class HouseMusic {
     const send = ctx.createGain();
     send.gain.value = 0.5;
     f.connect(send).connect(this.echo);
-    for (const n of chord) this.osc('sawtooth', midiToHz(n), n % 2 ? 6 : -6, t, 0.004, 0.26, 0.03, f, false);
+    const w = this.song.stabWave, lvl = w === 'sawtooth' ? 0.03 : w === 'square' ? 0.022 : 0.05;
+    for (const n of chord) this.osc(w, midiToHz(n), n % 2 ? 6 : -6, t, 0.004, w === 'triangle' ? 0.4 : 0.26, lvl, f, false);
   }
 
   private pluck(hz: number, t: number): void {

@@ -1,48 +1,44 @@
-/** Pure note logic for the generative deep house track (no Web Audio), so it can be unit tested. */
-export const HOUSE_BPM = 122;
+/** Pure note logic for the generative deep house songs (no Web Audio), so it can be unit tested. `step` counts 16ths from the song start. */
+import type { HouseSong } from './houseSongs';
+
 export const HOUSE_STEPS = 16;
-export const HOUSE_STEP_S = 60 / HOUSE_BPM / 4;
-/** Late shift of every odd 16th, as a fraction of a step (the shuffle). */
-export const HOUSE_SWING = 0.16;
+/** Bars per song before the next one starts (about 1.5 minutes). */
+export const SONG_BARS = 48;
 
-/** One bar each: bass root (midi) and a rootless voicing in the middle register. Am9, Fmaj9, Dm9, Em7. */
-const PROG: readonly { root: number; voicing: readonly number[] }[] = [
-  { root: 33, voicing: [60, 64, 67, 71] },
-  { root: 29, voicing: [57, 60, 64, 67] },
-  { root: 38, voicing: [53, 57, 60, 64] },
-  { root: 28, voicing: [55, 59, 62, 64] },
-];
+export const stepSeconds = (song: HouseSong): number => 60 / song.bpm / 4;
 
-const barOf = (step: number): number => Math.floor(step / HOUSE_STEPS) % PROG.length;
+const barOf = (song: HouseSong, step: number): number => Math.floor(step / HOUSE_STEPS) % song.prog.length;
 const posOf = (step: number): number => step % HOUSE_STEPS;
 
 /** Seconds a step starts late because of the swing. */
-export const swingOffset = (step: number): number => (step % 2 === 1 ? HOUSE_SWING * HOUSE_STEP_S : 0);
+export const swingOffset = (song: HouseSong, step: number): number => (step % 2 === 1 ? song.swing * stepSeconds(song) : 0);
+
+/** Arrangement: 2-bar intro without drums, a 4-bar breakdown in the middle, the full groove otherwise. */
+export function houseSection(step: number): 'intro' | 'break' | 'full' {
+  const b = Math.floor(step / HOUSE_STEPS) % SONG_BARS;
+  return b < 2 ? 'intro' : b >= 24 && b < 28 ? 'break' : 'full';
+}
 
 /** Pad chord for the bar (played on its first step). */
-export function houseChord(step: number): readonly number[] {
-  return PROG[barOf(step)].voicing;
+export function houseChord(song: HouseSong, step: number): readonly number[] {
+  return song.prog[barOf(song, step)].voicing;
 }
 
 /** Bass: off-beat, syncopated, out of the kick's way. [midi, length in steps] or null. */
-const BASS: readonly (readonly [number, number, number])[] = [[2, 0, 2], [6, 0, 1], [7, 12, 1], [10, 0, 2], [13, 7, 1], [14, 0, 2]];
-export function houseBass(step: number): readonly [number, number] | null {
+export function houseBass(song: HouseSong, step: number): readonly [number, number] | null {
   const p = posOf(step);
-  for (const [at, iv, len] of BASS) if (at === p) return [PROG[barOf(step)].root + iv, len];
+  for (const [at, iv, len] of song.bass) if (at === p) return [song.prog[barOf(song, step)].root + iv, len];
   return null;
 }
 
-/** Chord stab positions: a short filtered stab on the "and" of beats, extra push every second bar. */
-export function houseStab(step: number): boolean {
+/** Chord stab on this step? */
+export function houseStab(song: HouseSong, step: number): boolean {
   const p = posOf(step);
-  return p === 3 || p === 10 || (barOf(step) % 2 === 1 && p === 14);
+  return song.stab.includes(p) || (Math.floor(step / HOUSE_STEPS) % 2 === 1 && song.stabOdd.includes(p));
 }
 
-/** Sparse pluck motif over A minor pentatonic, 2-bar phrase. */
-const PLUCK: readonly (number | null)[] = [76, null, null, 79, null, null, 81, null, null, null, 79, null, 76, null, 74, null,
-  null, null, 72, null, null, 74, null, null, 76, null, null, null, null, null, 69, null];
-export function housePluck(step: number): number | null {
-  return PLUCK[step % PLUCK.length];
+export function housePluck(song: HouseSong, step: number): number | null {
+  return song.pluck[step % song.pluck.length];
 }
 
 export interface HouseHit {
@@ -56,12 +52,14 @@ export interface HouseHit {
 
 export function houseDrums(step: number): HouseHit {
   const p = posOf(step);
+  const sec = houseSection(step);
+  const on = sec === 'full';
   return {
-    kick: p % 4 === 0,
-    clap: p === 4 || p === 12,
-    openHat: p % 4 === 2,
-    hat: p % 4 === 2 ? 0 : p % 2 === 1 ? 0.55 : 0.3,
-    shaker: p % 2 === 1,
+    kick: on && p % 4 === 0,
+    clap: on && (p === 4 || p === 12),
+    openHat: sec !== 'intro' && p % 4 === 2,
+    hat: !on || p % 4 === 2 ? 0 : p % 2 === 1 ? 0.55 : 0.3,
+    shaker: on && p % 2 === 1,
   };
 }
 
