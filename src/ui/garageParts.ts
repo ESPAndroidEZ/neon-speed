@@ -1,5 +1,6 @@
 import { REV_TEST } from '../audio/revTest';
 import { measureCar, type CarStats } from '../physics/carStats';
+import { rate } from '../physics/carRating';
 import type { CarSpec } from '../data/cars';
 import { button } from './uiKit';
 import { t } from '../i18n';
@@ -8,7 +9,7 @@ import { t } from '../i18n';
 const statCache = new Map<string, CarStats>();
 export const statsOf = (c: CarSpec): CarStats => {
   let s = statCache.get(c.id);
-  if (!s) statCache.set(c.id, (s = measureCar(c.tuning)));
+  if (!s) statCache.set(c.id, (s = { ...measureCar(c.tuning), topKph: rate(c.tuning).topKph })); // same top speed as the Tuning screen
   return s;
 };
 export const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;

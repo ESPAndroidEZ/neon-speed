@@ -131,3 +131,16 @@ Goal: a playable, shareable Chapter 1 demo. "Very good on every platform" is the
 | Sun evening | Menu, garage-lite (buy and paint), save, deploy to a static host, test on a phone |
 
 Cut first if time runs out: Drift Night event, vinyls, third car, music variety. Never cut: handling feel.
+
+## 10. Fun round (owner request 2026-11-17: "plan more stuff that would be nice to have, more fun, and add it")
+Picked for fun per hour of work, phone-friendly, no new assets, no change to the approved handling or the locked turbo.
+| # | Feature | Why it is fun | Status |
+|---|---|---|---|
+| 1 | **Style combo**: drift, near miss, slipstream and clean corner chain within 3 s; multiplier x1..x5 on the HUD; the combo banks as "Style $" on the results | Turns clean aggressive driving into a score chase between rivals | building now |
+| 2 | **Achievements**: 16 badges (first win, 10k drift, 5 near misses in a lap, win in snow, flawless lap, every track, every car...), toast on unlock, list in the driver record | Long-term goals; reasons to try every car, track and weather | building now |
+| 3 | **Knockout mode** (circuits): last place is out at the end of each lap | Tension every lap, short sessions on phones | next |
+| 4 | **Neon tokens**: 5 hidden glowing tokens per track, off the racing line (alleys, dock, tunnel); all 5 unlock a paint | Exploration, replay value of the free roam | next |
+| 5 | **Drift zones**: marked corner sections with a score target and bronze/silver/gold | Skill showcase for the approved handbrake drift | later |
+| 6 | **Rival grudges**: the rival who beats you most gets a nemesis tag, taunt barks and a bounty | Story-like personality in free races | later |
+| 7 | **Replay**: last race from the deterministic snapshots with cinematic cameras | Share-worthy moments (photo mode exists) | later |
+| 8 | **Online extras**: room ghost of the winner, quick rematch button | Keeps groups playing | later |

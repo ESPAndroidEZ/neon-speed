@@ -1,0 +1,21 @@
+/** Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the same keys. */
+export const EN_ACH = {
+  'ach.unlocked': 'ACHIEVEMENT: {name}', 'ach.title': 'Achievements', 'ach.count': '{n} of {total} unlocked',
+  'ach.finish': 'Off the line', 'ach.finish.d': 'Finish a race.',
+  'ach.win': 'First blood', 'ach.win.d': 'Win a race.',
+  'ach.podium5': 'Regular', 'ach.podium5.d': 'Finish on the podium 5 times.',
+  'ach.wins10': 'Kingpin', 'ach.wins10.d': 'Win 10 races.',
+  'ach.drift10k': 'Sideways', 'ach.drift10k.d': 'Score 10,000 drift points in one race.',
+  'ach.drift50k': 'Smoke show', 'ach.drift50k.d': 'Score 50,000 drift points in one race.',
+  'ach.near5': 'Paint swap', 'ach.near5.d': '5 near misses in one race.',
+  'ach.tow5': 'Draft king', 'ach.tow5.d': '5 slipstreams in one race.',
+  'ach.combo5k': 'Chain reaction', 'ach.combo5k.d': 'Bank a 5,000 point style combo.',
+  'ach.style20k': 'Showtime', 'ach.style20k.d': '20,000 style points in one race.',
+  'ach.rain': 'Aquaplane', 'ach.rain.d': 'Win in the rain.',
+  'ach.snow': 'Ice cold', 'ach.snow.d': 'Win in the snow.',
+  'ach.ton': 'Two-fifty', 'ach.ton.d': 'Hit 250 km/h.',
+  'ach.weathers': 'All seasons', 'ach.weathers.d': 'Win in clear, rain and snow.',
+  'ach.tracks3': 'Tourist', 'ach.tracks3.d': 'Win on 3 different tracks.',
+  'ach.cars4': 'Collector', 'ach.cars4.d': 'Win with 4 different cars.',
+  'ach.laps100': 'Mileage', 'ach.laps100.d': 'Drive 100 laps.',
+};

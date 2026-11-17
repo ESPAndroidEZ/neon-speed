@@ -2,6 +2,7 @@ import { EN_CONTROLS } from './enControls';
 import { EN_GAME } from './enGame';
 import { EN_MENU } from './enMenu';
 import { EN_ONLINE } from './enOnline';
+import { EN_ACH } from './enAch';
 
 /**
  * English UI strings: the reference table. Spanish (es.ts) must have exactly the same keys (tests/i18n-check).
@@ -10,6 +11,7 @@ import { EN_ONLINE } from './enOnline';
  */
 export const EN = {
   ...EN_CONTROLS,
+  ...EN_ACH,
   ...EN_MENU,
   ...EN_GAME,
   ...EN_ONLINE,

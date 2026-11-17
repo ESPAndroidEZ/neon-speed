@@ -6,6 +6,9 @@ export class RaceStats {
   near = 0;
   slip = 0;
   clean = 0;
+  /** Banked style-combo points and the best single chain (core/styleCombo), copied by ui/comboHud. */
+  style = 0;
+  bestCombo = 0;
 
   /** Call every frame while the player is racing (speed in m/s). Non-finite or negative speeds are ignored. */
   step(speedMs: number): void {
@@ -31,6 +34,8 @@ export class RaceStats {
     this.near = 0;
     this.slip = 0;
     this.clean = 0;
+    this.style = 0;
+    this.bestCombo = 0;
   }
 }
 

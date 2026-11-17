@@ -1,5 +1,7 @@
 import { AudioManager } from './audio/audioManager';
 import { installGameCues } from './audio/gameCues';
+import { installComboHud } from './ui/comboHud';
+import { announceAchievements } from './ui/achievementsUi';
 import { LOD_EYE } from './world/carLod';
 import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
@@ -83,7 +85,7 @@ const results = new ResultsScreen(document.body, { onAgain: () => game.restart()
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);
-attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
+attachRaceFeedback(engine, game, hud); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
@@ -181,7 +183,7 @@ const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMen
 game.onFinish = (r) => {
   const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
   const extra = story.finish(r) ?? free;
-  world.setHandprints(store.data.career.completed.length); recordRace(r);
+  world.setHandprints(store.data.career.completed.length); recordRace(r); announceAchievements(r, game, store.data.selected);
   return extra;
 };
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);

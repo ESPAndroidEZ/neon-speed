@@ -26,6 +26,7 @@ export class ResultsScreen {
 
   constructor(parent: HTMLElement, handlers: { onAgain: () => void; onMenu?: () => void; tip?: () => string | null }) {
     this.handlers = handlers;
+    this.root.className = 'rb-results';
     this.root.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#05060dcc;color:#e8f6ff;font:600 16px system-ui,sans-serif;z-index:20;padding:16px;box-sizing:border-box;overflow:auto';
     parent.appendChild(this.root);
   }
@@ -43,7 +44,7 @@ export class ResultsScreen {
     const lt = r.lapTimes ?? [];
     const best = Math.min(...lt);
     const splits = lt.length > 1 ? `<div style="font-size:.85em;opacity:.85;margin-top:4px">${t('res.laps')}: ${lt.map((v, i) => `<span style="${v === best ? 'color:var(--green)' : ''}">${i + 1}&nbsp;${fmt(v)}</span>`).join(' &nbsp;·&nbsp; ')}</div>` : '';
-    const st = raceStats.any ? `<div style="font-size:.8em;opacity:.75;margin-top:4px">${t('res.top')} <b>${speedText(raceStats.topKph)}</b> · ${t('res.near')} <b>${raceStats.near}</b> · ${t('res.slip')} <b>${raceStats.slip}</b> · ${t('res.clean')} <b>${raceStats.clean}</b></div>` : '';
+    const st = raceStats.any ? `<div style="font-size:.8em;opacity:.75;margin-top:4px">${t('res.top')} <b>${speedText(raceStats.topKph)}</b> · ${t('res.near')} <b>${raceStats.near}</b> · ${t('res.slip')} <b>${raceStats.slip}</b> · ${t('res.clean')} <b>${raceStats.clean}</b>${raceStats.style > 0 ? ` · ${t('res.style')} <b>${raceStats.style.toLocaleString()}</b> (${t('res.combo')} ${raceStats.bestCombo.toLocaleString()})` : ''}</div>` : '';
     const cs = extra ? null : cashSplit(r.cash, r.driftScore);
     const split = cs ? `<div style="font-size:.8em;opacity:.75;margin-bottom:8px">${t('res.split', { prize: cs.prize.toLocaleString(), drift: cs.drift.toLocaleString() })}</div>` : '';
     const pb = !extra && r.note ? [`<div style="color:#18d8ff;font-size:.9em">${r.note}</div>`] : [];

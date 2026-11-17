@@ -3,7 +3,7 @@ import type { EN_GAME } from './enGame';
 /** Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas claves que enGame.ts. */
 export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'hud.keys': 'R reiniciar · M silenciar · Esc menú', 'hud.keysDev': '1 despejado · 2 lluvia · 3 nieve · R reiniciar · M silenciar · Esc menú',
-  'hud.lap': 'VUELTA', 'hud.pos': 'POS', 'hud.drift': 'DERRAPE', 'hud.banked': 'GUARDADO {n}',
+  'hud.lap': 'VUELTA', 'hud.pos': 'POS', 'hud.drift': 'DERRAPE', 'hud.banked': 'GUARDADO {n}', 'combo.style': 'ESTILO', 'combo.banked': 'ESTILO +{n}', 'combo.lost': 'COMBO PERDIDO', 'res.style': 'Estilo', 'res.combo': 'mejor combo',
   'pause.title': 'PAUSA', 'pause.resume': 'Reanudar (Esc)', 'pause.restart': 'Reiniciar', 'pause.save': 'Guardar',
   'pause.photo': 'Foto (PNG)', 'pause.photoSaved': 'Foto guardada', 'pause.photoFail': 'No se pudo guardar la foto',
   'pause.saveQuit': 'Guardar y salir al menú', 'pause.saveTo': 'GUARDAR EN',

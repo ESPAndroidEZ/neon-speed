@@ -1,7 +1,7 @@
 /** Race, story, HUD, pause, save and system messages: English UI strings. */
 export const EN_GAME = {
   'hud.keys': 'R reset · M mute · Esc menu', 'hud.keysDev': '1 clear · 2 rain · 3 snow · R reset · M mute · Esc menu',
-  'hud.lap': 'LAP', 'hud.pos': 'POS', 'hud.drift': 'DRIFT', 'hud.banked': 'BANKED {n}',
+  'hud.lap': 'LAP', 'hud.pos': 'POS', 'hud.drift': 'DRIFT', 'hud.banked': 'BANKED {n}', 'combo.style': 'STYLE', 'combo.banked': 'STYLE +{n}', 'combo.lost': 'COMBO LOST', 'res.style': 'Style', 'res.combo': 'best combo',
   'pause.title': 'PAUSED', 'pause.resume': 'Resume (Esc)', 'pause.restart': 'Restart', 'pause.save': 'Save',
   'pause.photo': 'Photo (PNG)', 'pause.photoSaved': 'Photo saved', 'pause.photoFail': 'Could not save photo',
   'pause.saveQuit': 'Save & Quit to menu', 'pause.saveTo': 'SAVE TO',

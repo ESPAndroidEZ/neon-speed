@@ -14,6 +14,7 @@ const CSS = `
 .rb-ob .rb-btn{min-width:min(200px,100%);min-height:48px}
 .rb-tut{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 56px));transform:translateX(-50%);z-index:90;max-width:min(92vw,440px);display:flex;gap:10px;align-items:center;
 padding:10px 12px;background:#0a0d1ce6;border:1px solid #18d8ff88;border-radius:12px;color:#e8f6ff;font:600 13px/1.35 system-ui,sans-serif}
+body:has(.rb-layer.dim) .rb-tut,body:has(.rb-results[style*="display: flex"]) .rb-tut{display:none}
 .rb-tut button{min-width:44px;min-height:44px;background:none;border:0;color:#fff;font-size:20px;cursor:pointer;flex:none}
 `;
 let styled = false;
