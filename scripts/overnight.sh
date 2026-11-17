@@ -30,7 +30,8 @@ MARGIN=${LIMIT_MARGIN:-120}   # extra seconds after the announced reset
 MODE=${MODE:-tmux}            # tmux = interactive session you can watch and /resume; print = headless claude -p
 TMUX_SESSION=${TMUX_SESSION:-neon}
 QUIET=${QUIET_SECS:-90}       # tmux mode: seconds of silence (and no "esc to interrupt") before a session counts as finished
-NICE=${NICE_LEVEL:-10}        # lower CPU priority for Claude and everything it spawns (headless Chromium etc.)
+CORES=${CPU_CORES:-0,1}       # pin Claude and all its children (Chromium, node) to these cores: the PC stays responsive
+NICE=${NICE_LEVEL:-15}       # lower CPU priority for Claude and everything it spawns (headless Chromium etc.)
 PROBE=${PROBE_SECS:-1200}    # first wait when the reset time cannot be parsed (grows by 50 % steps)
 
 mkdir -p "$LOG_DIR"
@@ -142,7 +143,7 @@ session_alive() { tmux has-session -t "$TMUX_SESSION" 2>/dev/null; }
 session_open() {
   SID=$(cat /proc/sys/kernel/random/uuid); TRANSCRIPT="$PROJ_DIR/$SID.jsonl"; S_START=$(date +%s); NUDGES=0
   tmux kill-session -t "$TMUX_SESSION" 2>/dev/null
-  local cmd="nice -n $NICE $CLAUDE_BIN --dangerously-skip-permissions --session-id $SID ${MODEL:+--model $MODEL} 'Follow the instructions in docs/overnight/prompt.md exactly. [nudge 0]'"
+  local cmd="nice -n $NICE taskset -c $CORES $CLAUDE_BIN--dangerously-skip-permissions --session-id $SID ${MODEL:+--model $MODEL} 'Follow the instructions in docs/overnight/prompt.md exactly. [nudge 0]'"
   tmux new-session -d -s "$TMUX_SESSION" -x 200 -y 50 -c "$PWD" -e "PATH=$PATH" "$cmd" 9>&- || { SID=; return 1; }
   say "NEW session $SID (tmux attach -t $TMUX_SESSION, or /resume)"
 }
@@ -199,7 +200,7 @@ run_session_tmux() {
     since=$S_START
   elif [[ -z $SID ]]; then
     session_adopt || { session_close; session_open || { code=1; tail_txt=; : >"$log"; return; }; }
-    since=0
+    since=$(date +%s)   # adopted: judge idleness from now on (never 0, or the turn timeout fires at once)
   else
     since=$(date +%s); session_nudge
   fi

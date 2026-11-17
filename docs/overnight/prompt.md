@@ -23,7 +23,7 @@ RAM/CPU hygiene (Carlos wants the PC to do nothing but this one session; the box
 - Start no background services other than `scripts/with-dev.sh`, which cleans up after itself. Before every `OVERNIGHT-CONTINUE` and after every browser job, make sure nothing of yours is left running: `ps -eo pid,args | grep -E "[v]ite|[c]hrome-headless|[p]laywright"`, and `kill` those PIDs (never `pkill -f`, it matches your own shell).
 - Do not launch other Claude sessions or subagents for bulk work; do the work in this session. A single Explore subagent for screenshot review is fine.
 
-Item 99 ("self-directed") is a standing item: never tick it. When you reach it, read `docs/overnight/ideas.md`, pick the single highest-value idea (or invent a better one: gameplay feel, menus, HUD, performance, mobile, accessibility, juice, tests), do it with the same discipline, log it in the report and in the "done" list of `ideas.md`, and end with `OVERNIGHT-CONTINUE`. Only print `OVERNIGHT-DONE` if the ideas are truly exhausted or the build cannot be kept green.
+Item 99 ("self-directed") is a standing item: never tick it. When you reach it, read `docs/overnight/ideas.md`, pick the single highest-value idea (or invent a better one: gameplay feel, menus, HUD, performance, mobile, accessibility, juice, tests), do it with the same discipline, log it in the report and in the "done" list of `ideas.md`, then pick the next idea and keep going in the same session (do NOT end with `OVERNIGHT-CONTINUE` after each idea; that marker is only for a nearly full context). Only print `OVERNIGHT-DONE` if the ideas are truly exhausted or the build cannot be kept green.
 
 Never, under any circumstances:
 - Touch `main`, merge into it, force-push, rewrite history, or delete branches.
