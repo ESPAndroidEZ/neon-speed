@@ -24,4 +24,12 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 17 | Tunnel (city HIGH): cyan wall strip blows out half the screen; countdown: green-white glare on the grid's right | emissive strength through bloom | open | open |
 | 18 | Coast HIGH: dark specks on the red sky | cloud cells (`world/sky`) | open | open |
 | 19 | `demo` autopilot crashes in the first corners | dev pilot, not visual | open (dev tool) | open |
-Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). Menus review: pending.
+| 20 | Settings shows "Unlock all cars (free test)" to players | not gated on DEV | dev builds only | fixed |
+| 21 | Garage/title HIGH: headlight glare hides the car (Supra, Civic almost invisible) | showroom spot lights 300 x spotK + HIGH bloom/streaks (same family as 16) | open: top visual priority | open |
+| 22 | Garage 390x844 portrait: the panel covers the car completely | layout has no portrait framing | open | open |
+| 23 | A crew member stands between the camera and the car at some garage/menu angles | cast placement (`game/cast.ts` 77-78) | open | open |
+| 24 | Main menu on landscape phones: two-column grid takes ~58 % of the width | `menuCss` max-height:520px rule | open | open |
+| 25 | Portrait: rotate toast over the cash pill, SELECT MAP title touching it | `ui/rotateHint`, `.rb-cash` | open | open |
+| 26 | Online screen layout (alignment, tiny help text), ES default name "Driver" | `ui/onlineMenu` | open | open |
+| 27 | ES: money "(1,200 $)" instead of "1.200 $"; "Dock Sprint" untranslated; tuning stats uppercased ("6.8 S") | number format / data strings / CSS uppercase | open | open |
+Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). All three reviews are in.
