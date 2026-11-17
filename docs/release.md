@@ -15,10 +15,12 @@ Not in a release bundle: the tuning panel, the K audio panel, the F4 handling ov
 `public/sw.js` precaches the whole release (shell, code, models, icons) on the first visit; afterwards the game starts offline. Each build writes a content-hash `VERSION`, so a new release installs in the background and the page shows **Update ready: Reload / Later** (`core/pwa.ts`). Manifest: `public/manifest.webmanifest` (fullscreen, landscape, 192/512/maskable icons). Checked by `npm run e2e -- --only offline`.
 
 ## Deploy (GitHub Pages)
-`.github/workflows/deploy.yml` builds `build:prod` and deploys `dist/` on every push to `main`.
-Carlos, once:
-1. GitHub repo > Settings > Pages > Build and deployment > Source: **GitHub Actions**.
-2. The repo is private: GitHub Pages for private repos needs a paid plan (Pro / Team). Without it, either make the repo public or use Cloudflare Pages (below).
+**Live: https://espandroidez.github.io/neon-speed/** (switched on 2026-11-17; the repo is public, so Pages is free).
+`.github/workflows/deploy.yml` builds `build:prod` (brand-safe by default) and deploys `dist/` on every push to `main`, or by hand
+from any branch matching `overnight/*` (allowed in the `github-pages` environment):
+1. `gh workflow run deploy --ref <branch>`, then `gh run watch <id> --exit-status` (id from `gh run list --workflow deploy --limit 1`).
+2. `node scripts/live-check.mjs` checks the live site at 390x844, 844x390, 1366x768 and 1920x1080: console errors, 404s, MIME types,
+   race start, save/load, language switch, manifest/icons, HTTPS APIs, service worker and an offline reload; prints first-load time and size.
 3. Optional: Settings > Secrets and variables > Actions > Variables > `REAL_BRANDS` = `1` to ship real car names. Default is the brand-safe build.
 Live URL afterwards: `https://espandroidez.github.io/neon-speed/` (shown on the workflow run). No secrets are needed.
 
