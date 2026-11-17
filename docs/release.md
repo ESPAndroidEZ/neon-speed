@@ -39,3 +39,6 @@ Android immersive (hiding the navigation bar too) needs one line in `MainActivit
 
 ## Checks before a release
 `npm run build:q`, `npm run test:q`, `npm run visual:q` (dev server), `npm run viewport` (10 viewports, dev server), `npm run e2e` (dev server; builds and previews dist itself for the offline check).
+
+## Own server
+`scripts/deploy-server.sh` (after `tsh login`): builds `build:public`, copies `dist/` over Teleport as `webdev` into the nginx docroot of the server (`HOST` / `ROOT` env vars, defaults in the script). The nginx config there is managed by Ansible: do not edit it on the server. The vhost is HTTP only; HTTPS needs a Let's Encrypt certificate added through the Ansible config.
