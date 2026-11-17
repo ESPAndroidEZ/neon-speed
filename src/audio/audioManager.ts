@@ -3,10 +3,11 @@ import type { Game } from '../game/game';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventReader } from '../physics/driveEvents';
 import { WEATHER } from '../physics/weather';
 import { AudioBus } from './audioBus';
-import { AUDIO, ENGINE_SOURCE } from './audioParams';
+import { AUDIO, ENGINE_SOURCE, MUSIC_SOURCE } from './audioParams';
 import { createOscillatorVoice, createWorkletVoice, type EngineVoice } from './engineVoice';
 import { AmbienceBed } from './bed';
 import { Music } from './music';
+import { HouseMusic } from './houseMusic';
 import { RivalEngines } from './rivalEngines';
 import { Sfx } from './sfx';
 import { TurboSound } from './turboSound';
@@ -29,6 +30,7 @@ export class AudioManager {
   private readonly sfx: Sfx;
   private readonly turbo: TurboSound;
   private readonly music: Music;
+  private readonly house: HouseMusic;
   private readonly rivals: RivalEngines;
   private readonly bed: AmbienceBed;
   private lastHit = -9;
@@ -51,6 +53,7 @@ export class AudioManager {
     this.sfx = new Sfx(this.bus);
     this.turbo = new TurboSound(this.bus);
     this.music = new Music(this.bus);
+    this.house = new HouseMusic(this.bus);
     this.rivals = new RivalEngines(this.bus);
     this.bed = new AmbienceBed(this.bus);
     game.onImpact = (s) => {
@@ -195,6 +198,8 @@ export class AudioManager {
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);
 
     this.level += (smoothstep(5, 70, speed) + (nitro ? 0.25 : 0) - this.level) * Math.min(1, dt * 0.8);
-    this.music.update(true, this.level);
+    const house = MUSIC_SOURCE.style === 'house';
+    this.music.update(!house, this.level);
+    this.house.update(house, this.level);
   }
 }

@@ -1,4 +1,4 @@
-import { ENGINE_SOURCE } from '../audio/audioParams';
+import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
 import { t } from '../i18n';
 import { button, h } from './uiKit';
 
@@ -14,6 +14,24 @@ export function engineSoundRow(s: { engineSound: 'rec' | 'synth' }, commit: () =
     });
     b.dataset.v = v;
     b.classList.toggle('hot', s.engineSound === v);
+    b.style.minWidth = '90px';
+    row.append(b);
+  }
+  return row;
+}
+
+/** Settings row: background music style, generative deep house or synthwave. */
+export function musicStyleRow(s: { musicStyle: 'house' | 'synth' }, commit: () => void): HTMLElement {
+  const row = h('div', 'rb-row', `<span class="rb-lbl">${t('set.musicStyle')}</span>`);
+  for (const v of ['house', 'synth'] as const) {
+    const b = button(t(v === 'house' ? 'set.musicHouse' : 'set.musicSynth'), () => {
+      s.musicStyle = v;
+      MUSIC_SOURCE.style = v;
+      commit();
+      row.querySelectorAll('button').forEach((x) => x.classList.toggle('hot', x.dataset.v === v));
+    });
+    b.dataset.v = v;
+    b.classList.toggle('hot', s.musicStyle === v);
     b.style.minWidth = '90px';
     row.append(b);
   }

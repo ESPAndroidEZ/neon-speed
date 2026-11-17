@@ -29,7 +29,10 @@ export class Music {
     this.intensity += (intensity - this.intensity) * 0.04;
     this.out.gain.setTargetAtTime(playing ? 1 : 0, ctx.currentTime, 0.6);
     this.lp.frequency.setTargetAtTime(layers(this.intensity).cutoff + 800, ctx.currentTime, 0.2);
-    if (ctx.state !== 'running') return;
+    if (!playing || ctx.state !== 'running') {
+      this.started = false;
+      return;
+    }
     if (!this.started) {
       this.started = true;
       this.next = ctx.currentTime + 0.1;
