@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import { brandSafe } from './scripts/vite-brand-plugin';
 import { swPrecache } from './scripts/vite-sw-plugin';
@@ -7,7 +8,11 @@ import { swPrecache } from './scripts/vite-sw-plugin';
  * .gz/.br copies, asset budget report). Both are minified with hashed file names and no source maps; dev panels and
  * dev URL flags are only reachable behind import.meta.env.DEV, so they are not in the bundle.
  */
-export default defineConfig(({ mode }) => ({
+/** GLBs that ship (core/modelList): the release only requests these, so optional models never 404. */
+const glbs = (dir: string, pre = ''): string[] => (existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.glb')).map((f) => pre + f) : []);
+
+export default defineConfig(({ mode, command }) => ({
+  define: { __RB_MODELS__: command === 'serve' ? 'null' : JSON.stringify([...glbs('public/models'), ...glbs('public/models/props', 'props/')]) },
   // Relative asset URLs: required when the build is served from Capacitor's local scheme on iOS and from a
   // GitHub Pages sub-path (/neon-speed/).
   base: './',

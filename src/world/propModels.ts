@@ -1,4 +1,5 @@
 import { Box3, Group, InstancedMesh, Matrix4, Mesh, Object3D, Vector3 } from 'three';
+import { modelPresent } from '../core/modelList';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export interface Placement {
@@ -24,7 +25,7 @@ const propUrl = (name: PropName): string => `${import.meta.env?.BASE_URL ?? '/'}
 export function loadPropModel(name: PropName): Promise<Group | null> {
   let p = cache.get(name);
   if (!p) {
-    p = loader.loadAsync(propUrl(name)).then((g) => normaliseProp(g.scene, name)).catch(() => null);
+    p = !modelPresent(`props/${name}.glb`) ? Promise.resolve(null) : loader.loadAsync(propUrl(name)).then((g) => normaliseProp(g.scene, name)).catch(() => null);
     cache.set(name, p);
   }
   return p;
