@@ -6,7 +6,7 @@ export type PhysicsLevel = 'NORMAL' | 'AGGRESSIVE' | 'EXTREME';
 export const LEVELS: readonly PhysicsLevel[] = ['NORMAL', 'AGGRESSIVE', 'EXTREME'];
 
 /** Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. */
-const GRIP: Record<Weather, readonly number[]> = { CLEAR: [1, 1, 1], RAIN: [0.72, 0.6, 0.5], SNOW: [0.45, 0.34, 0.26] };
+const GRIP: Record<Weather, readonly number[]> = { CLEAR: [1, 1, 1], RAIN: [0.72, 0.6, 0.5], SNOW: [0.63, 0.53, 0.44] };
 /** Snow lets the tail swing: less yaw damping. Slides also recover more slowly (weaker counter-steer assist). */
 const YAW_DAMP: Record<Weather, readonly number[]> = { CLEAR: [1, 1, 1], RAIN: [1, 0.9, 0.8], SNOW: [1, 0.72, 0.55] };
 /** Rear axle grip relative to the front: in bad weather the tail lets go first. */

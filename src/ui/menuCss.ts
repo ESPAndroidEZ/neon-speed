@@ -86,4 +86,6 @@ h2.rb-title::after{content:'';display:block;width:clamp(48px,6vw,84px);height:3p
 .rb-garage .rb-sub{margin-top:4px}
 .rb-hint{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-faint)}
 @media (min-width:2200px) and (min-height:1300px){.rb-btn{min-width:min(340px,80vw);padding:18px 30px}.rb-sub{font-size:.8em}.rb-cash{font-size:30px}}
+.rb-input{min-height:44px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--line);background:#05060dcc;color:var(--text);font:600 16px var(--font);outline:none;min-width:0}
+.rb-input:focus{border-color:var(--cyan);box-shadow:var(--glow-cyan)}
 `;

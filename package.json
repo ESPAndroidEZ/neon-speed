@@ -39,6 +39,7 @@
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.6.2",
     "@capacitor/status-bar": "^8.0.4",
+    "peerjs": "^1.5.4",
     "three": "^0.187.0"
   },
   "devDependencies": {

@@ -48,6 +48,8 @@ export interface MenuDeps {
   onDriving?: () => void;
   /** Load a save (slot or autosave) and resume that race. */
   loadSlot: (id: SlotId) => void;
+  /** Online screen (ui/onlineMenu), built by main once the online module exists. */
+  online: (onBack: () => void) => HTMLElement;
   /** Start a story event. */
   startEvent: (ev: StoryEvent) => void;
 }
@@ -128,9 +130,13 @@ export class Menu {
       c.title = describe(latest.snap);
       stack.append(c);
     }
-    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.online'), () => this.online()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
     el.append(stack);
     this.mount(el, 'main', 'menu', () => this.main());
+  }
+
+  online(): void {
+    this.mount(this.d.online(() => this.main()), 'other', 'main', () => this.online());
   }
 
   load(): void {

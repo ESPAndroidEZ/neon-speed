@@ -51,6 +51,14 @@ export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, g
 }
 
 /**
+ * Long handbrake hold (owner, 2026-11-17: "it keeps holding and that makes it harder to manage the car"): the first
+ * HB_FULL seconds are the approved handbrake, untouched; after that its strength (rear grip loss, carry, brake force)
+ * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning.
+ */
+const HB_FULL = 0.45, HB_FADE = 0.6, HB_TAIL = 0.3;
+export const handbrakeFade = (held: number): number => 1 - (1 - HB_TAIL) * smoothstep(HB_FULL, HB_FULL + HB_FADE, held);
+
+/**
  * Drift hold: the rear-grip target once the handbrake is released. After a handbrake entry (rear grip still
  * recovering, hb < 0.985), staying on the throttle while the car is sliding keeps the rear loose, so the slide can be
  * held through a corner: more throttle = bigger angle, steer sets the line, lifting off or straightening ends it.

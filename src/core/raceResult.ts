@@ -22,6 +22,8 @@ export interface Racer {
   stuck: number;
   /** Furthest progress (samples) reached so far: a rival that stops gaining ground is put back on the road. */
   progress: number;
+  /** Another player's car in an online race (driven over the network): soft bumps only, lag would make crashes unfair. */
+  remote?: boolean;
 }
 
 export interface RaceResult {

@@ -37,6 +37,8 @@ import { button, toast } from './ui/uiKit';
 import { calibrate } from './ui/controlsOnboard';
 import { ResultsScreen } from './ui/results';
 import { installVersus } from './game/versusGate';
+import { installOnline } from './game/onlineRace';
+import { buildOnlineMenu } from './ui/onlineMenu';
 import { Cast } from './game/cast';
 import { applySettings } from './ui/settings';
 import { initLang } from './i18n/langPrefs';
@@ -109,7 +111,6 @@ if (q.get('look')) {
 void world.applyPropModels();
 
 if (import.meta.env.DEV) void import('./dev/devPanels').then((m) => m.installDevPanels(audio, game, tuning, engine));
-
 const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   const def = findTrackDef(q.get('track') ?? trackId);
   story.endStory();
@@ -139,6 +140,7 @@ menu = new Menu({
   onDriving: applyDriving,
   controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt }),
   loadSlot: (id) => loadSlot(id),
+  online: (back) => buildOnlineMenu(online, back),
 });
 const subs = new Subtitles(voice);
 story = new StoryController({
@@ -189,6 +191,7 @@ game.onFinish = (r) => {
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
 
 const versus = installVersus(game, direct);
+const online = installOnline({ game, store, bypass: versus.bypass, hideMenu: () => menu.hide(), showLobby: () => menu.online(), leaveToMenu });
 const loading = new LoadingCard();
 game.onStartRace = () => loading.show();
 installRadio(engine, game, subs);
