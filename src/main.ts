@@ -189,7 +189,7 @@ world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.
 const versus = installVersus(game, direct);
 const online = installOnline({ game, store, bypass: versus.bypass, hideMenu: () => menu.hide(), showLobby: () => menu.online(), leaveToMenu });
 const loading = new LoadingCard();
-game.onStartRace = () => { loading.show(); window.setTimeout(() => void engine.renderer.compileAsync(engine.scene, engine.camera).catch(() => undefined), 30); }; // shaders compile behind the card, no first-use stutter
+game.onStartRace = () => loading.show(); // (renderer.compileAsync here compiled canvas variants the composer never uses: twice the programs, no gain)
 installRadio(engine, game, subs);
 
 installMinimap(game, world, (fn) => engine.onFrame(fn));

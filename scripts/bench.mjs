@@ -34,7 +34,9 @@ const sample = (page, secs) => page.evaluate((secs) => new Promise((res) => {
   const iv = [], sim = [], fr = [], rd = [], st = [], calls = [], tris = []; let last = performance.now(); const end = last + secs * 1000;
   const info = window.__rbRenderer.info; info.autoReset = false; info.reset(); // count every pass of a frame, not just the last
   const loop = (now) => {
-    const s = window.__rbStats(); iv.push(now - last); last = now; sim.push(s.sim); fr.push(s.frame); rd.push(s.render); st.push(s.steps); calls.push(s.calls); tris.push(s.triangles); info.reset();
+    const s = window.__rbStats();
+    if (s.calls > 0) { iv.push(now - last); last = now; sim.push(s.sim ?? 0); fr.push(s.frame ?? 0); rd.push(s.render ?? 0); st.push(s.steps ?? 1); calls.push(s.calls); tris.push(s.triangles); } // only frames that rendered (an fps cap skips ticks)
+    info.reset();
     if (now < end) requestAnimationFrame(loop); else { info.autoReset = true; res({ iv: iv.slice(2), sim, fr, rd, st, calls: med(calls.slice(2)), tris: med(tris.slice(2)), stats: s, heap: performance.memory?.usedJSHeapSize ?? 0 }); }
   };
   requestAnimationFrame(loop);
