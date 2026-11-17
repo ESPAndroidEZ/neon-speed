@@ -1,90 +1,90 @@
 import { createRng } from '../../core/rng';
-import type { RoadEdge, RoadGraph, RoadKind, RoadNode } from '../../types/world';
-import { districtAt, GRAMMAR, ROADS, WORLD_HALF, XS, ZS } from './grammar';
+import type { DistrictId, RoadEdge, RoadGraph, RoadKind, RoadNode } from '../../types/world';
+import { districtAt, GRAMMAR, isWater, LAT, LAT_N, RING, ROADS, WORLD_HALF } from './grammar';
+import { addSpines, finishGraph, makeEdge, runwayEdge, runwayNode } from './spines';
 
-const CURVE_STEPS = 6;
-
-function polyline(ax: number, az: number, bx: number, bz: number, bow: number): Float32Array {
-  if (Math.abs(bow) < 0.5) return new Float32Array([ax, az, bx, bz]);
-  const len = Math.hypot(bx - ax, bz - az);
-  const cx = (ax + bx) / 2 - ((bz - az) / len) * bow * 2;
-  const cz = (az + bz) / 2 + ((bx - ax) / len) * bow * 2;
-  const p = new Float32Array((CURVE_STEPS + 1) * 2);
-  for (let i = 0; i <= CURVE_STEPS; i++) {
-    const t = i / CURVE_STEPS;
-    const u = 1 - t;
-    p[i * 2] = u * u * ax + 2 * u * t * cx + t * t * bx;
-    p[i * 2 + 1] = u * u * az + 2 * u * t * cz + t * t * bz;
-  }
-  return p;
+/** District of a lattice node: the first land quadrant around it (nodes sit on district cell borders). */
+function nodeDistrict(x: number, z: number): DistrictId | null {
+  for (const [dx, dz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]] as const) if (!isWater(x + dx, z + dz)) return districtAt(x + dx, z + dz);
+  return null;
 }
 
+/** A link is on land if either side of its midpoint is land (shore links run along the water's edge). */
+function linkDistrict(ax: number, az: number, bx: number, bz: number): DistrictId | null {
+  const mx = (ax + bx) / 2, mz = (az + bz) / 2, nx = -(bz - az), nz = bx - ax, l = Math.hypot(nx, nz) || 1;
+  for (const s of [1, -1]) { const x = mx + (nx / l) * s, z = mz + (nz / l) * s; if (!isWater(x, z)) return districtAt(x, z); }
+  return null;
+}
+
+const onRing = (ax: number, az: number, bx: number, bz: number): boolean =>
+  (ax === bx && Math.abs(ax) === RING && Math.abs(az) <= RING && Math.abs(bz) <= RING) || (az === bz && Math.abs(az) === RING && Math.abs(ax) <= RING && Math.abs(bx) <= RING);
+
 /**
- * Build the road graph for the slice from a seed. One lattice (XS x ZS) is shared by all districts so they join
- * cleanly; each district's grammar then jitters the junctions, bows and drops links and picks the road kind.
- * Deterministic: the same seed gives the same city.
+ * Neon Harbor's road graph from a seed (docs/open-world.md): a 128 m lattice over the land, bent per district grammar
+ * (jitter, bowed links, avenues every n-th line), the highway ring on lines +-2048, then authored spines (Bay Bridge,
+ * runway, tunnels, exits). A seeded spanning tree (Kruskal over shuffled links) is always kept, so the city is one
+ * connected network; only the other links may be dropped. Deterministic: the same seed gives the same city.
  */
 export function generateRoads(seed = 7): RoadGraph {
   const rnd = createRng(seed);
   const nodes: RoadNode[] = [];
-  const at: number[][] = [];
-  XS.forEach((x0, i) => {
-    at.push([]);
-    ZS.forEach((z0, j) => {
-      const d = districtAt(x0, z0);
-      const edge = i === 0 || j === 0 || i === XS.length - 1 || j === ZS.length - 1;
-      const g = GRAMMAR[d];
-      const jit = edge && d !== 'coast' ? 0 : g.jitter;
-      at[i].push(nodes.length);
-      nodes.push({ id: nodes.length, x: x0 + (rnd() - 0.5) * 2 * jit, z: z0 + (rnd() - 0.5) * 2 * jit, district: d, edges: [], light: false, radius: 6 });
-    });
-  });
-  const edges: RoadEdge[] = [];
-  const link = (a: number, b: number, line: number, onRing: boolean, harborRoad = false): void => {
-    const na = nodes[a];
-    const nb = nodes[b];
-    const d = districtAt((na.x + nb.x) / 2, (na.z + nb.z) / 2);
-    const g = GRAMMAR[d];
-    const major = harborRoad || (g.avenueEvery > 0 && line % g.avenueEvery === g.avenueEvery - 1);
-    let kind: RoadKind = d === 'coast' ? 'coast' : major ? 'avenue' : g.minor;
-    if (d === 'oldtown' && rnd() < 0.45) kind = 'street';
-    const keepRoll = rnd();
-    const bow = (rnd() - 0.5) * 2 * g.curve;
-    if (!major && !onRing && d !== 'coast' && keepRoll < g.drop) return;
-    const pts = polyline(na.x, na.z, nb.x, nb.z, bow);
-    const cum = new Float32Array(pts.length / 2);
-    for (let k = 1; k < cum.length; k++) cum[k] = cum[k - 1] + Math.hypot(pts[k * 2] - pts[k * 2 - 2], pts[k * 2 + 1] - pts[k * 2 - 1]);
-    const r = ROADS[kind];
-    const e: RoadEdge = { id: edges.length, a, b, kind, district: d, lanes: r.lanes, width: r.width, pts, cum, length: cum[cum.length - 1], limit: r.limit };
-    edges.push(e);
-    na.edges.push(e.id);
-    nb.edges.push(e.id);
-  };
-  for (let i = 0; i < XS.length; i++) for (let j = 0; j < ZS.length; j++) {
-    const ring = (k: number, n: number): boolean => k === 0 || k === n - 1;
-    if (i + 1 < XS.length) link(at[i][j], at[i + 1][j], j, ring(j, ZS.length), j === 3); // along X: belongs to Z line j (line 3 is Harbor Road)
-    if (j + 1 < ZS.length) link(at[i][j], at[i][j + 1], i, ring(i, XS.length));
+  const at = new Map<number, number>(); // lattice (i, j) -> node id
+  const key = (i: number, j: number): number => (i + 64) * 256 + (j + 64);
+  for (let i = -LAT_N; i <= LAT_N; i++) for (let j = -LAT_N; j <= LAT_N; j++) {
+    const x0 = i * LAT, z0 = j * LAT, d = nodeDistrict(x0, z0);
+    if (!d) continue;
+    const fixed = Math.abs(x0) === RING || Math.abs(z0) === RING || Math.abs(i) === LAT_N || Math.abs(j) === LAT_N || runwayNode(x0, z0) || nodeDistrict(x0 + LAT, z0) === null || nodeDistrict(x0 - LAT, z0) === null || nodeDistrict(x0, z0 + LAT) === null || nodeDistrict(x0, z0 - LAT) === null;
+    const jit = fixed ? 0 : GRAMMAR[d].jitter;
+    at.set(key(i, j), nodes.length);
+    nodes.push({ id: nodes.length, x: x0 + (rnd() - 0.5) * 2 * jit, z: z0 + (rnd() - 0.5) * 2 * jit, district: d, edges: [], light: false, radius: 6 });
   }
-  for (const n of nodes) {
-    const bearing = (id: number): number => {
-      const e = edges[id];
-      const o = e.a === n.id ? nodes[e.b] : nodes[e.a];
-      return Math.atan2(o.x - n.x, o.z - n.z);
-    };
-    n.edges.sort((p, q) => bearing(p) - bearing(q));
-    let w = 8;
-    let avenues = 0;
-    for (const id of n.edges) {
-      w = Math.max(w, edges[id].width);
-      if (edges[id].kind === 'avenue') avenues++;
+  // candidate links with their kind; `must` = never dropped (ring, avenues, runway)
+  interface Cand { a: number; b: number; kind: RoadKind; d: DistrictId; bow: number; must: boolean; line: number }
+  const cands: Cand[] = [];
+  for (let i = -LAT_N; i <= LAT_N; i++) for (let j = -LAT_N; j <= LAT_N; j++) {
+    const a = at.get(key(i, j));
+    if (a === undefined) continue;
+    for (const [di, dj] of [[1, 0], [0, 1]] as const) {
+      const b = at.get(key(i + di, j + dj));
+      if (b === undefined) continue;
+      const ax = i * LAT, az = j * LAT, bx = (i + di) * LAT, bz = (j + dj) * LAT;
+      const d = linkDistrict(ax, az, bx, bz);
+      if (!d || d === 'bay') continue;
+      const rw = runwayEdge(ax, az, bx, bz);
+      if (rw === 'cross') continue; // nothing crosses the runway
+      const g = GRAMMAR[d], line = di ? j : i; // the lattice line this link lies on
+      const ring = onRing(ax, az, bx, bz);
+      const avenue = g.avenueEvery > 0 && ((line % g.avenueEvery) + g.avenueEvery) % g.avenueEvery === 0;
+      let kind: RoadKind = ring ? 'highway' : rw === 'on' ? 'runway' : avenue ? 'avenue' : g.minor;
+      if (d === 'oldtown' && kind === 'alley' && rnd() < 0.45) kind = 'street';
+      const bow = kind === g.minor ? (rnd() - 0.5) * 2 * g.curve : 0;
+      cands.push({ a, b, kind, d, bow, must: ring || rw === 'on' || kind === 'avenue', line });
     }
-    n.radius = w / 2 + 2.5;
-    n.light = n.edges.length >= 3 && avenues >= 2 && n.district !== 'coast';
   }
-  return { seed, half: WORLD_HALF, nodes, edges };
+  // seeded spanning tree: shuffle, union-find; tree links are kept no matter what
+  const order = cands.map((_, k) => k);
+  for (let k = order.length - 1; k > 0; k--) { const r = Math.floor(rnd() * (k + 1)); [order[k], order[r]] = [order[r], order[k]]; }
+  order.sort((p, q) => Number(cands[q].must) - Number(cands[p].must)); // must-keep links join first (stable)
+  const parent = nodes.map((_, k) => k);
+  const find = (x: number): number => { while (parent[x] !== x) x = parent[x] = parent[parent[x]]; return x; };
+  const edges: RoadEdge[] = [];
+  for (const k of order) {
+    const c = cands[k], ra = find(c.a), rb = find(c.b), tree = ra !== rb;
+    if (tree) parent[ra] = rb;
+    if (!tree && !c.must && rnd() < GRAMMAR[c.d].drop) continue;
+    const e = makeEdge(edges.length, nodes[c.a], nodes[c.b], c.kind, c.d, c.bow);
+    if (c.kind === 'street' && c.d === 'downtown' && ((c.line % 2) + 2) % 2 === 1) e.oneWay = true; // alternating one-way grid
+    edges.push(e);
+    nodes[c.a].edges.push(e.id);
+    nodes[c.b].edges.push(e.id);
+  }
+  edges.sort((p, q) => p.id - q.id);
+  const g: RoadGraph = { seed, half: WORLD_HALF, nodes, edges };
+  addSpines(g, rnd, (x, z) => { let best = -1, bd = Infinity; for (const n of nodes) { const dd = (n.x - x) ** 2 + (n.z - z) ** 2; if (dd < bd) { bd = dd; best = n.id; } } return best; });
+  return finishGraph(g, ROADS);
 }
 
-/** Nodes reachable from node 0 (the lattice ring keeps the graph in one piece; tests assert it). */
+/** Nodes reachable from node 0 (the spanning tree keeps the graph in one piece; tests assert it). */
 export function reachable(g: RoadGraph): number {
   const seen = new Uint8Array(g.nodes.length);
   const stack = [0];
