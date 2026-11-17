@@ -1,4 +1,4 @@
-# Racer's Blood: project summary
+# Neon Speed: project summary
 
 Updated 2026-11-15 (after session 8).
 

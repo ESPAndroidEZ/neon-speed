@@ -111,7 +111,7 @@ export class Menu {
     const el = h('div', 'rb-layer rb-hero');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = 'max(6vh,env(safe-area-inset-bottom))';
-    el.append(h('h1', 'rb-title', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
+    el.append(h('h1', 'rb-title', "NEON SPEED"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
     if (!isPhone()) el.append(h('div', 'rb-hint', t('menu.keys')));
     el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
     this.mount(el, 'title', 'main', () => this.title());
@@ -120,7 +120,7 @@ export class Menu {
   main(): void {
     this.backdrop();
     const el = h('div', 'rb-layer rb-main');
-    el.append(h('div', 'rb-logo', "RACER'S BLOOD"), h('div', 'rb-sub', t('menu.chapter')));
+    el.append(h('div', 'rb-logo', "NEON SPEED"), h('div', 'rb-sub', t('menu.chapter')));
     const stack = h('div', 'rb-stack');
     const latest = this.d.slots.latest();
     if (latest) {

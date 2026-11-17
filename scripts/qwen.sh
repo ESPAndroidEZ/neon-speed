@@ -23,7 +23,7 @@ start=$(git rev-parse HEAD)
 
 prompt=$(mktemp)
 cat > "$prompt" <<EOF
-You are Qwen working on Racer's Blood. Follow AGENTS.md exactly. Your task file is $task: read it first, then do it.
+You are Qwen working on Neon Speed. Follow AGENTS.md exactly. Your task file is $task: read it first, then do it.
 You may create or edit ONLY these paths: $files
 Anything else you change is reverted automatically. Do not run git commands; the runner commits for you.
 When you think you are done run: npm run build${check:+ && $check}

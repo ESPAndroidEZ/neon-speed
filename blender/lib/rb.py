@@ -1,4 +1,4 @@
-"""Racer's Blood Blender helpers (headless, Blender 4.5 LTS). Used by blender/cars/*.py and blender/props/*.py.
+"""Neon Speed Blender helpers (headless, Blender 4.5 LTS). Used by blender/cars/*.py and blender/props/*.py.
 
 All coordinates you pass are GAME space, metres: +X = LEFT, +Y = UP, +Z = NOSE (front of the car).
 The car stands on y = 0, centred on x = 0 and z = 0. rb converts to Blender space and the glTF exporter

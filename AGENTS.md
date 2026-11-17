@@ -1,4 +1,4 @@
-# Rules for Qwen (Hermes): Racer's Blood
+# Rules for Qwen (Hermes): Neon Speed
 
 Only work when `docs/handoff.md` says `Baton: qwen`; otherwise stop and tell the owner. Do ONE task from `docs/tasks/` at a time. Edit only the files on its `Files:` line. Work on branch `qwen/<task>`, never `main`.
 

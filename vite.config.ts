@@ -9,7 +9,7 @@ import { swPrecache } from './scripts/vite-sw-plugin';
  */
 export default defineConfig(({ mode }) => ({
   // Relative asset URLs: required when the build is served from Capacitor's local scheme on iOS and from a
-  // GitHub Pages sub-path (/racer-blood/).
+  // GitHub Pages sub-path (/neon-speed/).
   base: './',
   // host: true exposes the dev server on the LAN so a real phone can load it.
   server: { host: true, port: 5173 },

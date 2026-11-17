@@ -88,7 +88,7 @@ export const OPENING_CAPTIONS: { at: number; dur: number; text: string; kind: 's
   { at: 4.4, dur: 2.0, text: 'Redline runs the Loop. Dante runs Redline.', kind: 'switch' },
   { at: 6.6, dur: 1.9, text: "And Mara's garage is three days from the bank.", kind: 'switch' },
   { at: 8.7, dur: 1.9, text: 'So tonight... you drive.', kind: 'switch' },
-  { at: 9.4, dur: 2.1, text: "RACER'S BLOOD", kind: 'title' },
+  { at: 9.4, dur: 2.1, text: "NEON SPEED", kind: 'title' },
 ];
 
 export const CHAPTER = { id: 1, title: 'Wet Asphalt', tagline: 'Every street remembers who bled for it.' };

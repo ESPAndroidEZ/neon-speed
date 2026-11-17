@@ -5,7 +5,7 @@
 # Re-run after a reboot or `wsl --shutdown` (the WSL address changes). Remove: add -Remove.
 param([int]$Port = 5173, [switch]$Remove)
 
-$rule = "Racer's Blood dev $Port"
+$rule = "Neon Speed dev $Port"
 netsh interface portproxy delete v4tov4 listenport=$Port listenaddress=0.0.0.0 2>$null | Out-Null
 Get-NetFirewallRule -DisplayName $rule -ErrorAction SilentlyContinue | Remove-NetFirewallRule
 if ($Remove) { Write-Host "Removed port forward and firewall rule for $Port."; exit 0 }

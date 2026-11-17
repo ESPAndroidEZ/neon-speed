@@ -1,4 +1,4 @@
-# Art direction: Racer's Blood
+# Art direction: Neon Speed
 
 Mood: wet reflective night streets, saturated neon, strong contrast, layered depth, glossy cars, light streaks, gritty industrial detail.
 The feel of the late-2000s underground street-racing games, with ORIGINAL assets only: nothing copied, fictional brands everywhere

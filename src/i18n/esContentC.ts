@@ -80,7 +80,7 @@ export const ES_CONTENT_C: Record<string, string> = {
   'Redline runs the Loop. Dante runs Redline.': 'Redline manda en el Loop. Dante manda en Redline.',
   'And Mara\'s garage is three days from the bank.': 'Y el garaje de Mara está a tres días del banco.',
   'So tonight... you drive.': 'Así que esta noche... conduces tú.',
-  'RACER\'S BLOOD': 'RACER\'S BLOOD',
+  'NEON SPEED': 'NEON SPEED',
   'Real tuning stages for THIS car (typical PS/Nm from the tuning scene). Big gains on straights and exits; on tight tracks traction limits the gain, so pair it with tyres and a differential.': 'Etapas reales de preparación para ESTE coche (PS/Nm típicos del mundo del tuning). Grandes ganancias en rectas y salidas de curva; en pistas cerradas la tracción limita la mejora, así que combínala con neumáticos y diferencial.',
   'More grip front and rear: faster through every corner and in the rain. The biggest gain on tight tracks (Container Maze, Kestrel Bay).': 'Más agarre delante y detrás: más rápido en todas las curvas y bajo la lluvia. La mayor mejora en pistas cerradas (Container Maze, Kestrel Bay).',
   'Less grip lost in roll: steadier in quick direction changes (S-bends, chicanes).': 'Se pierde menos agarre en el balanceo: más estable en cambios rápidos de dirección (eses, chicanes).',
