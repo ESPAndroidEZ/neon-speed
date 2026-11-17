@@ -24,8 +24,8 @@ export interface Graphics {
 }
 
 export const PRESETS: Record<Quality, Graphics> = {
-  low: { resScale: 0.7, bloom: false, reflections: false, shadows: false, particles: 0.5, drawDistance: 0, msaa: 0, fpsCap: 30, fov: 60, hudScale: 1, motionBlur: 0 },
-  medium: { resScale: 0.85, bloom: true, reflections: false, shadows: false, particles: 0.8, drawDistance: 1, msaa: 2, fpsCap: 60, fov: 60, hudScale: 1, motionBlur: 0.5 },
+  low: { resScale: 0.7, bloom: false, reflections: false, shadows: false, particles: 0.5, drawDistance: 0, msaa: 0, fpsCap: 60, fov: 60, hudScale: 1, motionBlur: 0 },
+  medium: { resScale: 0.85, bloom: true, reflections: false, shadows: false, particles: 0.8, drawDistance: 1, msaa: 0, fpsCap: 60, fov: 60, hudScale: 1, motionBlur: 0.5 },
   high: { resScale: 1, bloom: true, reflections: true, shadows: true, particles: 1, drawDistance: 2, msaa: 4, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 1 },
   ultra: { resScale: 1.25, bloom: true, reflections: true, shadows: true, particles: 1.4, drawDistance: 2, msaa: 4, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 1 },
 };
@@ -58,12 +58,12 @@ export interface GraphicsHooks {
 /** Push GRAPHICS into the engine and the HUD. Call after any change. */
 export function applyGraphics(engine: Engine, hooks: GraphicsHooks): void {
   const g = GRAPHICS;
-  engine.fpsCap = g.fpsCap;
+  engine.fpsCap = g.fpsCap || (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches ? 60 : 0); // phones never render above 60 fps
   engine.camera.far = FAR[g.drawDistance];
   engine.camera.updateProjectionMatrix();
   engine.renderer.shadowMap.enabled = g.shadows;
   engine.setSamples(g.msaa);
-  engine.maxPixelRatio = Math.max(0.5, 2 * g.resScale);
+  engine.resScale = g.resScale; // the tier's DPR cap stays (core/quality applyQuality)
   engine.resize();
   hooks.hud.setScale(g.hudScale);
   hooks.chase.tuning.fovMin = g.fov;

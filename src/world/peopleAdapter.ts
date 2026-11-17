@@ -1,5 +1,6 @@
 import { BoxGeometry, CylinderGeometry, Group, Mesh, MeshStandardMaterial, Object3D, SphereGeometry, type BufferGeometry } from 'three';
 import type { Look } from '../data/characters';
+import { noReflect } from './layers';
 import { JOINTS, PARENT, REST, type JointName, type PersonRig, type PersonSpec } from '../types/people';
 
 /**
@@ -58,6 +59,7 @@ export function buildPerson(spec: PersonSpec): PersonRig {
   if (spec.accessories.sunglasses) add('head', g('shades', () => new BoxGeometry(0.2, 0.035, 0.025)), 0x080a10, 0, 0.14, 0.11);
   if (spec.accessories.hood) add('chest', g('hood', () => new SphereGeometry(0.14, 10, 6, 0, Math.PI * 2, 0, Math.PI * 0.5).rotateX(-0.5)), jacket, 0, 0.22, -0.08);
   root.scale.setScalar((spec.height ?? 1.75) / 1.75);
+  noReflect(root); // the rain mirror skips people (world/layers)
   return { root, joints, spec, dispose: () => root.removeFromParent() };
 }
 

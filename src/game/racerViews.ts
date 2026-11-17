@@ -4,6 +4,7 @@ import type { CarSpec } from '../data/cars';
 import type { Racer } from '../core/raceManager';
 import { createCarVisual } from '../world/carFactory';
 import { getLoadout } from '../world/loadoutStore';
+import { applyCarLod } from '../world/carLod';
 import type { CarVisual } from '../world/proceduralCar';
 
 export interface RacerView {
@@ -84,6 +85,7 @@ export class RacerViews {
       v.holder.rotation.y = v.heading;
       v.holder.rotation.x = -v.racer.contact.pitch;
       const inp = v.racer.input;
+      applyCarLod(v.visual.root, v.x, v.z);
       v.visual.update(frameDt, car.state.speed, inp.steer, inp.brake > 0.1 && car.state.speed > 1, v.longAccel * this.rollScale, car.lateralAccel * this.rollScale);
     }
   }

@@ -63,6 +63,8 @@ export class Engine implements Disposable {
   maxPixelRatio: number;
   /** Dynamic resolution (core/quality AutoQuality): multiplies the final pixel ratio, applied after the screen's own limit. */
   dynScale = 1;
+  /** Graphics screen render scale (0.5 .. 1.5) on top of the tier's device-pixel-ratio cap `maxPixelRatio`. */
+  resScale = 1;
   private readonly updates = new Set<FixedUpdate>();
   private readonly frames = new Set<FrameCallback>();
   private readonly unwatch: () => void;
@@ -71,6 +73,8 @@ export class Engine implements Disposable {
   fpsCap = 0; // frame cap, 0 = the display's rate
   /** Smoothed milliseconds of work per frame (update + render submit), read by AutoQuality. */
   workMs = 0;
+  /** Last frame's split in ms (fixed updates, frame callbacks, render submit) and fixed steps run; read by scripts/bench.mjs. */
+  readonly prof = { sim: 0, frame: 0, render: 0, steps: 0 };
   private accumulator = 0;
   private lastTime = 0;
   private running = false;
@@ -99,6 +103,7 @@ export class Engine implements Disposable {
     this.scene.background = new Color(0x05060d);
     this.scene.fog = new FogExp2(0x070914, 0.011 * LOOK_CONFIG.fog.densityScale);
     this.camera = new PerspectiveCamera(60, w / h, 0.1, 800);
+    this.camera.layers.enable(1); // world/layers NO_REFLECT: people and wheels, skipped by the rain mirror
 
     const target = new WebGLRenderTarget(w, h, {
       type: HalfFloatType,
@@ -165,7 +170,7 @@ export class Engine implements Disposable {
   resize(): void {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, this.maxPixelRatio) * this.dynScale;
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, this.maxPixelRatio) * this.resScale * this.dynScale;
     this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(w, h);
     this.composer.setPixelRatio(pixelRatio);
@@ -198,14 +203,16 @@ export class Engine implements Disposable {
       steps++;
     }
     if (steps === MAX_SUBSTEPS) this.accumulator = 0;
-
+    const t1 = performance.now();
     const alpha = this.accumulator / FIXED_DT;
     for (const fn of this.frames) fn(alpha, frameDt);
+    const t2 = performance.now();
 
     this.bloomKick = damp(this.bloomKick, 0, 7, frameDt);
     this.bloom.strength = this.baseBloomStrength + this.bloomKick;
     this.composer.render(frameDt);
-    const work = performance.now() - now;
+    const end = performance.now(), work = end - now, pr = this.prof;
+    pr.sim = t1 - now; pr.frame = t2 - t1; pr.render = end - t2; pr.steps = steps;
     this.workMs += (work - this.workMs) * 0.05; // CPU time of a frame, smoothed (the display wait is not in it)
   };
 }

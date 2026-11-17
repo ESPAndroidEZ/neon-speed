@@ -29,7 +29,8 @@
     "assets": "node scripts/asset-report.mjs",
     "viewport": "node scripts/viewport-check.mjs",
     "e2e": "node scripts/e2e-check.mjs",
-    "lang": "node scripts/lang-check.mjs"
+    "lang": "node scripts/lang-check.mjs",
+    "bench": "scripts/with-dev.sh 'node scripts/bench.mjs --base $BASE'"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",

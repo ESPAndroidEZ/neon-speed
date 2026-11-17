@@ -125,6 +125,8 @@ export class Hud {
     this.root.style.display = v ? '' : 'none';
   }
 
+  private lastLines = -1;
+
   update(tel: RaceTelemetry): void {
     const tenths = Math.floor(tel.raceTime * 10);
     const ik = tenths + 1e7 * tel.lap + 1e9 * tel.position + 1e11 * tel.racerCount + 1e13 * tel.totalLaps; // numeric key: the string is built only when it changes
@@ -135,7 +137,8 @@ export class Hud {
     }
     this.gauge.update(tel.speedKph, tel.rpm / tel.redlineRpm, tel.gear, tel.nitroLevel, tel.nitroActive);
     // edge speed lines fade in between 110 and 220 km/h
-    this.lines.style.opacity = String(Math.max(0, Math.min(1, (tel.speedKph - 110) / 110)) * 0.85);
+    const lo = Math.round(Math.max(0, Math.min(1, (tel.speedKph - 110) / 110)) * 85) / 100;
+    if (lo !== this.lastLines) this.lines.style.opacity = String((this.lastLines = lo)); // style write (and string) only on change
     if (tel.driftScore !== this.lastScore) {
       const tier = Math.floor(tel.driftScore / 1000);
       if (tier > this.lastTier) this.popUp(`+${tier * 1000}`, '#ff2a9d');

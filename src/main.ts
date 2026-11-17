@@ -1,5 +1,6 @@
 import { AudioManager } from './audio/audioManager';
 import { installGameCues } from './audio/gameCues';
+import { LOD_EYE } from './world/carLod';
 import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
 import { installAutoTier } from './ui/autoTier';
@@ -88,7 +89,7 @@ engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
 const gameCues = installGameCues(audio.bus, game);
 engine.onFrame((_a, dt) => {
-  audio.update(dt); gameCues();
+  audio.update(dt); gameCues(); LOD_EYE.x = engine.camera.position.x; LOD_EYE.z = engine.camera.position.z;
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
 const voice = new Voice(); const auto = installAutoTier(engine, store, kv);
@@ -188,7 +189,7 @@ world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.
 const versus = installVersus(game, direct);
 const online = installOnline({ game, store, bypass: versus.bypass, hideMenu: () => menu.hide(), showLobby: () => menu.online(), leaveToMenu });
 const loading = new LoadingCard();
-game.onStartRace = () => loading.show();
+game.onStartRace = () => { loading.show(); window.setTimeout(() => void engine.renderer.compileAsync(engine.scene, engine.camera).catch(() => undefined), 30); }; // shaders compile behind the card, no first-use stutter
 installRadio(engine, game, subs);
 
 installMinimap(game, world, (fn) => engine.onFrame(fn));
