@@ -53,10 +53,28 @@ export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, g
 /**
  * Long handbrake hold (owner, 2026-11-17: "it keeps holding and that makes it harder to manage the car"): the first
  * HB_FULL seconds are the approved handbrake, untouched; after that its strength (rear grip loss, carry, brake force)
- * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning.
+ * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning. Letting go
+ * after such a long hold gives the rear grip straight back (no drift hold, HB_REGRIP per second): the car is
+ * drivable again at once instead of sliding on (owner, second report the same day).
  */
-const HB_FULL = 0.45, HB_FADE = 0.6, HB_TAIL = 0.3;
+const HB_FULL = 0.5, HB_FADE = 0.4, HB_TAIL = 0.2; // the approved flick is a 0.4-0.45 s pull: untouched
+export const HB_REGRIP = 8;
 export const handbrakeFade = (held: number): number => 1 - (1 - HB_TAIL) * smoothstep(HB_FULL, HB_FULL + HB_FADE, held);
+/** The last pull was a long hold (seconds held, kept after release until the next pull). */
+export const longHold = (held: number): boolean => held > HB_FULL;
+
+/**
+ * Handbrake hold bookkeeping, shared by both handling models: counts the seconds of the current pull (a new pull starts
+ * from 0; after release the length of the last one is kept) and returns the rear-grip target and blend rate.
+ */
+export function handbrakeTarget(c: { hbHeld: number; hbFactor: number; flags: { handbrake: boolean } }, handbrake: boolean, hbGrip: number, dt: number, hold: () => number): [number, number] {
+  if (handbrake) {
+    c.hbHeld = c.flags.handbrake ? c.hbHeld + dt : 0;
+    return [1 - (1 - hbGrip) * handbrakeFade(c.hbHeld), 14];
+  }
+  if (longHold(c.hbHeld) && c.hbFactor < 0.985) return [1, HB_REGRIP]; // straight back to grip after a long hold
+  return [hold(), 3];
+}
 
 /**
  * Drift hold: the rear-grip target once the handbrake is released. After a handbrake entry (rear grip still

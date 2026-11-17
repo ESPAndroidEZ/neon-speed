@@ -5,7 +5,7 @@ import type { CarController } from '../carController';
 import { tireLateral } from './tire';
 import { steerAngle } from './steering';
 import { splitDrive } from './driveSplit';
-import { driftHoldTarget, handbrakeCarry, handbrakeFade, slideDamping, slideYaw } from './stability';
+import { driftHoldTarget, handbrakeCarry, handbrakeFade, handbrakeTarget, slideDamping, slideYaw } from './stability';
 
 const G = 9.81;
 const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration that helps traction (keeps launches as tuned)
@@ -43,9 +43,9 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const slipDen = Math.max(absU, 3);
   const delta = steerAngle(t, as, steerIn, u, v, c.steerAuthority, assistMul);
   // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
-  c.hbHeld = input.handbrake ? c.hbHeld + dt : 0;
-  const hbK = handbrakeFade(c.hbHeld); // 1 for a normal pull; a long hold fades back toward grip
-  c.hbFactor = lerp(c.hbFactor, input.handbrake ? 1 - (1 - t.handbrakeGrip) * hbK : driftHoldTarget(t, u, v, c.thr, c.hbFactor, g), Math.min(1, dt * (input.handbrake ? 14 : 3)));
+  const [hbT, hbRate] = handbrakeTarget(c, input.handbrake, t.handbrakeGrip, dt, () => driftHoldTarget(t, u, v, c.thr, c.hbFactor, g));
+  const hbK = input.handbrake ? handbrakeFade(c.hbHeld) : 1; // 1 for a normal pull; a long hold fades back toward grip
+  c.hbFactor = lerp(c.hbFactor, hbT, Math.min(1, dt * hbRate));
 
   const muR = t.gripRear * g * c.hbFactor * rearMul; // drive is split by layout (driveSplit), each axle capped by its traction
   const tractionLimit = muR * trMul * (ld.staticR + (fzR - ld.staticR) * TRACTION_SQUAT);

@@ -4,6 +4,7 @@ import type { PhysicsEnv } from '../weatherLevels';
 import type { CarController } from '../carController';
 import { axleCaps, CAP, diffCap, lateralCurve } from './v2Tyre';
 import { carry, driveTrim, rearHold, steerV2, yawAssist } from './arcade';
+import { handbrakeFade } from '../legacy/stability';
 
 const G = 9.81;
 const DRIVE_USE = 0.95; // a spinning tyre still keeps a little sideways grip
@@ -71,7 +72,8 @@ export function stepV2(c: CarController, dt: number, input: CarInput, weather: W
   let bF = bk * p.bias, bR = bk * (1 - p.bias);
   const lxF = capF * MU_LONG, lxR = capR * MU_LONG;
   p.lockedF = !abs && bF > lxF && absU > 2;
-  p.lockedR = (input.handbrake && absU > 0.5) || (!abs && bR > lxR && absU > 2);
+  p.lockedR = (input.handbrake && absU > 0.5 && handbrakeFade(c.hbHeld) > 0.5) || // a long hold stops locking the rear
+    (!abs && bR > lxR && absU > 2);
   bF = Math.min(bF, lxF * (abs ? ABS_USE : 1) - (abs ? Math.max(0, -dF) : 0)); // ABS counts engine braking in too
   bR = Math.min(bR, lxR * (abs ? EBD_REAR : 1) - (abs ? Math.max(0, -dR) : 0));
   bF = Math.max(0, bF);
