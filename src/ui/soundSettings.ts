@@ -1,4 +1,4 @@
-import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
+import { ENGINE_SOURCE, MIX_PRESETS, MUSIC_SOURCE, type SoundMix } from '../audio/audioParams';
 import { t } from '../i18n';
 import { button, h } from './uiKit';
 
@@ -14,6 +14,30 @@ export function engineSoundRow(s: { engineSound: 'rec' | 'synth' }, commit: () =
     });
     b.dataset.v = v;
     b.classList.toggle('hot', s.engineSound === v);
+    b.style.minWidth = '90px';
+    row.append(b);
+  }
+  return row;
+}
+
+/** Settings row: sound mix preset. Music loud (default) or engine loud; sets the Engine and Music sliders, which stay free to fine-tune. */
+export function soundMixRow(s: { mix: SoundMix; engineVolume: number; musicVolume: number }, sliders: { engine: HTMLElement; music: HTMLElement }, apply: () => void, commit: () => void): HTMLElement {
+  const row = h('div', 'rb-row', `<span class="rb-lbl">${t('set.mix')}</span>`);
+  for (const v of ['music', 'engine'] as const) {
+    const b = button(t(v === 'music' ? 'set.mixMusic' : 'set.mixEngine'), () => {
+      s.mix = v;
+      s.engineVolume = MIX_PRESETS[v].engine;
+      s.musicVolume = MIX_PRESETS[v].music;
+      for (const [el, val] of [[sliders.engine, s.engineVolume], [sliders.music, s.musicVolume]] as const) {
+        const input = el.querySelector('input');
+        if (input) input.value = String(val);
+      }
+      apply();
+      commit();
+      row.querySelectorAll('button').forEach((x) => x.classList.toggle('hot', x.dataset.v === v));
+    });
+    b.dataset.v = v;
+    b.classList.toggle('hot', s.mix === v);
     b.style.minWidth = '90px';
     row.append(b);
   }

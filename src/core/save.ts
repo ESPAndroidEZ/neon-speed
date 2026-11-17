@@ -10,6 +10,7 @@ import type { AssistLevel, HandlingModel, StabilityLevel } from '../physics/assi
 import type { PhysicsLevel } from '../physics/weatherLevels';
 import type { Weather } from '../types/game';
 import { defaultCareer, type CareerState } from './career';
+import { MIX_PRESETS, type SoundMix } from '../audio/audioParams';
 
 export type Quality = 'low' | 'medium' | 'high' | 'ultra';
 
@@ -34,7 +35,7 @@ export interface SaveData {
   /** Installed performance upgrades and the tuning setup per car id. */
   upgrades: Record<string, Upgrades>;
   setups: Record<string, Setup>;
-  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; engineVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; handlingModel: HandlingModel; stability: StabilityLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics; lang: '' | 'en' | 'es'; subtitleSize: UiSize; minimapSize: UiSize; engineSound: 'rec' | 'synth'; musicStyle: 'house' | 'synth' };
+  settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; engineVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; handlingModel: HandlingModel; stability: StabilityLevel; steerSens: number; rumble: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics; lang: '' | 'en' | 'es'; subtitleSize: UiSize; minimapSize: UiSize; engineSound: 'rec' | 'synth'; musicStyle: 'house' | 'synth'; mix: SoundMix };
   races: number;
   career: CareerState;
 }
@@ -59,7 +60,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
   loadouts: {},
   upgrades: {},
   setups: {},
-  settings: { volume: 0.35, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'NORMAL', sfxVolume: 0.75, engineVolume: 0.6, musicVolume: 0.55, cameraShake: 'LOW', assist: 'STANDARD', handlingModel: 'legacy', stability: 'LIGHT', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon', graphics: { ...PRESETS.high }, lang: '', subtitleSize: 'S', minimapSize: 'S', engineSound: 'rec', musicStyle: 'house' },
+  settings: { volume: 0.35, muted: false, quality: 'high', voice: false, autoQuality: true, weatherPhysics: 'NORMAL', sfxVolume: 0.75, engineVolume: MIX_PRESETS.music.engine, musicVolume: MIX_PRESETS.music.music, cameraShake: 'LOW', assist: 'STANDARD', handlingModel: 'legacy', stability: 'LIGHT', steerSens: 1, rumble: true, padDeadzone: 0.12, difficulty: 'STREET', look: 'neon', graphics: { ...PRESETS.high }, lang: '', subtitleSize: 'S', minimapSize: 'S', engineSound: 'rec', musicStyle: 'house', mix: 'music' },
   races: 0,
   career: defaultCareer(),
 });

@@ -12,7 +12,7 @@ import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
 import { applyUiSizes } from './uiSizes';
-import { engineSoundRow, musicStyleRow, soundCredits } from './soundSettings';
+import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
 import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
 
 export interface SettingsDeps {
@@ -164,7 +164,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   };
   const grid = h('div', 'rb-settings');
   grid.append(
-    panel(t('set.secAudio'), [vol, engVol, engineSoundRow(s, () => d.store.commit()), sfxVol, musVol, musicStyleRow(s, () => d.store.commit()), mute, voice, soundCredits()]),
+    panel(t('set.secAudio'), [vol, soundMixRow(s, { engine: engVol, music: musVol }, () => applySettings(d), () => d.store.commit()), engVol, engineSoundRow(s, () => d.store.commit()), sfxVol, musVol, musicStyleRow(s, () => d.store.commit()), mute, voice, soundCredits()]),
     panel(t('set.secGame'), [langRow(), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, unlockAll(d.store)]),
     panel(t('set.secControls'), [...(d.extraRows?.() ?? []), ...drivingRows(d.store, () => d.onDriving?.())]),
     panel(t('set.graphics'), [...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto]),
