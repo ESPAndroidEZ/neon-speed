@@ -27,7 +27,7 @@ export class ResultsScreen {
   constructor(parent: HTMLElement, handlers: { onAgain: () => void; onMenu?: () => void; tip?: () => string | null }) {
     this.handlers = handlers;
     this.root.className = 'rb-results';
-    this.root.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#05060dcc;color:#e8f6ff;font:600 16px system-ui,sans-serif;z-index:20;padding:16px;box-sizing:border-box;overflow:auto';
+    this.root.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#05060dcc;color:#e8f6ff;font:600 clamp(12px,3.6vh,16px) system-ui,sans-serif;z-index:20;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));box-sizing:border-box;overflow:auto';
     parent.appendChild(this.root);
   }
 
