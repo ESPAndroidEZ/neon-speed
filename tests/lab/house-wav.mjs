@@ -4,13 +4,12 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 mkdirSync('logs/music', { recursive: true });
 const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
 const N = 5, SECS = 14;
-for (let k = 0; k < N; k++) {
+for (let k = Number(process.env.FROM ?? 0); k < N; k++) {
   const p = await b.newPage();
   await p.goto('http://localhost:5173/?probe');
   await p.waitForTimeout(3000);
   const r = await p.evaluate(async ([k, secs]) => {
     const { HouseMusic } = await import('/src/audio/houseMusic.ts');
-    const { MUSIC_SOURCE } = await import('/src/audio/audioParams.ts');
     const { HOUSE_SONGS } = await import('/src/audio/houseSongs.ts');
     if (k >= HOUSE_SONGS.length) return null;
     const sr = 44100, ctx = new OfflineAudioContext(2, sr * secs, sr);
@@ -18,7 +17,7 @@ for (let k = 0; k < N; k++) {
     const noise = ctx.createBuffer(1, sr, sr); const nd = noise.getChannelData(0); for (let i = 0; i < sr; i++) nd[i] = Math.random() * 2 - 1;
     const music = ctx.createGain(); music.gain.value = 0.55 * 0.7; music.connect(ctx.destination);
     const m = new HouseMusic({ ctx, music, noise });
-    while (MUSIC_SOURCE.song !== HOUSE_SONGS[k].name) { MUSIC_SOURCE.skip++; m.update(true, 0.3); }
+    m.songIdx = (k + HOUSE_SONGS.length - 1) % HOUSE_SONGS.length; m.nextSong(0); // private fields: pick song k directly
     for (let t = 0.05; t < secs - 0.3; t += 0.05) ctx.suspend(t).then(() => { m.update(true, ctx.currentTime < secs / 2 ? 0.3 : 0.95); ctx.resume(); });
     const buf = await ctx.startRendering();
     const L = buf.getChannelData(0), R = buf.getChannelData(1);
