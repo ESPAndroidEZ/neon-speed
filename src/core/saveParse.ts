@@ -4,6 +4,7 @@ import { sanitizeLoadout } from '../data/loadout';
 import { sanitizeGraphics } from './graphics';
 import type { Weather } from '../types/game';
 import type { SaveData } from './save';
+import { MIX_PRESETS } from '../audio/audioParams';
 
 const WEATHERS: readonly Weather[] = ['CLEAR', 'RAIN', 'SNOW'];
 
@@ -52,6 +53,8 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.muted = s.muted === true;
   out.settings.voice = s.voice === true;
   out.settings.autoQuality = s.autoQuality !== false;
+  if (s.engineSound === 'rec' || s.engineSound === 'synth') out.settings.engineSound = s.engineSound;
+  if (s.musicStyle === 'house' || s.musicStyle === 'synth') out.settings.musicStyle = s.musicStyle;
   if (s.cameraShake === 'OFF' || s.cameraShake === 'LOW' || s.cameraShake === 'NORMAL') out.settings.cameraShake = s.cameraShake;
   if (s.lang === 'en' || s.lang === 'es') out.settings.lang = s.lang; // '' = not chosen: follow the browser language
   for (const k of ['subtitleSize', 'minimapSize'] as const) if (s[k] === 'S' || s[k] === 'M' || s[k] === 'L') out.settings[k] = s[k];
@@ -59,6 +62,11 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.engineVolume = num(s.engineVolume, out.settings.engineVolume, 0, 1);
   if (s.engineVolume === undefined && out.settings.volume === 0.7) out.settings.volume = 0.35; // 2026-11-15: old default was too loud
   out.settings.musicVolume = num(s.musicVolume, out.settings.musicVolume, 0, 1);
+  if (s.mix === 'music' || s.mix === 'engine') out.settings.mix = s.mix;
+  else if (s.engineVolume !== undefined) { // 2026-11-17: saves from before the mix swap get the new music-first levels once
+    out.settings.engineVolume = MIX_PRESETS.music.engine;
+    out.settings.musicVolume = MIX_PRESETS.music.music;
+  }
   if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
   if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;
   if (s.handlingModel === 'legacy' || s.handlingModel === 'v2') out.settings.handlingModel = s.handlingModel; // older saves: the default

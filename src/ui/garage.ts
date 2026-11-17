@@ -39,8 +39,8 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   root.style.justifyContent = wide ? 'center' : 'flex-end';
   root.style.alignItems = wide ? 'flex-start' : 'center';
   root.style.padding = wide ? '0 0 0 max(24px,3vw)' : '0 0 2vh';
-  const panel = h('div', 'rb-card');
-  panel.style.cssText += ';cursor:default;width:min(400px,92vw);box-sizing:border-box;max-height:88vh;overflow:auto';
+  const panel = h('div', 'rb-panel rb-garage');
+  panel.style.cssText += ';width:min(400px,92vw);max-height:88vh;overflow:auto;text-align:center';
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
   if (performance.now() - langAt < 400 && browsed >= 0) idx = browsed; // rebuilt by a language switch: keep the browsed car
@@ -115,10 +115,10 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const badge = h('span', '', t(st2 === 'glb' ? 'garage.glb' : st2 === 'procedural' ? 'garage.procedural' : 'garage.checking'));
     badge.style.cssText = `margin-left:8px;padding:1px 7px;border-radius:9px;font-size:10px;letter-spacing:1px;text-transform:uppercase;border:1px solid ${st2 === 'glb' ? '#7dff9a' : '#ffb347'};color:${st2 === 'glb' ? '#7dff9a' : '#ffb347'}`;
     const brand = h('div', 'rb-sub', c.brand);
-    brand.append(badge);
-    panel.append(brand, title, h('div', '', tx(c.blurb)));
-    if (c.tuning.v2) panel.append(h('div', 'rb-sub', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
-    if (st2 === 'procedural') panel.append(h('div', 'rb-sub', t('garage.putGlb', { id: c.id })));
+    if (import.meta.env.DEV) brand.append(badge); // model status: dev only
+    panel.append(brand, title, h('div', 'rb-blurb', tx(c.blurb)));
+    if (c.tuning.v2) panel.append(h('div', 'rb-note', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
+    if (st2 === 'procedural' && import.meta.env.DEV) panel.append(h('div', 'rb-note', t('garage.putGlb', { id: c.id }))); // asset hint: dev only
     panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, speedText(st.topKph)) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
       h('div', 'rb-sub', t('garage.paint')),

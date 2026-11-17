@@ -1,9 +1,8 @@
 import { AudioManager } from './audio/audioManager';
-import { installUiSound } from './audio/uiSound'; import { CountdownBeeps } from './audio/countdownBeep'; import { RaceCues } from './audio/raceCue';
+import { installGameCues } from './audio/gameCues';
 import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
-import { AutoQuality, isPhone } from './core/quality';
-import { deviceHints, firstRunTier } from './core/perfTier';
+import { installAutoTier } from './ui/autoTier';
 import { installGuard, watchContextLoss } from './core/guard';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
@@ -39,6 +38,8 @@ import { button, toast } from './ui/uiKit';
 import { calibrate } from './ui/controlsOnboard';
 import { ResultsScreen } from './ui/results';
 import { installVersus } from './game/versusGate';
+import { installOnline } from './game/onlineRace';
+import { buildOnlineMenu } from './ui/onlineMenu';
 import { Cast } from './game/cast';
 import { applySettings } from './ui/settings';
 import { initLang } from './i18n/langPrefs';
@@ -85,19 +86,12 @@ attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
-installUiSound(audio.bus, () => audio.music.keyPc); const beeps = new CountdownBeeps(audio.bus), cues = new RaceCues(audio.bus);
+const gameCues = installGameCues(audio.bus, game);
 engine.onFrame((_a, dt) => {
-  audio.update(dt); beeps.update(game.rm.banner); cues.update(game.rm.player.lapTimes.length, game.rm.player.finished, game.rm.player.finishRank); cues.reward(game.rm.rewards.seq, game.rm.rewards.last);
+  audio.update(dt); gameCues();
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
-const voice = new Voice(); const auto = new AutoQuality();
-auto.onDowngrade = (tier) => {
-  store.data.settings.quality = tier;
-  store.commit();
-  toast(t('main.lowFps', { tier: t(`opt.${tier}`).toUpperCase() }));
-};
-engine.onFrame((_a, dt) => auto.update(dt, engine));
-if (!navigator.webdriver && firstRunTier(store.data.settings, deviceHints(engine.renderer.getContext(), isPhone()), kv)) store.commit(); // tests keep their tier
+const voice = new Voice(); const auto = installAutoTier(engine, store, kv);
 initLang(store);
 applySettings({ store, audio: audio.bus, engine, voice, auto, game, hud });
 const applyDriving = (): void => {
@@ -112,7 +106,6 @@ if (q.get('look')) {
 void world.applyPropModels();
 
 if (import.meta.env.DEV) void import('./dev/devPanels').then((m) => m.installDevPanels(audio, game, tuning, engine));
-
 const launchFree = (w: Weather, rivals: number, trackId: string): void => {
   const def = findTrackDef(q.get('track') ?? trackId);
   story.endStory();
@@ -142,6 +135,7 @@ menu = new Menu({
   onDriving: applyDriving,
   controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt, keys: controls.bindings }),
   loadSlot: (id) => loadSlot(id),
+  online: (back) => buildOnlineMenu(online, back),
 });
 const subs = new Subtitles(voice);
 story = new StoryController({
@@ -192,6 +186,7 @@ game.onFinish = (r) => {
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
 
 const versus = installVersus(game, direct);
+const online = installOnline({ game, store, bypass: versus.bypass, hideMenu: () => menu.hide(), showLobby: () => menu.online(), leaveToMenu });
 const loading = new LoadingCard();
 game.onStartRace = () => loading.show();
 installRadio(engine, game, subs);

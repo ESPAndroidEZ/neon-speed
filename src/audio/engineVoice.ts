@@ -5,6 +5,7 @@ import { ENGINE_VOICES } from '../data/engineVoices';
 export interface EngineVoice {
   /** Connect this to the mix. */
   readonly out: AudioNode;
+  /** `layout`: engine voice index (data/engineVoices engineVoiceIndex). */
   set(rpm: number, load: number, layout: number, cut: boolean, burble: number, volume: number, voicing: number): void;
   dispose(): void;
 }
@@ -16,12 +17,11 @@ const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
 function workletSource(): string {
   return `const __name = (f) => f;
 const EngineDsp = ${EngineDsp.toString()};
-const VOICES = ${JSON.stringify(ENGINE_VOICES)};
 registerProcessor('${NAME}', class extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return ['rpm', 'load', 'layout', 'cut', 'burble', 'vol', 'voicing'].map((name) => ({ name, defaultValue: name === 'rpm' ? 1000 : name === 'vol' || name === 'voicing' ? 1 : 0, automationRate: 'k-rate' }));
   }
-  constructor() { super(); this.d = new EngineDsp(sampleRate, VOICES); }
+  constructor(o) { super(); this.d = new EngineDsp(sampleRate, o.processorOptions.voices); }
   process(_in, out, p) {
     const o = out[0][0];
     this.d.set(p.rpm[0], p.load[0], p.layout[0], p.cut[0] > 0.5, p.burble[0], p.vol[0], p.voicing[0]);
@@ -43,7 +43,7 @@ export async function createWorkletVoice(ctx: AudioContext): Promise<EngineVoice
   }
   if (!(await p)) return null;
   try {
-    const node = new AudioWorkletNode(ctx, NAME, { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] });
+    const node = new AudioWorkletNode(ctx, NAME, { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1], processorOptions: { voices: ENGINE_VOICES } });
     const prm = (n: string): AudioParam => node.parameters.get(n) as AudioParam;
     const [rpm, load, layout, cut, burble, vol, voicing] = ['rpm', 'load', 'layout', 'cut', 'burble', 'vol', 'voicing'].map(prm);
     return {
@@ -92,7 +92,7 @@ export function createOscillatorVoice(ctx: AudioContext): EngineVoice {
     out: gain,
     set(rpm, load, layout, _cut, _burble, volume, voicing) {
       const t = ctx.currentTime;
-      const hz = EngineDsp.firingHz(rpm, ENGINE_VOICES[Math.min(ENGINE_VOICES.length - 1, layout | 0)].per);
+      const hz = EngineDsp.firingHz(rpm, (ENGINE_VOICES[layout] ?? ENGINE_VOICES[0]).per);
       for (const { o, mul } of oscs) o.frequency.setTargetAtTime(hz * mul, t, 0.03);
       filter.frequency.setTargetAtTime(350 + rpm * 0.45 + Math.max(0.2, load) * 1300 + voicing * 500, t, 0.05);
       gain.gain.setTargetAtTime((0.1 + Math.max(0.2, load) * 0.14) * volume, t, 0.08);

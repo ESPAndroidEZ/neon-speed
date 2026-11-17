@@ -1,6 +1,6 @@
 # UI style: menus and HUD
 
-Plain DOM + CSS variables (`src/ui/theme.css.ts` injects them; `uiKit` uses them). Same neon language as the game: dark glass panels,
+Plain DOM + CSS variables (`src/ui/theme.ts` tokens + `src/ui/menuCss.ts` components, injected by `uiKit.injectCss`). Review every menu with `node scripts/ui-shots.mjs --tag <name>` (logs/ui/<name>/, contact sheet per size). Same neon language as the game: dark glass panels,
 cyan edges, magenta for the primary action, italic heavy type for titles.
 
 ## Tokens (CSS custom properties on `:root`)
@@ -26,6 +26,15 @@ body `--fs-md`/`--fs-sm`; numbers (speed, times) tabular, italic 900.
 - **Row** `.rb-row`: flex, wrap, gap `--sp-3`, centred. **Bar** `.rb-bar`: 7px, cyan to magenta fill. **Chip**: pill, label + value.
 - **Toast**: bottom centre, `--panel-solid`, cyan border, 2.4 s. **Dialogue**: portrait + name (speaker colour) + typewriter text.
 - Screens fade/slide in with `--dur` and `--ease`; focus order top to bottom; every action reachable with keyboard, gamepad (A/B) and touch.
+
+## Menu pass 2026-11-16 (implemented)
+- `.rb-panel` glass section (h3 = cyan section label with a fading rule); `.rb-card` is a static panel, `.rb-card.rb-pick` a clickable tile (tabIndex + Enter/Space).
+- Hover/focus never moves an element (no translate/scale): moving targets flicker under the pointer and fail Playwright's stability wait. Glow and border only.
+- Main menu `.rb-main`: logo + chapter top-left, `.rb-stack` of buttons on the left third (car stays right); under 520 px height the stack becomes a 2-column grid.
+- Title `.rb-hero`: bottom gradient so the logo reads over the bright showroom.
+- Settings `.rb-settings`: four panels (Sound, Game, Controls & driving, Graphics) in an auto-fit grid; rows = label left, control right; segmented buttons stay >= 44 px tall (viewport check).
+- Tuning: `.rb-class` badge, `.rb-up` upgrade rows with level pips, `.rb-set` slider rows with `.rb-val`. Garage: `.rb-blurb`, `.rb-note`; asset/model badges only in dev builds.
+- Sliders and checkboxes are custom-drawn (track gradient, toggle switch). No backdrop-filter on full-screen layers (phone cost).
 
 ## HUD layout (landscape, safe areas respected)
 - Bottom right: speedo arc (large number, gear, tacho arc with redline in red), nitro bar under it (cyan; pulses on use), drift combo pop-ups above it (magenta, scale-in).

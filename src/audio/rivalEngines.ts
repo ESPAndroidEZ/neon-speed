@@ -1,8 +1,8 @@
 import { Vector3, type PerspectiveCamera } from 'three';
 import type { RacerView } from '../game/racerViews';
 import { AUDIO } from './audioParams';
-import { voiceIndex } from '../data/engineVoices';
 import type { AudioBus } from './audioBus';
+import { engineVoiceIndex } from '../data/engineVoices';
 import { createOscillatorVoice, createWorkletVoice, type EngineVoice } from './engineVoice';
 
 const VOICES = 3;
@@ -65,6 +65,7 @@ export class RivalEngines {
       }
       const car = v.racer.car;
       const st = car.state;
+      const sound = v.spec.sound;
       s.panner.positionX.value = v.x;
       s.panner.positionY.value = 0.6;
       s.panner.positionZ.value = v.z;
@@ -75,7 +76,7 @@ export class RivalEngines {
       const vr = ((st.velocity.x - listenerVel.x) * dx + (st.velocity.z - listenerVel.z) * dz) / d; // + = approaching
       const pitch = Math.min(1.25, Math.max(0.8, SOUND_SPEED / (SOUND_SPEED - Math.max(-120, Math.min(120, vr)))));
       const dtn = car.drivetrain;
-      s.voice.set(dtn.rpm * pitch, Math.min(1, 0.25 + Math.abs(st.speed) * 0.01 + (car.flags.wheelspin ? 0.5 : 0)), voiceIndex(v.spec.id), dtn.wasCut, 0.5, 0.6 * AUDIO.rivalVolume * AUDIO.engineVolume, AUDIO.engineVoicing);
+      s.voice.set(dtn.rpm * pitch, Math.min(1, 0.25 + Math.abs(st.speed) * 0.01 + (car.flags.wheelspin ? 0.5 : 0)), engineVoiceIndex(v.spec.id, sound.layout), dtn.rpm >= Math.min(7400, (v.spec.tuning.redlineRpm ?? 7400) * 0.995), 0.5, 0.6 * AUDIO.rivalVolume * AUDIO.engineVolume, AUDIO.engineVoicing);
     }
   }
 }

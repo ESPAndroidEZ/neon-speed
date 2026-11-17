@@ -18,7 +18,7 @@ const WHEELBASE = 2.6;
 const V_MAX = 82;
 // Handbrake cornering (same physics as the player's handbrake turn): corner speed planned this much faster per skill.
 const ENV = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
-const HB_ALAT = Number(ENV.RB_HB_ALAT ?? 1.2), HB_SLIP = Number(ENV.RB_HB_SLIP ?? 0.7), HB_LOCK = Number(ENV.RB_HB_LOCK ?? 1);
+const HB_ALAT = Number(ENV.RB_HB_ALAT ?? 0.5), HB_SLIP = Number(ENV.RB_HB_SLIP ?? 0.7), HB_LOCK = Number(ENV.RB_HB_LOCK ?? 1);
 const GRID = { A_LAT: 6.5, A_LAT_SKILL: 5.2, A_BRAKE: 6.0, A_BRAKE_SKILL: 2.3, A_ACCEL: 4.5, A_ACCEL_SKILL: 2.5 };
 
 const hash = (s: string): number => {
@@ -57,6 +57,7 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
   let nitroTimer = 0;
   let stuckFor = 0;
   let reverseFor = 0;
+  let hbFor = 0; // seconds of the current handbrake pull: re-pulled every 0.3 s, a long hold fades (stability.handbrakeFade)
   let pendingGrip = 0;
   let profConf = 1; // the confidence the current profile was built with (kept so a restored driver rebuilds the same one)
 
@@ -166,8 +167,10 @@ export function createAIRacer(id: string, name: string, skill: number, opts: AIO
       out.throttle = Math.max(0, Math.min(1, (vt - speed) * 0.45 + 0.1));
       out.brake = speed > vt + 1.2 ? Math.min(1, (speed - vt) * 0.22) : 0;
       if (out.brake > 0) out.throttle = 0;
-      out.handbrake = hbOn;
-      if (out.handbrake) { out.brake = 0; out.throttle = Math.max(out.throttle, 0.6); }
+      hbFor = hbOn ? hbFor + dt : 0;
+      out.handbrake = hbOn && hbFor <= 0.3;
+      if (hbFor > 0.3) hbFor = 0; // one step off, then a fresh pull
+      if (hbOn) { out.brake = 0; out.throttle = Math.max(out.throttle, 0.6); }
 
       // unstick: pinned at the road edge or against another car for a while: reverse away from the wall, then drive on
       stuckFor = Math.abs(speed) < 1.2 && out.throttle > 0.3 ? stuckFor + dt : Math.max(0, stuckFor - dt * 2);

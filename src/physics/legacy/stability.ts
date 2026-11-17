@@ -51,6 +51,32 @@ export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, g
 }
 
 /**
+ * Long handbrake hold (owner, 2026-11-17: "it keeps holding and that makes it harder to manage the car"): the first
+ * HB_FULL seconds are the approved handbrake, untouched; after that its strength (rear grip loss, carry, brake force)
+ * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning.
+ * Owner, same day: "when stopping to use the handbrake, release it immediately; turning the other way and using the
+ * handbrake must act immediately". So on release the rear goes to its no-handbrake target at HB_REGRIP per second
+ * (about 0.1 s): full grip, or the approved drift hold while the driver stays on the throttle in a slide (lifting or
+ * straightening ends it at once); a new pull bites at HB_BITE per second.
+ */
+const HB_FULL = 0.5, HB_FADE = 0.4, HB_TAIL = 0.2; // the approved flick is a 0.4-0.45 s pull: untouched
+export const HB_REGRIP = 15, HB_BITE = 30;
+export const handbrakeFade = (held: number): number => 1 - (1 - HB_TAIL) * smoothstep(HB_FULL, HB_FULL + HB_FADE, held);
+
+/**
+ * Handbrake hold bookkeeping, shared by both handling models: counts the seconds of the current pull (a new pull starts
+ * from 0; after release the length of the last one is kept) and returns the rear-grip target and blend rate.
+ */
+export function handbrakeTarget(c: { hbHeld: number; hbFactor: number; flags: { handbrake: boolean } }, handbrake: boolean, hbGrip: number, dt: number, hold: () => number): [number, number] {
+  if (handbrake) {
+    c.hbHeld = c.flags.handbrake ? c.hbHeld + dt : 0;
+    return [1 - (1 - hbGrip) * handbrakeFade(c.hbHeld), HB_BITE];
+  }
+  // released: the handbrake lets go at once; only the throttle drift hold (on the gas while sliding) keeps the rear loose
+  return [hold(), c.hbFactor < 0.985 ? HB_REGRIP : 3];
+}
+
+/**
  * Drift hold: the rear-grip target once the handbrake is released. After a handbrake entry (rear grip still
  * recovering, hb < 0.985), staying on the throttle while the car is sliding keeps the rear loose, so the slide can be
  * held through a corner: more throttle = bigger angle, steer sets the line, lifting off or straightening ends it.

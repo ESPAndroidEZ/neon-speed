@@ -13,10 +13,10 @@ export class AudioBus {
   private readonly master: GainNode;
   private readonly chase: BiquadFilterNode;
   private sfxVol = 0.75;
-  private musicVol = 0.55;
-  private musicMul = 0.7;
+  private musicVol = 0.75;
+  private musicMul = 2.4;
   private vol = 0.35;
-  private engineVol = 0.6;
+  private engineVol = 0.15;
   private mutedFlag = false;
 
   constructor() {

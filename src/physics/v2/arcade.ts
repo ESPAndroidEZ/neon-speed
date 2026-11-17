@@ -1,6 +1,6 @@
 import { clamp, lerp, smoothstep } from '../../core/math';
 import type { CarController } from '../carController';
-import { driftHoldTarget, handbrakeCarry } from '../legacy/stability';
+import { driftHoldTarget, handbrakeCarry, handbrakeTarget } from '../legacy/stability';
 
 /*
  * v2 arcade layer (plan section 4), on top of the physics and never inside the force code. Setting: OFF / LIGHT / FULL.
@@ -52,8 +52,8 @@ export function yawAssist(c: CarController, beta: number, speed: number, handbra
  */
 export function rearHold(c: CarController, handbrake: boolean, grip: number, dt: number): number {
   const t = c.t;
-  const target = handbrake ? t.handbrakeGrip : c.stability === 'FULL' ? driftHoldTarget(t, c.u, c.v, c.thr, c.hbFactor, grip) : 1;
-  c.hbFactor = lerp(c.hbFactor, target, Math.min(1, dt * (handbrake ? 14 : 3)));
+  const [target, rate] = handbrakeTarget(c, handbrake, t.handbrakeGrip, dt, () => (c.stability === 'FULL' ? driftHoldTarget(t, c.u, c.v, c.thr, c.hbFactor, grip) : 1));
+  c.hbFactor = lerp(c.hbFactor, target, Math.min(1, dt * rate));
   return c.stability === 'FULL' && !handbrake ? c.hbFactor : 1;
 }
 

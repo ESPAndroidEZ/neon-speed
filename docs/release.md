@@ -20,7 +20,7 @@ Carlos, once:
 1. GitHub repo > Settings > Pages > Build and deployment > Source: **GitHub Actions**.
 2. The repo is private: GitHub Pages for private repos needs a paid plan (Pro / Team). Without it, either make the repo public or use Cloudflare Pages (below).
 3. Optional: Settings > Secrets and variables > Actions > Variables > `REAL_BRANDS` = `1` to ship real car names. Default is the brand-safe build.
-Live URL afterwards: `https://espandroidez.github.io/racer-blood/` (shown on the workflow run). No secrets are needed.
+Live URL afterwards: `https://espandroidez.github.io/neon-speed/` (shown on the workflow run). No secrets are needed.
 
 ### Alternative: Cloudflare Pages (works with a private repo, free)
 dash.cloudflare.com > Workers & Pages > Create > Pages > Connect to Git > pick the repo. Build command `npm run build:public`, output `dist`, env `NODE_VERSION=22`. No token goes into the repo.
@@ -39,3 +39,6 @@ Android immersive (hiding the navigation bar too) needs one line in `MainActivit
 
 ## Checks before a release
 `npm run build:q`, `npm run test:q`, `npm run visual:q` (dev server), `npm run viewport` (10 viewports, dev server), `npm run e2e` (dev server; builds and previews dist itself for the offline check).
+
+## Own server
+`scripts/deploy-server.sh` (after `tsh login`): builds `build:public`, copies `dist/` over Teleport as `webdev` into the nginx docroot of the server (`HOST` / `ROOT` env vars, defaults in the script). The nginx config there is managed by Ansible: do not edit it on the server. The vhost is HTTP only; HTTPS needs a Let's Encrypt certificate added through the Ansible config.

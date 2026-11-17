@@ -55,6 +55,8 @@ export class CarController {
   v = 0;
   r = 0;
   hbFactor = 1;
+  /** Seconds the handbrake has been held without a break (a long hold fades its effect: stability.handbrakeFade). */
+  hbHeld = 0;
   prevX = 0;
   prevZ = 0;
   prevHeading = 0;
@@ -83,6 +85,7 @@ export class CarController {
     [this.prevX, this.prevZ, this.prevHeading] = [x, z, heading];
     this.u = this.v = this.r = 0;
     this.hbFactor = 1;
+    this.hbHeld = 0;
     this.drift.reset();
     this.surfaceGrip = 1;
     this.surfaceDrag = 0;

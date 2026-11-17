@@ -1,91 +1,120 @@
 # Neon Speed: story and opening cinematic
 
-Tagline: **"Every street remembers who bled for it."** Tone: neon-noir street racing. Loyalty, debt, a city that never sleeps. Rating PG (crashes are cars, not people).
-Critique of the old story: `docs/story-review.md`. Text lives in `src/data/storyLines*.ts` (one block per beat); event metadata in `story1.ts`, `story2a.ts`, `story2b.ts`. Spanish is keyed by the English text (`src/i18n/esContentE..G`). Test: `tests/story-graph-check.mts`.
+Tagline: **"Every street remembers who bled for it."**
 
-## Premise
-**Kestrel Bay** is a port city that never fully dries out. When the container trade left, night races took over the empty quays: the **Harbor Loop**. Winners press a red hand on the **Red Hand Wall** at the finish line. Twelve years ago the Loop's first legend, **Cain Vega**, crashed at Quay 9 and vanished. Now **Redline Holdings** is buying the docks, the debt on Mara's garage and the Loop itself.
+## Lore (round 2)
 
-## The truth (what really happened, revealed in the final act)
-Cain's brake line was cut on the quay before the race by a man in a grey coat with a gold gull cufflink: **Aldous Calloway**'s man (Calloway Sr. had money riding on the Loop and Cain was about to expose the fixing). Cain's protege **Dante**, twenty-one, had prepped the car and found the cut line afterwards. Calloway Sr. held his family's debt and Cain's. His price: silence. Dante kept the line, said nothing, and has spent twelve years buying the Loop so that no one can ever cut a line and walk away. His rules are his guilt. The East Yard key he gives the Rookie in Chapter 1 opens the lighthouse lockbox with the proof: he was handing the truth to the first driver who drove like Cain.
+- **Kestrel Bay** is a port city. When the container trade left, the docks emptied and night races started on the empty yards and quays. Kids spray-painted the **Harbor Loop**.
+- **Racer's Blood** is the **Red Hand Wall** at the finish line. Winners press a red-painted hand on it. The saying: *"every street remembers who bled for it"* (sweat, risk, wrecks; PG).
+- **Cain Vega**, the Loop's first legend, vanished after a crash at the docks 12 years ago. Everyone thinks he is gone. His sister **Mara** runs **Gearhead Garage**. The beat-up Civic was Cain's first car; Mara rebuilt it and gives the Rookie the keys.
+- **Dante Voss**, Cain's protege and rival, turned the Redline crew into **Redline Holdings**. He is buying the docks and the debt on Mara's garage to turn the Loop into a private sponsored circuit and erase the street scene.
+- **The Rookie** arrives with nothing but the car. Mara sees Cain's feel in how they drive.
+- **DJ Switch** broadcasts pirate radio from a crane cab above the docks and knows everything. Secretly he is **Cain** (revealed after the Chapter 1 finale).
+- Chapter 1 rivals: **Jinx** (Evo, aggressive, rain specialist), **Tank** (Supra, heavy), **Vex** (350Z, drifter), **Dante** (black and gold RX-7). Street rookies Pixel, Lola and Rook fill the early grids.
+
+Where it appears in the game: skippable "Previously in Kestrel Bay" title cards before the first intro cinematic (`data/lore.ts` PREVIOUSLY); the Crew screen with bios and the Red Hand Wall (one red handprint unlocked per event, also painted on a wall at the start line); loading-screen tips from the lore; in-race radio chatter from Switch (overtakes, crashes, drift combos, weather, laps, rival names: `data/radio.ts`, `game/radio.ts`); after beating Dante a final radio message reveals that Switch is Cain.
+
+## World
+
+Kestrel Bay, a port city that never fully dries out: rain on the cranes, neon on the wet asphalt, and a first snow coming. Street racing runs after midnight on the **Kestrel Bay Streets** circuit (a tight 1.4 km street course: Main Street, a canal bridge, a plaza hairpin, the dock strip, alleys and a tunnel), nicknamed the **Harbor Loop** and controlled by the Redline crew.
 
 ## Cast
-- **The Rookie** (they/them, silent in cutscenes, a few lines). Want: save Mara's garage. Need: choose what the Loop becomes. Learned to drive from a pirate-radio voice, which is why Mara sees Cain in their hands.
-- **Mara Vega**, mentor, phone calls. Practical, sarcastic, protective. Cain's sister. Hurt by his twelve years of silence; the arc is whether she forgives him.
-- **DJ Switch** = **Cain Vega**. Pirate radio, warm and wry, uses Cain's sayings ("the road writes its name on you", planted in the first conversation). His hands cannot hold a wheel any more.
-- **Dante Voss**, antagonist. Calm, formal, never contracts a sentence. Early lines read as menace, late lines as guilt ("a street without rules eventually kills someone"; the flowers at Quay 9; "Almost is what I collect").
-- Rivals, each with a car and a reason to care: **Jinx** (Evo, rain; grew up in the flooded district), **Tank** (Supra, blocker; ten years of dock wages in the car), **Vex** (350Z, drifter; Redline pays for the tyres, and the leash), **Nova** (RX-7, drift queen; hates being paid to lose), **Brick** (Evo, dock union; never lifts, never lies), **Calloway Jr.** (Supra, Cliffside; entitled, lonely, slowly suspects his father). Street fillers: **Pixel** (streamer, hatchback), **Lola** (dock runner; saw the man in the grey coat at ten), **Rook** (ex-Redline; saw Dante carry something wrapped in a towel at dawn).
-- The betrayal: Cain let Mara grieve for twelve years. She hangs up on him at the end of Chapter 1 and speaks to him only through the Rookie until the final act.
 
-## Three acts (10 beats, ids fixed because saves and tests use them)
-**Act 1: Wet Asphalt (Chapter 1, demo).**
-1. `warmup` Warm-up Circuit (dry, Civic). COLD OPEN: the first launch plays the 11 s cinematic and drops straight into the race. Mara and Switch teach braking, the handbrake and nitro through timed in-race captions (`cues`). After the win: the "Previously in Kestrel Bay" cards (skippable, once), then the first conversation (Mara, the Civic, the debt, the Wall). Plants: "the road writes its name on you" (Switch) and "my brother used to say that" (Mara).
-2. `dock` Dock Sprint (rain, Jinx). Unlocks the 350Z. Dante: the docks close Friday.
-3. `drift` Drift Night (snow, drift score). Vex, the show, Dante's challenge.
-4. `finale` Harbor Loop vs Dante (rain to snow). Dante gives the East Yard key ("Do not use it yet"). Switch reveals he is Cain; Mara hangs up. Unlocks the Supra.
+- **You (the Rookie).** New in town, silent, drives Cain's beaten-up Civic.
+- **Mara Vega.** Owns Gearhead Garage, your mentor, Cain's sister. Appears as phone calls. Her garage is three days from foreclosure.
+- **Dante Voss.** Leader of Redline Holdings. Calm, polite, ruthless.
+- **DJ Switch.** Pirate radio voice of the city. Narrates the cinematic, the race intros and live chatter. Secretly Cain Vega.
 
-**Act 2: Redline Rising (Chapter 2, four district votes plus one clue each).**
-5. `c2-redline` roadblock night (Rook: Dante came in at dawn with something in a towel). Switch comes out on air.
-6. `c2-neon` Neon Strip, Nova (flowers at Quay 9 every year). Unlocks the RX-7.
-7. `c2-maze` Container Maze, Brick (the gate log vanished; Calloway's father signed for the lock). Unlocks the Evo.
-8. `c2-yard` Yard Drift Night (drift). Lola tells what she saw at ten: the grey coat, the gull cufflink.
-9. `c2-cliff` Cliffside Run, Calloway Jr. ("my father sounded afraid").
+## Chapter 1: "Wet Asphalt" (the demo)
 
-**Act 3: the Council and the lighthouse.**
-10. `c2-final` The Open Loop. Calloway calls twice to say take the sponsorship. The CHOICE (flags `open` / `sponsor`, mutually exclusive), then the race, then the lighthouse: the key opens the lockbox (cut brake line, torn gate log, Dante's note). Dante confesses; the Calloway name lands.
+1. **Opening cinematic.** Establish the city, the car, the debt.
+2. **Race 1, Warm-up Circuit (dry).** Beat the street rookies. Earn the first cash, teaches drift and nitro.
+3. **Mara's call.** The bank wants the garage by Sunday. Redline's lawyers are behind it.
+4. **Race 2, Dock Sprint (rain).** Grip drops, drifts get easier to start and harder to catch. Earn cash, buy the second car.
+5. **Race 3, Drift Night (first snow).** Scored drift event on the docks. Lowest grip, big payoff.
+6. **Finale, Harbor Loop vs Dante (rain turning to snow).** Win and the garage is saved.
+7. **Ending.** Dante hands you a key: "Tomorrow the whole city will be watching." End card: *Chapter 2: Short Tracks* is coming, with a feedback link.
 
-## The branch (visible differences)
-| | `open` | `sponsor` |
-|---|---|---|
-| Choice reply | Nova and Brick join in | Nova and Brick walk away |
-| Final field | Dante, Calloway, Nova, Brick | Dante, Calloway, Vex, Tank (`rivalsIf`) |
-| In-race captions | Switch: Pixel is streaming, the street is with you | Switch: black and gold in the mirrors |
-| Lighthouse | Pixel streams it live, Switch names Aldous Calloway, Calloway Jr. brings the lawyers, Dante sells the docks back for a hand on the Wall, Mara forgives Cain, Cain asks for one lap | Dante keeps the Loop and buries the proof for safety; Cain: "you bought the Wall with my brake line"; Mara is proud and not okay; Switch keeps listening |
-| Ending card | **The Open Loop**, credits "NEON SPEED / Kestrel Bay keeps the lights on." | **Redline Racing**, credits "NEON SPEED / Some doors you choose twice." |
-Crew screen bios change after the ending (`truth` field); relationships (`rel`) are saved as before.
-
-## Dialogue system notes
-- Every event has `before`, `afterWin`, `afterLose` plus `loseAlt` (2 more sets): repeated failures rotate through three different lines (tries are per session).
-- Lines can read **context flags** supplied at play time (`StoryController.view`): `car-<id>` (civic, golf, 350z, rx7, e61, m3, evo, supra), `tier-0..3`, `replay` (event already passed), `retry` (failed this session), plus the saved story flags (`open`, `sponsor`). Use `if:` / `unless:` on a line.
-- `cues` are timed captions (seconds after the countdown starts), optionally flag-gated.
-- Dante's key, flags, relationships and `cardsSeen` live in the save (`career.flags`); old saves load unchanged.
+Demo progression: 3 cars (starter, mid, top), 3 upgrade stages, paint and underglow.
 
 ## Opening cinematic: timecoded script
-Runs 11.5 s and maps onto the four shots in `src/camera/shots.ts`. Tap skips to the whip. The first launch goes straight from here into the warm-up race.
+
+Runs 11.5 s and maps onto the four shots already built in `src/camera/shots.ts`. Tap skips to the whip.
 
 | Time | Shot | On screen / action | Audio |
 |------|------|--------------------|-------|
-| 0.0 - 2.2 | Front low sweep | Black. Rain hiss, then a hard cut to the headlights | Rain, idle rumble. **Switch:** "Kestrel Bay. Two a.m." |
-| 2.2 - 4.2 | Wheel flyby | Tracking down the flank, tyre spray, neon on the paint | **Switch:** "The rain doesn't wash anything clean here." |
-| 4.2 - 8.4 | 360 orbit | Full reveal. Lower-third: *Honda Civic, "The Beater"* | **Switch:** "Redline runs the Loop. Dante runs Redline." / "And Mara's garage is three days from the bank." |
-| 8.4 - 10.8 | Rear crane reveal | Title **NEON SPEED** fades in at 9.4 | **Switch:** "So tonight... you drive." |
-| 10.8 - 11.5 | Whip into chase cam | FOV kick, tagline, countdown | Whoosh, countdown beeps, gameplay music |
+| 0.0 - 2.2 | Front low sweep | Black. Rain hiss, then a hard cut to the headlights: they flare on (emissive pulse). Camera sweeps low across the nose | Rain, idle rumble. **Switch (VO):** "Kestrel Bay. Two a.m." |
+| 2.2 - 4.2 | Wheel flyby | Tracking down the flank, tyre spray, neon sliding across the paint | Tyre hiss through a puddle, rev blip. **Switch:** "The rain doesn't wash anything clean here." |
+| 4.2 - 8.4 | 360 orbit | Full reveal of the car. Lower-third: *Honda Civic, "The Beater"*. Cranes and signs behind | Synth bed rises, bass pulse. **Switch (4.2-6.4):** "Redline runs the Loop. Dante runs Redline." **(6.4-8.4):** "And Mara's garage is three days from the bank." |
+| 8.4 - 10.8 | Rear crane reveal | Camera rises, the road and city skyline open up. Title **NEON SPEED** fades in at 9.4 | Rev builds, synth sting. **Switch:** "So tonight... you drive." |
+| 10.8 - 11.5 | Whip into chase cam | FOV kick, motion blur, tagline under the title, countdown 3-2-1 begins | Whoosh, bloom kick, countdown beeps, gameplay music starts |
 
-## Race intro cards (Switch)
-Warm-up: "Warm-up lap. Don't embarrass yourself." Dock Sprint: "Wet road, short fuse. Brake earlier than you think." Drift Night: "First snow. Sideways is the only way." Finale: "Last race. Last chance. Bring everything."
+Notes: every hard cut gets a bloom kick (already wired). In rain races the opening uses the same shots with the rain layer on. The car in the cinematic is always the car you currently drive.
 
-## Chapter 1 and 2 events as implemented
+## Race intro cards (one line each, Switch VO)
+
+- Warm-up Circuit: "Warm-up lap. Don't embarrass yourself."
+- Dock Sprint: "Wet road, short fuse. Brake earlier than you think."
+- Drift Night: "First snow. Sideways is the only way."
+- Harbor Loop vs Dante: "Last race. Last chance. Bring everything."
+
+## As implemented (feedback round 1)
+
+Story mode lives in `src/data/story.ts` (text) and `src/game/story.ts` (flow). Events, in order:
+
 | # | Event | Conditions | Objective | Reward |
 |---|-------|-----------|-----------|--------|
-| 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Pixel, Lola, Rook | top 2 | $1,500 |
-| 2 | Dock Sprint | rain, 2 laps, vs Jinx, Tank, Rook, Pixel | top 2 | $3,000, **350Z** |
-| 3 | Drift Night | snow, 3 laps, no rivals | 6,000 drift points | points / 3 + $4,000 |
-| 4 | Harbor Loop vs Dante | rain to snow at 75 s, 3 laps, vs Vex, Jinx, Tank, Dante | win | $8,000, **Supra** |
-| 5 | Redline Rising | Kestrel Bay, dry, vs Rook, Vex, Jinx | top 2 | $4,000 |
-| 6 | Neon Night | Neon Strip, rain, 3 laps, vs Nova, Pixel, Lola, Vex | top 2 | $6,000, **RX-7** |
-| 7 | Container Maze | snow, 4 laps, vs Brick, Tank, Rook, Jinx | top 2 | $7,000, **Evo** |
-| 8 | Yard Drift Night | Container Drift, rain, no rivals | 12,000 points | $6,000 |
-| 9 | Cliffside Run | point-to-point, clear to snow at 35 s, vs Calloway, Nova, Jinx | win | $10,000 |
-| 10 | The Open Loop | Kestrel Bay, rain to snow at 90 s; field depends on the choice | top 2 | $12,000 |
-Chapter 2 tagline: *Four districts. Four votes. One street.*
+| 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Pixel, Lola, Rook | top 2 | race cash + $1,500 |
+| 2 | Dock Sprint | rain, 2 laps, vs Jinx, Tank, Rook, Pixel | top 2 | race cash + $3,000, **350Z unlocked** |
+| 3 | Drift Night | snow, 3 laps, no rivals | bank 6,000 drift points | points / 3 + $4,000 |
+| 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Vex, Jinx, Tank, Dante | win | race cash + $8,000, **Supra unlocked** |
 
-## Characters in game
-2D portraits with four expressions (neutral, smirk, angry, worried) in dialogue, the Crew screen and the versus screen; low-poly 3D figures (Mara by the garage car, rivals at the grid, Dante at the finale). Optional Tripo GLBs for Dante and Mara replace the procedural figures when present.
+Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his black and gold RX-7 on show). After the finale: Dante's key line, then Switch's radio message revealing he is Cain, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).
 
-## After the ending
-The story is complete in ten beats. Open threads for a future Chapter 3 (not built): Calloway Jr. and the trial, the Mountain Pass lookout (Vex's offer), the Coast Run glamour exhibition (sponsor branch), and a Cain-as-co-driver pace-note feature.
+## Chapter 2: "Redline Rising" (implemented, session 5)
+Tagline: *Four districts. Four votes. One street.* Rating: PG (no real violence; crashes are cars, not people).
 
-## Locations added later (round 9, 2026-11-15)
-- **Mountain Pass (Kestrel Highlands):** the old supply road over the ridge; Cain learned to drive here ("where he left his nerves").
-- **Coast Run (Riviera Quarter):** yachts, the casino square, the hotel hairpin; the sponsor branch leads here. Dante's people watch from the casino terrace.
-Both are free-race maps; story events can use them through `StoryEvent.trackId` (`mountain`, `coast`).
+**Premise.** Dante lost the garage but not the city. He turns money into rules: Redline Holdings buys the impound lot, the tow
+trucks and the street lamps, then pays every district boss to stay neutral. Cain, as DJ Switch, comes out on air (he is no
+longer hiding) and sends the Rookie to win the four votes of the Loop Council: the Neon Strip, the Container Maze, the Cliffside
+and the old Harbor.
+
+**Events** (`src/data/story2a.ts`, `story2b.ts`; map in brackets):
+1. *Redline Rising* [Kestrel Bay, dry, Rook/Vex/Jinx]: the roadblock night. Dante's offer: "I am simply buying what is for sale."
+2. *Neon Night* [Neon Strip, rain, 3 laps]: **Nova**, the drift queen, paid double by Dante to stop you. Win: she votes with you; unlocks the RX-7.
+3. *Container Maze* [Container Maze, snow, 4 laps]: **Brick**, dock-union heavy hitter, never lifts, never moves over. Win: unlocks the Evo.
+4. *Yard Drift Night* [Container Drift, rain, no rivals]: 12,000 points to win the dock crews (a drift event on the maze).
+5. *Cliffside Run* [Cliffside Run, point-to-point, clear turning to snow at 35 s]: **Calloway**, heir to the north coast, owns the road and the guard rail. Win it (P1).
+6. *The Open Loop* [Kestrel Bay, rain turning to snow, Dante + the three bosses]: the Council meets at the Wall.
+
+**The choice (event 6, before the race).** Dante offers a sponsorship (garage safe, pit crew, a season, the livery). Switch/Cain wants the Loop open to everyone.
+- *Open the Loop to everyone* (`open`): Cain +2, Mara +1, Nova +1, Dante -2. Epilogue: crowds queue at the garage, Dante watches "politely".
+- *Accept Redline's sponsorship* (`sponsor`): Dante +2, Brick +1, Mara -1, Cain -2. Epilogue: Redline Racing starts, Mara "proud, and does not like it".
+Both lead to the same hook: Cain asks the Rookie to meet him at the lighthouse. The crash twelve years ago was not an accident.
+Flags and relationships (`career.flags`, `career.rel`, -5..5) are saved; the Crew screen shows the relationship bars from Chapter 2 on.
+
+**Characters in game.** 2D portraits with four expressions (neutral, smirk, angry, worried) in dialogue, the Crew screen and the
+versus screen before every race; low-poly 3D figures (Mara by the garage car, rivals leaning on their cars at the grid, Dante at the finale).
+Optional: Tripo GLBs for Dante and Mara (`public/models/characters/<id>.glb`) replace the procedural figures when present (loader hook is a TODO).
+
+## Chapter 3 outline: "Blood on the Wall" (not built)
+- **Act 1, the lighthouse.** Cain reveals the proof: a brake line cut the night of the crash, and the dock gate log that places
+  Dante at the quay. Cain cannot drive any more (his hands), so he rides along in the Rookie's radio: Switch becomes a co-driver
+  who calls corners (a live "pace note" feature).
+- **Act 2, short tracks.** The new Council holds short-circuit events across the city: tight alley circuits, a tram-depot night, a
+  rooftop car park (vertical map). Each unlocks a piece of evidence. Branch: with `open` the districts help (Nova's crew, Brick's
+  trucks); with `sponsor` the Rookie races in Redline black and gold and must decide when to betray the team.
+- **Act 3, the Final Loop.** One long race through all five districts, point-to-point, dusk to dawn (weather cycles). Dante's last
+  card: he did not cut the line, he *knew*. The truth is Calloway's father. Dante's endgame is to buy the Wall itself.
+- **Endings.** Win clean (Cain returns to drive one lap, Switch goes silent for the first time); or win the dirty way (Dante keeps the
+  Wall). Epilogue sets up Chapter 4 on the open road.
+
+## New locations (round 9, 2026-11-15)
+- **Mountain Pass (Kestrel Highlands).** The old supply road over the ridge behind Kestrel Bay: switchbacks, a rock tunnel and
+  a lookout where the crews meet after midnight. Cain learned to drive here; Mara says the hairpins are "where he left his
+  nerves". Story use: a Chapter 3 night run to the lookout, where Vex is waiting with an offer; snow events after the ridge.
+- **Coast Run (Riviera Quarter).** South of the harbour, where the money lives: yachts, the casino square, the hotel hairpin,
+  the cliff tunnel and the beach road. The sponsor branch of Chapter 2 (`sponsor` flag) leads here: a glamour exhibition race
+  for a sponsor dinner, with DJ Switch calling it live from the esplanade. Dante's people watch from the casino terrace.
+Both are free-race maps now; story events can point at them through `StoryEvent.trackId` (`mountain`, `coast`).
+

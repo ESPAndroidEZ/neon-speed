@@ -18,7 +18,8 @@ for (const c of CARS) {
   check(`${c.id}: keyboard driver spins less than once per 3 laps, never stuck`, spins / laps < 1 / 3 && stuck === 0 && laps >= 16, `${spins} spins, ${stuck} stuck in ${laps} laps`);
   const s = scenarios(c.id);
   const awd = c.id === 'evo';
-  check(`${c.id}: handbrake flick starts a drift without spinning`, s.driftStart > (awd ? 0.35 : 0.45) && s.driftStart < 1.0, `${s.driftStart.toFixed(2)} rad`);
+  // 2026-11-17: limits 0.45/0.35 -> 0.40/0.30: the handbrake lets go at once now (owner), so the flick slide is a little smaller
+  check(`${c.id}: handbrake flick starts a drift without spinning`, s.driftStart > (awd ? 0.3 : 0.4) && s.driftStart < 1.0, `${s.driftStart.toFixed(2)} rad`);
   check(`${c.id}: releasing everything straightens the car`, s.recoverT < 2 && s.recoverMax < 0.95, `${s.recoverT.toFixed(2)} s, peak ${s.recoverMax.toFixed(2)} rad`);
   check(`${c.id}: responsive at 40-120 km/h`, Math.max(s.resp40, s.resp80, s.resp120) < 0.2, `${s.resp40.toFixed(2)} / ${s.resp80.toFixed(2)} / ${s.resp120.toFixed(2)} s`);
   check(`${c.id}: a key tap at 200 km/h is not twitchy`, s.tapShift < 2.6 && s.tapSlip < 0.08, `${s.tapShift.toFixed(2)} m, ${s.tapSlip.toFixed(2)} rad`);

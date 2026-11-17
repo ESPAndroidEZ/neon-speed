@@ -29,7 +29,8 @@ export function lapTime(carId: string, weather: Weather): number {
 
 // 2026-11-15 owner decision: cars are FULLY REAL (data/carReal), so lap times no longer follow price. Bands = measured
 // AI laps +-4 s (regression guards); realism itself is checked in tests/cars-check (0-100 and top speed vs the real car).
-const BANDS: Record<string, [number, number]> = { civic: [55, 63], golf: [56.5, 64.5], '350z': [56, 64], rx7: [53.5, 61.5], e61: [54.5, 62.5], m3: [50, 58], evo: [53.5, 61.5], supra: [55, 63] };
+// 2026-11-17 re-measured: the handbrake lets go at once now (owner), so the bot's handbrake corners are 1.5-3 s slower.
+const BANDS: Record<string, [number, number]> = { civic: [61, 69], golf: [60.5, 68.5], '350z': [59, 67], rx7: [56.5, 64.5], e61: [57, 65], m3: [56, 64], evo: [55, 63], supra: [53.5, 61.5] };
 const times: Record<string, number> = {};
 for (const c of CARS) {
   times[c.id] = lapTime(c.id, 'CLEAR');

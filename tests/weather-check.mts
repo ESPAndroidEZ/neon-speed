@@ -37,9 +37,9 @@ const stop = (w: Weather, lv: PhysicsLevel): number => {
 };
 
 // grip table and stopping distances
-check('grip table: rain 0.72/0.60/0.50, snow 0.45/0.34/0.26', gripFor('RAIN', 'NORMAL') === 0.72 && gripFor('RAIN', 'AGGRESSIVE') === 0.6 && gripFor('RAIN', 'EXTREME') === 0.5 && gripFor('SNOW', 'NORMAL') === 0.45 && gripFor('SNOW', 'AGGRESSIVE') === 0.34 && gripFor('SNOW', 'EXTREME') === 0.26, '');
+check('grip table: rain 0.72/0.60/0.50, snow 0.63/0.53/0.44 (owner 2026-11-17: a little more slippery than rain)', gripFor('RAIN', 'NORMAL') === 0.72 && gripFor('RAIN', 'AGGRESSIVE') === 0.6 && gripFor('RAIN', 'EXTREME') === 0.5 && gripFor('SNOW', 'NORMAL') === 0.63 && gripFor('SNOW', 'AGGRESSIVE') === 0.53 && gripFor('SNOW', 'EXTREME') === 0.44, '');
 const dry = stop('CLEAR', 'AGGRESSIVE');
-const want: [Weather, PhysicsLevel, number][] = [['RAIN', 'NORMAL', 1 / 0.72], ['RAIN', 'AGGRESSIVE', 1 / 0.6], ['RAIN', 'EXTREME', 1 / 0.5], ['SNOW', 'NORMAL', 1 / 0.45], ['SNOW', 'AGGRESSIVE', 1 / 0.34], ['SNOW', 'EXTREME', 1 / 0.26]];
+const want: [Weather, PhysicsLevel, number][] = [['RAIN', 'NORMAL', 1 / 0.72], ['RAIN', 'AGGRESSIVE', 1 / 0.6], ['RAIN', 'EXTREME', 1 / 0.5], ['SNOW', 'NORMAL', 1 / 0.63], ['SNOW', 'AGGRESSIVE', 1 / 0.53], ['SNOW', 'EXTREME', 1 / 0.44]];
 let prev = 0;
 for (const [w, lv, ratio] of want) {
   const d = stop(w, lv);

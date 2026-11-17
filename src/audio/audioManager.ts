@@ -4,19 +4,18 @@ import type { Game } from '../game/game';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventReader } from '../physics/driveEvents';
 import { WEATHER } from '../physics/weather';
 import { AudioBus } from './audioBus';
-import { AUDIO } from './audioParams';
+import { AUDIO, ENGINE_SOURCE, MUSIC_SOURCE } from './audioParams';
 import { createOscillatorVoice, createWorkletVoice, type EngineVoice } from './engineVoice';
 import { AmbienceBed } from './bed';
 import { Music } from './music';
+import { HouseMusic } from './houseMusic';
 import { RivalEngines } from './rivalEngines';
 import { Sfx } from './sfx';
 import { TurboSound } from './turboSound';
 import { findCar } from '../data/cars';
-import { voiceIndex } from '../data/engineVoices';
 import { createSampleVoice, loadEngineSamples } from './engineSamples';
 import { REV_TEST } from './revTest'; import { LaunchRev } from './launchRev';
-import type { MoodId } from './musicPatterns';
-import { MUSIC_CUE } from './audioParams';
+import { engineVoiceIndex } from '../data/engineVoices';
 
 
 /** Things the K panel can trigger without driving. */
@@ -31,15 +30,14 @@ export class AudioManager {
   private sampleCar = '';
   private readonly sfx: Sfx;
   private readonly turbo: TurboSound;
-  readonly music: Music;
+  private readonly music: Music;
+  private readonly house: HouseMusic;
   private readonly rivals: RivalEngines;
   private readonly bed: AmbienceBed;
   private lastHit = -9;
   private clock = 0;
   private readonly game: Game;
   private level = 0;
-  private raceNo = 0;
-  private wasRacing = false;
   private reader = new EventReader();
   private lastDtn: unknown = null;
   private lastPedal = 0; private readonly rev = new LaunchRev();
@@ -56,6 +54,7 @@ export class AudioManager {
     this.sfx = new Sfx(this.bus);
     this.turbo = new TurboSound(this.bus);
     this.music = new Music(this.bus);
+    this.house = new HouseMusic(this.bus);
     this.rivals = new RivalEngines(this.bus);
     this.bed = new AmbienceBed(this.bus);
     game.onImpact = (s) => {
@@ -145,7 +144,7 @@ export class AudioManager {
       if (s.lift) { if (rt.sound.turbo !== 'none') this.turbo.bov(Math.max(0.6, s.boost)); this.turbo.pop(0.8); }
     }
     const car2 = rt ?? spec, redline = rt?.tuning.redlineRpm ?? t.redlineRpm;
-    this.useCar(car2?.id ?? '');
+    this.useCar(ENGINE_SOURCE.samples ? car2?.id ?? '' : ''); // '' = no samples: the synth plays
     if (this.test) {
       this.testT += dt;
       if (this.test === 'sweep') {
@@ -159,7 +158,7 @@ export class AudioManager {
 
     if (g.state === 'RACING' && g.rm.phase === 'COUNTDOWN') { this.rev.hold(dt, g.ctl.throttle, car2?.tuning.idleRpm ?? 900, redline); rpm = this.rev.rpm; load = this.rev.load; } else rpm = this.rev.release(dt, rpm); // gas flat at the lights revs the engine
     if (this.voice) {
-      const layout = voiceIndex(car2?.id ?? '');
+      const layout = car2 ? engineVoiceIndex(car2.id, car2.sound.layout) : 0;
       const vol = (inGame ? 1 : 0) * AUDIO.engineVolume, cutNow = rpm >= redline * 0.995 && load > 0.5, burble = pedal < 0.05 && speed > 8 ? 1 : 0;
       this.voice.set(rpm, load, layout, cutNow, burble, this.sample ? 0 : vol, AUDIO.engineVoicing); // synth silent when samples play
       this.sample?.set(rpm, load, layout, cutNow, burble, vol, AUDIO.engineVoicing);
@@ -200,20 +199,8 @@ export class AudioManager {
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);
 
     this.level += (smoothstep(5, 70, speed) + (nitro ? 0.25 : 0) - this.level) * Math.min(1, dt * 0.8);
-    this.updateMusic(speed, load);
-  }
-
-  /** Mood from the game state and weather; intensity from speed, nitro and the last lap; duck from engine load and speech. */
-  private updateMusic(speed: number, load: number): void {
-    const g = this.game, racing = g.state === 'RACING';
-    if (racing && !this.wasRacing) this.music.reseed(++this.raceNo * 31 + 7); // a new song for every race
-    this.wasRacing = racing;
-    let mood: MoodId = 'menu';
-    if (g.state === 'MENU') mood = MUSIC_CUE.mood ?? 'menu';
-    else if (g.state === 'CINEMATIC') mood = 'story';
-    else if (g.state !== 'PODIUM') mood = g.weather === 'RAIN' ? 'rain' : g.weather === 'SNOW' ? 'snow' : 'race';
-    const t = g.telemetry, lastLap = racing && t.totalLaps > 1 && t.lap >= t.totalLaps ? 0.25 : 0;
-    const duck = (racing ? 0.3 * load * smoothstep(10, 60, speed) : 0) + MUSIC_CUE.speech;
-    this.music.update(!g.paused, Math.min(1, this.level + lastLap), mood, duck);
+    const house = MUSIC_SOURCE.style === 'house';
+    this.music.update(!house, this.level);
+    this.house.update(house, this.level);
   }
 }

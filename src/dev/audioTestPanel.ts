@@ -10,7 +10,7 @@ const CSS = `#ap{position:fixed;right:0;top:0;bottom:0;width:300px;overflow:auto
 #ap h4{margin:10px 0 4px;color:#ff2a9d}#ap button{margin:2px 3px 2px 0;padding:6px 9px}#ap label{display:flex;gap:6px;align-items:center;margin:3px 0}#ap label span{width:100px}#ap input{flex:1;min-width:0}#ap output{width:44px;text-align:right}`;
 
 const SLIDERS: [keyof AudioParams, number, number][] = [
-  ['engineVolume', 0, 2.5], ['turboVolume', 0, 3], ['tyreVolume', 0, 3], ['ambienceVolume', 0, 3], ['crashVolume', 0, 3], ['musicVolume', 0, 2], ['rivalVolume', 0, 3],
+  ['engineVolume', 0, 2.5], ['turboVolume', 0, 3], ['tyreVolume', 0, 3], ['ambienceVolume', 0, 3], ['crashVolume', 0, 3], ['musicVolume', 0, 5], ['rivalVolume', 0, 3],
   ['whistlePitch', 0.5, 1.8], ['bovLength', 0.3, 3], ['clunkVolume', 0, 3], ['popVolume', 0, 3],
 ];
 const PRESETS: { key: 'engineVoicing' | 'squealVoicing'; title: string; options: string[] }[] = [

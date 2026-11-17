@@ -14,11 +14,12 @@ export const THEME_CSS = `
 }
 .rb-chip{display:inline-flex;gap:var(--sp-2);align-items:center;padding:var(--sp-1) var(--sp-3);border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:var(--fs-sm)}
 .rb-label{font-size:var(--fs-xs);letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
-.rb-appear{animation:rb-in var(--dur) var(--ease) both}
+.rb-appear{animation:rb-in var(--dur) var(--ease) backwards}
 /* animated neon menu: titles flicker like a tube, buttons rise in one after another */
 .rb-title{animation:rb-flicker 7s infinite}
 @keyframes rb-flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%{opacity:.82}63%{opacity:.7}}
-.rb-layer .rb-btn{animation:rb-in var(--dur-slow) var(--ease) both}
+.rb-layer .rb-btn{animation:rb-in var(--dur-slow) var(--ease) backwards}
+.rb-layer>.rb-card,.rb-layer>.rb-row,.rb-layer>.rb-panel,.rb-layer>.rb-grid{animation:rb-in var(--dur-slow) var(--ease) backwards}
 .rb-layer .rb-btn:nth-of-type(2){animation-delay:.06s}.rb-layer .rb-btn:nth-of-type(3){animation-delay:.12s}.rb-layer .rb-btn:nth-of-type(4){animation-delay:.18s}
 .rb-layer .rb-btn:nth-of-type(5){animation-delay:.24s}.rb-layer .rb-btn:nth-of-type(6){animation-delay:.3s}.rb-layer .rb-btn:nth-of-type(7){animation-delay:.36s}
 /* NEON SPEED wordmark: NEON cyan, SPEED magenta, each tube flickers on its own beat */

@@ -12,6 +12,8 @@ import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
 import { applyUiSizes } from './uiSizes';
+import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
+import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -37,6 +39,8 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setSfxVolume(s.sfxVolume);
   d.audio.setEngineVolume(s.engineVolume);
   d.audio.setMusicVolume(s.musicVolume);
+  ENGINE_SOURCE.samples = s.engineSound !== 'synth';
+  MUSIC_SOURCE.style = s.musicStyle;
   if (phoneDefaults(s)) d.store.commit();
   Object.assign(GRAPHICS, s.graphics);
   applyQuality(d.engine, s.quality, true);
@@ -51,7 +55,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
 export function buildSettings(d: SettingsDeps): HTMLElement {
   const s = d.store.data.settings;
   const root = h('div', 'rb-layer dim');
-  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
+  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) max(12px,env(safe-area-inset-right)) max(20px,4vh) max(12px,env(safe-area-inset-left))';
   root.append(h('h2', 'rb-title', t('set.title')));
   const slider = (label: string, key: 'volume' | 'sfxVolume' | 'engineVolume' | 'musicVolume'): HTMLElement => {
     const row = h('div', 'rb-row', `<span class="rb-lbl">${label}</span>`);
@@ -153,7 +157,19 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     hint.textContent = t(`hint.wphys.${s.weatherPhysics}`);
   };
   refreshWp();
-  root.append(vol, engVol, sfxVol, musVol, mute, voice, langRow(), ...(d.extraRows?.() ?? []), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, ...drivingRows(d.store, () => d.onDriving?.()), h('div', 'rb-sub', t('set.graphics')), ...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto, unlockAll(d.store), button(t('common.back'), d.onBack));
+  const panel = (title: string, rows: HTMLElement[]): HTMLElement => {
+    const p = h('section', 'rb-panel');
+    p.append(h('h3', '', title), ...rows);
+    return p;
+  };
+  const grid = h('div', 'rb-settings');
+  grid.append(
+    panel(t('set.secAudio'), [vol, soundMixRow(s, { engine: engVol, music: musVol }, () => applySettings(d), () => d.store.commit()), engVol, engineSoundRow(s, () => d.store.commit()), sfxVol, musVol, musicStyleRow(s, () => d.store.commit()), mute, voice, soundCredits()]),
+    panel(t('set.secGame'), [langRow(), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, unlockAll(d.store)]),
+    panel(t('set.secControls'), [...(d.extraRows?.() ?? []), ...drivingRows(d.store, () => d.onDriving?.())]),
+    panel(t('set.graphics'), [...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto]),
+  );
+  root.append(grid, button(t('common.back'), d.onBack));
   return root;
 }
 

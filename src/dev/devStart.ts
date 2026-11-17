@@ -37,7 +37,7 @@ export interface DevStartDeps {
  */
 export function runDevStart(d: DevStartDeps): void {
   const { q, game, store, world, menu, story, pause, juice, hud } = d;
-  if (q.has('probe')) installProbe(game); // dev: screen positions for scripts/viewport-check.mjs
+  if (q.has('probe')) { installProbe(game); (window as unknown as Record<string, unknown>).__rbGame = game; } // dev: screen positions for scripts/viewport-check.mjs, game handle for scripts/online-check.mjs
   if (q.has('soak')) { // dev: stats for scripts/soak.mjs (leak and crash hunting)
     const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene } } }).d.engine;
     let objects = 0;
@@ -101,6 +101,7 @@ if (d.direct) {
   else if (scr === 'tune') menu.tune();
   else if (scr === 'story') menu.story();
   else if (scr === 'crew') menu.crew();
+  else if (scr === 'online') menu.online();
   else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event
 }
 

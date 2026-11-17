@@ -1,6 +1,6 @@
 import type { EN_MENU } from './enMenu';
 
-/** Menús, ajustes, garaje, puesta a punto y mapas (español neutro). Mismas claves que enMenu.ts. */
+/** Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. */
 export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'common.back': 'Volver',
   'common.menu': 'Menú',
@@ -20,10 +20,10 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'menu.press': 'Pulsa Intro / Toca',
   'menu.keys': 'W/S acelerar y frenar · A/D girar · Espacio freno de mano · Mayús nitro · M silenciar · R reiniciar',
   'menu.continue': 'Continuar', 'menu.story': 'Historia', 'menu.freeRace': 'Carrera libre', 'menu.daily': 'Reto diario', 'menu.garage': 'Garaje',
-  'menu.tuning': 'Puesta a punto', 'menu.crew': 'Equipo', 'menu.load': 'Cargar', 'menu.settings': 'Ajustes',
+  'menu.tuning': 'Tuning', 'menu.crew': 'Equipo', 'menu.load': 'Cargar', 'menu.settings': 'Ajustes',
   'menu.timeTrial': 'Contrarreloj', 'menu.rivals3': '3 rivales', 'menu.rivals5': '5 rivales',
   'menu.grip': 'Agarre {n} %', 'menu.best': 'Mejor', 'menu.pink': 'Borde rosa: va bien con este mapa',
-  'set.title': 'AJUSTES', 'set.master': 'General', 'set.engine': 'Motor', 'set.effects': 'Efectos', 'set.music': 'Música',
+  'set.title': 'AJUSTES', 'set.master': 'General', 'set.engine': 'Motor', 'set.secAudio': 'Sonido', 'set.secGame': 'Juego', 'set.secControls': 'Controles y conducción', 'set.engineSound': 'Sonido del motor', 'set.engineRec': 'Grabaciones', 'set.engineSynth': 'Sintetizado', 'set.credits': 'Créditos de sonido', 'set.creditsError': 'No se han podido cargar los créditos (¿sin conexión?).', 'set.effects': 'Efectos', 'set.music': 'Música', 'set.nextSong': 'Siguiente ▸ ({song})', 'set.mix': 'Mezcla de sonido', 'set.mixMusic': 'Música alta', 'set.mixEngine': 'Motor alto', 'set.musicStyle': 'Estilo de música', 'set.musicHouse': 'Deep house', 'set.musicSynth': 'Synthwave',
   'set.mute': 'Silenciar (M)', 'set.voice': 'Voz de Switch', 'set.autoQuality': 'Calidad automática', 'set.wphys': 'Física de lluvia y nieve',
   'set.shake': 'Sacudida de cámara', 'set.graphics': 'Gráficos', 'set.unlockAll': 'Desbloquear todos los coches (prueba)', 'set.allUnlocked': 'Todos los coches desbloqueados ✓',
   'hint.wphys.NORMAL': 'Lluvia 72 % de agarre, nieve 45 %.',
@@ -61,9 +61,9 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'look.rims': 'Llantas', 'look.size': 'Tamaño', 'look.tint': 'Cristales tintados', 'look.headlights': 'Faros',
   'look.glowPattern': 'Patrón de luces inferiores', 'look.calipers': 'Pinzas de freno', 'look.stance': 'Altura', 'look.plate': 'Matrícula',
   'look.loadouts': 'Configuraciones', 'look.default': 'por defecto', 'look.plain': 'liso',
-  'tune.title': 'PUESTA A PUNTO', 'tune.stats': 'de serie {cls} {pr} · 0-100 {accel} s · máx. {top} · frenada 30 m/s {stop} m',
-  'tune.bests': 'Tus mejores vueltas con esta puesta a punto: {laps}',
-  'tune.noBests': 'Tus mejores vueltas con esta puesta a punto aparecerán aquí (corre para registrarlas).',
+  'tune.title': 'TUNING', 'tune.stats': 'de serie {cls} {pr} · 0-100 {accel} s · máx. {top} · frenada 30 m/s {stop} m',
+  'tune.bests': 'Tus mejores vueltas con este tuning: {laps}',
+  'tune.noBests': 'Tus mejores vueltas con este tuning aparecerán aquí (corre para registrarlas).',
   'tune.buyFirst': 'Primero compra este coche en el garaje.', 'tune.upgrades': 'Mejoras · dinero {cash}',
   'tune.next': 'siguiente: PR {pr} · 0-100 {accel} s · máx. {top} · frenada {stop} m',
   'tune.needsTurbo': 'requiere un coche turbo', 'tune.maxed': 'al máximo', 'tune.setup': 'Reglajes', 'tune.reset': 'Restablecer reglajes',

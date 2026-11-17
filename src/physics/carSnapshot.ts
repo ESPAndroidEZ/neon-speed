@@ -9,20 +9,20 @@ const copyState = (a: CarState, b: CarState): void => {
 
 /** JSON-safe copy of everything a car controller (and its drivetrain and drift scorer) remembers between steps. */
 export function snapshotCar(c: CarController): {
-  state: CarState; u: number; v: number; r: number; hb: number; prev: [number, number, number];
+  state: CarState; u: number; v: number; r: number; hb: number; hbHeld?: number; prev: [number, number, number];
   surf: [number, number, number]; ld: [number, number, number, number, number]; flags: CarController['flags']; drivetrain: unknown; drift: unknown;
 } {
   const st: CarState = { position: { x: 0, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 }, heading: 0, speed: 0, yawRate: 0, slipAngle: 0 };
   copyState(st, c.state);
   return {
-    state: st, u: c.u, v: c.v, r: c.r, hb: c.hbFactor, prev: [c.prevX, c.prevZ, c.prevHeading],
+    state: st, u: c.u, v: c.v, r: c.r, hb: c.hbFactor, hbHeld: c.hbHeld, prev: [c.prevX, c.prevZ, c.prevHeading],
     surf: [c.surfaceGrip, c.surfaceDrag, c.steerAuthority], ld: [c.load.ax, c.load.ay, c.axRaw, c.ayRaw, c.thr], flags: { ...c.flags }, drivetrain: c.drivetrain.snapshot(), drift: c.drift.snapshot(),
   };
 }
 
 export function restoreCar(c: CarController, d: ReturnType<typeof snapshotCar>): void {
   copyState(c.state, d.state);
-  c.u = d.u; c.v = d.v; c.r = d.r; c.hbFactor = d.hb;
+  c.u = d.u; c.v = d.v; c.r = d.r; c.hbFactor = d.hb; c.hbHeld = d.hbHeld ?? 0;
   [c.prevX, c.prevZ, c.prevHeading] = d.prev;
   [c.surfaceGrip, c.surfaceDrag, c.steerAuthority] = d.surf;
   c.axRaw = d.ld[2];

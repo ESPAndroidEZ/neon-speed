@@ -5,7 +5,7 @@ import type { CarController } from '../carController';
 import { tireLateral } from './tire';
 import { steerAngle } from './steering';
 import { splitDrive } from './driveSplit';
-import { driftHoldTarget, handbrakeCarry, slideDamping, slideYaw } from './stability';
+import { driftHoldTarget, handbrakeCarry, handbrakeFade, handbrakeTarget, slideDamping, slideYaw } from './stability';
 
 const G = 9.81;
 const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration that helps traction (keeps launches as tuned)
@@ -13,7 +13,7 @@ const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration
  * Snow only (dry and rain are untouched): tyres dig in lengthwise, so drive traction uses grip^(1 - tr/2) instead of grip,
  * and full power keeps `floorR` of the rear's sideways grip (a held throttle steps the tail out ~15 deg instead of spinning the car).
  */
-export const SNOW_FEEL = { tr: 1, floorR: 0.7 };
+export const SNOW_FEEL = { tr: 0.35, floorR: 0.7 };
 
 /**
  * Handling v1 (git tag handling-v1), kept verbatim as the `legacy` model: arcade bicycle model with weight transfer,
@@ -43,7 +43,9 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const slipDen = Math.max(absU, 3);
   const delta = steerAngle(t, as, steerIn, u, v, c.steerAuthority, assistMul);
   // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
-  c.hbFactor = lerp(c.hbFactor, input.handbrake ? t.handbrakeGrip : driftHoldTarget(t, u, v, c.thr, c.hbFactor, g), Math.min(1, dt * (input.handbrake ? 14 : 3)));
+  const [hbT, hbRate] = handbrakeTarget(c, input.handbrake, t.handbrakeGrip, dt, () => driftHoldTarget(t, u, v, c.thr, c.hbFactor, g));
+  const hbK = input.handbrake ? handbrakeFade(c.hbHeld) : 1; // 1 for a normal pull; a long hold fades back toward grip
+  c.hbFactor = lerp(c.hbFactor, hbT, Math.min(1, dt * hbRate));
 
   const muR = t.gripRear * g * c.hbFactor * rearMul; // drive is split by layout (driveSplit), each axle capped by its traction
   const tractionLimit = muR * trMul * (ld.staticR + (fzR - ld.staticR) * TRACTION_SQUAT);
@@ -67,7 +69,7 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const motion = clamp(u, -1, 1);
   const brakeMax = t.brakeForce * g;
   const fBrake = -dtn.brakeCmd * brakeMax * motion;
-  const fHand = input.handbrake ? -Math.min(t.handbrakeForce, g * t.gripRear * fzR) * motion : 0;
+  const fHand = input.handbrake ? -Math.min(t.handbrakeForce * hbK, g * t.gripRear * fzR) * motion : 0;
   const fDrag = -t.dragCoef * u * absU;
   const fRoll = -t.rollingResistance * t.mass * G * clamp(u / 0.3, -1, 1) - c.surfaceDrag * t.mass * u;
   const fScrub = -fyF * Math.sin(delta);
