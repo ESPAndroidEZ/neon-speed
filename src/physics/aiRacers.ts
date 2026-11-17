@@ -18,7 +18,7 @@ const WHEELBASE = 2.6;
 const V_MAX = 82;
 // Handbrake cornering (same physics as the player's handbrake turn): corner speed planned this much faster per skill.
 const ENV = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
-const HB_ALAT = Number(ENV.RB_HB_ALAT ?? 1.2), HB_SLIP = Number(ENV.RB_HB_SLIP ?? 0.7), HB_LOCK = Number(ENV.RB_HB_LOCK ?? 1);
+const HB_ALAT = Number(ENV.RB_HB_ALAT ?? 0.5), HB_SLIP = Number(ENV.RB_HB_SLIP ?? 0.7), HB_LOCK = Number(ENV.RB_HB_LOCK ?? 1);
 const GRID = { A_LAT: 6.5, A_LAT_SKILL: 5.2, A_BRAKE: 6.0, A_BRAKE_SKILL: 2.3, A_ACCEL: 4.5, A_ACCEL_SKILL: 2.5 };
 
 const hash = (s: string): number => {

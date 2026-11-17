@@ -53,15 +53,15 @@ export function handbrakeCarry(t: CarTuning, u: number, v: number, hb: number, g
 /**
  * Long handbrake hold (owner, 2026-11-17: "it keeps holding and that makes it harder to manage the car"): the first
  * HB_FULL seconds are the approved handbrake, untouched; after that its strength (rear grip loss, carry, brake force)
- * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning. Letting go
- * after such a long hold gives the rear grip straight back (no drift hold, HB_REGRIP per second): the car is
- * drivable again at once instead of sliding on (owner, second report the same day).
+ * fades to HB_TAIL over HB_FADE seconds, so holding it through a corner no longer keeps the car spinning.
+ * Owner, same day: "when stopping to use the handbrake, release it immediately; turning the other way and using the
+ * handbrake must act immediately". So on release the rear goes to its no-handbrake target at HB_REGRIP per second
+ * (about 0.1 s): full grip, or the approved drift hold while the driver stays on the throttle in a slide (lifting or
+ * straightening ends it at once); a new pull bites at HB_BITE per second.
  */
 const HB_FULL = 0.5, HB_FADE = 0.4, HB_TAIL = 0.2; // the approved flick is a 0.4-0.45 s pull: untouched
-export const HB_REGRIP = 8;
+export const HB_REGRIP = 15, HB_BITE = 30;
 export const handbrakeFade = (held: number): number => 1 - (1 - HB_TAIL) * smoothstep(HB_FULL, HB_FULL + HB_FADE, held);
-/** The last pull was a long hold (seconds held, kept after release until the next pull). */
-export const longHold = (held: number): boolean => held > HB_FULL;
 
 /**
  * Handbrake hold bookkeeping, shared by both handling models: counts the seconds of the current pull (a new pull starts
@@ -70,10 +70,10 @@ export const longHold = (held: number): boolean => held > HB_FULL;
 export function handbrakeTarget(c: { hbHeld: number; hbFactor: number; flags: { handbrake: boolean } }, handbrake: boolean, hbGrip: number, dt: number, hold: () => number): [number, number] {
   if (handbrake) {
     c.hbHeld = c.flags.handbrake ? c.hbHeld + dt : 0;
-    return [1 - (1 - hbGrip) * handbrakeFade(c.hbHeld), 14];
+    return [1 - (1 - hbGrip) * handbrakeFade(c.hbHeld), HB_BITE];
   }
-  if (longHold(c.hbHeld) && c.hbFactor < 0.985) return [1, HB_REGRIP]; // straight back to grip after a long hold
-  return [hold(), 3];
+  // released: the handbrake lets go at once; only the throttle drift hold (on the gas while sliding) keeps the rear loose
+  return [hold(), c.hbFactor < 0.985 ? HB_REGRIP : 3];
 }
 
 /**
