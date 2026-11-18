@@ -1,5 +1,6 @@
 // App icons from the brand art in resources/brand (Neon Speed). Usage: npm run icons
-//   website-icon.png (wordmark only)  -> browser tab icons (public/icons/favicon-*.png, rounded, transparent corners)
+//   website-icon.png (wordmark only)  -> browser tab icons (public/icons/favicon-32/48.png, rounded, transparent corners)
+//   app-icon-cartoon.png (cartoon car) -> larger browser icons (public/icons/favicon-car-192/512.png)
 //   app-icon.png (geometric car)      -> phone icons: PWA, apple-touch, maskable, Android mipmaps + adaptive foreground, iOS 1024
 // The source art has rounded transparent corners; phone launchers want full-bleed squares (the OS masks them), so the
 // corners are filled from the nearest opaque pixel towards the centre. Resampling is an alpha-weighted box filter.
@@ -69,10 +70,12 @@ function render(src, size, scale = 1) {
 const enc = (png, opaque = false) => PNG.sync.write(png, opaque ? { colorType: 2, inputHasAlpha: true } : {});
 const site = load('resources/brand/website-icon.png');
 const app = load('resources/brand/app-icon.png');
+const cartoon = load('resources/brand/app-icon-cartoon.png');
 const full = bleed(app);
 
 mkdirSync('public/icons', { recursive: true });
-for (const s of [32, 48, 192, 512]) writeFileSync(`public/icons/favicon-${s}.png`, enc(render(site, s)));
+for (const s of [32, 48]) writeFileSync(`public/icons/favicon-${s}.png`, enc(render(site, s))); // tab icon: the wordmark
+for (const s of [192, 512]) writeFileSync(`public/icons/favicon-car-${s}.png`, enc(render(cartoon, s))); // larger browser icon (bookmarks, shortcuts): the cartoon car
 writeFileSync('public/icons/icon-192.png', enc(render(full, 192)));
 writeFileSync('public/icons/icon-512.png', enc(render(full, 512)));
 writeFileSync('public/icons/maskable-512.png', enc(render(full, 512, 0.74))); // safe zone: art inside the central 80 % circle
