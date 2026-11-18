@@ -56,7 +56,7 @@ export function installOnline(d: OnlineDeps): Online {
     const car = findCar(self.car);
     d.bypass(() => game.startRace({ car, paint: self.paint, glow: self.glow, weather: m.settings.weather, laps: def.laps, trackId: def.id, cinematic: false, agents: field }));
     const racers = game.rm.racers;
-    for (const r of racers) if (r.agent instanceof NetAgent) { r.agent.racer = r; r.remote = true; }
+    for (const r of racers) if (r.agent instanceof NetAgent) { r.agent.racer = r; r.remote = true; r.car.wheelHold = true; /* the owner drives with the player handling, so predict with it */ }
     const byId = (id: string) => (id === self.id ? game.player : racers.find((r) => r.agent?.id === id));
     placeGrid(game.rm, m.roster.map((p) => byId(p.id)).filter((r) => r !== undefined));
     game.world.surfaces.reseed(m.seed); // same puddles and snow banks for everyone

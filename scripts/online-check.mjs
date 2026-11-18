@@ -36,7 +36,7 @@ for (const p of [A, B]) await p.waitForFunction(() => window.__rbGame.rm.raceTim
 const s0a = await st(A), s0b = await st(B);
 Object.assign(a0, s0a); Object.assign(b0, s0b);
 for (const p of [A, B]) await p.waitForFunction((t) => window.__rbGame.rm.raceTime > t + 4, s0a.rt, { timeout: 120000, polling: 500 }).catch(() => {});
-const a1 = await st(A), b1 = await st(B);
+const [a1, b1] = await Promise.all([st(A), st(B)]);
 const moved = (s0, s1, i) => Math.hypot(s1.x[i] - s0.x[i], s1.z[i] - s0.z[i]);
 console.log(JSON.stringify({a1, b1}));
 check('A sees B move', moved(a0, a1, 1) > 5, moved(a0, a1, 1).toFixed(1) + ' m');
