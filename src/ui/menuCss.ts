@@ -53,7 +53,8 @@ h2.rb-title::after{content:'';display:block;width:clamp(48px,6vw,84px);height:3p
 .rb-main .rb-btn{min-width:min(300px,34vw);text-align:left;padding-left:28px}
 @media (max-width:600px){.rb-main .rb-btn{min-width:min(300px,72vw)}}
 .rb-stack{display:flex;flex-direction:column;gap:clamp(8px,1.6vh,12px)}
-@media (max-height:520px){.rb-main{gap:4px}.rb-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.rb-main .rb-btn{min-width:min(220px,30vw);padding-top:8px;padding-bottom:8px}.rb-main .rb-logo{font-size:clamp(22px,4.4vw,34px)}.rb-main .rb-sub{margin-bottom:6px}}
+@media (max-height:520px){.rb-main{gap:4px;padding-top:max(54px,calc(env(safe-area-inset-top) + 42px))}.rb-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.rb-main .rb-btn{min-width:min(220px,30vw);padding-top:8px;padding-bottom:8px}.rb-main .rb-logo{font-size:clamp(22px,4.4vw,34px)}.rb-main .rb-sub{margin-bottom:6px}}
+@media (max-height:420px){.rb-main .rb-btn{padding-top:5px;padding-bottom:5px}.rb-stack{gap:5px}.rb-main .rb-sub{display:none}}
 .rb-settings{width:min(1240px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(10px,1.6vw,18px);align-items:start;flex:none}
 .rb-settings .rb-panel{display:flex;flex-direction:column;gap:2px}
 .rb-settings .rb-row{justify-content:flex-end;width:100%;min-height:44px;padding:3px 0;gap:8px;border-bottom:1px solid #ffffff0b}

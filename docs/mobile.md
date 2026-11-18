@@ -33,3 +33,7 @@ App id `com.racersblood.game` and the name are in `capacitor.config.ts`.
 - Full screen: HUD icon, pause menu and Settings (`core/fullscreen`, `ui/fullscreenButton`). iPhone Safari has no Fullscreen API: the button becomes "Add to Home Screen" with a one-time hint. The app (Capacitor) hides the status bar instead. Entering full screen tries to lock landscape; a wake lock keeps the screen on while racing (`core/wakeLock`).
 - Responsive: canvas follows the visual viewport (`core/viewport`), the chase camera widens and pulls back in portrait and caps the horizontal view on 32:9 (`camera/aspectFrame`), portrait shows a small "rotate your phone" hint. Checked by `npm run viewport` (10 viewports).
 - Haptics: `ui/haptics` (Capacitor Haptics in the app, navigator.vibrate on Android browsers).
+
+## Install button (2026-11-18)
+Main menu shows "Install app" when the page is not already installed and not inside the native shell (`core/install.ts`, `ui/installButton.ts`). Android Chrome / Edge / Samsung: the `beforeinstallprompt` event is kept and the button opens the browser's install dialog (the prompt only exists on the production build, which registers the service worker). iPhone / iPad Safari has no install API: the button shows a how-to card (Share > Add to Home Screen). Android browsers without the prompt get a menu how-to. Desktop without the prompt shows nothing. Test: `tests/install-check.mts`.
+

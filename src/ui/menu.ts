@@ -21,7 +21,9 @@ import { buildTrackSelect } from './trackSelect';
 import { dailyButton } from './dailyButton';
 import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
+import { onInstallChange } from '../core/install';
 import { onLangChange, t } from '../i18n';
+import { installButton } from './installButton';
 import { langCorner, langRow } from './langRow';
 import { garageLayout, type GarageLayout } from './garageConfig';
 
@@ -71,6 +73,7 @@ export class Menu {
     injectCss();
     this.d = d;
     onLangChange(() => this.again?.());
+    onInstallChange(() => this.screen === 'main' && this.main()); // the browser offers its install prompt late
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       if (e.code === 'Enter' && this.screen === 'title') {
@@ -137,6 +140,8 @@ export class Menu {
       stack.append(c);
     }
     stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    const install = installButton();
+    if (install) stack.append(install);
     el.append(stack, langCorner()); // after the stack so the menu's first focus stays on the first menu button
     this.mount(el, 'main', 'menu', () => this.main());
   }

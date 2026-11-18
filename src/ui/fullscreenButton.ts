@@ -3,6 +3,7 @@ import { isStandalone } from '../core/fullscreen';
 import { ICONS } from './icons';
 import { h, injectCss } from './uiKit';
 import { t } from '../i18n';
+import type { StringKey } from '../i18n';
 
 const CSS = `
 .rb-fs{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:0 12px;font:800 13px system-ui,sans-serif;
@@ -15,7 +16,7 @@ padding:12px 14px;background:#0a0d1cf2;border:1px solid #18d8ff88;border-radius:
 `;
 
 /** One-time "Add to Home Screen" card for iPhone Safari (no Fullscreen API there). `force` shows it again (button tap). */
-export function showHomescreenHint(force = false): void {
+export function showHomescreenHint(force = false, key: StringKey = 'fs.hint'): void {
   injectCss();
   try {
     if (!force && localStorage.getItem('rb-a2hs') === '1') return;
@@ -24,13 +25,13 @@ export function showHomescreenHint(force = false): void {
     /* no storage: show it anyway */
   }
   if (isStandalone() || document.querySelector('.rb-a2hs')) return;
-  const card = h('div', 'rb-a2hs', `${ICONS.homescreen}<div>${t('fs.hint')}</div>`);
+  const card = h('div', 'rb-a2hs', `${ICONS.homescreen}<div>${t(key)}</div>`);
   const x = h('button', '', ICONS.close) as HTMLButtonElement;
   x.setAttribute('aria-label', t('common.close'));
   x.addEventListener('click', () => card.remove());
   card.append(x);
   document.body.append(card);
-  window.setTimeout(() => card.remove(), 12000);
+  window.setTimeout(() => card.remove(), key === 'fs.hint' ? 12000 : 20000);
 }
 
 let styled = false;
