@@ -186,5 +186,17 @@ for (const id of ['supra', 'rx7', '350z']) {
   hold(c, 2, inp({ throttle: 1, steer: 0 }));
   check(`${id}: wheel centred on W ends the slide and speeds up`, Math.abs(Math.atan2(c.v, Math.abs(c.u))) < 0.15 && c.state.speed > v0 + 3, `slip ${(Math.abs(Math.atan2(c.v, Math.abs(c.u))) * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
 }
+// Plain cornering, W + full lock at ~108 km/h, no handbrake: an RWD car must not latch into a 30 deg slide that W cannot drive out of.
+for (const id of ['350z', 'supra', 'm3', 'rx7']) {
+  const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+  c.reset(0, 0, 0);
+  c.wheelHold = true;
+  toSpeed(c, 30);
+  hold(c, 1.5, inp({ throttle: 1, steer: 1 }));
+  const v0 = c.state.speed;
+  hold(c, 2.5, inp({ throttle: 1, steer: 1 }));
+  const slip = Math.abs(Math.atan2(c.v, Math.abs(c.u)));
+  check(`${id}: W + full lock does not latch a big slide`, slip < 0.3 && c.state.speed > v0 - 1, `slip ${(slip * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
