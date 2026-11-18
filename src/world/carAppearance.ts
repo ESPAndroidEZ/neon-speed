@@ -45,7 +45,7 @@ export function applyAppearance(t: AppearanceTargets, l: Loadout, paintHex: numb
   // glass: tint darkens, clear shows the interior
   t.glass.color.setHex(0x0a101c).multiplyScalar(1 - l.tint * 0.75);
   t.glass.opacity = 1;
-  t.headMat.color.setHex(l.headlight).multiplyScalar(2.4);
+  t.headMat.color.setHex(l.headlight).multiplyScalar(1.6);
   t.wheels.caliper.color.setHex(l.caliper);
   t.wheels.rim.color.setHex(l.rim.color);
   attachParts(t.parts.root, t.parts.anchors, l.parts, p, t.parts.trim);

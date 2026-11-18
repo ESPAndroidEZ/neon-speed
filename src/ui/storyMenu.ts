@@ -6,6 +6,7 @@ import { CHAPTER, ENDING, type StoryEvent } from '../data/story';
 import { ALL_EVENTS, CHAPTER_2, EPILOGUE, eventsOf } from '../data/story2';
 import { findTrackDef } from '../data/tracks';
 import { button, h } from './uiKit';
+import { ICONS } from './icons';
 import { t, tx } from '../i18n';
 
 export interface StoryMenuDeps {
@@ -22,7 +23,7 @@ function eventCard(ev: StoryEvent, n: number, career: CareerState, start: (ev: S
   const car = ev.carId ? findCar(ev.carId) : null;
   const rivals = ev.rivals.length ? ev.rivals.map((r) => findRival(r).name).join(', ') : t('story.noRivals');
   const tag = done ? 'var(--green)' : open ? 'var(--magenta)' : 'var(--text-faint)';
-  card.innerHTML = `<div class="rb-sub" style="color:${tag};font-weight:800">${open ? '' : '🔒 '}${n}. ${t(done ? 'story.passed' : open ? 'story.next' : 'story.locked')}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
+  card.innerHTML = `<div class="rb-sub" style="color:${tag};font-weight:800">${open ? '' : ICONS.lock + ' '}${n}. ${t(done ? 'story.passed' : open ? 'story.next' : 'story.locked')}${ev.trackId ? ` · ${findTrackDef(ev.trackId).name}` : ''}</div>
     <div style="font-size:20px;font-weight:900;margin:4px 0">${tx(ev.title)}</div>
     <div style="opacity:.85;font-size:14px;line-height:1.35">${tx(ev.blurb)}</div>
     <div class="rb-sub" style="margin-top:8px">${t(`weather.${ev.weather}`)}${ev.weatherChange ? ` → ${t(`weather.${ev.weatherChange.to}`)}` : ''} · ${ev.laps === 1 ? t('story.oneRun') : t('story.laps', { n: ev.laps })}${car ? ` · ${t('story.only', { car: car.name })}` : ''}</div>
@@ -64,6 +65,12 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
 export function buildEnding(career: CareerState, chapter: number, onMenu: () => void): HTMLElement {
   const root = h('div', 'rb-layer dim');
   const card = chapter === 2 ? EPILOGUE[career.flags.sponsor ? 'sponsor' : 'open'] : ENDING;
-  root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)), button(t('common.menu'), onMenu, 'hot'));
+  root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)));
+  const credits = 'credits' in card ? (card.credits as string[]) : [];
+  if (credits.length) {
+    const cr = h('div', 'rb-sub', credits.map((c, i) => `<div style="margin-top:${i ? 4 : 18}px;${i ? '' : 'font-weight:900;letter-spacing:6px;font-size:20px'}">${tx(c)}</div>`).join(''));
+    root.append(cr);
+  }
+  root.append(button(t('common.menu'), onMenu, 'hot'));
   return root;
 }

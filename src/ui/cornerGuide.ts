@@ -2,6 +2,7 @@ import { racingLine, speedProfile, type RacingLine } from '../physics/aiLine';
 import type { TrackSample } from '../types/game';
 import { t } from '../i18n';
 
+const KINDS = ['cg.fast', 'cg.sharp', 'cg.hairpin'] as const;
 const CSS = `
 .rb-cg{position:fixed;left:50%;top:calc(max(14px,env(safe-area-inset-top),2vh) + clamp(40px,6vh,56px));transform:translateX(-50%);
 display:flex;align-items:center;gap:10px;padding:6px 14px 6px 10px;border-radius:12px;background:#05081299;pointer-events:none;
@@ -29,7 +30,8 @@ export class CornerGuide {
   private samples: readonly TrackSample[] | null = null;
   private grip = -1;
   private aBrake = 8;
-  private lastKey = '';
+  private lastKey = -1;
+  private lastWord = '';
   enabled = true;
 
   constructor(parent: HTMLElement) {
@@ -77,13 +79,14 @@ export class CornerGuide {
     const need = speed > vMin ? (speed * speed - vMin * vMin) / (2 * Math.max(dist, 4)) : 0;
     const state = need > this.aBrake * 0.8 ? 'brake' : need > this.aBrake * 0.45 ? 'warn' : '';
     if (sev === 0 && !state) return this.show(false);
-    const kind = t(['cg.fast', 'cg.sharp', 'cg.hairpin'][sev] as 'cg.fast');
+    const kind = t(KINDS[sev]);
     const word = state === 'brake' ? t('cg.brake') : state === 'warn' ? t('cg.ease') : kind;
     const left = turn < 0; // ks > 0 is a RIGHT turn (tests/lab/turn-sign.mts)
-    const key = `${state}|${sev}|${left}|${Math.round(dist / 10)}|${word}`;
+    const key = Math.round(dist / 10) * 100 + sev * 10 + (left ? 5 : 0) + (state === 'brake' ? 2 : state === 'warn' ? 1 : 0); // numeric key: no string per frame
     this.show(true);
-    if (key === this.lastKey) return;
+    if (key === this.lastKey && word === this.lastWord) return;
     this.lastKey = key;
+    this.lastWord = word;
     this.el.className = `rb-cg${state ? ' ' + state : ''}`;
     this.path.setAttribute('d', ARROWS[sev]);
     this.path.style.transform = left ? 'scaleX(-1)' : '';

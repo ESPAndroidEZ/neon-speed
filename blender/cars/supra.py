@@ -5,6 +5,7 @@ Build: scripts/model-build.sh cars/supra   (SHOTS=1 for renders in logs/models/)
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
 import rb
+import detail
 
 LENGTH, WIDTH, HEIGHT, WHEELBASE, WHEEL_R = 4.38, 1.86, 1.29, 2.67, 0.33
 TYRE_W = 0.22
@@ -56,6 +57,15 @@ rb.box('wing_blade', (0, 1.16, zp + 0.02), (1.6, 0.04, 0.30), 'trim', bevel=0.01
 # mirror on the A-pillar, flank found by surface_x
 xm = rb.surface_x(body, 0.95, 0.30)
 rb.mirror_x(rb.box('mirror', (xm + 0.05, 1.0, 0.30), (0.10, 0.08, 0.14), 'paint', bevel=0.02))
+
+# detailing: door gaps, handle, belt moulding, sills, splitter, diffuser, twin exhausts
+detail.door_lines(body, [0.5, -0.4], 0.3, 0.74)
+detail.handle(body, -0.15, 0.7)
+detail.window_trim(body, 0.5, -1.2, 0.79)
+detail.sill(body, 0.95, -1.1)
+detail.splitter(body, 0.2)
+detail.diffuser(body, 0.28, 1.0)
+detail.exhaust(body, 0.55, 0.3)
 
 for corner, x, z in (('fl', TRACK, ZF), ('fr', -TRACK, ZF), ('rl', TRACK, ZR), ('rr', -TRACK, ZR)):
     rb.wheel(corner, x, z, WHEEL_R, TYRE_W)

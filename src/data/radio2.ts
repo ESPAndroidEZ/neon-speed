@@ -65,15 +65,18 @@ export const RIVAL_RADIO_2: Record<string, string[]> = {
     'Nova turns the Strip into a slide. Watch the rear end.',
     'Nova is warmed up on the boulevards. She does not brake.',
     'Nova and the neon, Rookie. The rain only helps her.',
+    'Nova does not like being paid to lose.',
   ],
   Brick: [
     'Brick is a dock-union wall. He does not lift, and he does not yield.',
     'Brick holds the lane like he owns the dock. Tonight he is wrong.',
     'Brick will not move over. Plan the pass early, Rookie.',
+    'Brick gave his word to the union. He has never broken it.',
   ],
   Calloway: [
     'Calloway owns the Cliffside. He brakes later than the rail.',
     'Calloway is at home on the coast. The sea is his home stretch.',
     'Calloway lifts late and brakes later. The rail is his mirror.',
+    'Calloway built the rail. He is starting to wonder who paid for it.',
   ],
 };

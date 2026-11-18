@@ -2,8 +2,10 @@
  * Open-world contracts (free roam). The road network is pure data: no `three` here or in `src/world/roads`.
  * World units are metres, +Y up. The physics stays 2D on the X/Z plane; `heightAt` only lifts and pitches the car.
  */
-export type DistrictId = 'harbor' | 'neon' | 'oldtown' | 'coast';
-export type RoadKind = 'avenue' | 'street' | 'alley' | 'coast';
+/** Neon Harbor districts (docs/open-world.md). 'bay' is water: only the Bay Bridge crosses it. */
+export type DistrictId = 'downtown' | 'harbour' | 'oldtown' | 'strip' | 'hills' | 'industrial' | 'bay';
+export const DISTRICTS: readonly DistrictId[] = ['downtown', 'harbour', 'oldtown', 'strip', 'hills', 'industrial', 'bay'];
+export type RoadKind = 'highway' | 'avenue' | 'street' | 'alley' | 'hills' | 'bridge' | 'runway' | 'coast';
 export type SurfaceType = 'asphalt' | 'wet' | 'curb' | 'grass';
 
 /** Tyre grip multiplier and extra drag (1/s) per surface. Weather grip multiplies on top. */
@@ -42,10 +44,20 @@ export interface RoadEdge {
   length: number;
   /** Speed limit for traffic, m/s. */
   limit: number;
+  /** Road surface height at each centre-line point (bridge deck, ramps); absent = follow the terrain (`heightAt`). */
+  ys?: Float32Array;
+  /** Roofed (underpass, light tunnel): no rain or snow, tunnel lights. */
+  tunnel?: boolean;
+  /** Traffic drives a -> b only. */
+  oneWay?: boolean;
+  /** Leaves the map to a race track (the node at b is the map edge). */
+  exit?: 'mountain' | 'coast';
 }
 
 export interface RoadGraph {
   seed: number;
+  /** Order-independent hash of every node and edge (tests: same seed, same city). */
+  hash?: number;
   /** World square is [-half, half] on both axes. */
   half: number;
   nodes: RoadNode[];
@@ -65,7 +77,8 @@ export interface Footprint {
   district: DistrictId;
 }
 
-export type PoiKind = 'garage' | 'shop' | 'race' | 'drift' | 'trap' | 'hangout' | 'photo' | 'handprint';
+export type PoiKind = 'garage' | 'shop' | 'race' | 'drift' | 'trap' | 'hangout' | 'photo' | 'handprint'
+  | 'sprint' | 'checkpoint' | 'circuit' | 'trial' | 'jump' | 'token' | 'meet' | 'mission' | 'exit' | 'travel';
 
 export interface Poi {
   id: string;
@@ -104,4 +117,52 @@ export interface RoamSave {
   best: Record<string, number>;
   /** Opaque quest manager snapshot (src/quests). */
   quests: unknown;
+}
+
+/** Look and mood of one district (fog, light colours, window lights); the generator grammar is chosen by id. */
+export interface District {
+  id: DistrictId;
+  /** i18n key of the display name. */
+  name: string;
+  fog: number;
+  fogDensity: number;
+  /** Street light and key light colours. */
+  lamp: number;
+  key: number;
+  /** Lit-window colour and the share of windows lit at night (0..1). */
+  window: number;
+  lit: number;
+}
+
+/** Streaming cell: 128 m square, key "cx,cz" with cx = floor(x / CHUNK). */
+export type ChunkKey = string;
+export interface ChunkInfo {
+  cx: number;
+  cz: number;
+  district: DistrictId;
+  /** Edge ids that touch the cell, footprints and props inside it (indices into the world data). */
+  edges: number[];
+  buildings: number[];
+}
+
+/** One traffic car on the road graph. `role` is the hook for police later (not used in this round). */
+export interface TrafficAgent {
+  edge: number;
+  /** Lane index from the right edge in the driving direction; dir +1 = a -> b. */
+  lane: number;
+  dir: 1 | -1;
+  /** Distance along the edge (m) and speed (m/s). */
+  s: number;
+  speed: number;
+  variant: number;
+  role: 'civil' | 'police';
+}
+
+/** Story or activity mission as data: when it starts, what to do, how it fails, what it pays. */
+export interface MissionHook {
+  id: string;
+  trigger: { poi: string } | { flag: string } | { district: DistrictId };
+  objective: { kind: 'reach'; poi: string; seconds?: number } | { kind: 'race'; route: string[]; rivals: string[] } | { kind: 'drift'; poi: string; score: number } | { kind: 'talk'; event: string };
+  fail?: { seconds?: number; wrecks?: number };
+  reward: { cash: number; unlock?: string; flag?: string };
 }

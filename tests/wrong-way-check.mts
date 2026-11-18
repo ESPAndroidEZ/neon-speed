@@ -1,0 +1,16 @@
+import { newWrongWay, wrongWayUpdate } from '../src/game/wrongWayLogic.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+const run = (m: ReturnType<typeof newWrongWay>, secs: number, vx: number, vz: number): boolean => { let on = false; for (let i = 0; i < secs * 60; i++) on = wrongWayUpdate(m, 1 / 60, vx, vz, 0, 1); return on; };
+let m = newWrongWay();
+check('driving the right way never warns', !run(m, 10, 0, 40));
+m = newWrongWay();
+check('brief spin against the road does not warn', !run(m, 0.6, 0, -30));
+check('sustained wrong way warns', run(newWrongWay(), 2, 0, -30));
+check('slow crawl backwards does not warn', !run(newWrongWay(), 5, 0, -3));
+check('sideways across the road does not warn', !run(newWrongWay(), 5, 30, 0));
+m = newWrongWay();
+run(m, 2, 0, -30);
+check('stays on until turned around', run(m, 0.2, 0, 30) === true);
+check('goes off once driving the right way', !run(m, 1, 0, 30));
+if (failed) process.exit(1);

@@ -38,6 +38,8 @@ export const clampRel = (v: number): number => Math.max(-5, Math.min(5, v));
 /** Apply a dialogue choice: set its flags and shift relationship values. Returns the option's reply lines. */
 export function applyChoice(c: CareerState, opt: ChoiceOption): ChoiceOption['reply'] {
   for (const [k, v] of Object.entries(opt.set ?? {})) c.flags[k] = v;
+  if (opt.set?.open) delete c.flags.sponsor; // the two doors exclude each other
+  if (opt.set?.sponsor) delete c.flags.open;
   for (const [k, v] of Object.entries(opt.rel ?? {})) c.rel[k] = clampRel((c.rel[k] ?? 0) + v);
   return opt.reply;
 }

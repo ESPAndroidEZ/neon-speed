@@ -12,7 +12,15 @@ const CSS = `
 #hud .tl{position:absolute;left:var(--ml);top:var(--mt);font-size:13px;opacity:.85;max-width:48vw}
 #hud .tl small{display:block;opacity:.7;font-size:11px;margin-top:3px}
 #hud .info{position:absolute;right:var(--mr);top:var(--mt);text-align:right;font-size:clamp(14px,2vw,20px);line-height:1.5;white-space:nowrap}
-#hud .ban{position:absolute;left:0;right:0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
+#hud .ban{position:absolute;left:50%;width:max-content;translate:-50% 0;top:28%;text-align:center;font-size:clamp(70px,12vw,120px);font-style:italic;color:#fff;text-shadow:0 0 24px #ff2a9d,0 0 60px #18d8ff}
+#hud .ban.go{animation:rb-ban .55s var(--ease,ease-out) both}
+#hud .info.pu{animation:rb-pu 1.1s ease-out}#hud .info.pd{animation:rb-pd 1.1s ease-out}
+@keyframes rb-pu{0%,35%{color:var(--green);text-shadow:0 0 14px var(--green);scale:1.12}100%{scale:1}}@keyframes rb-pd{0%,35%{color:var(--red);text-shadow:0 0 14px var(--red);scale:1.12}100%{scale:1}}
+@keyframes rb-ban{0%{opacity:0;scale:1.7}25%{opacity:1}100%{opacity:1;scale:1}}
+#hud .lights{position:absolute;left:0;right:0;top:calc(28% + clamp(84px,14vw,140px));display:flex;gap:clamp(10px,2vw,22px);justify-content:center}
+#hud .lights i{width:clamp(16px,3vw,30px);aspect-ratio:1;border-radius:50%;background:#ffffff22;border:2px solid #ffffff44}
+#hud .lights i.r{background:var(--red);border-color:#ff9aa8;box-shadow:0 0 18px var(--red)}#hud .lights i.g{background:var(--green);border-color:#d8ffe0;box-shadow:0 0 22px var(--green)}
+@media (prefers-reduced-motion:reduce){#hud .ban.go{animation:none}}
 #hud .ds{position:absolute;left:50%;top:var(--mt);transform:translateX(-50%);font-size:clamp(20px,3vw,34px);white-space:nowrap;font-style:italic;color:#ff2a9d;text-shadow:0 0 12px #ff2a9d;opacity:0;transition:opacity .2s}
 #hud .hb-fs{position:absolute;left:var(--ml);top:calc(var(--mt) + 40px)}
 @media (pointer:coarse){#hud .hb-fs{left:calc(max(14px,env(safe-area-inset-left)) + 112px);top:calc(max(10px,env(safe-area-inset-top)) + 34px)}}
@@ -28,11 +36,13 @@ export class Hud {
   private readonly weather = document.createElement('div');
   private readonly info = document.createElement('div');
   private readonly banner = document.createElement('div');
+  private readonly lights = document.createElement('div');
+  private readonly lamps: HTMLElement[] = [];
   private readonly gauge = new ArcGauge();
   private readonly lines = document.createElement('div');
   private readonly pop = document.createElement('div');
   private lastTier = 0;
-  private lastInfo = '';
+  private lastInfoKey = -1;
   private lastScore = -1;
   private weatherNow: Weather | null = null;
 
@@ -61,10 +71,17 @@ export class Hud {
     br.append(this.gauge.el);
     this.lines.className = 'rb-lines';
     this.pop.className = 'rb-pop';
-    this.root.append(style, this.lines, this.weather, this.info, this.banner, this.drift, this.pop, br);
+    this.pop.setAttribute('role', 'status'); // screen readers announce pop-ups and the countdown
+    this.pop.setAttribute('aria-live', 'polite');
+    this.banner.setAttribute('role', 'status');
+    this.banner.setAttribute('aria-live', 'polite');
+    this.lights.className = 'lights';
+    this.lights.style.display = 'none';
+    for (let i = 0; i < 3; i++) { const d = document.createElement('i'); this.lamps.push(d); this.lights.append(d); }
+    this.root.append(style, this.lines, this.weather, this.info, this.banner, this.lights, this.drift, this.pop, br);
     parent.appendChild(this.root);
     onLangChange(() => {
-      this.lastInfo = '';
+      this.lastInfoKey = -1;
       this.lastScore = -1; // labels re-render on the next update
       if (this.weatherNow) this.setWeather(this.weatherNow);
     });
@@ -72,7 +89,7 @@ export class Hud {
 
   setWeather(w: Weather): void {
     this.weatherNow = w;
-    this.weather.innerHTML = `${t(`weather.${w}`).toUpperCase()}<small>${t('hud.keys')}</small>`;
+    this.weather.innerHTML = `${t(`weather.${w}`).toUpperCase()}<small>${t(import.meta.env.DEV ? 'hud.keysDev' : 'hud.keys')}</small>`;
   }
 
   /** Centre banner: countdown digits and GO. Empty string hides it. */
@@ -86,28 +103,46 @@ export class Hud {
     this.pop.classList.add('go');
   }
 
+  /** Brief green (gained) or red (lost) glow on the lap / position block. */
+  flashPosition(gained: boolean): void {
+    this.info.classList.remove('pu', 'pd');
+    void this.info.offsetWidth;
+    this.info.classList.add(gained ? 'pu' : 'pd');
+  }
+
   setBanner(text: string): void {
-    if (this.banner.textContent !== text) this.banner.textContent = text;
+    if (this.banner.textContent === text) return;
+    this.banner.textContent = text;
+    this.banner.classList.remove('go');
+    if (text) { void this.banner.offsetWidth; this.banner.classList.add('go'); }
+    // start light bar: one red lamp per second left (3 = all three), green on GO
+    const n = Number(text), go = text === 'GO!';
+    for (let i = 0; i < 3; i++) this.lamps[i].className = go ? 'g' : n > 0 && i >= 3 - n ? 'r' : '';
+    this.lights.style.display = go || n > 0 ? '' : 'none';
   }
 
   setVisible(v: boolean): void {
     this.root.style.display = v ? '' : 'none';
   }
 
+  private lastLines = -1;
+
   update(tel: RaceTelemetry): void {
-    const secs = Math.floor(tel.raceTime * 10) / 10;
-    const info = `${t('hud.lap')} ${tel.lap}/${tel.totalLaps}<br>${t('hud.pos')} ${tel.position}/${tel.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
-    if (info !== this.lastInfo) {
-      this.lastInfo = info;
-      this.info.innerHTML = info;
+    const tenths = Math.floor(tel.raceTime * 10);
+    const ik = tenths + 1e7 * tel.lap + 1e9 * tel.position + 1e11 * tel.racerCount + 1e13 * tel.totalLaps; // numeric key: the string is built only when it changes
+    if (ik !== this.lastInfoKey) {
+      this.lastInfoKey = ik;
+      const secs = tenths / 10;
+      this.info.innerHTML = `${t('hud.lap')} ${tel.lap}/${tel.totalLaps}<br>${t('hud.pos')} ${tel.position}/${tel.racerCount}<br>${Math.floor(secs / 60)}:${(secs % 60).toFixed(1).padStart(4, '0')}`;
     }
     this.gauge.update(tel.speedKph, tel.rpm / tel.redlineRpm, tel.gear, tel.nitroLevel, tel.nitroActive);
     // edge speed lines fade in between 110 and 220 km/h
-    this.lines.style.opacity = String(Math.max(0, Math.min(1, (tel.speedKph - 110) / 110)) * 0.85);
+    const lo = Math.round(Math.max(0, Math.min(1, (tel.speedKph - 110) / 110)) * 85) / 100;
+    if (lo !== this.lastLines) this.lines.style.opacity = String((this.lastLines = lo)); // style write (and string) only on change
     if (tel.driftScore !== this.lastScore) {
       const tier = Math.floor(tel.driftScore / 1000);
       if (tier > this.lastTier) this.popUp(`+${tier * 1000}`, '#ff2a9d');
-      else if (tel.driftScore === 0 && this.lastScore > 600) this.popUp(t('hud.banked', { n: this.lastScore }), '#7dff9a');
+      else if (tel.driftScore === 0 && this.lastScore > 600) this.popUp(t('hud.banked', { n: this.lastScore }), 'var(--green)');
       this.lastTier = tier;
       this.lastScore = tel.driftScore;
       this.drift.textContent = `${t('hud.drift')} ${tel.driftScore}`;

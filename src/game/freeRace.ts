@@ -21,6 +21,19 @@ export function finishFreeRace(store: SaveStore, def: TrackDef, weather: Weather
       buttons: [{ label: t('res.again'), hot: true, action: again }, { label: t('common.menu'), action: menu }],
     };
   }
-  store.recordTrack(`${def.id}:${weather}`, r.totalTime);
+  const key = `${def.id}:${weather}`;
+  const prev = store.data.trackBest[key];
+  const record = store.recordTrack(key, r.totalTime);
+  r.note = pbNote(prev, r.totalTime, record);
   return undefined;
+}
+
+const mmss = (sec: number): string => `${Math.floor(sec / 60)}:${(sec % 60).toFixed(2).padStart(5, '0')}`;
+
+/** One line about the player's own best time on this map and weather. Empty when the run did not finish. */
+export function pbNote(prev: number | undefined, time: number, record: boolean): string {
+  if (!(time > 0)) return '';
+  if (prev === undefined) return t('free.pbFirst', { time: mmss(time) });
+  const delta = Math.abs(time - prev).toFixed(2);
+  return record ? t('free.pbNew', { delta }) : t('free.pbMiss', { time: mmss(prev), delta });
 }

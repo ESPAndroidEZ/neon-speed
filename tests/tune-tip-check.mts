@@ -1,0 +1,15 @@
+import { affordableTip } from '../src/data/upgradeAdvice.ts';
+import { UPGRADES } from '../src/data/upgrades.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('broke: no tip', affordableTip({}, 100) === null);
+const tyres = UPGRADES.find((u) => u.id === 'tyres')!;
+check('first tip is tyres level 1 when affordable', affordableTip({}, tyres.levels[0].price)?.id === 'tyres');
+check('tyres owned: next affordable item', affordableTip({ tyres: 1 }, tyres.levels[1].price)?.id === 'tyres');
+check('tyres maxed: moves on to suspension', affordableTip({ tyres: tyres.levels.length }, 1e6)?.id === 'suspension');
+const all: Record<string, number> = {};
+for (const u of UPGRADES) all[u.id] = u.levels.length;
+check('everything maxed: no tip', affordableTip(all, 1e9) === null);
+check('never suggests the power stage', affordableTip({ ...all, stage: 0, tyres: 0 }, 1e9)?.id !== 'stage');
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);

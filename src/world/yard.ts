@@ -1,5 +1,5 @@
 import { BoxGeometry, Color, Group, InstancedMesh, MeshStandardMaterial, Object3D } from 'three';
-import { makeContainerSheet } from './city/textures';
+import { makeContainerSheet } from './city/texturesProps';
 import { createRng } from '../core/rng';
 import type { Track } from './track';
 

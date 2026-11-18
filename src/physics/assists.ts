@@ -35,7 +35,8 @@ export type StabilityLevel = 'OFF' | 'LIGHT' | 'FULL';
 export const HANDLING: { model: HandlingModel } = { model: 'legacy' };
 
 /** Copy the preferences onto a car. Allocation free, safe to call every step. */
-export function applyDriving(car: { assist: Assist; sensitivity: number; stability: StabilityLevel }): void {
+export function applyDriving(car: { assist: Assist; sensitivity: number; stability: StabilityLevel; wheelHold: boolean }): void {
+  car.wheelHold = true;
   car.stability = DRIVING.stability;
   const a = ASSIST_LEVELS[DRIVING.level];
   car.assist.steer = a.steer;

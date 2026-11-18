@@ -1,0 +1,11 @@
+import { resultGap } from '../src/game/resultGap.ts';
+let failed = 0;
+const check = (n: string, ok: boolean, d = ''): void => { console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' - ' + d : ''}`); if (!ok) failed++; };
+check('behind the winner: +0.83', resultGap(100.83, 100) === '+0.83', resultGap(100.83, 100));
+check('winner has no gap', resultGap(100, 100) === '');
+check('DNF has no gap', resultGap(null, 100) === '');
+check('no winner time: blank', resultGap(100, null) === '');
+check('a tie (under 5 ms) is blank', resultGap(100.004, 100) === '');
+check('minutes are not formatted away: +75.10', resultGap(175.1, 100) === '+75.10', resultGap(175.1, 100));
+check('NaN is blank', resultGap(Number.NaN, 100) === '');
+if (failed) process.exit(1);

@@ -1,4 +1,5 @@
 import type { Texture } from 'three';
+import { modelPresent } from '../core/modelList';
 import { modelUrl, type CarSpec } from '../data/cars';
 import { hasFailed, loadCarModel } from './assetLoader';
 import { defaultLoadout, type Loadout } from '../data/loadout';
@@ -34,7 +35,7 @@ export function createCarVisual(spec: CarSpec, paint: number, glow: number, env:
   v.setEnv(env);
   v.setUnderglow(glow);
   const url = modelUrl(spec);
-  if (!hasFailed(url)) {
+  if (!hasFailed(url) && modelPresent(`${spec.id}.glb`)) {
     loadCarModel(url, { targetLength: spec.shape.length, scale: spec.model.scale, yawOffset: getYawOverride(spec.id) ?? spec.model.yaw })
       .then((m) => {
         const mv = withPlates(buildModelCar(m, spec.color, paint, getYawOverride(spec.id) ?? spec.model.yaw), spec, l);
@@ -51,6 +52,7 @@ export function createCarVisual(spec: CarSpec, paint: number, glow: number, env:
 /** Start fetching every GLB at boot so they are cached by the time the garage opens. */
 export function preloadCarModels(specs: readonly CarSpec[]): void {
   for (const s of specs) {
+    if (!modelPresent(`${s.id}.glb`)) { status.set(s.id, 'procedural'); continue; } // not shipped: no request
     status.set(s.id, 'loading');
     loadCarModel(modelUrl(s)).then(
       () => {

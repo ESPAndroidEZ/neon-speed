@@ -9,10 +9,18 @@ export const ALL_EVENTS: readonly StoryEvent[] = [...EVENTS, ...EVENTS_2A, ...EV
 
 export const eventsOf = (chapter: number): StoryEvent[] => ALL_EVENTS.filter((e) => (e.chapter ?? 1) === chapter);
 
-/** Epilogue card after the last event of Chapter 2: it follows the branching choice. */
-export const EPILOGUE: Record<'open' | 'sponsor', { title: string; text: string }> = {
-  open: { title: 'The Open Loop', text: 'No sponsors, no door fees, no rules except the Wall. Cain waits at the lighthouse. Chapter 3 is coming.' },
-  sponsor: { title: 'Redline Racing', text: 'A season, a livery and a signature. Dante smiles for the cameras. Cain waits at the lighthouse. Chapter 3 is coming.' },
+/** Epilogue card after the last event of Chapter 2: it follows the branching choice. `credits` roll under it. */
+export const EPILOGUE: Record<'open' | 'sponsor', { title: string; text: string; credits: string[] }> = {
+  open: {
+    title: 'The Open Loop',
+    text: 'Dante pressed his hand on the Wall beside Cain’s. Calloway’s father faces a judge. Mara answers when Cain calls. The Loop belongs to everyone who shows up.',
+    credits: ['NEON SPEED', 'Kestrel Bay keeps the lights on.', 'Thanks for driving.'],
+  },
+  sponsor: {
+    title: 'Redline Racing',
+    text: 'A season, a livery and a Loop where nobody gets hurt. The brake line sleeps in a locked drawer. Cain still broadcasts. Mara still answers, slowly.',
+    credits: ['NEON SPEED', 'Some doors you choose twice.', 'Thanks for driving.'],
+  },
 };
 
 export const findAnyEvent = (id: string): StoryEvent => ALL_EVENTS.find((e) => e.id === id) ?? ALL_EVENTS[0];

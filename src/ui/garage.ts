@@ -2,14 +2,15 @@ import { carNav, navButton } from './carNav';
 import { REV_TEST } from '../audio/revTest';
 import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
-import { measureCar, type CarStats } from '../physics/carStats';
 import type { CarVisual } from '../world/proceduralCar';
 import { setYawOverride } from '../world/modelPrefs';
 import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
+import { clamp01, hex, soundTest, statsOf } from './garageParts';
 import { button, h, money } from './uiKit';
-import { t, tx } from '../i18n';
+import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
+import { speedText } from '../game/speedUnit';
 
 export interface GarageDeps {
   store: SaveStore;
@@ -22,16 +23,13 @@ export interface GarageDeps {
   onBack: () => void;
 }
 
-const statCache = new Map<string, CarStats>();
-const statsOf = (c: CarSpec): CarStats => {
-  let s = statCache.get(c.id);
-  if (!s) statCache.set(c.id, (s = measureCar(c.tuning)));
-  return s;
-};
-const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 /** Dev-only GLB yaw calibration row and nose arrow (`?calib` in a dev build). */
 const CALIB = import.meta.env.DEV && new URLSearchParams(location.search).has('calib');
-const clamp01 = (v: number): number => Math.max(0.04, Math.min(1, v));
+
+/** Browsed car index and when the language last changed (registered at import time, so it runs before the menu rebuilds the screen). */
+let browsed = -1;
+let langAt = -1e9;
+onLangChange(() => { langAt = performance.now(); });
 
 /** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
 export function buildGarage(d: GarageDeps): HTMLElement {
@@ -45,8 +43,10 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   panel.style.cssText += ';width:min(400px,92vw);max-height:88vh;overflow:auto;text-align:center';
   root.append(panel);
   let idx = Math.max(0, CARS.findIndex((c) => c.id === d.store.data.selected));
-  const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + CARS.length - 1) % CARS.length; render(); };
-  const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = (idx + 1) % CARS.length; render(); };
+  if (performance.now() - langAt < 400 && browsed >= 0) idx = browsed; // rebuilt by a language switch: keep the browsed car
+  browsed = idx;
+  const goPrev = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = browsed = (idx + CARS.length - 1) % CARS.length; render(); };
+  const goNext = (): void => { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); idx = browsed = (idx + 1) % CARS.length; render(); };
   carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
   const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); window.clearInterval(watch); } }, 400);
   let yaw = 0;
@@ -119,7 +119,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     panel.append(brand, title, h('div', 'rb-blurb', tx(c.blurb)));
     if (c.tuning.v2) panel.append(h('div', 'rb-note', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
     if (st2 === 'procedural' && import.meta.env.DEV) panel.append(h('div', 'rb-note', t('garage.putGlb', { id: c.id }))); // asset hint: dev only
-    panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, `${Math.round(st.topKph)} km/h`) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
+    panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, speedText(st.topKph)) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
       h('div', 'rb-sub', t('garage.paint')),
       swatches(PAINTS, paintOf(c), (p) => {
@@ -197,15 +197,4 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   statusListeners.add(rerender);
   render();
   return root;
-}
-
-/** "Sound test": hold to rev any car (owned or not) from idle to the limiter with shifts; release for the lift-off pops. */
-function soundTest(carId: string): HTMLElement {
-  const b = button(t('garage.sound'), () => undefined);
-  b.style.cssText += ';width:100%;margin-top:6px;touch-action:none';
-  const down = (e: Event): void => { e.preventDefault(); if (REV_TEST.carId !== carId) REV_TEST.start(carId); REV_TEST.holding = true; b.classList.add('on'); };
-  const up = (): void => { REV_TEST.holding = false; b.classList.remove('on'); };
-  b.addEventListener('pointerdown', down);
-  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, up);
-  return b;
 }

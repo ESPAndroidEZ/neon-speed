@@ -4,7 +4,7 @@ import type { RaceManager } from './raceManager';
 import type { CarInput } from '../types/game';
 
 interface RacerData {
-  id: string; finished: boolean; finishTime: number; lapStart: number; bestLap: number | null; finishRank: number;
+  id: string; finished: boolean; finishTime: number; lapStart: number; bestLap: number | null; lapTimes?: number[]; finishRank: number;
   input: CarInput; car: unknown; laps: unknown; hitIndex: number; agent: unknown; stuck: number; progress?: number;
 }
 
@@ -19,7 +19,7 @@ export function snapshotRace(rm: RaceManager): RaceData {
   return {
     phase: rm.phase, countdown: rm.countdown, raceTime: rm.raceTime, finishCount: rm.finishCount, launch: rm.launch.snapshot(), rewards: rm.rewards.snapshot(),
     racers: rm.racers.map((r) => ({
-      id: r.id, finished: r.finished, finishTime: r.finishTime, lapStart: r.lapStart, bestLap: Number.isFinite(r.bestLap) ? r.bestLap : null,
+      id: r.id, finished: r.finished, finishTime: r.finishTime, lapStart: r.lapStart, bestLap: Number.isFinite(r.bestLap) ? r.bestLap : null, lapTimes: r.lapTimes.slice(),
       finishRank: r.finishRank, input: { ...r.input }, car: r.car.snapshot(), laps: r.laps.snapshot(), hitIndex: r.contact.hit.index,
       agent: r.agent?.snapshot?.() ?? null, stuck: r.stuck, progress: r.progress,
     })),
@@ -43,6 +43,8 @@ export function restoreRace(rm: RaceManager, d: RaceData): void {
     r.finishTime = x.finishTime;
     r.lapStart = x.lapStart;
     r.bestLap = x.bestLap ?? Infinity;
+    r.lapTimes.length = 0;
+    if (Array.isArray(x.lapTimes)) for (const v of x.lapTimes) if (typeof v === 'number' && Number.isFinite(v)) r.lapTimes.push(v);
     r.finishRank = x.finishRank;
     Object.assign(r.input, x.input);
     r.car.restore(x.car);

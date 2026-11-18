@@ -1,3 +1,4 @@
+import { CARS } from '../src/data/cars.ts';
 import { CarController } from '../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning, type CarTuning } from '../src/physics/carTuning.ts';
 import { ASSIST_LEVELS, setAssist, type AssistLevel } from '../src/physics/assists.ts';
@@ -165,6 +166,52 @@ const hold = (c: CarController, secs: number, i: CarInput): void => {
   const held = slipAfter(1, 0.5), straight = slipAfter(1, 0);
   check('handbrake drift holds on the throttle', held > 0.3 && held < 0.75, `slip after 2.5 s ${(held * 57.3).toFixed(0)} deg`);
   check('straightening ends the drift', straight < 0.15, `slip ${(straight * 57.3).toFixed(0)} deg`);
+}
+// Gas must win over a brake that is still held (finger or trigger resting on it): the car pulls away from a stop, in forward gear.
+{
+  const c = mk();
+  hold(c, 6, inp({ brake: 1 })); // stopped, in reverse
+  hold(c, 3, inp({ throttle: 1, brake: 1 }));
+  check('gas pulls away even with the brake still held', c.state.speed > 3 && c.drivetrain.gear > 0, `${(c.state.speed * 3.6).toFixed(0)} km/h, gear ${c.drivetrain.gear}`);
+}
+// After a handbrake flick, centring the wheel with W still held ends the slide and the car accelerates (no need to lift).
+for (const id of ['supra', 'rx7', '350z']) {
+  const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+  c.reset(0, 0, 0);
+  c.wheelHold = true; // the player's car
+  toSpeed(c, 22);
+  hold(c, 0.4, inp({ throttle: 1, steer: 1, handbrake: true }));
+  hold(c, 0.6, inp({ throttle: 1, steer: 0 }));
+  const v0 = c.state.speed;
+  hold(c, 2, inp({ throttle: 1, steer: 0 }));
+  check(`${id}: wheel centred on W ends the slide and speeds up`, Math.abs(Math.atan2(c.v, Math.abs(c.u))) < 0.15 && c.state.speed > v0 + 3, `slip ${(Math.abs(Math.atan2(c.v, Math.abs(c.u))) * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
+}
+// Plain cornering, W + full lock at ~108 km/h, no handbrake: an RWD car must not latch into a 30 deg slide that W cannot drive out of.
+for (const id of ['350z', 'supra', 'm3', 'rx7']) {
+  const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+  c.reset(0, 0, 0);
+  c.wheelHold = true;
+  toSpeed(c, 30);
+  hold(c, 1.5, inp({ throttle: 1, steer: 1 }));
+  const v0 = c.state.speed;
+  hold(c, 2.5, inp({ throttle: 1, steer: 1 }));
+  const slip = Math.abs(Math.atan2(c.v, Math.abs(c.u)));
+  check(`${id}: W + full lock does not latch a big slide`, slip < 0.3 && c.state.speed > v0 - 1, `slip ${(slip * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
+}
+// Full lock (a held key) must not eat the throttle: at 20 m/s the Civic and Golf (FWD) keep most of their straight-line acceleration.
+for (const id of ['civic', 'golf']) {
+  const accel = (steer: number): number => {
+    const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+    c.reset(0, 0, 0);
+    c.wheelHold = true;
+    toSpeed(c, 20);
+    const i = inp({ throttle: 1, steer });
+    let sum = 0;
+    for (let k = 0; k < 90; k++) { c.step(D, i, WEATHER.CLEAR); if (k >= 30) sum += c.axRaw; }
+    return sum / 60;
+  };
+  const straight = accel(0), turn = accel(1);
+  check(`${id}: full lock keeps the throttle effective`, turn > 0.5 * straight && turn > 1, `${turn.toFixed(2)} vs ${straight.toFixed(2)} m/s^2 straight`);
 }
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

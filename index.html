@@ -75,9 +75,11 @@
         background: #05060d;
         color: #e8f6ff;
         font: 900 italic clamp(28px, 7vmin, 64px) system-ui, sans-serif;
-        text-shadow: 0 0 18px #ff2a9d, 0 0 40px #18d8ff;
+        letter-spacing: 0.06em;
         transition: opacity 0.35s;
       }
+      #boot .wm em { font-style: italic; color: #d8f8ff; text-shadow: 0 0 10px #18d8ff, 0 0 32px #18d8ff, 0 0 60px #18d8ff88; }
+      #boot .wm strong { font-weight: 900; color: #ffe0f0; text-shadow: 0 0 10px #ff2a9d, 0 0 32px #ff2a9d, 0 0 60px #ff2a9d88; }
       #boot b {
         display: block;
         width: min(60vw, 320px);
@@ -97,7 +99,7 @@
   </head>
   <body>
     <div id="app"></div>
-    <div id="boot" data-offscreen-ok>NEON SPEED<b><i></i></b></div>
+    <div id="boot" data-offscreen-ok><span class="wm"><em>NEON</em> <strong>SPEED</strong></span><b><i></i></b></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

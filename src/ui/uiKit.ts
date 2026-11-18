@@ -11,6 +11,11 @@ export function injectCss(): void {
   document.head.appendChild(s);
 }
 
+/** The NEON SPEED title treatment (styles in ui/theme). */
+export function wordmark(): HTMLElement {
+  return h('h1', 'rb-wm', '<em>NEON</em> <strong>SPEED</strong>');
+}
+
 export function h(tag: string, cls = '', html = ''): HTMLElement {
   const e = document.createElement(tag);
   if (cls) e.className = cls;

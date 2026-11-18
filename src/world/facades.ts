@@ -3,7 +3,8 @@ import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
 import { ARCHETYPES, archetypesFor, pickArchetype, type Archetype } from './city/archetypes';
-import { makeFacadeSheet, makeShopfrontTexture, type FacadeSheet } from './city/textures';
+import { makeFacadeSheet, type FacadeSheet } from './city/textures';
+import { makeShopfrontTexture } from './city/texturesProps';
 
 export interface Plaza {
   x: number;

@@ -1,5 +1,5 @@
 // Best-lap ghost logic (game/ghostData): recording, best-lap choice, playback interpolation.
-import { ghostPose, GhostRecorder, isGhostLap, type Pose } from '../src/game/ghostData.ts';
+import { ghostDelta, ghostPose, GhostRecorder, isGhostLap, type Pose } from '../src/game/ghostData.ts';
 
 let failed = 0;
 const check = (n: string, ok: boolean, i: string): void => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}  (${i})`); };
@@ -35,5 +35,16 @@ check('slow frames keep the timeline (20 s lap at 2 fps)', !!fresh2 && ghostPose
 const wrap = { t: 1, f: [0, 0, 0, 3.1, 1, 0, 0, -3.1] };
 ghostPose(wrap, 0.05, out);
 check('heading interpolates across +-pi the short way', Math.abs(Math.abs(out.h) - 3.14) < 0.05, out.h.toFixed(3));
+// live delta: the ghost drives +x at 10 m/s for 40 s (frames at 10 Hz)
+const line: number[] = [];
+for (let i = 0; i <= 400; i++) line.push(i, 0, 0, 0);
+const best = { t: 40, f: line };
+for (let i = 0; i <= 400; i++) best.f[i * 4] = i; // 1 m per 0.1 s
+check('delta is 0 on the same pace', Math.abs(ghostDelta(best, 10, 100, 0)) < 0.02, ghostDelta(best, 10, 100, 0).toFixed(3));
+check('delta is + when behind (70 m at 10 s, ghost has 100 m)', Math.abs(ghostDelta(best, 10, 70, 0) - 3) < 0.05, ghostDelta(best, 10, 70, 0).toFixed(3));
+check('delta is - when ahead', Math.abs(ghostDelta(best, 10, 110, 0) + 1) < 0.05, ghostDelta(best, 10, 110, 0).toFixed(3));
+check('delta refines between frames', Math.abs(ghostDelta(best, 5.03, 50.3, 0)) < 0.01, ghostDelta(best, 5.03, 50.3, 0).toFixed(4));
+check('delta is NaN far off the line', Number.isNaN(ghostDelta(best, 10, 100, 60)), 'off line');
+check('delta is NaN past the end of the stored lap', Number.isNaN(ghostDelta(best, 55, 400, 0)), 'past end');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

@@ -22,7 +22,11 @@ const spokes = (n: number, r: number, face: number, rim: MeshStandardMaterial, w
 
 export const RIM_DESIGNS: Record<string, RimBuilder> = {
   /** Five fat spokes. */
-  five: (r, face, rim) => spokes(5, r, face, rim, r * 0.11, r * 0.5, 0.035),
+  five: (r, face, rim) => {
+    const lip = new Mesh(new TorusGeometry(r * 0.64, 0.014, 6, 28).rotateY(Math.PI / 2), rim);
+    lip.position.x = face;
+    return [...spokes(5, r, face, rim, r * 0.1, r * 0.6, 0.035), lip];
+  },
   /** Ten slim spokes with a polished lip ring. */
   multi: (r, face, rim) => {
     const lip = new Mesh(new TorusGeometry(r * 0.64, 0.012, 6, 28).rotateY(Math.PI / 2), rim);

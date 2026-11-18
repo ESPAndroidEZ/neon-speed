@@ -8,6 +8,8 @@ export const ICONS = {
   /** Corners pointing in: exit full screen. */
   fullscreenExit: svg('<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>'),
   pause: svg('<path d="M8 5v14M16 5v14"/>'),
+  /** Padlock: a locked story event (instead of the emoji, which has no glyph without an emoji font). */
+  lock: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
   reset: svg('<path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/>'),
   /** Phone with a plus: add to home screen. */
   homescreen: svg('<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 9v6M9 12h6"/>'),

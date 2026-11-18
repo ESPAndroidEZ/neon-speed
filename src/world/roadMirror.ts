@@ -1,5 +1,6 @@
 import { PlaneGeometry, type MeshStandardMaterial, type Scene } from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import { NO_REFLECT } from './layers';
 
 /**
  * Planar mirror under the road for real wet-street reflections. Expensive (renders the scene again), so it only
@@ -22,6 +23,8 @@ export class RoadMirror {
     if (active && !this.mirror) {
       const m = new Reflector(new PlaneGeometry(1000, 1000), { textureWidth: 512, textureHeight: 512, color: 0x7f8fb8, clipBias: 0.003 });
       m.rotation.x = -Math.PI / 2;
+      const draw = m.onBeforeRender; // the Reflector takes the main camera's layers: hide NO_REFLECT (people, wheels) for its pass
+      m.onBeforeRender = function (r, s, cam, ...rest) { cam.layers.disable(NO_REFLECT); draw.call(this, r, s, cam, ...rest); cam.layers.enable(NO_REFLECT); };
       m.position.set(100, 0.012, 150); // under the road (0.02), above the ground plane
       this.scene.add(m);
       this.mirror = m;

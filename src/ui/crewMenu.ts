@@ -4,6 +4,8 @@ import { drawWall } from '../world/wallArt';
 import { portraitEl } from './portraits';
 import { button, h } from './uiKit';
 import { t, tx } from '../i18n';
+import { statsCard } from './statsCard';
+import { achievementsCard } from './achievementsUi';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 /** Characters whose relationship value is shown once Chapter 2 starts. */
@@ -13,7 +15,7 @@ const REL_IDS = ['mara', 'cain', 'dante', 'nova', 'brick'];
 function relBar(v: number): HTMLElement {
   const bar = h('div', 'rb-bar');
   bar.style.cssText += ';width:100%;margin-top:8px;position:relative';
-  bar.innerHTML = `<i style="position:absolute;left:${v >= 0 ? 50 : 50 + v * 10}%;width:${Math.abs(v) * 10}%;background:${v >= 0 ? '#7dff9a' : '#ff5470'}"></i>`;
+  bar.innerHTML = `<i style="position:absolute;left:${v >= 0 ? 50 : 50 + v * 10}%;width:${Math.abs(v) * 10}%;background:${v >= 0 ? 'var(--green)' : 'var(--red)'}"></i>`;
   const wrap = h('div', '', `<div class="rb-sub" style="font-size:11px;margin-top:6px">${t('crew.relationship')}</div>`);
   wrap.append(bar);
   return wrap;
@@ -36,16 +38,16 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
   for (const c of CREW) {
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:default;width:min(270px,88vw);text-align:left;border-color:${hex(c.color)}66`;
-    const bio = tx(career.endingSeen && c.revealed ? c.revealed : c.bio);
+    const bio = tx(career.epilogueSeen && c.truth ? c.truth : career.endingSeen && c.revealed ? c.revealed : c.bio);
     const rel = career.rel[c.id] ?? 0;
     const mood = rel > 0 ? 'smirk' : rel < 0 ? 'angry' : 'neutral';
     const top = h('div');
     top.style.cssText = 'display:flex;gap:10px;align-items:center';
-    top.append(portraitEl(c.id, mood, 52), h('div', '', `<div style="font-weight:900">${c.name}</div><div class="rb-sub" style="letter-spacing:2px">${tx(c.role)}</div>`));
+    top.append(portraitEl(c.id, mood, 52), h('div', '', `<div style="font-weight:900">${c.id === 'rookie' ? t('crew.rookie') : c.name}</div><div class="rb-sub" style="letter-spacing:2px">${tx(c.role)}</div>`));
     card.append(top, h('div', '', `<div style="opacity:.85;font-size:14px;line-height:1.4;margin-top:8px">${bio}</div>`));
     if (REL_IDS.includes(c.id) && career.completed.includes('c2-redline')) card.append(relBar(rel));
     grid.append(card);
   }
-  root.append(grid, button(t('common.back'), onBack));
+  root.append(grid, statsCard(), achievementsCard(), button(t('common.back'), onBack));
   return root;
 }

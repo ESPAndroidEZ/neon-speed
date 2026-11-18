@@ -69,6 +69,8 @@ const none = createNeutralInput();
   check('time trial finishes 3 laps', rm.phase === 'FINISHED' && !!rm.result, `${rm.raceTime.toFixed(1)} s, laps ${p.laps.laps}`);
   check('single racer is P1 with cash', rm.result?.position === 1 && (rm.result?.cash ?? 0) > 0, `cash ${rm.result?.cash}`);
   check('best lap recorded & plausible', p.bestLap > 40 && p.bestLap < 140, `${p.bestLap.toFixed(1)} s`);
+  const lts = rm.result?.lapTimes ?? [];
+  check('lap times: one per lap, sum to total, best matches', lts.length === 3 && Math.abs(lts.reduce((x, y) => x + y, 0) - rm.result!.totalTime) < 0.1 && Math.abs(Math.min(...lts) - p.bestLap) < 1e-9, lts.map((v) => v.toFixed(1)).join(' '));
   check('lap time sums to total', Math.abs(rm.result!.totalTime - rm.raceTime) < 0.1, `${rm.result?.totalTime.toFixed(1)}`);
 }
 

@@ -1,5 +1,6 @@
 import type { Weather } from '../types/game';
 import { AUDIO } from './audioParams';
+import { squealMix } from './squealMix';
 import type { AudioBus } from './audioBus';
 
 /** Looping noise voice: filter into a gain, both set from outside each frame. */
@@ -70,19 +71,19 @@ export class Sfx {
   }
 
   /** slide 0..1, speed m/s, surface = current weather (picks the squeal voice), nitro, precipitation 0..1. */
-  update(slide: number, speed: number, surface: Weather, nitro: boolean, precipitation: number, active: boolean): void {
+  update(slide: number, speed: number, surface: Weather, nitro: boolean, precipitation: number, active: boolean, ground = 'dry'): void {
     const t = this.bus.ctx.currentTime;
     const on = active ? 1 : 0;
     const soft = AUDIO.squealVoicing === 0;
     const v = AUDIO.tyreVolume * slide * on;
-    const f = 1100 + speed * 14;
+    const f = 1100 + speed * 14, m = squealMix(surface, ground);
     this.dry.filter.Q.setTargetAtTime(soft ? 3.5 : 9, t, 0.1); // soft = wide and warm, sharp = narrow and shrill
     this.dryHi.filter.Q.setTargetAtTime(soft ? 5 : 14, t, 0.1);
-    this.dry.set(soft ? f * 0.85 : f, surface === 'CLEAR' ? v * (soft ? 0.26 : 0.2) : 0, t);
-    this.dryHi.set(f * 2.05, surface === 'CLEAR' ? v * (soft ? 0.03 : 0.12) : 0, t);
-    this.wet.set(3600 + speed * 20, surface === 'RAIN' ? v * 0.16 : 0, t); // hissy spray
-    this.wetHi.set(700 + speed * 8, surface === 'RAIN' ? v * 0.14 : 0, t);
-    this.snow.set(700 + speed * 10, surface === 'SNOW' ? v * 0.3 * (0.7 + 0.3 * Math.sin(t * 17)) : 0, t); // crunchy
+    this.dry.set(soft ? f * 0.85 : f, v * (soft ? 0.26 : 0.2) * m.dry, t);
+    this.dryHi.set(f * 2.05, v * (soft ? 0.03 : 0.12) * m.dryHi, t);
+    this.wet.set(3600 + speed * 20, v * 0.16 * m.wet, t); // hissy spray
+    this.wetHi.set(700 + speed * 8, v * 0.14 * m.wetHi, t);
+    this.snow.set(700 + speed * 10, v * 0.3 * m.snow * (0.7 + 0.3 * Math.sin(t * 17)), t); // crunchy
     this.whoosh.set(500 + speed * 9 + (nitro ? 900 : 0), nitro ? 0.22 * on : 0, t);
     this.roar.gain.setTargetAtTime(nitro ? 0.16 * on : 0, t, 0.08);
     this.roarOsc.frequency.setTargetAtTime(60 + speed * 0.5, t, 0.1);
@@ -130,10 +131,8 @@ export class Sfx {
     if (k > 0.5) this.burst(0.18 * cv * k, 7000, 0.45); // glass and trim bits on a big hit
   }
 
-  /** Splash of a car through a puddle. */
-  splash(speed: number): void {
-    this.burst(Math.min(0.5, 0.15 + speed * 0.01), 2600, 0.35);
-  }
+  /** One-shot noise puff for surface changes (puddle splash, ice hiss, snow bank thump). */
+  puff(level: number, cutoff: number, dur: number): void { this.burst(level * AUDIO.crashVolume, cutoff, dur); }
 
   private burst(level: number, cutoff: number, dur: number): void {
     const ctx = this.bus.ctx;

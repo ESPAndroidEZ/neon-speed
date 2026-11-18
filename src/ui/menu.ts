@@ -1,4 +1,5 @@
 import { isPhone } from '../core/quality';
+import { MUSIC_CUE } from '../audio/audioParams';
 import type { Engine } from '../core/engine';
 import type { AudioBus } from '../audio/audioBus';
 import { findCar, type CarSpec } from '../data/cars';
@@ -17,10 +18,11 @@ import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
+import { dailyButton } from './dailyButton';
 import type { TrackDef } from '../data/tracks';
-import { button, h, injectCss, lapText, money } from './uiKit';
+import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
 import { onLangChange, t } from '../i18n';
-import { langRow } from './langRow';
+import { langCorner, langRow } from './langRow';
 import { garageLayout, type GarageLayout } from './garageConfig';
 
 export interface MenuDeps {
@@ -71,7 +73,10 @@ export class Menu {
     onLangChange(() => this.again?.());
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
-      if (e.code === 'Enter' && this.screen === 'title') this.main();
+      if (e.code === 'Enter' && this.screen === 'title') {
+        e.preventDefault(); // the new menu's focused button must not also receive this Enter
+        this.main();
+      }
       else if (e.code === 'Escape' && this.screen === 'other') this.main();
     });
   }
@@ -87,6 +92,7 @@ export class Menu {
 
   private mount(el: HTMLElement, s: 'title' | 'main' | 'other', layout: GarageLayout = 'main', again: (() => void) | null = null): void {
     this.d.layout(layout);
+    MUSIC_CUE.mood = layout === 'main' || layout === 'menu' ? null : 'garage'; // garage layouts get the lo-fi half-time mood
     this.again = again;
     this.layer?.remove();
     this.cash?.remove();
@@ -113,7 +119,7 @@ export class Menu {
     const el = h('div', 'rb-layer rb-hero');
     el.style.justifyContent = 'flex-end';
     el.style.paddingBottom = 'max(6vh,env(safe-area-inset-bottom))';
-    el.append(h('h1', 'rb-title', "NEON SPEED"), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
+    el.append(wordmark(), h('div', 'rb-sub', t('menu.chapter')), button(t('menu.press'), () => this.main(), 'hot'));
     if (!isPhone()) el.append(h('div', 'rb-hint', t('menu.keys')));
     el.append(langRow(undefined, false)); // first-run language choice (also in Settings)
     this.mount(el, 'title', 'main', () => this.title());
@@ -130,8 +136,8 @@ export class Menu {
       c.title = describe(latest.snap);
       stack.append(c);
     }
-    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.online'), () => this.online()), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
-    el.append(stack);
+    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    el.append(stack, langCorner()); // after the stack so the menu's first focus stays on the first menu button
     this.mount(el, 'main', 'menu', () => this.main());
   }
 
@@ -197,7 +203,12 @@ export class Menu {
     this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage());
   }
 
+  /** The settings screen as an element; `back` is what its Back button does (main menu, or closing the overlay in the pause menu). */
+  settingsPanel(back: () => void): HTMLElement {
+    return buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: back });
+  }
+
   settings(): void {
-    this.mount(buildSettings({ store: this.d.store, audio: this.d.audio, engine: this.d.engine, voice: this.d.voice, auto: this.d.auto, game: this.d.game, hud: this.d.hud, onDriving: this.d.onDriving, extraRows: this.d.controlRows, onBack: () => this.main() }), 'other', 'main', () => this.settings());
+    this.mount(this.settingsPanel(() => this.main()), 'other', 'main', () => this.settings());
   }
 }

@@ -1,14 +1,18 @@
 import { AudioManager } from './audio/audioManager';
+import { installGameCues } from './audio/gameCues';
+import { installComboHud } from './ui/comboHud';
+import { announceAchievements } from './ui/achievementsUi';
+import { LOD_EYE } from './world/carLod';
+import { tuneTip } from './ui/tuneTip';
 import { Engine } from './core/engine';
-import { AutoQuality, isPhone } from './core/quality';
-import { deviceHints, firstRunTier } from './core/perfTier';
+import { installAutoTier } from './ui/autoTier';
 import { installGuard, watchContextLoss } from './core/guard';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
 import { competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
-import { finishFreeRace } from './game/freeRace';
+import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats';
 import { Juice } from './fx/juice';
 import { attachRaceFeedback } from './game/raceFeedback';
 import { Game } from './game/game';
@@ -17,7 +21,7 @@ import { applyDrivingSettings } from './ui/drivingSettings';
 import { registerServiceWorker, showUpdatePrompt } from './core/pwa';
 import { installPlatform } from './game/platform';
 import { installHotkeys } from './game/hotkeys';
-import { fullscreenButton } from './ui/fullscreenButton';
+import { fullscreenButton } from './ui/fullscreenButton'; import { photoButton } from './ui/photo';
 import { controlRows } from './ui/controlSettings';
 import { createControls } from './game/inputSetup';
 import { installMinimap } from './game/extras';
@@ -77,26 +81,20 @@ const hud = new Hud(document.body);
 const tuning = applyTuning(createDefaultTuning(), {});
 let menu: Menu;
 let story: StoryController;
-const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main() });
+const results = new ResultsScreen(document.body, { onAgain: () => game.restart(), onMenu: () => menu.main(), tip: () => tuneTip(store) });
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);
-attachRaceFeedback(engine, game, hud); // corner guide + launch pop-ups
+attachRaceFeedback(engine, game, hud); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
+const gameCues = installGameCues(audio.bus, game);
 engine.onFrame((_a, dt) => {
-  audio.update(dt);
+  audio.update(dt); gameCues(); LOD_EYE.x = engine.camera.position.x; LOD_EYE.z = engine.camera.position.z;
   world.update(dt, engine.camera.position.x, engine.camera.position.z, engine.renderer.domElement.clientHeight * engine.renderer.getPixelRatio());
 });
-const voice = new Voice(); const auto = new AutoQuality();
-auto.onDowngrade = (tier) => {
-  store.data.settings.quality = tier;
-  store.commit();
-  toast(t('main.lowFps', { tier: t(`opt.${tier}`).toUpperCase() }));
-};
-engine.onFrame((_a, dt) => auto.update(dt, engine));
-if (!navigator.webdriver && firstRunTier(store.data.settings, deviceHints(engine.renderer.getContext(), isPhone()), kv)) store.commit(); // tests keep their tier
+const voice = new Voice(); const auto = installAutoTier(engine, store, kv);
 initLang(store);
 applySettings({ store, audio: audio.bus, engine, voice, auto, game, hud });
 const applyDriving = (): void => {
@@ -138,7 +136,7 @@ menu = new Menu({
   startEvent: (ev) => story.start(ev),
   slots,
   onDriving: applyDriving,
-  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt }),
+  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt, keys: controls.bindings }),
   loadSlot: (id) => loadSlot(id),
   online: (back) => buildOnlineMenu(online, back),
 });
@@ -148,8 +146,8 @@ story = new StoryController({
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
-  extra: () => [fullscreenButton(fs), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
-  onResume: () => pause.resume(),
+  extra: () => [fullscreenButton(fs), photoButton({ canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) }), controls.prefs.data.scheme === 'tilt' ? button(t('ctl.recal'), () => void calibrate(controls.tilt)) : null],
+  onResume: () => pause.resume(), settings: (back) => menu.settingsPanel(back),
   onRestart: () => {
     pause.resume();
     game.restart();
@@ -185,7 +183,7 @@ const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMen
 game.onFinish = (r) => {
   const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
   const extra = story.finish(r) ?? free;
-  world.setHandprints(store.data.career.completed.length);
+  world.setHandprints(store.data.career.completed.length); recordRace(r); announceAchievements(r, game, store.data.selected);
   return extra;
 };
 world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.completed.length);
@@ -193,7 +191,7 @@ world.setHandprints(q.has('hands') ? Number(q.get('hands')) : store.data.career.
 const versus = installVersus(game, direct);
 const online = installOnline({ game, store, bypass: versus.bypass, hideMenu: () => menu.hide(), showLobby: () => menu.online(), leaveToMenu });
 const loading = new LoadingCard();
-game.onStartRace = () => loading.show();
+game.onStartRace = () => loading.show(); // (renderer.compileAsync here compiled canvas variants the composer never uses: twice the programs, no gain)
 installRadio(engine, game, subs);
 
 installMinimap(game, world, (fn) => engine.onFrame(fn));

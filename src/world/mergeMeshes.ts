@@ -1,4 +1,4 @@
-import { type BufferGeometry, type Group, type Material, Mesh } from 'three';
+import { type BufferGeometry, type Group, type Material, Matrix4, Mesh, type Object3D } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /**
@@ -37,4 +37,51 @@ export function mergeByMaterial(group: Group): void {
     for (const m of list) group.remove(m);
     group.add(out);
   }
+}
+
+const inv = new Matrix4(), rel = new Matrix4();
+
+/**
+ * Whole-tree version for static models (baked GLB cars: their wheels neither spin nor steer): every single-material
+ * mesh anywhere under `root` is merged with the others of its material, transforms baked relative to `root`.
+ * `byName` also merges different material objects with the same type and name (a GLB's per-part copies).
+ * A Blender car went from ~29 draw calls (5 per wheel) to about one per material. Returns the number of meshes removed.
+ */
+export function mergeTreeByMaterial(root: Object3D, byName = false, keep: Material | null = null): number {
+  root.updateMatrixWorld(true);
+  inv.copy(root.matrixWorld).invert();
+  const buckets = new Map<Material | string, Mesh[]>(), first = new Map<Material | string, Material>();
+  root.traverse((o) => {
+    const m = o as Mesh;
+    if (!m.isMesh || (m as Mesh & { isSkinnedMesh?: boolean }).isSkinnedMesh || Array.isArray(m.material) || m.userData.noMerge || !m.geometry.attributes.normal || m.morphTargetInfluences) return;
+    const key = byName && m.material.name ? `${m.material.type}:${m.material.name}` : m.material; // GLB copies share a name
+    const list = buckets.get(key) ?? [];
+    list.push(m);
+    buckets.set(key, list);
+    if (!first.has(key) || m.material === keep) first.set(key, m.material); // `keep` (a material code still edits) wins its bucket
+  });
+  let removed = 0;
+  for (const [key, list] of buckets) {
+    const mat = first.get(key) as Material;
+    if (list.length < 2) continue;
+    const indexed = list.every((m) => m.geometry.index !== null);
+    const names = Object.keys(list[0].geometry.attributes).filter((n) => list.every((m) => n in m.geometry.attributes));
+    const geos = list.map((m) => {
+      let g = m.geometry.clone().applyMatrix4(rel.multiplyMatrices(inv, m.matrixWorld));
+      if (!indexed && g.index) g = g.toNonIndexed();
+      for (const n of Object.keys(g.attributes)) if (!names.includes(n)) g.deleteAttribute(n);
+      return g;
+    });
+    const merged = mergeGeometries(geos, false);
+    for (const g of geos) g.dispose();
+    if (!merged) continue;
+    const out = new Mesh(merged, mat);
+    out.name = list[0].name;
+    out.castShadow = list.some((m) => m.castShadow);
+    out.receiveShadow = list.some((m) => m.receiveShadow);
+    for (const m of list) m.removeFromParent();
+    root.add(out);
+    removed += list.length - 1;
+  }
+  return removed;
 }

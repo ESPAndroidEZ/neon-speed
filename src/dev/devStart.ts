@@ -39,13 +39,13 @@ export function runDevStart(d: DevStartDeps): void {
   const { q, game, store, world, menu, story, pause, juice, hud } = d;
   if (q.has('probe')) { installProbe(game); (window as unknown as Record<string, unknown>).__rbGame = game; } // dev: screen positions for scripts/viewport-check.mjs, game handle for scripts/online-check.mjs
   if (q.has('soak')) { // dev: stats for scripts/soak.mjs (leak and crash hunting)
-    const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene } } }).d.engine;
+    const eng = (game as unknown as { d: { engine: { renderer: import('three').WebGLRenderer; scene: import('three').Scene; prof: Record<string, number>; workMs: number; dynScale: number } } }).d.engine;
     let objects = 0;
     (window as unknown as Record<string, unknown>).__rbRenderer = eng.renderer;
     (window as unknown as Record<string, unknown>).__rbScene = eng.scene;
     (window as unknown as Record<string, unknown>).__rbStats = () => {
       const i = eng.renderer.info; objects = 0; eng.scene.traverse(() => { objects++; });
-      return { geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs?.length ?? 0, calls: i.render.calls, triangles: i.render.triangles, objects };
+      return { geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs?.length ?? 0, calls: i.render.calls, triangles: i.render.triangles, objects, ...eng.prof, work: eng.workMs, dyn: eng.dynScale, lap: game.rm.player.lapTimes.length };
     };
     (window as unknown as Record<string, unknown>).__rbCycle = (n: number) => { // new race: next car, track and weather
       const ws = ['CLEAR', 'RAIN', 'SNOW'] as const, tr = TRACKS[n % TRACKS.length], car = CARS[n % CARS.length], f = freeRaceField(5);
@@ -94,7 +94,8 @@ if (d.direct) {
     hud.setVisible(false);
   } else menu.title();
   const scr = q.get('screen');
-  if (scr === 'garage') menu.garage();
+  if (scr === 'main') menu.main();
+  else if (scr === 'garage') menu.garage();
   else if (scr === 'weather' || scr === 'maps') menu.maps();
   else if (scr === 'settings') menu.settings();
   else if (scr === 'tune') menu.tune();

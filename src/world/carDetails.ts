@@ -1,11 +1,11 @@
-import { BoxGeometry, CylinderGeometry, Group, Mesh, MeshBasicMaterial, type Material } from 'three';
+import { BoxGeometry, CylinderGeometry, Group, Mesh, type Material } from 'three';
 import type { BodyParts, BodyShape } from './carBody';
 
 /**
  * Bolt-on details: front splitter, side skirts, rear wing or lip with end plates, hood scoop, exhaust tips,
  * door lines, side mirrors and light housings. All added to `body` (they roll and pitch with it).
  */
-export function addDetails(body: Group, s: BodyShape, parts: BodyParts, paint: Material, trim: Material, metal: Material, headMat: MeshBasicMaterial): void {
+export function addDetails(body: Group, s: BodyShape, parts: BodyParts, paint: Material, trim: Material, metal: Material): void {
   const zf = s.length / 2;
   const w = s.width;
   const add = (g: BoxGeometry | CylinderGeometry, m: Material, x: number, y: number, z: number, rx = 0): Mesh => {
@@ -23,10 +23,9 @@ export function addDetails(body: Group, s: BodyShape, parts: BodyParts, paint: M
     add(new BoxGeometry(0.06, 0.1, s.wheelbase - s.wheelRadius * 2.5), trim, x, 0.28, 0); // side skirt
     add(new BoxGeometry(0.014, 0.42, 0.01), trim, sx * (parts.halfWidth(parts.zWindshield - 0.9) + 0.002), s.beltHeight - 0.2, parts.zWindshield - 0.9); // door lines
     add(new BoxGeometry(0.014, 0.42, 0.01), trim, sx * (parts.halfWidth(parts.zWindshield - 1.9) + 0.002), s.beltHeight - 0.2, parts.zWindshield - 1.9);
-    add(new BoxGeometry(0.14, 0.1, 0.2), paint, sx * (parts.halfWidth(parts.zWindshield) + 0.05), s.beltHeight + 0.14, parts.zWindshield - 0.05); // mirror
-    const ly = parts.hoodY(zf - 0.14) - 0.06;
-    add(new BoxGeometry(0.5, 0.17, 0.06), trim, sx * w * 0.32, ly, zf - 0.14); // headlight housing
-    add(new BoxGeometry(0.44, 0.1, 0.06), headMat, sx * w * 0.32, ly, zf - 0.11); // headlight
+    const mx = parts.halfWidth(parts.zWindshield) * 0.84;
+    add(new BoxGeometry(0.1, 0.012, 0.04), trim, sx * (mx + 0.04), s.beltHeight + 0.06, parts.zWindshield - 0.1); // mirror stalk
+    add(new BoxGeometry(0.1, 0.095, 0.17), paint, sx * (mx + 0.11), s.beltHeight + 0.1, parts.zWindshield - 0.1); // mirror
     add(new CylinderGeometry(0.052, 0.052, 0.16, 12), metal, sx * w * 0.28, 0.33, -zf - 0.04, Math.PI / 2); // exhaust tips
   }
   if (s.scoop) add(new BoxGeometry(0.55, 0.1, 0.55), trim, 0, parts.hoodY(zf - s.hoodLength * 0.55) + 0.05, zf - s.hoodLength * 0.55);

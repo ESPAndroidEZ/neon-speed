@@ -1,3 +1,4 @@
+import { surfaceCue } from './surfaceCue';
 import { smoothstep } from '../core/math';
 import type { Game } from '../game/game';
 import { EV_BACKFIRE, EV_CUT, EV_DOWNSHIFT, EV_LIFT, EV_UPSHIFT, EventReader } from '../physics/driveEvents';
@@ -13,7 +14,7 @@ import { Sfx } from './sfx';
 import { TurboSound } from './turboSound';
 import { findCar } from '../data/cars';
 import { createSampleVoice, loadEngineSamples } from './engineSamples';
-import { REV_TEST } from './revTest';
+import { REV_TEST } from './revTest'; import { LaunchRev } from './launchRev';
 import { engineVoiceIndex } from '../data/engineVoices';
 
 
@@ -39,7 +40,7 @@ export class AudioManager {
   private level = 0;
   private reader = new EventReader();
   private lastDtn: unknown = null;
-  private lastPedal = 0;
+  private lastPedal = 0; private readonly rev = new LaunchRev();
   private lastSurface = 'dry';
   private testT = 0;
   private test: AudioTest | null = null;
@@ -155,6 +156,7 @@ export class AudioManager {
       if (this.testT > (this.test === 'sweep' ? 4.5 : 2)) this.test = null;
     }
 
+    if (g.state === 'RACING' && g.rm.phase === 'COUNTDOWN') { this.rev.hold(dt, g.ctl.throttle, car2?.tuning.idleRpm ?? 900, redline); rpm = this.rev.rpm; load = this.rev.load; } else rpm = this.rev.release(dt, rpm); // gas flat at the lights revs the engine
     if (this.voice) {
       const layout = car2 ? engineVoiceIndex(car2.id, car2.sound.layout) : 0;
       const vol = (inGame ? 1 : 0) * AUDIO.engineVolume, cutNow = rpm >= redline * 0.995 && load > 0.5, burble = pedal < 0.05 && speed > 8 ? 1 : 0;
@@ -186,14 +188,13 @@ export class AudioManager {
     if (hasTurbo && this.lastPedal > 0.75 && pedal > 0.15 && pedal < 0.6 && dtn.boost > 0.5) this.turbo.flutter(dtn.boost);
     this.lastPedal = pedal;
 
-    // surface sounds
-    const surf = racer.contact.surface.kind;
-    if (surf === 'puddle' && this.lastSurface !== 'puddle' && speed > 6) this.sfx.splash(speed);
+    const surf = racer.contact.surface.kind, cue = surfaceCue(this.lastSurface, surf, speed); // surface change cue
+    if (cue) this.sfx.puff(cue.level, cue.cutoff, cue.dur);
     this.lastSurface = surf;
     this.sfx.scrape(this.clock - this.lastHit < 0.15 && inGame, speed);
     this.bed.update(g.state === 'MENU' ? 0.6 : 1, this.bus);
     this.bus.setMusicMul(AUDIO.musicVolume);
-    this.sfx.update(slide, speed, g.weather, nitro, WEATHER[g.weather].precipitation * g.weatherIntensity, inGame);
+    this.sfx.update(slide, speed, g.weather, nitro, WEATHER[g.weather].precipitation * g.weatherIntensity, inGame, surf);
     this.rivals.update(g.views.views, this.game.chase.camera, this.vel, g.state === 'RACING' || g.state === 'PODIUM');
     this.bus.setChaseCutoff(g.state === 'RACING' ? 8500 - smoothstep(20, 80, speed) * 1500 : 16000);
 

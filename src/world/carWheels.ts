@@ -1,4 +1,6 @@
 import { mergeByMaterial } from './mergeMeshes';
+import { markDetail } from './carLod';
+import { noReflect } from './layers';
 import { centreCap, RIM_DESIGNS } from './rims';
 import { BoxGeometry, CylinderGeometry, Group, LatheGeometry, Mesh, MeshStandardMaterial, Vector2 } from 'three';
 
@@ -34,17 +36,22 @@ export function buildWheel(r: number, side: number, mats: WheelMats, design = 'f
   spin.add(new Mesh(tyreGeometry(r, 0.27), tyreMat));
   spin.add(new Mesh(new CylinderGeometry(r * Math.min(0.8, 0.66 * (size / 18)), r * Math.min(0.8, 0.66 * (size / 18)), 0.24, 20).rotateZ(Math.PI / 2), rimMat));
   const face = side * 0.125;
-  const dish = new Mesh(new CylinderGeometry(r * 0.5, r * 0.5, 0.03, 16).rotateZ(Math.PI / 2), dishMat);
+  const dish = new Mesh(new CylinderGeometry(r * 0.62, r * 0.62, 0.03, 20).rotateZ(Math.PI / 2), dishMat);
   dish.position.x = face - side * 0.015;
+  markDetail(dish);
   spin.add(dish);
   for (const p of (RIM_DESIGNS[design] ?? RIM_DESIGNS.five)(r, face, rimMat)) spin.add(p);
   spin.add(centreCap(r, face, rimMat));
   const disc = new Mesh(new CylinderGeometry(r * 0.52, r * 0.52, 0.025, 20).rotateZ(Math.PI / 2), brakeMat);
   disc.position.x = -side * 0.05;
+  markDetail(disc);
   spin.add(disc);
   mergeByMaterial(spin); // ~10 meshes -> 4 (tyre, rim, dish, disc)
   const caliper = new Mesh(new BoxGeometry(0.07, r * 0.32, r * 0.22), mats.caliper);
   caliper.position.set(-side * 0.05, r * 0.3, -r * 0.18);
+  markDetail(caliper);
+  noReflect(spin);
+  noReflect(caliper);
   return { spin, caliper };
 }
 

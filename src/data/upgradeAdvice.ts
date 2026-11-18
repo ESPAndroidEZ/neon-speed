@@ -1,4 +1,4 @@
-import type { UpgradeId, Upgrades } from './upgrades';
+import { findUpgrade, type UpgradeId, type Upgrades } from './upgrades';
 import type { Setup } from './setup';
 
 /** When each upgrade actually helps (shown in the tuning menu next to the measured numbers). */
@@ -36,4 +36,17 @@ export function recordLap(track: string, car: string, build: string, t: number):
   if (b !== null && b <= t) return false;
   try { localStorage.setItem(bestKey(track, car, build), t.toFixed(3)); } catch { return false; }
   return true;
+}
+
+/** What to suggest first after a lost race: handling before power (grip is the cheapest way to go faster). */
+const TIP_ORDER: readonly UpgradeId[] = ['tyres', 'suspension', 'brakes', 'differential', 'gearbox', 'weight', 'nitrous'];
+
+/** The next upgrade level the player can afford right now, in `TIP_ORDER`, or null. Skips the power stage (priced per car). */
+export function affordableTip(upgrades: Upgrades, cash: number): { id: UpgradeId; name: string; price: number } | null {
+  for (const id of TIP_ORDER) {
+    const cat = findUpgrade(id);
+    const next = cat.levels[upgrades[id] ?? 0];
+    if (next && next.price <= cash) return { id, name: next.name, price: next.price };
+  }
+  return null;
 }

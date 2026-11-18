@@ -122,8 +122,8 @@ if (ONLY.includes('offline')) {
     await ctx.setOffline(true);
     await page.reload({ waitUntil: 'load' });
     await page.waitForTimeout(2500);
-    const title = await page.locator('h1.rb-title').first().textContent().catch(() => null);
-    report(title?.includes('RACER') === true, 'offline: the game starts with the network off (service worker)', String(title));
+    const title = await page.locator('h1.rb-wm').first().textContent().catch(() => null);
+    report(title?.includes('NEON') === true, 'offline: the game starts with the network off (service worker)', String(title));
   } catch (e) {
     report(false, 'offline start', String(e).split('\n')[0]);
   }

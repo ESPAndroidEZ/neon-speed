@@ -2,6 +2,7 @@ import type { SaveSlots, SlotId } from '../core/gameSave';
 import type { PauseMenu } from '../ui/pauseMenu';
 import type { Game } from './game';
 import { canSave, captureGame } from './saveGame';
+import { pauseStatus } from './pauseStatus';
 import { t } from '../i18n';
 
 /** Pause state and saving: pause on Esc or a hidden tab, autosave when pausing or leaving, manual slots. */
@@ -35,6 +36,7 @@ export class PauseController {
     if (this.game.paused || this.game.state !== 'RACING' || !canSave(this.game)) return;
     this.game.paused = true;
     this.save('auto', true);
+    this.menu.setStatus(pauseStatus(this.game.telemetry, t('hud.lap')));
     this.menu.show();
   }
 

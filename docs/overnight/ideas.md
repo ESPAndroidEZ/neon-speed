@@ -1,0 +1,57 @@
+# Ideas for item 99 (self-directed)
+
+Pick the highest-value one, do it, move it to "Done" with a date and commit hash. Add your own; prefer things players feel in the first five minutes.
+
+## Backlog
+- Race feel: speed lines and FOV kick tied to speed and nitro (never camera shake from plain acceleration), subtle motion blur, better start-line countdown with engine rev.
+- Skid, gear-shift and nitro sound polish using only procedural audio; tyre screech varies with surface (asphalt, wet, snow).
+- Results screen: lap breakdown, best-lap ghost line, "what you could tune" hint from `data/upgradeAdvice.ts`.
+- Photo mode in the garage and after races (hide HUD, free orbit, filters), saves a PNG download.
+- Accessibility: colour-blind safe HUD palette option, text size options, reduced-flash option, remappable keys.
+- Mobile: touch target audit, frame-time governor that lowers quality before dropping frames, battery-friendly 30 fps option.
+- Tutorial: first race teaches throttle, braking line, handbrake and nitro with unobtrusive prompts that disappear once used.
+- Replay of the last race from the save snapshot machinery (deterministic physics), cinematic cameras.
+- Neon identity: animated neon sign title, city signage using the Neon Speed name and fictional brands, reflections in wet asphalt (keep `npm run visual` passing).
+- Test and tooling: a headless bot lap per car that asserts lap-time bands, so tuning regressions show up in CI.
+
+## Done
+- 2026-11-16 Lap chime and finish stings: rising pair each lap, major arpeggio for a win, soft falling pair otherwise (`audio/raceCue`, `main.ts`, `tests/race-cue-check.mts`).
+- 2026-11-16 Start-line beeps: low tick on 3, 2, 1 and a higher longer GO, synthesised on the sfx bus from the banner text (`audio/countdownBeep`, `main.ts`, `tests/countdown-beep-check.mts`).
+- 2026-11-16 Phone vibration on crashes, gated by the Rumble setting (`input/impactHaptic`, `game/inputSetup`, `tests/impact-haptic-check.mts`).
+- 2026-11-16 Payout split on the results: "Prize $x · Drifting $y" under the cash (`game/cashSplit`, `ui/results`, `tests/cash-split-check.mts`).
+- 2026-11-16 Drift record pop-up: "DRIFT RECORD n" when a banked drift beats your lifetime best (needs an existing record, so early drifts stay quiet) (`game/driftRecord`, `game/raceFeedback`, i18n `drift.record`, `tests/drift-record-check.mts`).
+- 2026-11-16 Pause menu status line: lap, position and race time under PAUSED (`game/pauseStatus`, `ui/pauseMenu`, `tests/pause-status-check.mts`).
+- 2026-11-16 Nitro tank cues: NITRO EMPTY when a burn runs the tank dry, NITRO READY when it is back to half (`game/nitroCue`, `game/raceFeedback`, `tests/nitro-cue-check.mts`).
+- 2026-11-16 Photo finish badge on the results when the top two (one of them the player) finish within 0.3 s (`game/photoFinish`, `ui/results`, `tests/photo-finish-check.mts`).
+- 2026-11-16 New best lap pop-up shows time and gain and counts as a lap (`game/ghost`, i18n `ghost.best`, `tests/lap-pop-check.mts`).
+- 2026-11-16 Screen-reader announcements: HUD pop-ups and countdown banner are polite live regions, WRONG WAY is an alert (`ui/hud`, `ui/wrongWay`, `tests/aria-live-check.mts`).
+- 2026-11-16 Loading tips come from a shuffled bag: no repeats until all have been shown (`core/tipBag`, `ui/loadingCard`, `tests/tip-bag-check.mts`).
+- 2026-11-16 Calm HUD also follows the OS reduced-motion preference (`calmEffective` in `ui/calm`, `tests/calm-effective-check.mts`).
+- 2026-11-16 Tyre squeal follows the surface: puddles spray even in clear weather, snow banks crunch, ice is quiet and thin; weather-only behaviour unchanged (`audio/squealMix`, `audio/sfx`, `tests/squeal-mix-check.mts`).
+- 2026-11-16 Pause on window blur (desktop only, not in automated browsers): alt-tab no longer leaves the car driving (`game/blurPause`, `game/platform`, `tests/blur-pause-check.mts`).
+- 2026-11-16 Weather build-up cue: "RAIN/SNOW SETTING IN: GRIP DROPPING" pop-up once when the ramp-in reaches 50 % (`game/weatherCue`, `game/raceFeedback`, `tests/weather-cue-check.mts`).
+- 2026-11-16 Race stats on the results: top speed, near misses, slipstreams, clean corners (`game/raceStats`, `ui/results`, `tests/race-stats-check.mts`).
+- 2026-11-16 Position change flash: the POS line glows green when you overtake and red when you lose a place, after a 0.45 s hold so side-by-side swaps do not flicker; off in Calm HUD (`game/posCue`, `Hud.flashPosition`, `tests/pos-cue-check.mts`).
+- 2026-11-16 Menu text size setting: A / A+ / A++ scales menu screens (not the race HUD), own key `ns.textsize` (`ui/textScale`, `ui/textSizeRow`, `tests/text-scale-check.mts`).
+- 2026-11-16 Save fuzz test: 3000 junk/mutated saves and snapshots never crash the parsers (`tests/save-fuzz-check.mts`).
+- 2026-11-16 FINAL LAP banner at the start of the last lap, after the lap-time pop-up (`game/finalLap`, `tests/final-lap-check.mts`).
+- 2026-11-16 Surface change sounds: glassy hiss on ice, soft thump on snow banks, puddle splash unified (`audio/surfaceCue`, `tests/surface-cue-check.mts`).
+- 2026-11-16 Results gap to the winner: dim "+0.83" per finisher in the results table (`game/resultGap`, `ui/results`, `tests/result-gap-check.mts`).
+- 2026-11-16 Start-line rev: gas flat during the countdown winds the engine up, smooth fall to real rpm at GO (`audio/launchRev`, `tests/launch-rev-check.mts`).
+- 2026-11-16 Lap time pop-up: "LAP n  m:ss.cc ±x.xx" at each lap end vs your best (`game/lapPop`, `game/ghost`, `tests/lap-pop-check.mts`).
+- 2026-11-16 Speed units: km/h or mph in Settings for the gauge, garage and tuning screens (`game/speedUnit`, `ui/unitsRow`, `tests/speed-unit-check.mts`).
+- 2026-11-16 Live delta to your best lap: "BEST ±x.x" under the gap tags, from the stored ghost lap (`ghostDelta` in `game/ghostData`, `ui/gapTags`, `tests/ghost-check.mts`).
+- 2026-11-16 Gap tags: seconds to the rival just ahead (red, +) and just behind (green, −) under lap/position (`game/gapLogic`, `ui/gapTags`, `tests/gap-check.mts`).
+- 2026-11-16 Gamepad menu navigation: d-pad or left stick moves focus, A presses, B goes back, left/right steps sliders and the garage car picker; only outside races (`input/padNavLogic`, `input/padMenu`, `tests/pad-nav-check.mts`).
+- 2026-11-16 Wrong-way warning: red banner after 1.2 s of fast driving against the road (with the R hint on keyboards), clears once turned around (`game/wrongWayLogic`, `ui/wrongWay`, `tests/wrong-way-check.mts`).
+- 2026-11-16 Settings from the pause menu: volume, camera shake, keys, accessibility and the rest can be changed mid-race; the screen opens over the pause menu, Back or Esc closes it (`PauseHandlers.settings`, `Menu.settingsPanel`).
+- 2026-11-16 Driver record: lifetime races, wins, podiums, DNFs, laps, time raced, cash won and best drift on the Crew screen, kept under its own localStorage key `ns.stats` (`game/driverStats`, `ui/statsCard`, `tests/driver-stats-check.mts`).
+- 2026-11-16 Results lap breakdown: every lap time listed under the best lap (fastest in green) when a race has more than one lap (`Racer.lapTimes`, `RaceResult.lapTimes`, snapshot field optional, `tests/race-check.mts`).
+- 2026-11-16 Remappable keyboard keys: gas, brake, left, right, handbrake, nitro in Settings (desktop), swap on conflict, reserved keys refused, coach hints show the bound key (`input/keyBindings`, `ui/keyRemap`, `tests/key-bindings-check.mts`).
+- 2026-11-16 Colour-blind safe HUD setting: good/bad (green/red) become blue/orange through the theme tokens (`ui/colorSafe`, `settings.colorSafe`, `tests/save-check.mts`).
+- 2026-11-16 Photo mode in the pause menu: clean-frame PNG download (`ui/photo`, `tests/photo-check.mts`).
+- 2026-11-16 Calm HUD accessibility setting: stops the limiter shift-light flash, title flicker, brake-hint pulse, nitro/pop bursts and speed lines (`ui/calm`, `settings.calmUi`, row in the driving settings, `tests/save-check.mts`).
+- 2026-11-16 Personal-best line on the free-race results: first run, new record with the gain, or best time plus gap (`pbNote` in `game/freeRace`, `RaceResult.note`, `tests/pb-note-check.mts`).
+- 2026-11-16 Daily challenge on the main menu from a date seed (`data/dailyChallenge`, `ui/dailyButton`, `tests/daily-check.mts`); main menu scrolls on short phones.
+- 2026-11-16 Results screen "what you could tune" hint: after a lost free race the results show one affordable upgrade and why it helps (`affordableTip` in `data/upgradeAdvice`, `ui/tuneTip`, `tests/tune-tip-check.mts`).
+- 2026-11-16 First-races driving coach: gas, brake, nitro, handbrake hints that retire once used (`game/coachLogic`, `ui/coach`, `tests/coach-check.mts`).

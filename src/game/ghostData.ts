@@ -57,3 +57,26 @@ export function ghostPose(g: GhostLap, lapTime: number, out: Pose): boolean {
   out.h = f[j + 3] + dh * a;
   return true;
 }
+
+const DELTA_WINDOW = 40; // frames (4 s) searched either side of the expected spot, so a lap that crosses itself cannot confuse it
+const DELTA_REACH2 = 30 * 30; // m^2: further than this from the stored line (shortcut, spin-out) shows no delta
+
+/**
+ * Live gap to the stored best lap: the time you are ahead of (-) or behind (+) the ghost at your spot, in seconds.
+ * Finds the ghost frame nearest to (x, z) around `lapTime`, refines it on the segment, and compares times. NaN when no sensible match.
+ * Allocation free.
+ */
+export function ghostDelta(g: GhostLap, lapTime: number, x: number, z: number): number {
+  const f = g.f, frames = f.length / 4;
+  const mid = Math.floor(lapTime * GHOST_HZ);
+  const lo = Math.max(0, mid - DELTA_WINDOW), hi = Math.min(frames - 2, mid + DELTA_WINDOW);
+  let best = Infinity, bi = -1;
+  for (let i = lo; i <= hi; i++) {
+    const dx = f[i * 4] - x, dz = f[i * 4 + 2] - z, d = dx * dx + dz * dz;
+    if (d < best) { best = d; bi = i; }
+  }
+  if (bi < 0 || best > DELTA_REACH2) return NaN;
+  const j = bi * 4, sx = f[j + 4] - f[j], sz = f[j + 6] - f[j + 2], len2 = sx * sx + sz * sz;
+  const a = len2 > 1e-6 ? Math.min(1, Math.max(0, ((x - f[j]) * sx + (z - f[j + 2]) * sz) / len2)) : 0;
+  return lapTime - (bi + a) / GHOST_HZ;
+}

@@ -2,12 +2,16 @@ import { DemoInput } from '../dev/demoInput';
 import type { Engine } from '../core/engine';
 import { CombinedInput } from '../input/combinedInput';
 import { GamepadInput } from '../input/gamepad';
+import { PadMenu } from '../input/padMenu';
 import { KeyboardInput } from '../input/keyboard';
+import { KeyBindings } from '../input/keyBindings';
 import { createTouchControls } from '../ui/touchControls';
 import { ControlStore } from '../input/controlPrefs';
 import { TiltInput } from '../input/tiltInput';
 import { chooseControls, controlsTutorial, enableTilt } from '../ui/controlsOnboard';
 import { isPhone } from '../core/quality';
+import { ImpactHaptic } from '../input/impactHaptic';
+import { buzz } from '../ui/haptics';
 import type { Game } from './game';
 
 export interface Controls {
@@ -17,6 +21,8 @@ export interface Controls {
   touch: ReturnType<typeof createTouchControls>;
   /** Phone control prefs (scheme, auto gas, tilt calibration), saved on their own key. */
   prefs: ControlStore;
+  /** Remappable keyboard keys (own storage key). */
+  bindings: KeyBindings;
   tilt: TiltInput;
   /** Wire what needs the Game: speed-sensitive keyboard steering and gamepad rumble on impacts. Call once the Game exists. */
   attach(engine: Engine, game: Game): void;
@@ -27,7 +33,8 @@ export interface Controls {
 /** All input devices in one place. `pause` and `reset` are what the pad's Start and Y and the touch buttons do. */
 export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }, kv: Storage | null): Controls {
   const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
-  const keys = new KeyboardInput();
+  const bindings = new KeyBindings(kv);
+  const keys = new KeyboardInput(bindings);
   const pad = new GamepadInput({ onPause: actions.pause, onReset: actions.reset });
   const prefs = new ControlStore(kv);
   const tilt = new TiltInput(prefs);
@@ -47,22 +54,27 @@ export function createControls(demo: string | null, actions: { pause: () => void
     window.addEventListener('pointerup', again, true);
   }
   return {
-    input, pad, touch, prefs, tilt,
+    input, pad, touch, prefs, tilt, bindings,
     onboard: () => {
       if (isPhone() && !prefs.data.chosen) chooseControls(prefs, tilt);
     },
     attach: (engine, game) => {
       let was = game.state;
-      engine.onFrame(() => {
+      const padMenu = new PadMenu(); // gamepad drives the menus (not while racing: A is the handbrake)
+      engine.onFrame((_a, dt) => {
+        padMenu.update(dt, game.paused || game.state !== 'RACING');
         keys.speedKph = game.telemetry.speedKph;
         tilt.speedKph = touch.speedKph = Math.abs(game.telemetry.speedKph);
         if (game.state === 'RACING' && was !== 'RACING' && isPhone()) controlsTutorial(prefs);
         was = game.state;
       });
       const base = game.onImpact;
+      const haptic = new ImpactHaptic();
       game.onImpact = (s) => {
         base?.(s);
         pad.rumble(Math.min(1, s / 18), Math.min(1, s / 10), 0.25);
+        const p = pad.rumbleOn && isPhone() ? haptic.pulse(s, performance.now()) : null; // phones: the same Rumble setting
+        if (p) buzz(p.ms, p.strong);
       };
     },
   };

@@ -83,14 +83,18 @@ export function handbrakeTarget(c: { hbHeld: number; hbFactor: number; flags: { 
  * Reuses `hb` (already saved state), so grip driving, the AI and restored races are unaffected.
  */
 const DRIFT_HOLD = 0.66;
+const POWER_SLIP_A = 0.2, POWER_SLIP_B = 0.4; // past ~11-23 deg the power-slide hold lets go, so the tail grips and W drives out instead of sitting in a big slide
 const POWER_HOLD = 0.8; // RWD power slide: looser than grip, tighter than a handbrake drift ("not too aggressive")
-export function driftHoldTarget(t: CarTuning, u: number, v: number, throttle: number, hb: number, grip = 1): number {
-  const rwdPower = t.driveFront <= 0.01 && hb >= 0.985 && grip > 0.6; // not on snow/ice: the tail is loose there already // RWD: throttle alone can start and hold a slide
+export function driftHoldTarget(t: CarTuning, u: number, v: number, throttle: number, hb: number, grip = 1, steer = 1, player = false): number {
+  // RWD: throttle alone can start and hold a slide (not on snow/ice: the tail is loose there already). Its own regime is hb >= POWER_HOLD;
+  // below that the rear is recovering from a handbrake, which is the other hold (DRIFT_HOLD). Mixing them latched a power slide for good.
+  const rwdPower = t.driveFront <= 0.01 && (hb >= 0.985 || (player && hb >= POWER_HOLD - 0.01)) && grip > 0.6; // player only: the AI keeps its tuned hold
   if ((hb >= 0.985 && !rwdPower) || u < 7 || throttle < 0.25) return 1;
   const slip = Math.abs(Math.atan2(v, u));
   if (slip < 0.07) return 1;
-  if (rwdPower) return slip < 0.12 ? 1 : 1 - (1 - POWER_HOLD) * smoothstep(0.6, 1, throttle) * smoothstep(0.12, 0.22, slip);
-  const k = smoothstep(0.25, 0.9, throttle) * smoothstep(0.07, 0.16, slip);
+  const keep = smoothstep(0.05, 0.3, Math.abs(steer)); // wheel centred = the driver is done with the slide: grip comes back and W accelerates
+  if (rwdPower) return slip < 0.12 ? 1 : 1 - (1 - POWER_HOLD) * smoothstep(0.6, 1, throttle) * smoothstep(0.12, 0.22, slip) * keep * (player ? 1 - smoothstep(POWER_SLIP_A, POWER_SLIP_B, slip) : 1);
+  const k = smoothstep(0.25, 0.9, throttle) * smoothstep(0.07, 0.16, slip) * keep;
   const hold = t.driveFront > 0.01 && t.driveFront < 0.99 ? 0.78 : DRIFT_HOLD; // AWD: the front pulls it straight sooner
   return 1 - (1 - Math.max(hold, t.handbrakeGrip)) * k;
 }

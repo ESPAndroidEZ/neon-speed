@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { getUnit, toUnit, unitLabel } from '../game/speedUnit';
 const CSS = `
 .rb-gauge{position:relative;width:clamp(170px,22vw,250px);aspect-ratio:1;margin-left:auto}
 .rb-gauge canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -12,6 +13,12 @@ const CSS = `
 .rb-pop.go{animation:rb-pop 1.1s var(--ease,ease-out) both}
 @keyframes rb-pop{0%{opacity:0;transform:translateX(-50%) scale(.5)}15%{opacity:1;transform:translateX(-50%) scale(1.2)}100%{opacity:0;transform:translateX(-50%) translateY(-34px) scale(1)}}
 .rb-lines{position:absolute;inset:0;pointer-events:none;opacity:0;background:repeating-conic-gradient(from 0deg at 50% 52%,transparent 0 3.2deg,rgba(220,240,255,.11) 3.2deg 3.6deg);-webkit-mask-image:radial-gradient(circle at 50% 52%,transparent 48%,#000 100%);mask-image:radial-gradient(circle at 50% 52%,transparent 48%,#000 100%);animation:rb-spin 1.6s linear infinite}
+.rb-shift{position:absolute;left:18%;right:18%;top:-2%;display:flex;gap:4%;justify-content:center;pointer-events:none}
+.rb-shift i{flex:1;max-width:14%;aspect-ratio:1;border-radius:50%;background:#ffffff1c;transition:background .06s,box-shadow .06s}
+.rb-shift i.on{background:#18d8ff;box-shadow:0 0 10px #18d8ff}.rb-shift i.on.y{background:#ffd23a;box-shadow:0 0 10px #ffd23a}.rb-shift i.on.r{background:#ff2a4a;box-shadow:0 0 12px #ff2a4a}
+.rb-shift.fl i{animation:rb-shiftfl .12s steps(1) infinite}
+@keyframes rb-shiftfl{50%{background:#ffffff1c;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.rb-shift.fl i{animation:none}}
 @keyframes rb-spin{to{background-position:0 0;transform:rotate(3.6deg)}}
 `;
 
@@ -26,7 +33,10 @@ export class ArcGauge {
   private readonly num = document.createElement('div');
   private readonly gear = document.createElement('div');
   private readonly burst = document.createElement('div');
-  private key = '';
+  private readonly shift = document.createElement('div');
+  private readonly leds: HTMLElement[] = [];
+  private ledN = -1;
+  private key = -1;
   private nitroWas = false;
 
   constructor() {
@@ -36,7 +46,9 @@ export class ArcGauge {
     this.gear.className = 'gear';
     this.burst.className = 'rb-nitro-burst';
     this.burst.textContent = t('pad.nitro');
-    this.el.append(this.cv, this.num, this.gear, this.burst);
+    this.shift.className = 'rb-shift';
+    for (let i = 0; i < 5; i++) { const d = document.createElement('i'); d.className = i < 2 ? '' : i < 4 ? 'y' : 'r'; this.leds.push(d); this.shift.append(d); }
+    this.el.append(this.shift, this.cv, this.num, this.gear, this.burst);
   }
 
   static css(): string {
@@ -44,18 +56,29 @@ export class ArcGauge {
   }
 
   update(kph: number, rpmFrac: number, gear: number, nitro: number, nitroActive: boolean): void {
-    const k = `${Math.round(kph)}|${Math.round(rpmFrac * 60)}|${gear}|${Math.round(nitro * 50)}`;
+    const shown = Math.round(toUnit(kph));
+    const k = shown + (getUnit() === 'mph' ? 1e9 : 0) + 1000 * Math.round(rpmFrac * 60) + 1e5 * (gear + 2) + 1e7 * Math.round(nitro * 50); // numeric key: no string per frame
     if (nitroActive && !this.nitroWas) {
       this.burst.classList.remove('go');
       void this.burst.offsetWidth; // restart the animation
       this.burst.classList.add('go');
     }
     this.nitroWas = nitroActive;
+    this.setShift(rpmFrac);
     if (k === this.key) return;
     this.key = k;
-    this.num.innerHTML = `${Math.round(kph)}<small>KM/H</small>`;
+    this.num.innerHTML = `${shown}<small>${unitLabel().toUpperCase()}</small>`;
     this.gear.textContent = gear < 0 ? 'R' : String(gear);
     this.draw(rpmFrac, nitro);
+  }
+
+  /** Shift light: five LEDs fill between 80 % and 96 % of the redline; all flash at the limiter. Touches the DOM on change only. */
+  private setShift(r: number): void {
+    const n = r < 0.8 ? 0 : Math.min(6, Math.floor((r - 0.8) / 0.16 * 5) + 1);
+    if (n === this.ledN) return;
+    this.ledN = n;
+    for (let i = 0; i < 5; i++) this.leds[i].classList.toggle('on', i < n);
+    this.shift.classList.toggle('fl', n >= 6);
   }
 
   private draw(rpm: number, nitro: number): void {

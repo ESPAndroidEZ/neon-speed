@@ -5,6 +5,7 @@ import { findBodyMaterial, setModelYaw } from './assetLoader';
 import { attachParts } from './carParts';
 import { addLightsAndShadow } from './carLights';
 import { upgradeCarMaterials } from './materialUpgrade';
+import { mergeTreeByMaterial } from './mergeMeshes';
 import type { CarVisual } from './proceduralCar';
 
 /**
@@ -26,6 +27,7 @@ export function buildModelCar(model: CarModel, factoryColor: number, paintHex: n
   const bodies = upgradeCarMaterials(model.root, { env: null });
   const found = findBodyMaterial(model.root);
   const bodyMat = (found && bodies.includes(found as never) ? found : bodies.length === 1 ? bodies[0] : null) as (Material & { color?: Color; map?: unknown }) | null;
+  mergeTreeByMaterial(model.root, true, bodyMat); // static model: wheels and parts merged per material (the paint stays bodyMat)
   const tint = (hex: number): void => {
     if (!bodyMat?.color) return;
     if (hex === factoryColor && bodyMat.map) bodyMat.color.setHex(0xffffff); // textured (Tripo): show the baked paint; untextured (Blender): the colour IS the paint

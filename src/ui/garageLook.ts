@@ -6,6 +6,10 @@ import { RIM_IDS } from '../world/rims';
 import { VINYL_IDS } from '../world/vinylLayer';
 import { h } from './uiKit';
 import { t, tx } from '../i18n';
+import type { StringKey } from '../i18n';
+
+/** Translated display name of a vinyl, rim, part or glow id. */
+const lookName = (id: string): string => t(`lookid.${id}` as StringKey);
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 
@@ -68,27 +72,27 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
   label(t('look.finish'));
   chips(FINISH_IDS.map((id) => ({ id, name: tx(FINISHES[id].name) })), l.finish, (id) => { l.finish = id as Loadout['finish']; commit(); });
   label(t('look.vinyl'));
-  chips([{ id: '', name: t('look.none') }, ...VINYL_IDS.map((id) => ({ id, name: id }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); });
+  chips([{ id: '', name: t('look.none') }, ...VINYL_IDS.map((id) => ({ id, name: lookName(id) }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); });
   swatches(PAINTS, l.vinyl.color, (c) => { l.vinyl.color = c; commit(); });
   slider(t('look.scale'), 0.5, 2, 0.1, l.vinyl.scale, (v) => (l.vinyl.scale = v));
   slider(t('look.rotate'), -90, 90, 5, l.vinyl.rotation, (v) => (l.vinyl.rotation = v));
   for (const slot of PART_SLOTS) {
     label(t(`look.slot.${slot}`));
-    chips([{ id: '', name: t('look.stock') }, ...Object.keys(PARTS[slot]).map((id) => ({ id, name: id }))], l.parts[slot] ?? '', (id) => {
+    chips([{ id: '', name: t('look.stock') }, ...Object.keys(PARTS[slot]).map((id) => ({ id, name: lookName(id) }))], l.parts[slot] ?? '', (id) => {
       if (id) l.parts[slot] = id;
       else delete l.parts[slot];
       commit(slot === 'spoiler'); // the stock spoiler is part of the body: rebuild
     });
   }
   label(t('look.rims'));
-  chips(RIM_IDS.map((id) => ({ id, name: id })), l.rim.design, (id) => { l.rim.design = id; commit(true); });
+  chips(RIM_IDS.map((id) => ({ id, name: lookName(id) })), l.rim.design, (id) => { l.rim.design = id; commit(true); });
   slider(t('look.size'), 17, 21, 1, l.rim.size, (v) => (l.rim.size = v), true);
   swatches([0xc4c8d4, 0x14141a, 0xffd27d, 0xff2a9d, 0x18d8ff, 0xc41a1a], l.rim.color, (c) => { l.rim.color = c; commit(); });
   slider(t('look.tint'), 0, 0.9, 0.05, l.tint, (v) => (l.tint = v));
   label(t('look.headlights'));
   swatches(HEADLIGHTS, l.headlight, (c) => { l.headlight = c; commit(); });
   label(t('look.glowPattern'));
-  chips(GLOW_PATTERNS.map((id) => ({ id, name: id })), l.glowPattern, (id) => { l.glowPattern = id as Loadout['glowPattern']; commit(); });
+  chips(GLOW_PATTERNS.map((id) => ({ id, name: lookName(id) })), l.glowPattern, (id) => { l.glowPattern = id as Loadout['glowPattern']; commit(); });
   label(t('look.calipers'));
   swatches(CALIPERS, l.caliper, (c) => { l.caliper = c; commit(); });
   slider(t('look.stance'), -1, 1, 0.1, l.stance, (v) => (l.stance = v));

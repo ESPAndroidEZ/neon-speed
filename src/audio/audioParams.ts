@@ -22,6 +22,8 @@ export const AUDIO = {
 
 export type AudioParams = typeof AUDIO;
 
+/** Screens and speech tell the music what to do without the music knowing about them. */
+export const MUSIC_CUE: { mood: 'garage' | null; speech: number } = { mood: null, speech: 0 };
 /** Engine sound source (Settings > Engine sound): the recorded loops (data/engineSounds) when a car has them, or always the synth. */
 export const ENGINE_SOURCE = { samples: true };
 

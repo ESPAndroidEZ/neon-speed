@@ -33,6 +33,19 @@ const TIERS: Record<Quality, QualityParams> = {
 
 let current: Quality = 'high';
 
+/** Bloom render-target scale per tier (its mip chain follows): Low and Medium bloom at half resolution. */
+const BLOOM_RES: Record<Quality, number> = { low: 0.5, medium: 0.5, high: 1, ultra: 1 };
+let bloomRes = 1;
+const scaled = new WeakSet<object>();
+function scaleBloom(engine: Engine, k: number): void {
+  bloomRes = k;
+  const b = engine.bloom as Engine['bloom'] | undefined; // test doubles have none
+  if (!b || scaled.has(b)) return;
+  scaled.add(b);
+  const size = b.setSize.bind(b);
+  b.setSize = (w: number, h: number) => size(Math.max(1, Math.round(w * bloomRes)), Math.max(1, Math.round(h * bloomRes)));
+}
+
 const merged: QualityParams = { ...TIERS.high };
 /** The tier's parameters with the graphics screen's overrides applied (bloom, reflections, particles, resolution). */
 export function qualityNow(): QualityParams {
@@ -47,7 +60,9 @@ export function applyQuality(engine: Engine, q: Quality, keepCustom = false): vo
   current = q;
   if (!keepCustom) usePreset(q);
   const t = qualityNow();
-  engine.maxPixelRatio = t.pixelRatio * GRAPHICS.resScale;
+  engine.maxPixelRatio = t.pixelRatio; // device-pixel-ratio cap: Low 1, Medium 1.5, High 2
+  engine.resScale = GRAPHICS.resScale;
+  scaleBloom(engine, BLOOM_RES[q]);
   engine.setBloom({ enabled: t.bloom, strength: t.bloomStrength * grade.bloomK * LOOK_CONFIG.bloom.strength, radius: LOOK_CONFIG.bloom.radius });
   engine.resize();
 }

@@ -16,6 +16,8 @@ export interface Racer {
   finishTime: number;
   lapStart: number;
   bestLap: number;
+  /** Every completed lap time in order (seconds). */
+  lapTimes: number[];
   /** Finish order, 1-based, 0 until finished. */
   finishRank: number;
   /** Seconds a rival has been pinned (almost stopped) while racing; past UNSTICK_AFTER it is put back on the road. */
@@ -32,7 +34,11 @@ export interface RaceResult {
   cash: number;
   totalTime: number;
   bestLap: number;
+  /** Player lap times in order; the results show a breakdown when there is more than one. */
+  lapTimes?: number[];
   driftScore: number;
+  /** Personal-best line for the results (set by the free race bookkeeping; empty or absent when there is nothing to say). */
+  note?: string;
 }
 
 const PAYOUT = [3000, 1800, 1100, 600, 300];
@@ -60,6 +66,7 @@ export function buildResult(racers: readonly Racer[], p: Racer, totalLaps: numbe
     cash: Math.round(base * (totalLaps / 3) + drift / 10),
     totalTime: p.finishTime,
     bestLap: p.bestLap,
+    lapTimes: p.lapTimes.slice(),
     driftScore: Math.floor(drift),
   };
 }

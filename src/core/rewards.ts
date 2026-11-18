@@ -1,4 +1,5 @@
 import type { CarController } from '../physics/carController';
+import { COMBO, StyleCombo, type ComboData } from './styleCombo';
 import type { TrackContact } from '../physics/trackContact';
 import { racingLine, type RacingLine } from '../physics/aiLine';
 import type { TrackSample } from '../types/game';
@@ -6,7 +7,7 @@ import type { TrackSample } from '../types/game';
 /** Racer fields the rewards read (structural, so tests can pass plain objects). */
 export interface RewardRacer { car: CarController; contact: TrackContact; isPlayer: boolean; finished: boolean }
 export type RewardKind = 'NEAR MISS' | 'SLIPSTREAM' | 'CLEAN CORNER';
-export interface RewardData { slip: number; inCorner: boolean; cornerHit: boolean; side: number[]; seq: number; last: RewardKind | null }
+export interface RewardData { slip: number; inCorner: boolean; cornerHit: boolean; side: number[]; seq: number; last: RewardKind | null; combo?: ComboData }
 
 /** Nitro paid per reward (fraction of a full tank), and the slipstream tow. */
 export const REWARD = { nearMiss: 0.12, cleanCorner: 0.08, slipPerSec: 0.1, slipPush: 1.2 };
@@ -26,11 +27,14 @@ export class RaceRewards {
   side = new Float32Array(16);
   seq = 0;
   last: RewardKind | null = null;
+  /** Style combo chained from these rewards and banked drifts (core/styleCombo). */
+  readonly combo = new StyleCombo();
   private line: RacingLine | null = null;
   private samples: readonly TrackSample[] | null = null;
 
   reset(): void {
     this.slip = 0; this.inCorner = false; this.cornerHit = false; this.side.fill(0); this.seq = 0; this.last = null;
+    this.combo.reset();
   }
 
   private pay(car: CarController, amount: number, kind: RewardKind): void {
@@ -38,12 +42,15 @@ export class RaceRewards {
     d.nitroLevel = Math.min(1, d.nitroLevel + amount);
     this.last = kind;
     this.seq++;
+    this.combo.link(kind === 'NEAR MISS' ? COMBO.nearMiss : COMBO.cleanCorner);
   }
 
   step(dt: number, racers: readonly RewardRacer[], samples: readonly TrackSample[], carImpact: number): void {
     let me: RewardRacer | null = null;
     for (const r of racers) if (r.isPlayer) me = r;
     if (!me || me.finished) return;
+    const dr = me.car.drift;
+    this.combo.step(dt, dr.bank, dr.chain > 0, Math.max(carImpact, me.contact.impact));
     const s = me.car.state, v = s.speed;
     const fx = Math.sin(s.heading), fz = Math.cos(s.heading);
     let towing = false;
@@ -62,7 +69,7 @@ export class RaceRewards {
       this.slip += dt;
       me.car.drivetrain.nitroLevel = Math.min(1, me.car.drivetrain.nitroLevel + REWARD.slipPerSec * dt);
       me.car.u += REWARD.slipPush * dt;
-      if (was < 0.6 && this.slip >= 0.6) { this.last = 'SLIPSTREAM'; this.seq++; }
+      if (was < 0.6 && this.slip >= 0.6) { this.last = 'SLIPSTREAM'; this.seq++; this.combo.link(COMBO.slipstream); }
     } else this.slip = 0;
 
     if (samples !== this.samples) { this.samples = samples; this.line = racingLine(samples, 1.7); }
@@ -78,7 +85,7 @@ export class RaceRewards {
   }
 
   snapshot(): RewardData {
-    return { slip: this.slip, inCorner: this.inCorner, cornerHit: this.cornerHit, side: Array.from(this.side), seq: this.seq, last: this.last };
+    return { slip: this.slip, inCorner: this.inCorner, cornerHit: this.cornerHit, side: Array.from(this.side), seq: this.seq, last: this.last, combo: this.combo.snapshot() };
   }
 
   restore(d: RewardData | undefined): void {
@@ -86,5 +93,6 @@ export class RaceRewards {
     if (!d) return;
     this.slip = d.slip; this.inCorner = d.inCorner; this.cornerHit = d.cornerHit; this.side.set(d.side.slice(0, 16));
     this.seq = d.seq; this.last = d.last;
+    this.combo.restore(d.combo);
   }
 }

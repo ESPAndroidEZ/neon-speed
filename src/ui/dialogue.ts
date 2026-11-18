@@ -1,8 +1,9 @@
 import { SPEAKERS, type ChoiceOption, type Line, type Speaker } from '../data/story';
+import { MUSIC_CUE } from '../audio/audioParams';
 import { portraitEl } from './portraits';
 import { Voice } from './subtitles';
 import { h, injectCss } from './uiKit';
-import { t, tx } from '../i18n';
+import { onLangChange, t, tx } from '../i18n';
 
 export { Subtitles, Voice, type Caption } from './subtitles';
 
@@ -33,6 +34,14 @@ export class DialogueBox {
   constructor(voice: Voice) {
     injectCss();
     this.voice = voice;
+    onLangChange(() => { // live language switch: redraw the open line (and its question) in the new language, keep its progress
+      const l = this.lines[this.idx];
+      if (!this.layer || !l) return;
+      const asking = this.asking, typing = this.typing !== null;
+      this.show();
+      if (!typing) { this.stopTyping(); if (this.textEl) this.textEl.textContent = this.full; }
+      if (asking) this.ask(l);
+    });
     window.addEventListener('keydown', (e) => {
       if (!this.layer || e.repeat) return;
       if (e.code === 'Enter' || e.code === 'Space') {
@@ -52,6 +61,7 @@ export class DialogueBox {
       return;
     }
     this.close();
+    MUSIC_CUE.speech = 0.7; // music ducks under spoken lines
     this.lines = lines;
     this.idx = 0;
     this.done = done;
@@ -85,6 +95,11 @@ export class DialogueBox {
     this.layer?.replaceChildren(card);
     if (l.who === 'switch') this.voice.say(tx(l.text));
     this.type(tx(l.text));
+  }
+
+  private stopTyping(): void {
+    if (this.typing !== null) clearInterval(this.typing);
+    this.typing = null;
   }
 
   private type(text: string): void {
@@ -160,6 +175,7 @@ export class DialogueBox {
   }
 
   private close(): void {
+    MUSIC_CUE.speech = 0;
     DIALOGUE.active = false;
     if (this.typing !== null) clearInterval(this.typing);
     this.typing = null;

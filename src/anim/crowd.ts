@@ -1,17 +1,21 @@
-import type { Group } from 'three';
+import type { Group, Mesh } from 'three';
+import { qualityTier } from '../core/quality';
 import { createRng } from '../core/rng';
 import type { BuildPerson, PersonSpec } from '../types/people';
 import { Animator } from './animator';
+import { bakePerson } from './personBake';
 import type { ClipName } from './clips';
 
 /**
  * Spectators: a pool of rigs (shared geometry and materials come from the people factory), placed from a list of
  * spots, each with a seeded look, clip and phase so a crowd never moves in sync. Only people within ANIMATE_RANGE of
  * the camera animate; further away they hold their last pose (frozen LOD) and beyond HIDE_RANGE they are hidden.
- * Heads turn toward the player car when it is close. No allocation in update().
+ * Frozen people are drawn as one baked mesh (anim/personBake: 1 draw call instead of ~21). Heads turn toward the player
+ * car when it is close. No allocation in update() except the one-off bake when a person first freezes.
  */
 const ANIMATE_RANGE = 40;
-const HIDE_RANGE = 160;
+/** Hide distance per tier (m): far people are a few pixels tall. */
+const HIDE_RANGE = { low: 70, medium: 110, high: 160, ultra: 200 } as const;
 const SKINS = [0x5a3a26, 0x8a5a3c, 0xb9805a, 0xd9a37c, 0xe8c4a0, 0x3e281c];
 const CLOTH = [0x1a1c24, 0x2b3446, 0x3a2260, 0x14363a, 0x4a1a22, 0x2a2a30, 0x5a4a32, 0xd0d4dc, 0xff2a9d, 0x18d8ff];
 const HAIR = ['short', 'long', 'spiky', 'bun', 'slick', 'bald', 'curly', 'mohawk'] as const;
@@ -30,7 +34,7 @@ export function crowdSpec(seed: number): PersonSpec {
   };
 }
 
-interface Member { anim: Animator; root: Group; x: number; z: number; facing: number }
+interface Member { anim: Animator; root: Group; x: number; z: number; facing: number; far: Mesh | null }
 
 export class Crowd {
   private readonly pool: Member[] = [];
@@ -49,7 +53,7 @@ export class Crowd {
     while (this.pool.length < spots.length) {
       const rig = this.build(crowdSpec(seed * 1000 + this.pool.length));
       this.parent.add(rig.root);
-      this.pool.push({ anim: new Animator(rig, 0), root: rig.root, x: 0, z: 0, facing: 0 });
+      this.pool.push({ anim: new Animator(rig, 0), root: rig.root, x: 0, z: 0, facing: 0, far: null });
     }
     spots.forEach((s, i) => {
       const m = this.pool[i];
@@ -57,11 +61,12 @@ export class Crowd {
       m.root.position.set(s.x, s.y, s.z);
       m.root.rotation.y = s.facing;
       m.root.visible = true;
+      this.dropFar(m);
       m.anim.phase = r() * 4;
       m.anim.play(CHEERS[Math.floor(r() * CHEERS.length)], 0.01);
       m.anim.update(0.016);
     });
-    for (let i = spots.length; i < this.pool.length; i++) this.pool[i].root.visible = false;
+    for (let i = spots.length; i < this.pool.length; i++) { this.pool[i].root.visible = false; this.dropFar(this.pool[i]); }
     this.active = spots.length;
   }
 
@@ -73,11 +78,14 @@ export class Crowd {
   /** camX/Z = camera, carX/Z = player car (heads follow it). Returns how many animated this frame. */
   update(dt: number, camX: number, camZ: number, carX: number, carZ: number): number {
     let n = 0;
+    const hide = HIDE_RANGE[qualityTier()];
     for (let i = 0; i < this.active; i++) {
       const m = this.pool[i];
-      const d = Math.hypot(m.x - camX, m.z - camZ);
-      m.root.visible = d < HIDE_RANGE;
-      if (d > ANIMATE_RANGE) continue; // frozen LOD
+      const d = Math.hypot(m.x - camX, m.z - camZ), frozen = d > ANIMATE_RANGE;
+      if (frozen && !m.far) { m.far = bakePerson(m.root); if (m.far) this.parent.add(m.far); }
+      m.root.visible = !frozen || !m.far ? d < hide : false;
+      if (m.far) m.far.visible = frozen && d < hide;
+      if (frozen) continue; // frozen LOD
       const dx = carX - m.x, dz = carZ - m.z;
       const near = dx * dx + dz * dz < 900;
       let yaw = Math.atan2(dx, dz) - m.facing;
@@ -90,8 +98,15 @@ export class Crowd {
 
   get count(): number { return this.active; }
 
+  private dropFar(m: Member): void {
+    if (!m.far) return;
+    m.far.removeFromParent();
+    m.far.geometry.dispose();
+    m.far = null;
+  }
+
   dispose(): void {
-    for (const m of this.pool) m.root.removeFromParent();
+    for (const m of this.pool) { m.root.removeFromParent(); this.dropFar(m); }
     this.pool.length = 0;
     this.active = 0;
   }

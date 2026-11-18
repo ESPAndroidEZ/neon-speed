@@ -1,18 +1,29 @@
 import type { DistrictId, RoadKind } from '../../types/world';
+export { districtAt, isWater, WORLD_HALF } from '../../data/world/districtMap';
 
-/** Road widths (m), lane counts and traffic speed limits (m/s) per road kind. */
+/** Road widths (m), total lanes and traffic speed limits (m/s) per road kind. */
 export const ROADS: Readonly<Record<RoadKind, { width: number; lanes: number; limit: number }>> = {
+  highway: { width: 20, lanes: 6, limit: 30 },
+  bridge: { width: 20, lanes: 6, limit: 30 },
+  runway: { width: 20, lanes: 4, limit: 40 },
   avenue: { width: 16, lanes: 4, limit: 17 },
-  street: { width: 10, lanes: 2, limit: 12.5 },
-  alley: { width: 7, lanes: 2, limit: 8 },
+  street: { width: 11, lanes: 2, limit: 12.5 },
+  alley: { width: 10, lanes: 2, limit: 8 },
+  hills: { width: 10, lanes: 2, limit: 15 },
   coast: { width: 11, lanes: 2, limit: 20 },
 };
 export const SIDEWALK = 3;
+/** Street lattice spacing (m): one block. The highway ring sits on lattice lines +-RING. */
+export const LAT = 128;
+export const RING = 2048;
+/** Lattice index range: nodes at k * LAT for |k| <= LAT_N (inside the world square with a margin). */
+export const LAT_N = 23;
 
 /**
- * District grammar: how the shared lattice is bent into each district's street pattern, and what gets built on it.
- * `jitter` moves junctions (m), `drop` removes minor links (bigger blocks, dead ends), `curve` bows the links,
- * `avenueEvery` promotes every n-th lattice line to an avenue (0 = none, 1 = all).
+ * District grammar: how the shared 128 m lattice is bent into each district's street pattern, and what gets built.
+ * `jitter` moves junctions (m), `drop` removes links that are not needed for connectivity (bigger blocks), `curve` bows
+ * links, `avenueEvery` promotes every n-th lattice line to an avenue (0 = none). Lots: frontage/depth/height ranges (m),
+ * gap between buildings, share of lots left empty.
  */
 export interface Grammar {
   jitter: number;
@@ -20,7 +31,6 @@ export interface Grammar {
   curve: number;
   avenueEvery: number;
   minor: RoadKind;
-  /** Lots: frontage and depth ranges (m), height range (m), gap between buildings (m), share of lots left empty. */
   lot: readonly [number, number];
   depth: readonly [number, number];
   height: readonly [number, number];
@@ -29,25 +39,11 @@ export interface Grammar {
 }
 
 export const GRAMMAR: Readonly<Record<DistrictId, Grammar>> = {
-  // Downtown grid: tight regular blocks, an avenue every third line, towers.
-  neon: { jitter: 1.5, drop: 0.05, curve: 0, avenueEvery: 3, minor: 'street', lot: [16, 30], depth: [16, 26], height: [18, 72], gap: 0.6, empty: 0.04 },
-  // Industrial port: wide roads everywhere, a third of the links removed to make long yards, low sheds.
-  harbor: { jitter: 2, drop: 0.34, curve: 0, avenueEvery: 2, minor: 'avenue', lot: [30, 58], depth: [22, 40], height: [8, 16], gap: 6, empty: 0.22 },
-  // Organic old town: junctions wander, links bow, alleys and dead ends, low houses shoulder to shoulder.
-  oldtown: { jitter: 15, drop: 0.2, curve: 9, avenueEvery: 0, minor: 'alley', lot: [9, 16], depth: [10, 15], height: [8, 17], gap: 0.2, empty: 0.06 },
-  // Coastal cliff road: one bowed two-lane road, nothing built beside it.
-  coast: { jitter: 9, drop: 0, curve: 13, avenueEvery: 0, minor: 'coast', lot: [0, 0], depth: [0, 0], height: [0, 0], gap: 0, empty: 1 },
+  downtown: { jitter: 0, drop: 0.04, curve: 0, avenueEvery: 3, minor: 'street', lot: [18, 34], depth: [18, 30], height: [30, 160], gap: 1, empty: 0.03 },
+  strip: { jitter: 0, drop: 0.08, curve: 0, avenueEvery: 2, minor: 'street', lot: [24, 44], depth: [20, 34], height: [14, 60], gap: 1, empty: 0.05 },
+  harbour: { jitter: 4, drop: 0.42, curve: 0, avenueEvery: 2, minor: 'avenue', lot: [30, 60], depth: [24, 42], height: [8, 18], gap: 6, empty: 0.25 },
+  oldtown: { jitter: 26, drop: 0.24, curve: 14, avenueEvery: 0, minor: 'alley', lot: [9, 16], depth: [10, 15], height: [8, 18], gap: 0.3, empty: 0.06 },
+  hills: { jitter: 34, drop: 0.55, curve: 30, avenueEvery: 0, minor: 'hills', lot: [16, 26], depth: [14, 22], height: [6, 11], gap: 14, empty: 0.55 },
+  industrial: { jitter: 6, drop: 0.5, curve: 0, avenueEvery: 3, minor: 'street', lot: [40, 80], depth: [30, 60], height: [8, 22], gap: 10, empty: 0.4 },
+  bay: { jitter: 0, drop: 1, curve: 0, avenueEvery: 0, minor: 'street', lot: [0, 0], depth: [0, 0], height: [0, 0], gap: 0, empty: 1 },
 };
-
-/** Lattice lines of the Harbor + Neon Strip slice (m). Spacing changes where the districts meet. */
-export const XS: readonly number[] = [-704, -616, -528, -440, -352, -256, -144, -32, 80, 192, 304, 416, 528, 672];
-export const ZS: readonly number[] = [-688, -520, -360, -208, -112, -16, 80, 176, 272, 368, 464, 560, 672];
-export const WORLD_HALF = 768;
-
-/** Which district a point belongs to (the lattice is aligned to these borders). */
-export function districtAt(x: number, z: number): DistrictId {
-  if (z < -212) return 'harbor';
-  if (x > 600 || z > 616) return 'coast';
-  if (x < -260) return 'oldtown';
-  return 'neon';
-}
