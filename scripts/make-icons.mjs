@@ -1,53 +1,96 @@
-// Procedural app icons (no external art): a neon "R" blade on a dark night gradient. Writes public/icons/*.png and the
-// Android / iOS launcher sources. Usage: npm run icons
+// App icons from the brand art in resources/brand (Neon Speed). Usage: npm run icons
+//   website-icon.png (wordmark only)  -> browser tab icons (public/icons/favicon-32/48.png, rounded, transparent corners)
+//   app-icon-cartoon.png (cartoon car) -> larger browser icons (public/icons/favicon-car-192/512.png)
+//   app-icon.png (geometric car)      -> phone icons: PWA, apple-touch, maskable, Android mipmaps + adaptive foreground, iOS 1024
+// The source art has rounded transparent corners; phone launchers want full-bleed squares (the OS masks them), so the
+// corners are filled from the nearest opaque pixel towards the centre. Resampling is an alpha-weighted box filter.
 import { PNG } from 'pngjs';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-const draw = (size, maskable) => {
-  const png = new PNG({ width: size, height: size });
-  const pad = maskable ? 0.18 : 0.08;
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const u = x / size, v = y / size;
-    // background: deep blue to magenta glow at the bottom right
-    let r = 8 + 20 * v, g = 10 + 8 * v, b = 24 + 40 * v;
-    const d = Math.hypot(u - 0.8, v - 0.9);
-    const glow = Math.max(0, 1 - d * 1.6);
-    r += 200 * glow * glow; g += 20 * glow; b += 120 * glow * glow;
-    // speed slashes
-    const s = (u * 0.7 + v) % 0.22;
-    if (s < 0.012 && v > 0.55) { r += 40; g += 120; b += 160; }
-    // the R: stem, bowl, leg inside the safe box
-    const x0 = pad + 0.12, x1 = 1 - pad - 0.12, y0 = pad + 0.1, y1 = 1 - pad - 0.1;
-    const w = x1 - x0, h = y1 - y0;
-    const lu = (u - x0) / w, lv = (v - y0) / h;
-    let on = false;
-    if (lu >= 0 && lu <= 1 && lv >= 0 && lv <= 1) {
-      const stem = lu < 0.24;
-      const top = lv < 0.2 && lu < 0.85;
-      const mid = lv > 0.42 && lv < 0.62 && lu < 0.85;
-      const bowl = lu > 0.62 && lu < 0.86 && lv < 0.62 && lv > 0.05;
-      const leg = lv > 0.55 && Math.abs(lu - (0.3 + (lv - 0.55) * 1.4)) < 0.13;
-      on = stem || top || mid || bowl || leg;
-    }
-    if (on) { r = 255; g = 60; b = 170; const hl = Math.max(0, 1 - lv * 1.3); r += 0; g += 150 * hl; b += 60 * hl; }
-    const i = (y * size + x) * 4;
-    png.data[i] = Math.min(255, r); png.data[i + 1] = Math.min(255, g); png.data[i + 2] = Math.min(255, b); png.data[i + 3] = 255;
+/** The art ships with opaque white outside its rounded corners: flood-fill that white from the four corners and make it transparent. */
+function load(p) {
+  const png = PNG.sync.read(readFileSync(p)), { width: w, height: h, data } = png;
+  const outside = new Uint8Array(w * h), stack = [0, w - 1, (h - 1) * w, h * w - 1];
+  const white = (i) => data[i * 4 + 3] < 255 || Math.min(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]) > 200;
+  while (stack.length) {
+    const i = stack.pop();
+    if (outside[i] || !white(i)) continue;
+    outside[i] = 1;
+    const x = i % w;
+    if (x > 0) stack.push(i - 1);
+    if (x < w - 1) stack.push(i + 1);
+    if (i >= w) stack.push(i - w);
+    if (i < w * (h - 1)) stack.push(i + w);
   }
-  return PNG.sync.write(png);
-};
+  const cut = outside.slice(); // grow by 2 px to eat the anti-aliased white rim
+  for (let r = 0; r < 2; r++) {
+    const src = cut.slice();
+    for (let i = 0; i < w * h; i++) if (!src[i] && ((i % w > 0 && src[i - 1]) || (i % w < w - 1 && src[i + 1]) || (i >= w && src[i - w]) || (i < w * (h - 1) && src[i + w]))) cut[i] = 1;
+  }
+  for (let i = 0; i < w * h; i++) if (cut[i]) data[i * 4 + 3] = 0;
+  return png;
+}
+
+/** Full-bleed copy: every transparent or partly transparent pixel takes the colour found walking towards the centre. */
+function bleed(src) {
+  const { width: w, height: hh } = src;
+  const out = new PNG({ width: w, height: hh });
+  for (let y = 0; y < hh; y++) for (let x = 0; x < w; x++) {
+    const i = (y * w + x) * 4;
+    let sx = x, sy = y, j = i;
+    const dx = w / 2 - x, dy = hh / 2 - y, n = Math.max(1, Math.hypot(dx, dy));
+    for (let k = 0; src.data[j + 3] < 255 && k < w; k++) {
+      sx = Math.round(x + (dx / n) * k * 1.5); sy = Math.round(y + (dy / n) * k * 1.5);
+      j = (Math.min(hh - 1, Math.max(0, sy)) * w + Math.min(w - 1, Math.max(0, sx))) * 4;
+    }
+    out.data[i] = src.data[j]; out.data[i + 1] = src.data[j + 1]; out.data[i + 2] = src.data[j + 2]; out.data[i + 3] = 255;
+  }
+  return out;
+}
+
+/** Resample `src` into a size x size canvas; the art is scaled by `scale` and centred, the margin clamps to the edge pixels. */
+function render(src, size, scale = 1) {
+  const out = new PNG({ width: size, height: size });
+  const k = src.width / (size * scale), off = (src.width - size * k) / 2;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const x0 = off + x * k, x1 = x0 + k, y0 = off + y * k, y1 = y0 + k;
+    let r = 0, g = 0, b = 0, a = 0, wsum = 0;
+    for (let sy = Math.floor(y0); sy < Math.ceil(y1); sy++) for (let sx = Math.floor(x0); sx < Math.ceil(x1); sx++) {
+      const wgt = (Math.min(sx + 1, x1) - Math.max(sx, x0)) * (Math.min(sy + 1, y1) - Math.max(sy, y0));
+      const cx = Math.min(src.width - 5, Math.max(4, sx)), cy = Math.min(src.height - 5, Math.max(4, sy)); // stay 4 px inside: the border row carries a light anti-alias rim
+      const p = (cy * src.width + cx) * 4, al = src.data[p + 3] * wgt;
+      r += src.data[p] * al; g += src.data[p + 1] * al; b += src.data[p + 2] * al; a += al; wsum += wgt;
+    }
+    const i = (y * size + x) * 4;
+    out.data[i] = a ? r / a : 0; out.data[i + 1] = a ? g / a : 0; out.data[i + 2] = a ? b / a : 0; out.data[i + 3] = Math.round(a / wsum);
+  }
+  return out;
+}
+
+const enc = (png, opaque = false) => PNG.sync.write(png, opaque ? { colorType: 2, inputHasAlpha: true } : {});
+const site = load('resources/brand/website-icon.png');
+const app = load('resources/brand/app-icon.png');
+const cartoon = load('resources/brand/app-icon-cartoon.png');
+const full = bleed(app);
+
 mkdirSync('public/icons', { recursive: true });
-for (const [name, size, maskable] of [['icon-192.png', 192, false], ['icon-512.png', 512, false], ['maskable-512.png', 512, true], ['apple-touch-icon.png', 180, false]]) writeFileSync(`public/icons/${name}`, draw(size, maskable));
+for (const s of [32, 48]) writeFileSync(`public/icons/favicon-${s}.png`, enc(render(site, s))); // tab icon: the wordmark
+for (const s of [192, 512]) writeFileSync(`public/icons/favicon-car-${s}.png`, enc(render(cartoon, s))); // larger browser icon (bookmarks, shortcuts): the cartoon car
+writeFileSync('public/icons/icon-192.png', enc(render(full, 192)));
+writeFileSync('public/icons/icon-512.png', enc(render(full, 512)));
+writeFileSync('public/icons/maskable-512.png', enc(render(full, 512, 0.74))); // safe zone: art inside the central 80 % circle
+writeFileSync('public/icons/apple-touch-icon.png', enc(render(full, 180))); // iOS rounds it itself, so no transparency
 mkdirSync('resources', { recursive: true });
-writeFileSync('resources/icon.png', draw(1024, false));
+writeFileSync('resources/icon.png', enc(render(full, 1024)));
 // native launchers (Android mipmaps, adaptive foreground, iOS 1024)
 const DENS = { mdpi: [48, 108], hdpi: [72, 162], xhdpi: [96, 216], xxhdpi: [144, 324], xxxhdpi: [192, 432] };
 for (const [d, [icon, fg]] of Object.entries(DENS)) {
   const dir = `android/app/src/main/res/mipmap-${d}`;
   try {
-    writeFileSync(`${dir}/ic_launcher.png`, draw(icon, false));
-    writeFileSync(`${dir}/ic_launcher_round.png`, draw(icon, false));
-    writeFileSync(`${dir}/ic_launcher_foreground.png`, draw(fg, true));
+    writeFileSync(`${dir}/ic_launcher.png`, enc(render(full, icon)));
+    writeFileSync(`${dir}/ic_launcher_round.png`, enc(render(full, icon, 0.9)));
+    writeFileSync(`${dir}/ic_launcher_foreground.png`, enc(render(full, fg, 0.62))); // adaptive: only the central 66 % shows
   } catch { /* no android platform yet */ }
 }
-try { writeFileSync('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png', draw(1024, false)); } catch { /* no ios platform yet */ }
+try { writeFileSync('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png', enc(render(full, 1024), true)); } catch { /* no ios platform yet */ }
 console.log('icons written');
