@@ -24,7 +24,7 @@ npm run mobile:ios          # builds, syncs, opens Xcode (run once: cd ios/App &
 Select your team under Signing, choose the iPhone, press Run. Landscape only, status bar hidden (`Info.plist`).
 
 ## After changing the game
-`npm run mobile:sync` copies the new build into both native projects. Icons: edit `scripts/make-icons.mjs`, run `npm run icons`.
+`npm run mobile:sync` copies the new build into both native projects. Icons: brand art lives in `resources/brand/` (`website-icon.png` = wordmark only, used for the browser tab icons `public/icons/favicon-*.png`; `app-icon.png` = geometric car, used for every phone icon: PWA, apple-touch, maskable, Android mipmaps and adaptive foreground, iOS 1024). Replace those PNGs and run `npm run icons`; the script strips the white outside the rounded corners and fills full-bleed squares for the launchers.
 App id `com.racersblood.game` and the name are in `capacitor.config.ts`.
 
 ## Notes

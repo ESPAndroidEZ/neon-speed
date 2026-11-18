@@ -43,7 +43,7 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
     const mood = rel > 0 ? 'smirk' : rel < 0 ? 'angry' : 'neutral';
     const top = h('div');
     top.style.cssText = 'display:flex;gap:10px;align-items:center';
-    top.append(portraitEl(c.id, mood, 52), h('div', '', `<div style="font-weight:900">${c.name}</div><div class="rb-sub" style="letter-spacing:2px">${tx(c.role)}</div>`));
+    top.append(portraitEl(c.id, mood, 52), h('div', '', `<div style="font-weight:900">${c.id === 'rookie' ? t('crew.rookie') : c.name}</div><div class="rb-sub" style="letter-spacing:2px">${tx(c.role)}</div>`));
     card.append(top, h('div', '', `<div style="opacity:.85;font-size:14px;line-height:1.4;margin-top:8px">${bio}</div>`));
     if (REL_IDS.includes(c.id) && career.completed.includes('c2-redline')) card.append(relBar(rel));
     grid.append(card);

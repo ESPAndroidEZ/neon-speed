@@ -60,7 +60,7 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'look.slot.spoiler': 'Alerón', 'look.slot.splitter': 'Splitter', 'look.slot.skirts': 'Taloneras', 'look.slot.hood': 'Capó',
   'look.rims': 'Llantas', 'look.size': 'Tamaño', 'look.tint': 'Cristales tintados', 'look.headlights': 'Faros',
   'look.glowPattern': 'Patrón de luces inferiores', 'look.calipers': 'Pinzas de freno', 'look.stance': 'Altura', 'look.plate': 'Matrícula',
-  'look.loadouts': 'Configuraciones', 'look.default': 'por defecto', 'look.plain': 'liso',
+  'crew.rookie': 'El Novato', 'look.loadouts': 'Configuraciones', 'look.default': 'por defecto', 'look.plain': 'liso',
   'tune.title': 'TUNING', 'tune.stats': 'de serie {cls} {pr} · 0-100 {accel} s · máx. {top} · frenada 30 m/s {stop} m',
   'tune.bests': 'Tus mejores vueltas con este tuning: {laps}',
   'tune.noBests': 'Tus mejores vueltas con este tuning aparecerán aquí (corre para registrarlas).',

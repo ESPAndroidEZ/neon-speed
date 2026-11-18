@@ -22,7 +22,7 @@ import { dailyButton } from './dailyButton';
 import type { TrackDef } from '../data/tracks';
 import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
 import { onLangChange, t } from '../i18n';
-import { langRow } from './langRow';
+import { langCorner, langRow } from './langRow';
 import { garageLayout, type GarageLayout } from './garageConfig';
 
 export interface MenuDeps {
@@ -73,7 +73,10 @@ export class Menu {
     onLangChange(() => this.again?.());
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
-      if (e.code === 'Enter' && this.screen === 'title') this.main();
+      if (e.code === 'Enter' && this.screen === 'title') {
+        e.preventDefault(); // the new menu's focused button must not also receive this Enter
+        this.main();
+      }
       else if (e.code === 'Escape' && this.screen === 'other') this.main();
     });
   }
@@ -134,7 +137,7 @@ export class Menu {
       stack.append(c);
     }
     stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
-    el.append(stack);
+    el.append(stack, langCorner()); // after the stack so the menu's first focus stays on the first menu button
     this.mount(el, 'main', 'menu', () => this.main());
   }
 

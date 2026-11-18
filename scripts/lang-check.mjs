@@ -30,6 +30,16 @@ ok(glyphs > 600, `Spanish glyphs render (${glyphs} px)`);
 await page.reload({ waitUntil: 'load' });
 await page.waitForSelector('.rb-wm');
 ok(/Pulsa Intro/i.test(await text(page)), 'choice survives a reload (saved)');
+// the main menu has its own language switch, and Enter on the title must not trigger it
+await page.reload({ waitUntil: 'load' });
+await page.waitForSelector('.rb-wm');
+await page.keyboard.press('Enter');
+await page.waitForSelector('.rb-stack');
+ok(/AJUSTES/i.test(await text(page)), 'Enter on the title keeps Spanish');
+await page.click('button[lang=en]');
+ok(/SETTINGS/i.test(await text(page)) && /FREE RACE/i.test(await text(page)), 'main menu EN button switches live');
+await page.click('button[lang=es]');
+ok(/AJUSTES/i.test(await text(page)), 'main menu ES button switches back');
 await ctx.close();
 ({ ctx, page } = await open('en-US'));
 ok(/Press Enter/i.test(await text(page)), 'en-US browser starts in English');

@@ -58,7 +58,7 @@ export const EN_MENU = {
   'look.slot.spoiler': 'Spoiler', 'look.slot.splitter': 'Splitter', 'look.slot.skirts': 'Side skirts', 'look.slot.hood': 'Hood',
   'look.rims': 'Rims', 'look.size': 'Size', 'look.tint': 'Window tint', 'look.headlights': 'Headlights',
   'look.glowPattern': 'Underglow pattern', 'look.calipers': 'Brake calipers', 'look.stance': 'Stance', 'look.plate': 'Plate',
-  'look.loadouts': 'Loadouts', 'look.default': 'default', 'look.plain': 'plain',
+  'crew.rookie': 'The Rookie', 'look.loadouts': 'Loadouts', 'look.default': 'default', 'look.plain': 'plain',
   'tune.title': 'TUNING', 'tune.stats': 'stock {cls} {pr} · 0-100 {accel} s · top {top} · 30 m/s stop {stop} m',
   'tune.bests': 'Your best laps with this exact setup: {laps}',
   'tune.noBests': 'Your best laps with this exact setup will show here (race to record them).',

@@ -16,3 +16,11 @@ export function langRow(after?: () => void, withLabel = true): HTMLElement {
   }
   return row;
 }
+
+/** Small language switch pinned to the top-left of a screen (main menu), so the language can be changed after the first run. */
+export function langCorner(): HTMLElement {
+  const row = langRow(undefined, false);
+  row.style.cssText = 'position:fixed;left:max(14px,env(safe-area-inset-left),2.5vw);top:max(14px,env(safe-area-inset-top),2vh);z-index:31;gap:6px;margin:0';
+  row.querySelectorAll('button').forEach((b) => { b.style.minWidth = '0'; b.style.minHeight = '36px'; b.style.padding = '4px 12px'; b.style.fontSize = '13px'; });
+  return row;
+}
