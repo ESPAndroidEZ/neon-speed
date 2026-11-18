@@ -40,7 +40,7 @@ export class CarController {
   /** Driving assists and steering sensitivity (player settings; the AI keeps STANDARD and 1). */
   readonly assist: Assist = createAssist();
   sensitivity = 1;
-  /** Player only: the throttle drift hold ends when the wheel is centred (the AI holds slides on its own line). */
+  /** Player only: throttle drift hold ends when the wheel is centred, power slides let go, steering drag is reduced (the AI keeps the tuned originals). */
   wheelHold = false;
   /** v2 arcade layer level (player setting; the AI keeps LIGHT). */
   stability: StabilityLevel = 'LIGHT';

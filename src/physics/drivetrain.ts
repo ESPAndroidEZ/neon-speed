@@ -77,7 +77,7 @@ export class Drivetrain {
         this.shiftTimer = t.shiftTime;
         this.events.push(EV_UPSHIFT, this.boost);
         if (this.rpm > t.redlineRpm * 0.7) this.events.push(EV_BACKFIRE, 0.4 + 0.5 * this.boost);
-      } else if (this.rpm < t.redlineRpm * t.downshiftFrac && this.gear > 1) {
+      } else if ((pedal > 0.05 ? wheelRpm : this.rpm) < t.redlineRpm * t.downshiftFrac && this.gear > 1) { // on the gas the engine rpm is floored (idle + 3000), so kick down on the real wheel rpm, or a slowing car stays lugging in a tall gear
         this.gear--;
         this.shiftTimer = t.shiftTime * 0.5;
         this.events.push(EV_DOWNSHIFT, 0);

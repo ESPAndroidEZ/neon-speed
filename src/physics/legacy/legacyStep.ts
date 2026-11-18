@@ -13,6 +13,8 @@ const TRACTION_SQUAT = 0.15; // share of the rear load gained under acceleration
  * Snow only (dry and rain are untouched): tyres dig in lengthwise, so drive traction uses grip^(1 - tr/2) instead of grip,
  * and full power keeps `floorR` of the rear's sideways grip (a held throttle steps the tail out ~15 deg instead of spinning the car).
  */
+/** Share of the steered-tyre drag kept (player car only, like the drift-hold fixes; the AI's lines are tuned to the full drag). Full lock (keyboard) at 70 km/h took 3 of the Civic's 3.7 m/s^2, so W did nothing in a sustained turn. */
+const STEER_SCRUB = 0.4;
 export const SNOW_FEEL = { tr: 0.35, floorR: 0.7 };
 
 /**
@@ -72,7 +74,7 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const fHand = input.handbrake ? -Math.min(t.handbrakeForce * hbK, g * t.gripRear * fzR) * motion : 0;
   const fDrag = -t.dragCoef * u * absU;
   const fRoll = -t.rollingResistance * t.mass * G * clamp(u / 0.3, -1, 1) - c.surfaceDrag * t.mass * u;
-  const fScrub = -fyF * Math.sin(delta);
+  const fScrub = -fyF * Math.sin(delta) * (c.wheelHold ? STEER_SCRUB : 1); // the steered tyres' sideways force dragging on the travel direction
   c.axRaw = (ds.fxR + ds.fxF * cd + fBrake + fHand + fDrag + fRoll + fScrub) / t.mass;
   c.ayRaw = (fyF * cd + fyR + fFwd) / t.mass; // FWD: the steered wheels pull the nose into the turn
   const du = c.axRaw + v * r;

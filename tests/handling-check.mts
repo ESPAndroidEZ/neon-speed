@@ -198,5 +198,20 @@ for (const id of ['350z', 'supra', 'm3', 'rx7']) {
   const slip = Math.abs(Math.atan2(c.v, Math.abs(c.u)));
   check(`${id}: W + full lock does not latch a big slide`, slip < 0.3 && c.state.speed > v0 - 1, `slip ${(slip * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
 }
+// Full lock (a held key) must not eat the throttle: at 20 m/s the Civic and Golf (FWD) keep most of their straight-line acceleration.
+for (const id of ['civic', 'golf']) {
+  const accel = (steer: number): number => {
+    const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+    c.reset(0, 0, 0);
+    c.wheelHold = true;
+    toSpeed(c, 20);
+    const i = inp({ throttle: 1, steer });
+    let sum = 0;
+    for (let k = 0; k < 90; k++) { c.step(D, i, WEATHER.CLEAR); if (k >= 30) sum += c.axRaw; }
+    return sum / 60;
+  };
+  const straight = accel(0), turn = accel(1);
+  check(`${id}: full lock keeps the throttle effective`, turn > 0.5 * straight && turn > 1, `${turn.toFixed(2)} vs ${straight.toFixed(2)} m/s^2 straight`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
