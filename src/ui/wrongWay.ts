@@ -42,6 +42,7 @@ export function attachWrongWay(engine: Engine, game: Game): void {
     }
     if (on !== shown) {
       shown = on;
+      if (on) paint(); // text in the current language (the banner is built before the saved language is applied)
       el.classList.toggle('on', on);
     }
   });

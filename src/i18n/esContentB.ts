@@ -108,7 +108,7 @@ export const ES_CONTENT_B: Record<string, string> = {
   'Runs the port yard. Never lifts, never moves over, and always keeps his word.': 'Dirige el patio del puerto. Nunca levanta, nunca se aparta y siempre cumple su palabra.',
   'Owns the Cliffside': 'Dueño del Cliffside',
   'Heir to the north coast. He paid for every metre of guard rail and drives like he owns the sea.': 'Heredero de la costa norte. Pagó cada metro de guardarraíl y conduce como si el mar fuera suyo.',
-  'Streamer, hatchback': 'Streamer, hatchback',
+  'Streamer, hatchback': 'Streamer, utilitario',
   'Streams every race to a chat that never sleeps. Drives like someone who is being watched, which is always.': 'Transmite cada carrera a un chat que nunca duerme. Conduce como quien es observado, es decir, siempre.',
   'Dock runner': 'Corredora del muelle',
   'Grew up on the quays. She knows every puddle, every loose plate and which crane light is broken.': 'Creció en los muelles. Conoce cada charco, cada placa suelta y qué luz de grúa está rota.',
