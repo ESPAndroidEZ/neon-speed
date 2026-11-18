@@ -43,7 +43,7 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const slipDen = Math.max(absU, 3);
   const delta = steerAngle(t, as, steerIn, u, v, c.steerAuthority, assistMul);
   // Handbrake bites quickly and lets go slowly, which is what makes catching a slide controllable.
-  const [hbT, hbRate] = handbrakeTarget(c, input.handbrake, t.handbrakeGrip, dt, () => driftHoldTarget(t, u, v, c.thr, c.hbFactor, g));
+  const [hbT, hbRate] = handbrakeTarget(c, input.handbrake, t.handbrakeGrip, dt, () => driftHoldTarget(t, u, v, c.thr, c.hbFactor, g, c.wheelHold ? input.steer : 1));
   const hbK = input.handbrake ? handbrakeFade(c.hbHeld) : 1; // 1 for a normal pull; a long hold fades back toward grip
   c.hbFactor = lerp(c.hbFactor, hbT, Math.min(1, dt * hbRate));
 

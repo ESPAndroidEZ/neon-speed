@@ -1,3 +1,4 @@
+import { CARS } from '../src/data/cars.ts';
 import { CarController } from '../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning, type CarTuning } from '../src/physics/carTuning.ts';
 import { ASSIST_LEVELS, setAssist, type AssistLevel } from '../src/physics/assists.ts';
@@ -172,6 +173,18 @@ const hold = (c: CarController, secs: number, i: CarInput): void => {
   hold(c, 6, inp({ brake: 1 })); // stopped, in reverse
   hold(c, 3, inp({ throttle: 1, brake: 1 }));
   check('gas pulls away even with the brake still held', c.state.speed > 3 && c.drivetrain.gear > 0, `${(c.state.speed * 3.6).toFixed(0)} km/h, gear ${c.drivetrain.gear}`);
+}
+// After a handbrake flick, centring the wheel with W still held ends the slide and the car accelerates (no need to lift).
+for (const id of ['supra', 'rx7', '350z']) {
+  const c = new CarController(applyTuning(createDefaultTuning(), CARS.find((x) => x.id === id)!.tuning));
+  c.reset(0, 0, 0);
+  c.wheelHold = true; // the player's car
+  toSpeed(c, 22);
+  hold(c, 0.4, inp({ throttle: 1, steer: 1, handbrake: true }));
+  hold(c, 0.6, inp({ throttle: 1, steer: 0 }));
+  const v0 = c.state.speed;
+  hold(c, 2, inp({ throttle: 1, steer: 0 }));
+  check(`${id}: wheel centred on W ends the slide and speeds up`, Math.abs(Math.atan2(c.v, Math.abs(c.u))) < 0.15 && c.state.speed > v0 + 3, `slip ${(Math.abs(Math.atan2(c.v, Math.abs(c.u))) * 57.3).toFixed(0)} deg, ${v0.toFixed(1)} -> ${c.state.speed.toFixed(1)} m/s`);
 }
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
