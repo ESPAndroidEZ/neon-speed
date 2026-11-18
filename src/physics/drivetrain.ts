@@ -56,12 +56,14 @@ export class Drivetrain {
   /** u = signed forward speed (m/s). */
   update(dt: number, u: number, throttle: number, brake: number, nitroKey: boolean): void {
     const t = this.t;
-    // Holding brake at a standstill engages reverse; throttle from reverse goes forward again.
+    // Holding brake at a standstill engages reverse; throttle from reverse goes forward again. Gas wins over a brake that is
+    // still held (a finger or trigger resting on it), otherwise gas would silently act as the brake and the car would not go.
     if (this.gear > 0 && u < 0.6 && brake > 0.1 && throttle < 0.05) this.gear = -1;
-    else if (this.gear < 0 && u > -0.6 && throttle > 0.1 && brake < 0.05) this.gear = 1;
+    else if (this.gear < 0 && u > -0.6 && throttle > 0.1) this.gear = 1;
     const reversing = this.gear < 0;
     const pedal = reversing ? brake : throttle;
     this.brakeCmd = reversing ? throttle : brake;
+    if (!reversing && throttle > 0.1) this.brakeCmd *= smoothstep(3, 6, Math.abs(u)); // pulling away with a brake still held: gas wins below ~11 km/h
 
     const ratio = (reversing ? REVERSE_RATIO : gearRatio(t, this.gear)) * t.finalDrive;
     const wheelRpm = (Math.abs(u) / t.wheelRadius) * ratio * RAD_S_TO_RPM;

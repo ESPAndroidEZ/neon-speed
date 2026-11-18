@@ -166,5 +166,12 @@ const hold = (c: CarController, secs: number, i: CarInput): void => {
   check('handbrake drift holds on the throttle', held > 0.3 && held < 0.75, `slip after 2.5 s ${(held * 57.3).toFixed(0)} deg`);
   check('straightening ends the drift', straight < 0.15, `slip ${(straight * 57.3).toFixed(0)} deg`);
 }
+// Gas must win over a brake that is still held (finger or trigger resting on it): the car pulls away from a stop, in forward gear.
+{
+  const c = mk();
+  hold(c, 6, inp({ brake: 1 })); // stopped, in reverse
+  hold(c, 3, inp({ throttle: 1, brake: 1 }));
+  check('gas pulls away even with the brake still held', c.state.speed > 3 && c.drivetrain.gear > 0, `${(c.state.speed * 3.6).toFixed(0)} km/h, gear ${c.drivetrain.gear}`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
