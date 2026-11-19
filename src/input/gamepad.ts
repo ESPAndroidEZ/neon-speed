@@ -95,6 +95,7 @@ export class GamepadInput implements InputSource {
       out.brake = 0;
       out.handbrake = false;
       out.nitro = false;
+      out.shiftUp = out.shiftDown = false;
       return out;
     }
 
@@ -115,6 +116,8 @@ export class GamepadInput implements InputSource {
     out.brake = clamp(b[6] ? b[6].value : 0, 0, 1);
     out.handbrake = this.pressed(b, 0) || this.pressed(b, 2);
     out.nitro = this.pressed(b, 5) || this.pressed(b, 1);
+    out.shiftUp = this.pressed(b, 12); // manual gearbox: d-pad up / down
+    out.shiftDown = this.pressed(b, 13);
     const start = this.pressed(b, 9);
     if (start && !this.startHeld) this.buttons.onPause?.();
     this.startHeld = start;

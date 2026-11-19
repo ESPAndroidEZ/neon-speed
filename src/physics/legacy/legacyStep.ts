@@ -27,6 +27,8 @@ export function stepLegacy(c: CarController, dt: number, input: CarInput, weathe
   const dtn = c.drivetrain;
   const as = c.assist;
   c.thr = t.throttleLag > 0 ? c.thr + (input.throttle - c.thr) * Math.min(1, dt / t.throttleLag) : input.throttle;
+  dtn.shiftUp = input.shiftUp === true;
+  dtn.shiftDown = input.shiftDown === true;
   dtn.update(dt, c.u, c.thr, input.brake, input.nitro);
   const ld = c.load;
   ld.update(dt, t, c.axRaw, c.ayRaw);

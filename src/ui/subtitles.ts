@@ -38,6 +38,9 @@ export interface Caption {
   kind: 'switch' | 'lower' | 'title';
 }
 
+/** Captions are OFF by default (tester feedback); Settings > Advanced > Subtitles turns them on. Big title cards always show. */
+export const SUBTITLES = { on: false };
+
 /** Timed captions over the opening cinematic, plus one-off subtitle lines (race intro cards). */
 export class Subtitles {
   private readonly layer = h('div');
@@ -61,6 +64,7 @@ export class Subtitles {
 
   /** Show a single line for `dur` seconds. */
   flash(text: string, dur: number, kind: Caption['kind'] = 'switch'): void {
+    if (!SUBTITLES.on && kind !== 'title') return;
     const line = tx(text);
     const el = h('div', '', line);
     el.dataset.src = text;

@@ -21,6 +21,7 @@ box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent),inset 0 0 18px c
 .rb-tc .big{width:calc(var(--u) * 1.4);height:calc(var(--u) * 1.4);border-radius:50%}
 .rb-tc .arrow{width:calc(var(--u) * 1.15);height:calc(var(--u) * 1.15);border-radius:24px;--c:#18d8ff}
 .rb-tc .arrow svg{font-size:34px}
+.rb-tc .shift{width:calc(var(--u) * .72);height:calc(var(--u) * .72);border-radius:50%;--c:#18d8ff;font-size:24px}.rb-tc:not([data-manual]) .shift{display:none}
 .rb-tc .gas{--c:#3dff8a}.rb-tc .brk{--c:#ff3b4e}.rb-tc .n2o{--c:#ff2a9d}.rb-tc .hb{--c:#ffc23d}
 `;
 

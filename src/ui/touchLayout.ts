@@ -2,7 +2,7 @@
 export type Layout = Record<string, { x: number; y: number }>;
 export type LayoutPreset = 'default' | 'hb-right' | 'both-right';
 
-const IDS = ['gas', 'brake', 'nitro', 'hb', 'pause', 'reset', 'arrowL', 'arrowR'];
+const IDS = ['gas', 'brake', 'nitro', 'hb', 'pause', 'reset', 'arrowL', 'arrowR', 'shiftUp', 'shiftDown'];
 const SCHEMES = ['tilt', 'wheel', 'buttons'];
 const clamp01 = (n: number): number => Math.min(0.97, Math.max(0.03, n));
 

@@ -16,6 +16,7 @@ export class CombinedInput implements InputSource {
     out.steer = 0;
     out.handbrake = false;
     out.nitro = false;
+    out.shiftUp = out.shiftDown = false;
     const s = this.scratch;
     for (let i = 0; i < this.sources.length; i++) {
       this.sources[i].sample(s);
@@ -24,6 +25,8 @@ export class CombinedInput implements InputSource {
       if (Math.abs(s.steer) > Math.abs(out.steer)) out.steer = s.steer;
       if (s.handbrake) out.handbrake = true;
       if (s.nitro) out.nitro = true;
+      if (s.shiftUp) out.shiftUp = true;
+      if (s.shiftDown) out.shiftDown = true;
     }
     return out;
   }

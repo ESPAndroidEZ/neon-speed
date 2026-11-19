@@ -12,6 +12,8 @@ import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
 import { settingsTabs } from './settingsTabs';
+import { SUBTITLES } from './subtitles';
+import { GEARBOX } from '../physics/gearbox';
 import { applyUiSizes } from './uiSizes';
 import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
 import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
@@ -50,6 +52,8 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.auto.enabled = s.autoQuality;
   d.game.physicsLevel = s.weatherPhysics;
   applyUiSizes(s);
+  SUBTITLES.on = s.subtitles;
+  GEARBOX.manual = s.gearbox === 'manual';
   d.game.chase.tuning.shake = { OFF: 0, LOW: 0.5, NORMAL: 1 }[s.cameraShake];
 }
 
@@ -101,6 +105,17 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     if (s.voice) d.voice.say('Kestrel Bay. Two a.m.');
   });
   voice.append(vbox);
+
+  const subs = h('label', 'rb-row', `<span class="rb-lbl">${t('set.subtitles')}</span>`);
+  const sbox = h('input') as HTMLInputElement;
+  sbox.type = 'checkbox';
+  sbox.checked = s.subtitles;
+  sbox.addEventListener('change', () => {
+    s.subtitles = sbox.checked;
+    applySettings(d);
+    d.store.commit();
+  });
+  subs.append(sbox);
 
   const wp = h('div', 'rb-row', `<span class="rb-lbl">${t('set.wphys')}</span>`);
   const shake = h('div', 'rb-row', `<span class="rb-lbl">${t('set.shake')}</span>`);
@@ -165,7 +180,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const advanced = h('div', 'rb-settings');
   advanced.append(
     panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), voice, soundCredits()]),
-    panel(t('set.secGame'), [sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store)]),
+    panel(t('set.secGame'), [subs, sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store)]),
     panel(t('set.secControls'), [...extra.filter((e) => e.dataset.adv), ...driving.advanced]),
     panel(t('set.graphics'), gfx.advanced),
   );

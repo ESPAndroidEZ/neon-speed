@@ -24,6 +24,8 @@ const stiff = (fzAxle: number, nom: number): number => Math.sqrt(Math.max(0.5, (
 export function stepV2(c: CarController, dt: number, input: CarInput, weather: WeatherProfile | PhysicsEnv): void {
   const t = c.t, p = c.v2, dtn = c.drivetrain, env = weather as Partial<PhysicsEnv>;
   c.thr = t.throttleLag > 0 ? c.thr + (input.throttle - c.thr) * Math.min(1, dt / t.throttleLag) : input.throttle;
+  dtn.shiftUp = input.shiftUp === true;
+  dtn.shiftDown = input.shiftDown === true;
   dtn.update(dt, c.u, c.thr, input.brake, input.nitro);
   const ld = c.load;
   ld.update(dt, t, c.axRaw, c.ayRaw); // smoothed body accelerations (ld.ax, ld.ay)

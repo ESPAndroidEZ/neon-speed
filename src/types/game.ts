@@ -67,6 +67,9 @@ export interface CarInput {
   steer: number;
   handbrake: boolean;
   nitro: boolean;
+  /** Manual gearbox only (Settings > Gearbox): held-state of the shift buttons, the drivetrain acts on the press. */
+  shiftUp?: boolean;
+  shiftDown?: boolean;
 }
 
 export function createNeutralInput(): CarInput {

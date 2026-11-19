@@ -46,6 +46,8 @@ export class KeyboardInput implements InputSource {
     out.brake = this.any(k.brake, 'ArrowDown') ? 1 : 0;
     out.handbrake = this.down.has(k.handbrake);
     out.nitro = this.down.has(k.nitro) || (k.nitro === DEFAULT_KEYS.nitro && this.down.has('ShiftRight'));
+    out.shiftUp = this.down.has('KeyE'); // manual gearbox: E up, Q down
+    out.shiftDown = this.down.has('KeyQ');
     return out;
   }
 

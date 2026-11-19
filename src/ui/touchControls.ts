@@ -4,6 +4,7 @@ import { SteerRamp } from '../input/steerRamp';
 import { ICONS } from './icons';
 import { holdButton, place, TOUCH_CSS } from './touchButton';
 import { applyLayout, enableDrag, type Layout } from './touchLayout';
+import { GEARBOX } from '../physics/gearbox';
 import { onLangChange, t } from '../i18n';
 
 export interface TouchControls extends InputSource {
@@ -34,7 +35,7 @@ const ARROW_R = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="current
 export function createTouchControls(container: HTMLElement, opts?: { onReset?: () => void; onPause?: () => void }): TouchControls {
   const isTouch = matchMedia('(pointer: coarse)').matches;
   let gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
-  let stick = 0, left = false, right = false, auto = false, lastT = 0, editing = false;
+  let stick = 0, left = false, right = false, auto = false, lastT = 0, editing = false, shiftUp = false, shiftDown = false;
   let stopDrag: (() => void) | null = null;
   const ramp = new SteerRamp();
   const root = document.createElement('div');
@@ -49,7 +50,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
 
   const release = (): void => {
     gas = brake = stick = 0;
-    handbrake = nitro = left = right = false;
+    handbrake = nitro = left = right = shiftUp = shiftDown = false;
   };
   const tag = (el: HTMLDivElement, id: string): HTMLDivElement => {
     el.dataset.id = id; // the layout editor and saved layouts find buttons by this id
@@ -148,6 +149,11 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
         place(reset, { left: `calc(${S.l} + 56px)` }),
       );
     }
+    const row = `calc(${S.b} + ${S.u} * ${scheme === 'tilt' ? 2.3 : 1.55} + 22px)`; // manual gearbox: + above the gas side, - next to it (shown only when Settings > Gearbox is manual)
+    layer.append(
+      place(tag(holdButton('shift', '+', () => { shiftUp = true; }, () => { shiftUp = false; }), 'shiftUp'), { right: S.r, bottom: row }),
+      place(tag(holdButton('shift', '&minus;', () => { shiftDown = true; }, () => { shiftDown = false; }), 'shiftDown'), { right: `calc(${S.r} + ${S.u} * 0.72 + 16px)`, bottom: row }),
+    );
     applyLayout(layer, p.scheme, p.layout ?? {}, p.btnScale ?? 1);
   }
   setScheme({ scheme: 'wheel', autoGas: true });
@@ -164,6 +170,9 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
       out.brake = on ? brake : 0;
       out.steer = on ? (root.dataset.scheme === 'buttons' ? digital : stick) : 0;
       out.handbrake = on && handbrake;
+      out.shiftUp = on && shiftUp;
+      out.shiftDown = on && shiftDown;
+      if (root.dataset.manual !== (GEARBOX.manual ? '1' : undefined)) { if (GEARBOX.manual) root.dataset.manual = '1'; else delete root.dataset.manual; }
       out.nitro = on && nitro;
       return out;
     },

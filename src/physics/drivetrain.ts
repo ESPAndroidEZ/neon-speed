@@ -20,6 +20,12 @@ export class Drivetrain {
   boost = 0;
   readonly events = new EventChannel();
   shiftTimer = 0;
+  /** Manual gearbox (player only): the driver shifts with shiftUp / shiftDown, nothing shifts by itself. */
+  manual = false;
+  shiftUp = false;
+  shiftDown = false;
+  private lastUp = false;
+  private lastDown = false;
   lastPedal = 0;
   wasCut = false;
   popClock = 0;
@@ -53,6 +59,21 @@ export class Drivetrain {
     this.events.clear();
   }
 
+  /** One gear up or down: shift time (half for a downshift) and the sound events. */
+  private shift(up: boolean): void {
+    const t = this.t;
+    if (up) {
+      this.gear++;
+      this.shiftTimer = t.shiftTime;
+      this.events.push(EV_UPSHIFT, this.boost);
+      if (this.rpm > t.redlineRpm * 0.7) this.events.push(EV_BACKFIRE, 0.4 + 0.5 * this.boost);
+    } else {
+      this.gear--;
+      this.shiftTimer = t.shiftTime * 0.5;
+      this.events.push(EV_DOWNSHIFT, 0);
+    }
+  }
+
   /** u = signed forward speed (m/s). */
   update(dt: number, u: number, throttle: number, brake: number, nitroKey: boolean): void {
     const t = this.t;
@@ -71,17 +92,16 @@ export class Drivetrain {
     this.rpm += (target - this.rpm) * Math.min(1, dt * 12);
 
     this.shiftTimer = Math.max(0, this.shiftTimer - dt);
+    const up = this.shiftUp && !this.lastUp, down = this.shiftDown && !this.lastDown; // one shift per press
+    this.lastUp = this.shiftUp;
+    this.lastDown = this.shiftDown;
+    if (this.manual && this.gear > 1 && Math.abs(u) < 2) this.gear = 1; // coming to a stop drops to first (no stalling in a high gear)
     if (this.gear > 0 && this.shiftTimer === 0) {
-      if (this.rpm > t.redlineRpm * t.upshiftFrac && this.gear < GEAR_RATIOS.length && pedal > 0.15) {
-        this.gear++;
-        this.shiftTimer = t.shiftTime;
-        this.events.push(EV_UPSHIFT, this.boost);
-        if (this.rpm > t.redlineRpm * 0.7) this.events.push(EV_BACKFIRE, 0.4 + 0.5 * this.boost);
-      } else if ((pedal > 0.05 ? wheelRpm : this.rpm) < t.redlineRpm * t.downshiftFrac && this.gear > 1) { // on the gas the engine rpm is floored (idle + 3000), so kick down on the real wheel rpm, or a slowing car stays lugging in a tall gear
-        this.gear--;
-        this.shiftTimer = t.shiftTime * 0.5;
-        this.events.push(EV_DOWNSHIFT, 0);
-      }
+      if (this.manual) {
+        if (up && this.gear < GEAR_RATIOS.length) this.shift(true);
+        else if (down && this.gear > 1) this.shift(false);
+      } else if (this.rpm > t.redlineRpm * t.upshiftFrac && this.gear < GEAR_RATIOS.length && pedal > 0.15) this.shift(true);
+      else if ((pedal > 0.05 ? wheelRpm : this.rpm) < t.redlineRpm * t.downshiftFrac && this.gear > 1) this.shift(false); // on the gas the engine rpm is floored (idle + 3000), so kick down on the real wheel rpm, or a slowing car stays lugging
     }
 
     const wantNitro = nitroKey && this.nitroLevel > 0.01 && pedal > 0.1 && !reversing;

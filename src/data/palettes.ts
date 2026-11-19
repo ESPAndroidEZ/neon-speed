@@ -16,6 +16,8 @@ export const PALETTES: Record<string, Palette> = {
   kestrel: { key: 0xff9a2e, accent: [0x1fb5a8, 0xff2a9d], horizon: 0xb85a22, fog: 0x1a1210, window: 0xffc070, skyline: { count: 90, min: 40, max: 130 } },
   neon: { key: 0xff2a9d, accent: [0x18d8ff, 0x7a2fd6], horizon: 0x9a1f7a, fog: 0x160a22, window: 0x9fe8ff, skyline: { count: 140, min: 70, max: 260 } },
   maze: { key: 0xff9a2e, accent: [0xe0b020, 0x9fe8ff], horizon: 0x8a4a1a, fog: 0x14100c, window: 0xffb050, skyline: { count: 60, min: 25, max: 80 } },
+  'drift-ring': { key: 0xff2a9d, accent: [0x18d8ff, 0xffe04a], horizon: 0x5a1a6a, fog: 0x0e0814, window: 0xff9ad0, skyline: { count: 50, min: 25, max: 70 } },
+  'serpent-drift': { key: 0x18d8ff, accent: [0xff2a9d, 0x9fffd0], horizon: 0x1a4a6a, fog: 0x080e18, window: 0x9fe8ff, skyline: { count: 70, min: 30, max: 110 } },
   'maze-drift': { key: 0xff9a2e, accent: [0xe0b020, 0x9fe8ff], horizon: 0x8a4a1a, fog: 0x14100c, window: 0xffb050, skyline: { count: 60, min: 25, max: 80 } },
   mountain: { key: 0x9fb4ff, accent: [0xffb040, 0xe8f0ff], horizon: 0x3a4a7a, fog: 0x0c1222, window: 0xffd9a0, skyline: { count: 0, min: 0, max: 0 } }, // moonlit rock, amber lookout lamps, snow
   coast: { key: 0xffb35c, accent: [0x18d8ff, 0xff2a9d], horizon: 0xc06a3a, fog: 0x12101a, window: 0xffd27d, skyline: { count: 80, min: 30, max: 110 } }, // sodium esplanade, sea teal, casino neon
