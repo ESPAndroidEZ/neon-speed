@@ -11,6 +11,7 @@ import { TiltInput } from '../input/tiltInput';
 import { chooseControls, controlsTutorial, enableTilt } from '../ui/controlsOnboard';
 import { isPhone } from '../core/quality';
 import { showHowTo } from '../ui/howToPlay';
+import { installNoSelect } from '../ui/noSelect';
 import { GEARBOX } from '../physics/gearbox';
 import { ImpactHaptic } from '../input/impactHaptic';
 import { buzz } from '../ui/haptics';
@@ -34,6 +35,7 @@ export interface Controls {
 
 /** All input devices in one place. `pause` and `reset` are what the pad's Start and Y and the touch buttons do. */
 export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }, kv: Storage | null): Controls {
+  installNoSelect();
   const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
   const bindings = new KeyBindings(kv);
   const keys = new KeyboardInput(bindings);

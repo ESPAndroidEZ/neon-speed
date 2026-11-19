@@ -44,6 +44,24 @@
         position: fixed;
         inset: 0;
       }
+      /* a game, not a web page: a long press never selects text, opens the callout or magnifies a button (menus sit outside #app) */
+      body,
+      body * {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+      input,
+      textarea {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      button,
+      [role='button'],
+      .rb-btn,
+      .rb-card {
+        touch-action: manipulation;
+      }
       #app {
         position: fixed;
         inset: 0;

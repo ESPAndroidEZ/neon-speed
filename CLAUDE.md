@@ -20,7 +20,7 @@
 `docs/handoff.md` status and next steps. `docs/plan.md` phases. `docs/story.md` story and cinematic. `docs/tasks/` Qwen tasks. `docs/inbox/` owner notes.
 
 ## Session start
-Read `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or `story.md` only when the task needs them.
+Read `docs/skills.md` (where things live, playbooks, gotchas, server and git facts), then `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or `story.md` only when the task needs them.
 
 ## Token discipline
 - Never cat files. Use Read with offset/limit (about 150 lines per read, `wc -l` first for unknown files).

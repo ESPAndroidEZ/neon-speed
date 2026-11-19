@@ -50,7 +50,7 @@ export class HeadlightPool {
     if (!v) return;
     const sh = Math.sin(v.heading);
     const ch = Math.cos(v.heading);
-    l.position.set(v.x + sh * 2, 0.75, v.z + ch * 2);
+    l.position.set(v.x + sh * 3.6, 0.7, v.z + ch * 3.6); // past the nose: closer than that it lit the hood at ~1000 lux and bloomed into a white blob
     this.targets[i].position.set(v.x + sh * 28, 0.2, v.z + ch * 28);
   }
 }

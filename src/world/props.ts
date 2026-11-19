@@ -58,9 +58,9 @@ export function buildProps(layout: PropsLayout, plaza: Plaza | null): Group {
   basin.position.set(plaza.x, 0.2, plaza.z);
   const pool = new Mesh(new CircleGeometry(plaza.r - 6.5, 28).rotateX(-Math.PI / 2), new MeshStandardMaterial({ color: 0x0a2a40, roughness: 0.05, metalness: 0.9, emissive: 0x0a3a60, emissiveIntensity: 0.6 }));
   pool.position.set(plaza.x, 0.42, plaza.z);
-  const ring = new Mesh(new TorusGeometry(plaza.r - 6.3, 0.07, 6, 48).rotateX(Math.PI / 2), new MeshBasicMaterial({ color: new Color(0x18d8ff).multiplyScalar(2.5) }));
+  const ring = new Mesh(new TorusGeometry(plaza.r - 6.3, 0.07, 6, 48).rotateX(Math.PI / 2), new MeshBasicMaterial({ color: new Color(0x18d8ff).multiplyScalar(1.4) }));
   ring.position.set(plaza.x, 0.45, plaza.z);
-  const column = new Mesh(new CylinderGeometry(0.4, 0.6, 5, 10), new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(2) }));
+  const column = new Mesh(new CylinderGeometry(0.4, 0.6, 5, 10), new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(1.5) }));
   column.position.set(plaza.x, 2.5, plaza.z);
   g.add(basin, pool, ring, column);
   return g;

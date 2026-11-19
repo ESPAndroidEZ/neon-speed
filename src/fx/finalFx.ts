@@ -29,7 +29,7 @@ const shader = {
         float o = float(i) * texel * 9.0;
         float w = exp(-float(i) * 0.22);
         vec3 a = texture2D(tDiffuse, vUv + vec2(o, 0.0)).rgb, b = texture2D(tDiffuse, vUv - vec2(o, 0.0)).rgb;
-        s += (max(a - 1.6, 0.0) + max(b - 1.6, 0.0)) * w;
+        s += (min(max(a - 1.6, 0.0), vec3(1.2)) + min(max(b - 1.6, 0.0), vec3(1.2))) * w; // capped per tap: a headlight at 6x HDR used to smear into a screen-wide white blob
       }
       c += s * streak * 0.22 * mix(vec3(0.35, 0.8, 1.0), vec3(1.0, 0.45, 0.85), vUv.x);
     }

@@ -22,11 +22,11 @@ export function buildTunnel(tr: Track): Group {
   const concrete = new MeshStandardMaterial({ color: 0x3b3e47, roughness: 0.9, side: DoubleSide });
   g.add(new Mesh(wallStrip(tr, (i) => tr.wall[i], 0, 5.4, 6, keep), concrete), new Mesh(wallStrip(tr, (i) => -tr.wall[i], 0, 5.4, 6, keep), concrete));
   g.add(new Mesh(ribbon(tr, (i) => -tr.wall[i], (i) => tr.wall[i], 5.4, 8, keep), new MeshStandardMaterial({ color: 0x23252b, roughness: 0.95, side: DoubleSide })));
-  const cyan = new MeshBasicMaterial({ color: hdr(0x18d8ff, 2.2), side: DoubleSide });
+  const cyan = new MeshBasicMaterial({ color: hdr(0x18d8ff, 1.2), side: DoubleSide });
   g.add(new Mesh(wallStrip(tr, (i) => tr.wall[i] - 0.03, 1.0, 1.14, 6, keep), cyan), new Mesh(wallStrip(tr, (i) => -tr.wall[i] + 0.03, 1.0, 1.14, 6, keep), cyan));
 
   const lamps = Math.floor((run[1] - run[0]) / 2);
-  const lampMesh = new InstancedMesh(new BoxGeometry(0.45, 0.1, 2.4), new MeshBasicMaterial({ color: hdr(0xffa040, 3) }), lamps * 2);
+  const lampMesh = new InstancedMesh(new BoxGeometry(0.45, 0.1, 2.4), new MeshBasicMaterial({ color: hdr(0xffa040, 2.2) }), lamps * 2);
   const d = new Object3D();
   for (let k = 0; k < lamps; k++) {
     const i = run[0] + 1 + k * 2;
@@ -59,7 +59,7 @@ export function buildBridge(tr: Track): Group {
   if (!run) return g;
   const keep = (i: number): boolean => i >= run[0] && i <= run[1];
   const parapet = new MeshStandardMaterial({ color: 0x30333b, roughness: 0.6, metalness: 0.5, side: DoubleSide });
-  const neon = new MeshBasicMaterial({ color: hdr(0xff2a9d, 2.4), side: DoubleSide });
+  const neon = new MeshBasicMaterial({ color: hdr(0xff2a9d, 1.6), side: DoubleSide });
   for (const side of [1, -1]) {
     g.add(new Mesh(wallStrip(tr, (i) => side * tr.wall[i], 0, 0.95, 6, keep), parapet));
     g.add(new Mesh(wallStrip(tr, (i) => side * (tr.wall[i] - 0.02), 0.95, 1.08, 6, keep), neon));
@@ -67,7 +67,7 @@ export function buildBridge(tr: Track): Group {
   const water = new Mesh(ribbon(tr, -34, 34, -0.012, 12, (i) => i >= run[0] - 5 && i <= run[1] + 5), new MeshStandardMaterial({ color: 0x050c1c, roughness: 0.06, metalness: 0.9 }));
   g.add(water);
   const steel = new MeshStandardMaterial({ color: 0x4a505c, roughness: 0.5, metalness: 0.7 });
-  const beam = new MeshBasicMaterial({ color: hdr(0x18d8ff, 2.4) });
+  const beam = new MeshBasicMaterial({ color: hdr(0x18d8ff, 1.6) });
   const d = new Object3D();
   for (const f of [0.15, 0.5, 0.85]) {
     const i = Math.round(run[0] + (run[1] - run[0]) * f);

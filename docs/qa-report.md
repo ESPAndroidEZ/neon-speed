@@ -17,15 +17,15 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 10 | Pause list cut off at the bottom in landscape (scrolls, no cue) | layer height | open | open |
 | 11 | Launch tip pop-up behind the speedo in portrait | pop-up position | open | open |
 | 12 | Rotate hint probably expires behind the loading card | 6 s timer starts under z 65 card | open (unconfirmed) | open |
-| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | pre-existing since the merge of main | open | open |
+| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | pre-existing since the merge of main | fixed by the glare/neon changes of 2026-11-19 (chroma 0.21, ALL PASS) | fixed |
 | 14 | Radio subtitles stack on top of each other | `Subtitles.flash` never removed the line in its slot | a new line replaces the one of the same kind | fixed |
 | 15 | Every rival shows plate RB-0001 | rivals got the default loadout | `rivalPlate(name)` (two letters + four digits, stable) | fixed |
-| 16 | HIGH: white glare blob and streaks on the player car roof (same as the garage glare) | bloom + streaks on a roof highlight (suspected headlights/stage light + streak pass) | open | open |
-| 17 | Tunnel (city HIGH): cyan wall strip blows out half the screen; countdown: green-white glare on the grid's right | emissive strength through bloom | open | open |
+| 16 | HIGH: white glare blob and streaks on the player car roof (same as the garage glare) | the anamorphic streak pass in `fx/finalFx.ts` summed unbounded HDR over 28 taps (confirmed: blob gone with streaks off or capped) | each tap capped at 1.2; headlight spot moved past the nose (3.6 m) | fixed |
+| 17 | Tunnel (city HIGH): cyan wall strip blows out half the screen; countdown: green-white glare on the grid's right | emissive 2.2-3x through bloom | tunnel/bridge strips 1.2-1.6, plaza ring 1.4, landmark band 1.8 (`world/tunnelBridge props landmarks`) | fixed (tunnel + plaza re-shot) |
 | 18 | Coast HIGH: dark specks on the red sky | cloud cells (`world/sky`) | open | open |
 | 19 | `demo` autopilot crashes in the first corners | dev pilot, not visual | open (dev tool) | open |
 | 20 | Settings shows "Unlock all cars (free test)" to players | not gated on DEV | dev builds only | fixed |
-| 21 | Garage/title HIGH: headlight glare hides the car (Supra, Civic almost invisible) | showroom spot lights 300 x spotK + HIGH bloom/streaks (same family as 16) | open: top visual priority | open |
+| 21 | Garage/title HIGH: headlight glare hides the car (Supra, Civic almost invisible) | same streak pass (the showroom spots are off) | same fix as 16 | fixed (Civic re-shot) |
 | 22 | Garage 390x844 portrait: the panel covers the car completely | layout has no portrait framing | open | open |
 | 23 | A crew member stands between the camera and the car at some garage/menu angles | cast placement (`game/cast.ts` 77-78) | open | open |
 | 24 | Main menu on landscape phones: two-column grid takes ~58 % of the width | `menuCss` max-height:520px rule | open | open |
@@ -33,3 +33,6 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 26 | Online screen layout (alignment, tiny help text), ES default name "Driver" | `ui/onlineMenu` | open | open |
 | 27 | ES: money "(1,200 $)" instead of "1.200 $"; "Dock Sprint" untranslated; tuning stats uppercased ("6.8 S") | number format / data strings / CSS uppercase | open | open |
 Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). All three reviews are in.
+
+## 2026-11-19 survey
+Four-view sheets per track (CLEAR, HIGH): Kestrel, Neon, Maze reviewed, no new bugs after the fixes above. NOT yet reviewed: cliff, mountain, coast, drift-ring, serpent-drift, and RAIN / SNOW on all tracks. Rows 9-12 and 22-27 still open.

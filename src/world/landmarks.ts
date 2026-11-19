@@ -93,7 +93,7 @@ function coast(track: Track): Group {
   for (const pt of scatter(track, 400, (i) => z[i] === 'plaza', () => 18, 2).slice(0, 1)) {
     const hall = new Mesh(new BoxGeometry(36, 16, 14), new MeshStandardMaterial({ color: 0x2a2230, roughness: 0.6, emissive: 0x1a0c08 }));
     hall.position.set(pt.x, pt.y + 8, pt.z);
-    const band = new Mesh(new BoxGeometry(36.4, 0.6, 14.4), new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(3) }));
+    const band = new Mesh(new BoxGeometry(36.4, 0.6, 14.4), new MeshBasicMaterial({ color: new Color(0xff2a9d).multiplyScalar(1.8) }));
     band.position.set(pt.x, pt.y + 14, pt.z);
     const win = new Mesh(new BoxGeometry(30, 6, 14.2), new MeshBasicMaterial({ color: new Color(0xffc070).multiplyScalar(1.4) }));
     win.position.set(pt.x, pt.y + 6, pt.z);

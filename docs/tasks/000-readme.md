@@ -3,3 +3,4 @@
 - Data tasks: typed constants only, short lines, no logic. Test tasks: the `check()` harness copied from `tests/tracks-check.mts`.
 - Never edit anything under `src/` unless the Files line lists it. The architect wires finished modules in.
 - `scripts/qwen-queue.sh` logs EMPTY when a branch changed nothing but the baton line: re-run it with a smaller task.
+- Orient with `docs/skills.md` (feature -> file table, playbooks for settings, strings, tracks, inputs) and `docs/code-map.md` before reading source files.

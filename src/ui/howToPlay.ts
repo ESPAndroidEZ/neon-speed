@@ -19,7 +19,7 @@ const seen = (): boolean => {
  * (`force` false) and any time from Crew > How to play (`force` true). Skipping or finishing marks it seen.
  */
 export function showHowTo(force: boolean): void {
-  if ((!force && seen()) || document.querySelector('.rb-howto')) return;
+  if ((!force && (seen() || navigator.webdriver)) || document.querySelector('.rb-howto')) return; // never over automated browser tests
   injectCss();
   const root = h('div', 'rb-layer dim rb-howto');
   root.style.zIndex = '5000';
