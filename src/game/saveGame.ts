@@ -26,7 +26,7 @@ export function captureGame(g: Game): GameSnapshot | null {
     },
     setup: {
       carId: s.car.id, paint: s.paint, glow: s.glow ?? null, weather: s.weather, laps: s.laps, rivalIds: s.meta.rivalIds,
-      skillScale: s.meta.skillScale, wet: s.meta.wet, eventId: s.meta.eventId, weatherChange: s.weatherChange ?? null, trackId: s.trackId ?? 'kestrel', level: s.meta.level,
+      skillScale: s.meta.skillScale, wet: s.meta.wet, eventId: s.meta.eventId, weatherChange: s.weatherChange ?? null, trackId: s.trackId ?? 'kestrel', level: s.meta.level, raceId: s.meta.raceId,
     },
     race: g.rm.snapshot(),
     weather: g.weather,
@@ -49,7 +49,7 @@ export function restoreGame(g: Game, snap: GameSnapshot): void {
       car, paint: snap.setup.paint, glow: snap.setup.glow ?? undefined, weather: snap.setup.weather as Weather, laps: snap.setup.laps, cinematic: false, trackId: snap.setup.trackId,
       weatherChange: (snap.setup.weatherChange as { at: number; to: Weather } | null) ?? undefined,
       agents: buildField(snap.setup.rivalIds, snap.setup.skillScale, snap.setup.wet, (snap.setup.level as Difficulty | undefined) ?? AI_SETTING.level),
-      meta: { rivalIds: snap.setup.rivalIds, skillScale: snap.setup.skillScale, wet: snap.setup.wet, eventId: snap.setup.eventId, level: snap.setup.level },
+      meta: { rivalIds: snap.setup.rivalIds, skillScale: snap.setup.skillScale, wet: snap.setup.wet, eventId: snap.setup.eventId, level: snap.setup.level, raceId: snap.setup.raceId },
     });
   } finally {
     g.onCountdown = hold;

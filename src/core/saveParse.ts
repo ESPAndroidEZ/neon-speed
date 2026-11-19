@@ -23,6 +23,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   if (typeof j !== 'object' || j === null) return out;
   out.cash = Math.floor(num(j.cash, out.cash, 0, 1e9));
   out.races = Math.floor(num(j.races, 0, 0, 1e6));
+  out.paid = Array.isArray(j.paid) ? j.paid.filter((x): x is string => typeof x === 'string' && x.length < 40).slice(-16) : [];
   if (Array.isArray(j.owned)) {
     const owned = j.owned.filter((id): id is string => typeof id === 'string' && knownCars.includes(id));
     if (owned.length > 0) out.owned = [...new Set(owned)];

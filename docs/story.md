@@ -66,7 +66,7 @@ Story mode lives in `src/data/story.ts` (text) and `src/game/story.ts` (flow). E
 |---|-------|-----------|-----------|--------|
 | 1 | Warm-up Circuit | dry, 2 laps, Civic only, vs Pixel, Lola, Rook | top 2 | race cash + $1,500 |
 | 2 | Dock Sprint | rain, 2 laps, vs Jinx, Tank, Rook, Pixel | top 2 | race cash + $3,000, **350Z unlocked** |
-| 3 | Drift Night | snow, 3 laps, no rivals | bank 6,000 drift points | points / 3 + $4,000 |
+| 3 | Drift Night | snow, 3 laps, no rivals | bank 3,000 drift points (was 6,000: bots that slide a lot reach ~2,000-2,700 in 3 snow laps) | points / 3 + $4,000 |
 | 4 | Harbor Loop vs Dante | rain turning to snow after 75 s, 3 laps, vs Vex, Jinx, Tank, Dante | win | race cash + $8,000, **Supra unlocked** |
 
 Mara phones before and after events, Dante taunts before the Dock Sprint, after Drift Night and twice before the finale (a cutscene with his black and gold RX-7 on show). After the finale: Dante's key line, then Switch's radio message revealing he is Cain, then the end card *Chapter 2: Short Tracks* with a feedback-link placeholder. The opening cinematic runs the first time with the five DJ Switch captions, the lower-third and the title from the script above. Optional browser speech reads Switch's lines (Settings: Switch voice, default off).

@@ -23,7 +23,7 @@ export interface GameSnapshot {
   version: number;
   savedAt: number;
   summary: SaveSummary;
-  setup: { carId: string; paint: number; glow: number | null; weather: string; laps: number; rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null; weatherChange: { at: number; to: string } | null; trackId?: string; level?: string };
+  setup: { carId: string; paint: number; glow: number | null; weather: string; laps: number; rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null; weatherChange: { at: number; to: string } | null; trackId?: string; level?: string; raceId?: string };
   race: unknown;
   weather: string;
   weatherIntensity: number;

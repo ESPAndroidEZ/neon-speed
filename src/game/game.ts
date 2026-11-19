@@ -75,8 +75,8 @@ export class Game {
   }
 
   startRace(s: RaceSetup): void {
-    this.paused = false;
-    this.onStartRace?.();
+    this.paused = false; this.onStartRace?.();
+    if (s.meta) s.meta.raceId ??= Date.now().toString(36) + Math.random().toString(36).slice(2, 8); // paid once, even through a save
     this.setup = s;
     this.d.results.hide();
     this.views.clear();

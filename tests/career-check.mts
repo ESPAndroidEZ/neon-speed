@@ -32,7 +32,7 @@ const c = store.data.career;
 check('fresh career starts at the warm-up', nextEvent(c)?.id === 'warmup' && isUnlocked(c, 'warmup') && !isUnlocked(c, 'dock') && !isDone(c), '');
 check('top-2 objective', evaluate(EVENTS[0], 2, 0).passed && !evaluate(EVENTS[0], 3, 0).passed, '');
 check('finale needs the win', evaluate(EVENTS[3], 1, 0).passed && !evaluate(EVENTS[3], 2, 0).passed, '');
-check('drift objective by score', evaluate(EVENTS[2], 9, 6500).passed && !evaluate(EVENTS[2], 1, 5000).passed, '');
+check('drift objective by score', evaluate(EVENTS[2], 9, 3200).passed && !evaluate(EVENTS[2], 1, 2500).passed, '');
 const cash0 = store.data.cash;
 const r1 = completeEvent(store.data, EVENTS[0]);
 check('first pass pays the bonus once', r1.firstTime && store.data.cash === cash0 + EVENTS[0].bonus && !completeEvent(store.data, EVENTS[0]).firstTime && store.data.cash === cash0 + EVENTS[0].bonus, '');

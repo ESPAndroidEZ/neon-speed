@@ -23,8 +23,8 @@ export const EVENTS: StoryEvent[] = [
     before: DOCK_BEFORE, afterWin: DOCK_WIN, afterLose: DOCK_LOSE, loseAlt: [DOCK_LOSE_2, DOCK_LOSE_3],
   },
   {
-    id: 'drift', title: 'Drift Night', blurb: 'First snow. Sideways is the only way. Score 6,000 drift points in 3 laps.',
-    kind: 'drift', weather: 'SNOW', laps: 3, rivals: [], skillScale: 1, needPosition: 99, driftTarget: 6000, bonus: 4000, unlocks: [],
+    id: 'drift', title: 'Drift Night', blurb: 'First snow. No rivals, just you and the road: score 3,000 drift points in 3 laps.',
+    kind: 'drift', weather: 'SNOW', laps: 3, rivals: [], skillScale: 1, needPosition: 99, driftTarget: 3000, bonus: 4000, unlocks: [],
     card: 'First snow. Sideways is the only way.',
     before: DRIFT_BEFORE, afterWin: DRIFT_WIN, afterLose: DRIFT_LOSE, loseAlt: [DRIFT_LOSE_2, DRIFT_LOSE_3],
   },

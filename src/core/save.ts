@@ -38,6 +38,8 @@ export interface SaveData {
   settings: { volume: number; muted: boolean; quality: Quality; voice: boolean; autoQuality: boolean; weatherPhysics: PhysicsLevel; sfxVolume: number; engineVolume: number; musicVolume: number; cameraShake: 'OFF' | 'LOW' | 'NORMAL'; assist: AssistLevel; handlingModel: HandlingModel; stability: StabilityLevel; steerSens: number; rumble: boolean; calmUi: boolean; colorSafe: boolean; padDeadzone: number; difficulty: Difficulty; look: LookId; graphics: Graphics; lang: '' | 'en' | 'es'; subtitleSize: UiSize; minimapSize: UiSize; engineSound: 'rec' | 'synth'; musicStyle: 'house' | 'synth'; mix: SoundMix };
   races: number;
   career: CareerState;
+  /** Ids of the last races already paid out (a restored save of a finished race pays nothing twice). */
+  paid?: string[];
 }
 
 /** Minimal storage shape so tests can pass an in-memory object. localStorage satisfies it. */
@@ -119,7 +121,7 @@ export class SaveStore {
   /** Buy the next level of an upgrade if the cash is there. Returns false when it cannot be bought. */
   buyUpgrade(carId: string, id: UpgradeId, price: number): boolean {
     const have = this.data.upgrades[carId] ?? {};
-    if (this.data.cash < price || (have[id] ?? 0) >= 3) return false;
+    if (this.data.cash < price || (have[id] ?? 0) >= (id === 'stage' ? 4 : 3)) return false; // Power stage has 4 levels, the rest 3
     this.data.cash -= price;
     this.data.upgrades[carId] = { ...have, [id]: (have[id] ?? 0) + 1 };
     this.syncBuilds();
@@ -159,6 +161,16 @@ export class SaveStore {
       this.commit();
     }
     return record;
+  }
+
+  /** True the first time a race id is claimed (and remembers it); false when that race was already paid. No id = always true. */
+  claimRace(id?: string): boolean {
+    if (!id) return true;
+    const paid = (this.data.paid ??= []);
+    if (paid.includes(id)) return false;
+    paid.push(id);
+    if (paid.length > 16) paid.shift();
+    return true;
   }
 
   /** Bank a finished race: cash and best lap for the weather. Returns true if the lap is a new record. */

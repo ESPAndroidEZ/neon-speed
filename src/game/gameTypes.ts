@@ -20,7 +20,7 @@ export interface RaceSetup {
   /** Play the intro cinematic first (otherwise straight to the countdown). */
   cinematic: boolean;
   /** What is needed to rebuild this race from a save. */
-  meta?: { rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null; level?: string };
+  meta?: { rivalIds: string[]; skillScale: number; wet: boolean; eventId: string | null; level?: string; raceId?: string };
   /** `upgrades`: performance upgrades the AI car runs (free races match the player's; none = stock). */
   agents: { agent: AIRacerAgent; car: CarSpec; paint: number; glow?: number; upgrades?: Upgrades }[];
 }

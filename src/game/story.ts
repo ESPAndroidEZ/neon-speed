@@ -112,6 +112,7 @@ export class StoryController {
   finish(r: RaceResult): ResultsExtra | void {
     const d = this.d;
     const ev = this.current;
+    if (!d.store.claimRace(d.game.setup?.meta?.raceId)) r.cash = 0; // already paid (a save of this finish was reloaded)
     if (!ev) {
       d.store.recordRace(r.cash, r.bestLap, d.game.weather);
       return;

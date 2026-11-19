@@ -45,5 +45,18 @@ const calmOn = parseSave(JSON.stringify({ settings: { calmUi: true } }), base, C
 check('calm HUD: default off, loads on, junk is off', base.settings.calmUi === false && calmOn.settings.calmUi === true && parseSave(JSON.stringify({ settings: { calmUi: 'yes' } }), base, CARS).settings.calmUi === false && parseSave(JSON.stringify({}), base, CARS).settings.calmUi === false, '');
 const cbOn = parseSave(JSON.stringify({ settings: { colorSafe: true } }), base, CARS);
 check('colour-safe HUD: default off, loads on, junk is off', base.settings.colorSafe === false && cbOn.settings.colorSafe === true && parseSave(JSON.stringify({ settings: { colorSafe: 1 } }), base, CARS).settings.colorSafe === false && parseSave(JSON.stringify({}), base, CARS).settings.colorSafe === false, '');
+const pk = mem();
+const p1 = new SaveStore(pk, base, CARS);
+check('a race id pays once, even after a reload', p1.claimRace('r1') && !p1.claimRace('r1') && p1.claimRace('r2') && p1.claimRace(undefined), '');
+p1.commit();
+const p2 = new SaveStore(pk, base, CARS);
+check('paid ids survive a reload (no infinite money from a saved finish)', !p2.claimRace('r1') && !p2.claimRace('r2') && p2.claimRace('r3'), '');
+for (let i = 0; i < 30; i++) p2.claimRace('x' + i);
+check('paid list stays short', (p2.data.paid?.length ?? 0) <= 16, '');
+const up = new SaveStore(null, { ...base, cash: 100000 }, CARS);
+for (let i = 0; i < 4; i++) up.buyUpgrade('civic', 'stage', 1);
+check('power stage can reach level 4 and no further', up.data.upgrades.civic?.stage === 4 && !up.buyUpgrade('civic', 'stage', 1) && up.data.cash === 100000 - 4, String(up.data.upgrades.civic?.stage));
+for (let i = 0; i < 4; i++) up.buyUpgrade('civic', 'tyres', 1);
+check('other upgrades stay capped at level 3', up.data.upgrades.civic?.tyres === 3, '');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

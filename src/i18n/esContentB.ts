@@ -122,7 +122,7 @@ export const ES_CONTENT_B: Record<string, string> = {
   'Dock Sprint': 'Dock Sprint',
   'Rain. Jinx lives for this. Brake earlier than you think. Finish top two.': 'Lluvia. Jinx vive para esto. Frena antes de lo que crees. Termina entre los dos primeros.',
   'Drift Night': 'Noche de derrape',
-  'First snow. Sideways is the only way. Score 6,000 drift points in 3 laps.': 'Primera nevada. De lado es la única forma. Consigue 6.000 puntos de derrape en 3 vueltas.',
+  'First snow. No rivals, just you and the road: score 3,000 drift points in 3 laps.': 'Primera nevada. Sin rivales, solo tú y la carretera: consigue 3.000 puntos de derrape en 3 vueltas.',
   'Snow on the docks, folks. Tonight nobody races. They put on a show. Vex is already warming up the tyres.': 'Nieve en los muelles, amigos. Esta noche nadie corre. Dan un espectáculo. Vex ya está calentando los neumáticos.',
   'The crowd loved it. The garage is two days from the bank, not three hours.': 'El público lo adoró. El garaje está a dos días del banco, no a tres horas.',
   'Pretty. Tomorrow night, the Loop. You and me. Bring the garage deeds, if you still have them.': 'Bonito. Mañana por la noche, el Loop. Tú y yo. Trae las escrituras del garaje, si aún las tienes.',
