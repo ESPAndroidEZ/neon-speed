@@ -147,7 +147,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - ghost.ts (90) full or blocked storage: no ghost | fn attachGhost
 - ghostData.ts (82) Pure ghost-lap logic (no DOM, no three): recording at 10 Hz, best-lap choice and interp... | fn ghostPose, ghostDelta; class GhostRecorder; const GHOST_HZ, isGhostLap; iface GhostLap, Pose
 - hotkeys.ts (33) In-race keys: R reset, Esc pause / skip / leave the podium, Enter restart a free race. ... | fn installHotkeys; iface HotkeyDeps
-- inputSetup.ts (87) Hand this to the Game; sources are keyboard, gamepad and touch merged (or the dev demo ... | fn createControls; iface Controls
+- inputSetup.ts (88) Hand this to the Game; sources are keyboard, gamepad and touch merged (or the dev demo ... | fn createControls; iface Controls
 - lapPop.ts (18) Pure text for the pop-up shown when a lap ends (no DOM, no i18n): "LAP 2  1:24.10  +0.31". | fn lapPop; iface LapPop
 - nitroCue.ts (31) Nitro tank cues (display only): "EMPTY" when a burn runs the tank dry, then "READY" onc... | class NitroCue; const NITRO_EMPTY_AT, NITRO_READY_AT; type NitroCueKind
 - onlineRace.ts (107) The player as the room sees them: name and garage car. | fn installOnline; const saveOnlineName; iface OnlineDeps, Online
@@ -287,7 +287,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - graphicsSettings.ts (148) Called after Auto quality is switched on or off (the watchdog reads the saved flag). | fn graphicsRows; iface GraphicsDeps, GraphicsRows
 - handlingOverlay.ts (52) Handling debug overlay (plan section 7), toggled with F4: per-axle load (N), slip angle... | const handlingOverlay
 - haptics.ts (22) Short haptic tick: Capacitor Haptics in the app, navigator.vibrate on Android browsers,... | fn buzz
-- howToPlay.ts (52) "How to play": four short slides (drive, the overpowered handbrake, nitro, modes). Open... | fn showHowTo
+- howToPlay.ts (50) "How to play": four short slides (drive, the overpowered handbrake, nitro, modes). Open... | fn showHowTo
 - hud.ts (152) Plain-DOM HUD. Only touches the DOM when a value actually changes. | class Hud
 - icons.ts (18) Inline SVG icons (stroke = currentColor), so no font glyphs ever show up as boxes. 24x2... | const ICONS
 - installButton.ts (18) "Install app" menu button, or null when there is nothing to offer (already installed, n... | fn installButton
@@ -306,7 +306,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- rotateHint.ts (39) Small "rotate your phone" pill in portrait on touch screens. Landscape is the recommend... | fn installRotateHint
+- rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
 - settings.ts (201) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
 - settingsTabs.ts (24) Two panes with a tab bar on top: the few settings everyone needs, and the full list und... | fn settingsTabs
@@ -318,8 +318,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - textSizeRow.ts (20) Settings row: menu text size (normal, large, larger). | fn textSizeRow
 - theme.ts (32) Design tokens of docs/ui-style.md as CSS custom properties. Injected once by `injectCss... | const THEME_CSS
 - titleCards.ts (71) Full-screen "Previously in Kestrel Bay" cards. Click, Enter, Space or Esc skips; each c... | class TitleCards
-- touchButton.ts (68) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
-- touchControls.ts (197) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
+- touchButton.ts (69) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
+- touchControls.ts (202) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - touchLayout.ts (94) Phone button layout: where the player put each button (centre as a fraction of the scre... | fn sanitizeLayout, applyLayout, enableDrag, presetLayout; const sanitizeScale; type Layout, LayoutPreset
 - trackSelect.ts (98) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
 - tuneMenu.ts (128) Marks an unchanged stat in the upgrade preview so its segment can be dropped in any lan... | fn buildTuneMenu

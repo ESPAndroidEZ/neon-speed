@@ -68,6 +68,7 @@ export function createControls(demo: string | null, actions: { pause: () => void
       const padMenu = new PadMenu(); // gamepad drives the menus (not while racing: A is the handbrake)
       engine.onFrame((_a, dt) => {
         padMenu.update(dt, game.paused || game.state !== 'RACING');
+        touch.starting = game.state === 'RACING' && game.rm.phase !== 'RACING'; // grid + 3-2-1: manual gas for the launch
         game.rm.player.car.drivetrain.manual = GEARBOX.manual; // the driver's own car only; rivals always shift by themselves
         keys.speedKph = game.telemetry.speedKph;
         tilt.speedKph = touch.speedKph = Math.abs(game.telemetry.speedKph);

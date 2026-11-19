@@ -57,7 +57,7 @@ export const EN_CONTROLS = {
   'ob.title': 'How do you want to steer?',
   'ob.body': 'Landscape works best. You can change this any time in Settings.',
   'ob.lang': 'Language',
-  'tut.tilt': 'Turn the phone like a wheel to steer. Gas is automatic: BRAKE on the left, NITRO and HANDBRAKE on the right (one tap is enough).',
+  'tut.tilt': 'Turn the phone like a wheel to steer. Gas is automatic after GO (hold the GAS pedal during the 3-2-1 for a perfect launch): BRAKE on the left, NITRO and HANDBRAKE on the right (one tap is enough).',
   'tut.wheel': 'Drag anywhere on the lower left to steer. GAS and BRAKE on the right, NITRO and HANDBRAKE above your left thumb.',
   'tut.buttons': 'Left arrows steer. GAS and BRAKE on the right, NITRO and HANDBRAKE above the arrows.',
   'pad.gas': 'GAS',
@@ -69,5 +69,5 @@ export const EN_CONTROLS = {
   'pad.drag': 'DRAG TO STEER',
   'pad.pause': 'Pause',
   'pad.reset': 'Reset car',
-  'rotate.hint': 'Rotate your phone for the best view',
+  'rotate.title': 'Turn your phone sideways', 'rotate.hint': 'Neon Speed is played in landscape. Rotate your phone to continue.',
 } as const;

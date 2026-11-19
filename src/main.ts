@@ -202,7 +202,7 @@ engine.onFrame(() => {
   if (show !== hudShown) hud.setVisible((hudShown = show));
   if (pads !== padsShown) touch.setVisible((padsShown = pads));
 });
-installRotateHint();
+installRotateHint(() => { if (game.state === 'RACING' && !game.paused) pause.pause(); });
 
 container.addEventListener('pointerdown', () => game.skipIntro());
 installHotkeys({ game, juice, story, pause, leaveToMenu });

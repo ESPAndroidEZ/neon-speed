@@ -59,7 +59,7 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'ob.title': '¿Cómo quieres conducir?',
   'ob.body': 'Funciona mejor en horizontal. Puedes cambiarlo cuando quieras en Ajustes.',
   'ob.lang': 'Idioma',
-  'tut.tilt': 'Gira el móvil como un volante para conducir. El acelerador es automático: FRENO a la izquierda, NITRO y FRENO DE MANO a la derecha (basta un toque).',
+  'tut.tilt': 'Gira el móvil como un volante para conducir. El acelerador es automático tras la salida (mantén ACELERAR durante el 3-2-1 para una salida perfecta): FRENO a la izquierda, NITRO y FRENO DE MANO a la derecha (basta un toque).',
   'tut.wheel': 'Arrastra en la parte inferior izquierda para girar. ACELERAR y FRENAR a la derecha, NITRO y FRENO DE MANO sobre tu pulgar izquierdo.',
   'tut.buttons': 'Las flechas de la izquierda giran. ACELERAR y FRENAR a la derecha, NITRO y FRENO DE MANO sobre las flechas.',
   'pad.gas': 'ACELERAR',
@@ -71,5 +71,5 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'pad.drag': 'ARRASTRA PARA GIRAR',
   'pad.pause': 'Pausa',
   'pad.reset': 'Reiniciar coche',
-  'rotate.hint': 'Gira el móvil para ver mejor',
+  'rotate.title': 'Gira el móvil de lado', 'rotate.hint': 'Neon Speed se juega en horizontal. Gira el móvil para continuar.',
 } as const;

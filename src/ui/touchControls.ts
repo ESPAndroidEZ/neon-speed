@@ -14,6 +14,8 @@ export interface TouchControls extends InputSource {
   setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'> & Partial<Pick<ControlPrefs, 'layout' | 'btnScale'>>): void;
   /** Layout editor: while on, buttons are dragged (not pressed), the overlay stays above menus and `onMoved` fires after each drop. */
   setEditing(on: boolean, layout?: Layout, onMoved?: () => void): void;
+  /** True from the grid until GO: tilt auto-gas is off and a GAS pedal shows, so the launch can be timed (set by game/inputSetup). */
+  starting: boolean;
   /** Current layer (the editor measures the pedals from it). */
   readonly layer: HTMLElement;
   /** Speed for the digital-steering ramp of the Buttons scheme. */
@@ -122,7 +124,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     const pause = small('pse', ICONS.pause, opts?.onPause, t('pad.pause'));
     const scheme: ControlScheme = p.scheme;
     if (scheme === 'tilt') {
-      const gasPedal = p.autoGas ? null : place(pedal('gas', 'pedal gas', t('pad.gas')), { right: S.r, bottom: S.b });
+      const gasPedal = place(pedal('gas', p.autoGas ? 'pedal gas startgas' : 'pedal gas', t('pad.gas')), { right: S.r, bottom: S.b }); // with auto gas it only shows during the countdown
       const col = p.autoGas ? S.r : `calc(${S.r} + ${S.u} * 1.05 + 22px)`;
       layer.append(
         place(pedal('brake', 'big brk', t('pad.brake'), t('pad.reverse')), { left: S.l, bottom: S.b }),
@@ -131,7 +133,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
         place(pause, { right: p.autoGas ? `calc(${S.r} + ${S.u} / 2 - 22px)` : `calc(${S.r} + ${S.u} * 0.52 - 22px)`, bottom: `calc(${S.b} + ${S.u} * ${p.autoGas ? 1 : 1.55} + 30px)`, top: 'auto' }),
         place(reset, { left: S.l }),
       );
-      if (gasPedal) layer.append(gasPedal);
+      layer.append(gasPedal);
     } else {
       const arrows = scheme === 'buttons';
       if (!arrows) layer.append(wheelZone());
@@ -160,13 +162,16 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
 
   const api: TouchControls = {
     speedKph: 0,
+    starting: false,
     sample(out: CarInput): CarInput {
       const on = isTouch && visible;
       const now = performance.now();
       const dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 0;
       lastT = now;
       const digital = ramp.update((left ? 1 : 0) - (right ? 1 : 0), api.speedKph, dt);
-      out.throttle = on ? (auto ? (brake > 0 ? 0 : 1) : gas) : 0;
+      const manualNow = !auto || api.starting; // tilt auto-gas only after GO: holding gas through the countdown timed the launch as EARLY (bogged)
+      if ((auto && api.starting) !== (root.dataset.start === '1')) { if (auto && api.starting) root.dataset.start = '1'; else delete root.dataset.start; }
+      out.throttle = on ? (manualNow ? gas : brake > 0 ? 0 : 1) : 0;
       out.brake = on ? brake : 0;
       out.steer = on ? (root.dataset.scheme === 'buttons' ? digital : stick) : 0;
       out.handbrake = on && handbrake;

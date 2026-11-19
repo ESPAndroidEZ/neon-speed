@@ -30,6 +30,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | engine / music / turbo sound | `audio/engineSamples.ts` (recorded loops, `samplePitch`), `data/engineSounds.ts` (`tune {trim,tone}` per car), `audio/engineVoice.ts` (synth), `audio/house*.ts` |
 | lights, bloom, glare, neon | `render/lookConfig.ts`, `core/grade.ts`, `core/looks.ts`, `fx/finalFx.ts` (streak pass), `fx/headlights.ts`, `world/carLights.ts`, emissive strengths in `world/tunnelBridge.ts props.ts landmarks.ts` |
 | menus / garage / tuning | `ui/menu.ts`, `ui/garage.ts` (+`garageLook`), `ui/tuneMenu.ts`, `ui/menuCss.ts` (all menu CSS) |
+| phone orientation, launch gas | `ui/rotateHint.ts` (landscape card + lock), `ui/touchControls.ts` (`starting`, `startgas` pedal), `game/inputSetup.ts` |
 | tutorial, subtitles | `ui/howToPlay.ts` (once, key `rb-howto`), `ui/subtitles.ts` (`SUBTITLES.on`, default off) |
 | deploy to the server | section 6 |
 
