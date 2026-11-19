@@ -11,6 +11,7 @@ import { button, h } from './uiKit';
 import { CARS } from '../data/cars';
 import { t } from '../i18n';
 import { langRow } from './langRow';
+import { settingsTabs } from './settingsTabs';
 import { applyUiSizes } from './uiSizes';
 import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
 import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
@@ -101,17 +102,6 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   });
   voice.append(vbox);
 
-  const auto = h('label', 'rb-row', `<span class="rb-lbl">${t('set.autoQuality')}</span>`);
-  const abox = h('input') as HTMLInputElement;
-  abox.type = 'checkbox';
-  abox.checked = s.autoQuality;
-  abox.addEventListener('change', () => {
-    s.autoQuality = abox.checked;
-    applySettings(d);
-    d.store.commit();
-  });
-  auto.append(abox);
-
   const wp = h('div', 'rb-row', `<span class="rb-lbl">${t('set.wphys')}</span>`);
   const shake = h('div', 'rb-row', `<span class="rb-lbl">${t('set.shake')}</span>`);
   for (const lv of ['OFF', 'LOW', 'NORMAL'] as const) {
@@ -162,18 +152,27 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     p.append(h('h3', '', title), ...rows);
     return p;
   };
-  const grid = h('div', 'rb-settings');
-  grid.append(
-    panel(t('set.secAudio'), [vol, soundMixRow(s, { engine: engVol, music: musVol }, () => applySettings(d), () => d.store.commit()), engVol, engineSoundRow(s, () => d.store.commit()), sfxVol, musVol, musicStyleRow(s, () => d.store.commit()), mute, voice, soundCredits()]),
-    panel(t('set.secGame'), [langRow(), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), shake, wp, hint, ...(import.meta.env.DEV ? [unlockAll(d.store)] : [])]), // the free unlock is a dev/test tool only
-    panel(t('set.secControls'), [...(d.extraRows?.() ?? []), ...drivingRows(d.store, () => d.onDriving?.())]),
-    panel(t('set.graphics'), [...graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase }), auto]),
+  const driving = drivingRows(d.store, () => d.onDriving?.());
+  const gfx = graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase, onAuto: () => applySettings(d) });
+  const basic = h('div', 'rb-settings');
+  basic.append(
+    panel(t('set.secAudio'), [vol, soundMixRow(s, { engine: engVol, music: musVol }, () => applySettings(d), () => d.store.commit()), mute]),
+    panel(t('set.secGame'), [langRow(), shake, wp, hint]),
+    panel(t('set.secControls'), [...(d.extraRows?.() ?? []), ...driving.basic]),
+    panel(t('set.graphics'), gfx.basic),
   );
-  root.append(grid, button(t('common.back'), d.onBack));
+  const advanced = h('div', 'rb-settings');
+  advanced.append(
+    panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), voice, soundCredits()]),
+    panel(t('set.secGame'), [sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store)]),
+    panel(t('set.secControls'), driving.advanced),
+    panel(t('set.graphics'), gfx.advanced),
+  );
+  root.append(settingsTabs(basic, advanced), button(t('common.back'), d.onBack));
   return root;
 }
 
-/** Test build: every car owned for free (the garage then lets anyone try them all). */
+/** Every car owned for free (the garage then lets anyone try them all). Under Advanced > Game. */
 function unlockAll(store: SaveStore): HTMLElement {
   const b = button('', () => {
     for (const c of CARS) if (!store.data.owned.includes(c.id)) store.data.owned.push(c.id);

@@ -79,10 +79,16 @@ export const WORK_LIMIT_MS = 14;
 export class AutoQuality {
   enabled = true;
   onDowngrade: ((tier: Quality) => void) | null = null;
+  /** Called when spare frame time lets Auto raise the tier. */
+  onUpgrade: ((tier: Quality) => void) | null = null;
+  /** Highest tier Auto may pick by itself (the device guess: phones MEDIUM, others HIGH). */
+  ceiling: Quality = 'high';
+  private noUp: Quality | null = null; // the tier that was too slow this session: never go back up to it
+  private upGood = 0;
   private acc = 0;
   private frames = 0;
   private bad = 0;
-  private cooldown = 4;
+  private cooldown = 8; // the first seconds compile shaders: do not judge them
   private readonly limit: number;
 
   constructor(minFps = isPhone() ? 50 : 40) { // phones: a jerky 45 fps must count as low too
@@ -112,19 +118,29 @@ export class AutoQuality {
     this.acc = 0;
     this.frames = 0;
     const busy = engine.workMs > WORK_LIMIT_MS; // a frame costing more than 14 ms leaves no headroom on a 60 Hz phone
-    if (avg > this.limit || busy) {
-      this.good = 0;
+    const lim = engine.fpsCap > 0 ? Math.max(this.limit, 1 / (engine.fpsCap * 0.8)) : this.limit; // a 30 fps cap is not "slow"
+    if (avg > lim || busy) {
+      this.good = this.upGood = 0;
       if (this.dyn > 0.6) { this.setDyn(engine, this.dyn - 0.1); this.cooldown = 1.5; return; } // resolution first
       this.bad++;
     } else {
       this.bad = 0;
-      if (avg < this.limit * 0.72 && engine.workMs < WORK_LIMIT_MS * 0.6 && ++this.good >= 3 && this.dyn < 1) { this.good = 0; this.setDyn(engine, this.dyn + 0.1); this.cooldown = 1.5; }
+      const room = engine.workMs < WORK_LIMIT_MS * 0.6; // spare frame time (vsync keeps the average near the display rate, so work time is the signal)
+      if (room && ++this.good >= 3 && this.dyn < 1) { this.good = 0; this.setDyn(engine, this.dyn + 0.1); this.cooldown = 1.5; }
+      const up = ORDER[ORDER.indexOf(current) + 1];
+      if (room && this.dyn >= 1 && up && ORDER.indexOf(up) <= ORDER.indexOf(this.ceiling) && up !== this.noUp && ++this.upGood >= 12) { // ~18 s of headroom at full resolution
+        this.upGood = 0;
+        this.cooldown = 8;
+        applyQuality(engine, up);
+        this.onUpgrade?.(up);
+      } else if (!room) this.upGood = 0;
       return;
     }
     const i = ORDER.indexOf(current);
     if (this.bad >= 2 && i > 0) { // still slow at 60 % resolution: drop a tier (and give resolution back)
       this.bad = 0;
       this.cooldown = 6;
+      this.noUp = current;
       applyQuality(engine, ORDER[i - 1]);
       this.setDyn(engine, 0.8);
       this.onDowngrade?.(ORDER[i - 1]);

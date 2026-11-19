@@ -13,6 +13,11 @@ export function installAutoTier(engine: Engine, store: SaveStore, kv: Storage | 
     store.commit();
     toast(t('main.lowFps', { tier: t(`opt.${tier}`).toUpperCase() }));
   };
+  auto.onUpgrade = (tier) => {
+    store.data.settings.quality = tier;
+    store.commit();
+  };
+  auto.ceiling = isPhone() ? 'medium' : 'high';
   engine.onFrame((_a, dt) => auto.update(dt, engine));
   if (!navigator.webdriver && firstRunTier(store.data.settings, deviceHints(engine.renderer.getContext(), isPhone()), kv)) store.commit(); // tests keep their tier
   return auto;

@@ -15,6 +15,7 @@ export const ES_MENU: Record<keyof typeof EN_MENU, string> = {
   'opt.BEGINNER': 'novato', 'opt.STANDARD': 'estándar', 'opt.PRO': 'pro',
   'opt.ROOKIE': 'novato', 'opt.STREET': 'calle', 'opt.LEGEND': 'leyenda',
   'opt.LIGHT': 'ligera', 'opt.FULL': 'total', 'opt.legacy': 'arcade v1', 'opt.v2': 'real v2',
+  'opt.auto': 'auto', 'set.tabBasic': 'Básico', 'set.tabAdvanced': 'Avanzado', 'gfx.autoNow': 'Se adapta a tu dispositivo (ahora {tier})',
   'opt.low': 'bajo', 'opt.medium': 'medio', 'opt.high': 'alto', 'opt.ultra': 'ultra',
   'menu.chapter': 'Capítulo 1 · Harbor Loop',
   'menu.press': 'Pulsa Intro / Toca',

@@ -10,12 +10,21 @@ export interface GraphicsDeps {
   engine: Engine;
   hud?: { setScale(s: number): void };
   chase: { tuning: { fovMin: number; fovMax: number } };
+  /** Called after Auto quality is switched on or off (the watchdog reads the saved flag). */
+  onAuto?: () => void;
+}
+
+export interface GraphicsRows {
+  /** The few rows everyone needs: quality (Auto or a fixed tier) and the frame cap. */
+  basic: HTMLElement[];
+  /** Benchmark and every detail slider. */
+  advanced: HTMLElement[];
 }
 
 const TIERS: Quality[] = ['low', 'medium', 'high', 'ultra'];
 
-/** Graphics screen rows: presets, resolution scale, toggles, particle density, draw distance, anti-aliasing, FPS cap, FOV, HUD scale, motion blur, benchmark. */
-export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
+/** Graphics screen rows. Basic: quality (Auto / tier) and frame cap. Advanced: resolution scale, toggles, particle density, draw distance, anti-aliasing, FPS cap, FOV, HUD scale, motion blur, benchmark. */
+export function graphicsRows(d: GraphicsDeps): GraphicsRows {
   const s = d.store.data.settings;
   const apply = (): void => {
     s.graphics = { ...GRAPHICS };
@@ -25,14 +34,28 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
   };
   const presets = h('div', 'rb-row', `<span class="rb-lbl">${t('gfx.preset')}</span>`);
   const note = h('div', 'rb-sub', '');
-  const refreshPreset = (): void => presets.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.lv === s.quality));
-  const choose = (q: Quality): void => {
-    s.quality = q;
-    usePreset(q);
+  const now = h('div', 'rb-sub', '');
+  const refreshPreset = (): void => {
+    presets.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', s.autoQuality ? b.dataset.lv === 'auto' : b.dataset.lv === s.quality));
+    now.textContent = s.autoQuality ? t('gfx.autoNow', { tier: t(`opt.${s.quality}`).toUpperCase() }) : '';
+  };
+  const choose = (q: Quality | 'auto', keepAuto = false): void => {
+    if (q === 'auto') s.autoQuality = true;
+    else {
+      if (!keepAuto) s.autoQuality = false; // a fixed choice switches the watchdog off
+      s.quality = q;
+      usePreset(q);
+    }
     apply();
+    d.onAuto?.();
     refreshPreset();
+    refreshFps();
     rebuild();
   };
+  const autoBtn = button(t('opt.auto'), () => choose('auto'));
+  autoBtn.dataset.lv = 'auto';
+  autoBtn.style.minWidth = '84px';
+  presets.append(autoBtn);
   for (const q of TIERS) {
     const b = button(t(`opt.${q}`), () => choose(q));
     b.dataset.lv = q;
@@ -44,10 +67,23 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
     window.setTimeout(() => {
       const r = benchmark(d.engine);
       note.textContent = t('gfx.result', { ms: r.ms.toFixed(1), tier: t(`opt.${r.tier}`).toUpperCase() });
-      choose(r.tier);
+      choose(r.tier, true);
     }, 60);
   });
+  const fpsRow = h('div', 'rb-row', `<span class="rb-lbl">${t('gfx.fps')}</span>`);
+  const refreshFps = (): void => fpsRow.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', Number(b.dataset.v) === GRAPHICS.fpsCap));
+  for (const [val, label] of [[0, t('opt.auto')], [30, '30'], [60, '60'], [120, '120']] as const) {
+    const b = button(label, () => {
+      GRAPHICS.fpsCap = val;
+      apply();
+      refreshFps();
+    });
+    b.dataset.v = String(val);
+    b.style.minWidth = '70px';
+    fpsRow.append(b);
+  }
   refreshPreset();
+  refreshFps();
   const body = h('div');
   const rebuild = (): void => {
     body.replaceChildren();
@@ -102,12 +138,11 @@ export function graphicsRows(d: GraphicsDeps): HTMLElement[] {
     slider(t('gfx.particles'), 'particles', 0.25, 1.5, 0.05, (v) => `${Math.round(v * 100)}%`);
     chips(t('gfx.draw'), 'drawDistance', [[0, t('gfx.short')], [1, t('opt.medium')], [2, t('gfx.far')]]);
     chips(t('gfx.aa'), 'msaa', [[0, t('opt.OFF')], [2, '2x'], [4, '4x']]);
-    chips(t('gfx.fps'), 'fpsCap', [[0, t('gfx.display')], [30, '30'], [60, '60'], [120, '120']]);
     slider(t('gfx.fov'), 'fov', 50, 75, 1, (v) => `${Math.round(v)}°`);
     slider(t('gfx.hud'), 'hudScale', 0.8, 1.3, 0.05, (v) => `${Math.round(v * 100)}%`);
     slider(t('gfx.blur'), 'motionBlur', 0, 1, 0.05, (v) => `${Math.round(v * 100)}%`);
   };
   rebuild();
   void PRESETS;
-  return [presets, h('div', 'rb-row'), bench, note, body];
+  return { basic: [presets, now, fpsRow], advanced: [bench, note, body] };
 }

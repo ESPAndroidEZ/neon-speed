@@ -19,7 +19,8 @@ export interface DeviceHints {
 export function guessTier(h: DeviceHints): Quality {
   const g = h.gpu.toLowerCase();
   if (/swiftshader|llvmpipe|software|basic render/.test(g)) return 'low';
-  if (h.phone) return (h.memory > 0 && h.memory <= 3) || (h.cores > 0 && h.cores <= 4) || /mali-[gt]?[1-7]\d\b|adreno \(tm\) [1-5]\d\d\b|powervr/.test(g) ? 'low' : 'medium';
+  // Start no lower than MEDIUM on real GPUs: Auto quality (core/quality) lowers it when the device really cannot keep up, and raises it again with spare time.
+  if (h.phone) return h.memory > 0 && h.memory <= 2 ? 'low' : 'medium';
   if (/intel|uhd|iris|apple m1|adreno|mali/.test(g) || (h.cores > 0 && h.cores <= 4)) return 'medium';
   return 'high';
 }

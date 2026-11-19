@@ -24,8 +24,8 @@ export interface Graphics {
 }
 
 export const PRESETS: Record<Quality, Graphics> = {
-  low: { resScale: 0.7, bloom: false, reflections: false, shadows: false, particles: 0.5, drawDistance: 0, msaa: 0, fpsCap: 60, fov: 60, hudScale: 1, motionBlur: 0 },
-  medium: { resScale: 0.85, bloom: true, reflections: false, shadows: false, particles: 0.8, drawDistance: 1, msaa: 0, fpsCap: 60, fov: 60, hudScale: 1, motionBlur: 0.5 },
+  low: { resScale: 0.7, bloom: false, reflections: false, shadows: false, particles: 0.5, drawDistance: 0, msaa: 0, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 0 },
+  medium: { resScale: 0.85, bloom: true, reflections: false, shadows: false, particles: 0.8, drawDistance: 1, msaa: 0, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 0.5 },
   high: { resScale: 1, bloom: true, reflections: true, shadows: true, particles: 1, drawDistance: 2, msaa: 4, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 1 },
   ultra: { resScale: 1.25, bloom: true, reflections: true, shadows: true, particles: 1.4, drawDistance: 2, msaa: 4, fpsCap: 0, fov: 60, hudScale: 1, motionBlur: 1 },
 };

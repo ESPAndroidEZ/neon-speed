@@ -48,8 +48,8 @@ function choiceRow<T extends string>(label: string, opts: readonly T[], get: () 
   return [row, hint];
 }
 
-/** Driving assists, steering sensitivity and gamepad options as settings rows. */
-export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement[] {
+/** Driving options as settings rows: `basic` = assists and opponents, `advanced` = the rest (look, handling model, sensitivity, gamepad, units). */
+export function drivingRows(store: SaveStore, onChange: () => void): { basic: HTMLElement[]; advanced: HTMLElement[] } {
   const s = store.data.settings;
   const save = (): void => {
     store.commit();
@@ -152,5 +152,5 @@ export function drivingRows(store: SaveStore, onChange: () => void): HTMLElement
   cb.append(cbBox);
   const model = choiceRow(t('drv.handling'), ['legacy', 'v2'] as const, () => s.handlingModel, (v) => { s.handlingModel = v; save(); }, 'hint.model');
   const stab = choiceRow(t('drv.stability'), ['OFF', 'LIGHT', 'FULL'] as const, () => s.stability, (v) => { s.stability = v; save(); }, 'hint.stab');
-  return [lookRow, assist, hint, ...model, ...stab, diff, diffHint, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow(), textSizeRow()];
+  return { basic: [assist, hint, diff, diffHint], advanced: [lookRow, ...model, ...stab, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow(), textSizeRow()] };
 }

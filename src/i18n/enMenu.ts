@@ -13,6 +13,7 @@ export const EN_MENU = {
   'opt.BEGINNER': 'beginner', 'opt.STANDARD': 'standard', 'opt.PRO': 'pro',
   'opt.ROOKIE': 'rookie', 'opt.STREET': 'street', 'opt.LEGEND': 'legend',
   'opt.LIGHT': 'light', 'opt.FULL': 'full', 'opt.legacy': 'v1 arcade', 'opt.v2': 'v2 real',
+  'opt.auto': 'auto', 'set.tabBasic': 'Basic', 'set.tabAdvanced': 'Advanced', 'gfx.autoNow': 'Auto adjusts to your device (now {tier})',
   'opt.low': 'low', 'opt.medium': 'medium', 'opt.high': 'high', 'opt.ultra': 'ultra',
   'menu.chapter': 'Chapter 1 · Harbor Loop',
   'menu.press': 'Press Enter / Tap',
