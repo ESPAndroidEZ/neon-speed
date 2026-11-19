@@ -1,4 +1,4 @@
-import { ENGINE_SOUNDS, engineSoundUrl, type EngineLayer } from '../data/engineSounds';
+import { ENGINE_SOUNDS, engineSoundUrl, type EngineLayer, type SoundTune } from '../data/engineSounds';
 import type { EngineVoice } from './engineVoice';
 
 /**
@@ -10,9 +10,19 @@ import type { EngineVoice } from './engineVoice';
 /** Loops are mastered at -12 dBFS RMS; this lifts them to about the synth's level. */
 const SAMPLE_GAIN = 1.5;
 
-const cache = new Map<string, Promise<{ layer: EngineLayer; buf: AudioBuffer }[] | null>>();
+/** A loaded loop; `tune` is the car's voicing (every loop of a car carries the same one). */
+export interface Loop { layer: EngineLayer; buf: AudioBuffer; tune?: SoundTune }
 
-export function loadEngineSamples(ctx: BaseAudioContext, carId: string): Promise<{ layer: EngineLayer; buf: AudioBuffer }[] | null> {
+/**
+ * Playback pitch past the recorded rpm: stretching a loop far above its recording sounds thin and shrill, so the part
+ * above 1x is compressed (1.3x -> 1.17x) and everything is trimmed a little (per car, `tune.trim`).
+ */
+export const PITCH_SHAPE = 0.6;
+export const samplePitch = (rate: number, trim = 0.96): number => (rate > 1 ? rate ** PITCH_SHAPE : rate) * trim;
+
+const cache = new Map<string, Promise<Loop[] | null>>();
+
+export function loadEngineSamples(ctx: BaseAudioContext, carId: string): Promise<Loop[] | null> {
   const set = ENGINE_SOUNDS[carId];
   if (!set || set.layers.length === 0) return Promise.resolve(null);
   let p = cache.get(carId);
@@ -20,7 +30,7 @@ export function loadEngineSamples(ctx: BaseAudioContext, carId: string): Promise
     p = Promise.all(set.layers.map(async (layer) => {
       const r = await fetch(engineSoundUrl(carId, layer.file));
       if (!r.ok) throw new Error(`${layer.file}: HTTP ${r.status}`);
-      return { layer, buf: await ctx.decodeAudioData(await r.arrayBuffer()) };
+      return { layer, buf: await ctx.decodeAudioData(await r.arrayBuffer()), tune: set.tune };
     })).catch((e: unknown) => {
       console.info(`[audio] ${carId}: engine samples unavailable (${e instanceof Error ? e.message : 'error'}), using the synth`);
       return null;
@@ -51,12 +61,18 @@ export function layerMix(rpm: number, loopRpm: readonly number[], gains: Float32
 }
 
 /** EngineVoice from loaded loops (same interface as the synth, so it drops in). */
-export function createSampleVoice(ctx: AudioContext, loops: { layer: EngineLayer; buf: AudioBuffer }[]): EngineVoice {
+export function createSampleVoice(ctx: AudioContext, loops: Loop[]): EngineVoice {
   const out = ctx.createGain();
+  const tune = loops[0]?.tune;
+  const tone = ctx.createBiquadFilter(); // takes the edge off the top end (less shrill, esp. when a loop is stretched up)
+  tone.type = 'lowpass';
+  tone.frequency.value = tune?.tone ?? 5200;
+  tone.Q.value = 0.5;
+  tone.connect(out);
   const on = loops.filter((l) => l.layer.load !== 'off'), off = loops.filter((l) => l.layer.load !== 'on');
   const mk = (group: typeof loops): { src: AudioBufferSourceNode[]; g: GainNode[]; rpm: number[]; gains: Float32Array; rates: Float32Array; bus: GainNode } => {
     const bus = ctx.createGain();
-    bus.connect(out);
+    bus.connect(tone);
     const src: AudioBufferSourceNode[] = [], g: GainNode[] = [];
     for (const l of group) {
       const s = ctx.createBufferSource();
@@ -75,7 +91,7 @@ export function createSampleVoice(ctx: AudioContext, loops: { layer: EngineLayer
   const apply = (m: ReturnType<typeof mk>, rpm: number, level: number, t: number): void => {
     layerMix(rpm, m.rpm, m.gains, m.rates);
     for (let i = 0; i < m.src.length; i++) {
-      m.src[i].playbackRate.setTargetAtTime(m.rates[i], t, 0.03);
+      m.src[i].playbackRate.setTargetAtTime(samplePitch(m.rates[i], tune?.trim), t, 0.03);
       m.g[i].gain.setTargetAtTime(m.gains[i] * level, t, 0.04);
     }
   };
@@ -90,6 +106,7 @@ export function createSampleVoice(ctx: AudioContext, loops: { layer: EngineLayer
     },
     dispose() {
       for (const m of [A, B]) if (m) { for (const s of m.src) { try { s.stop(); } catch { /* already stopped */ } } m.bus.disconnect(); }
+      tone.disconnect();
       out.disconnect();
     },
   };

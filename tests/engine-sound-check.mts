@@ -2,7 +2,7 @@
 import { existsSync } from 'node:fs';
 import { CARS } from '../src/data/cars.ts';
 import { ENGINE_SOUNDS } from '../src/data/engineSounds.ts';
-import { layerMix, loadEngineSamples } from '../src/audio/engineSamples.ts';
+import { layerMix, loadEngineSamples, samplePitch } from '../src/audio/engineSamples.ts';
 import { RevTest } from '../src/audio/revTest.ts';
 let failed = 0;
 const check = (n: string, ok: boolean, i: string): void => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}  (${i})`); };
@@ -22,6 +22,10 @@ layerMix(NaN, loops, g, r);
 check('crossfade and pitch are finite from 0 to past redline (and for NaN input)', nan === 0 && [...g, ...r].every(Number.isFinite), `${nan} NaN`);
 check('equal-power crossfade (gains squared sum to 1)', badSum === 0, `${badSum} off`);
 check('pitch stays within 0.5..2', [...r].every((x) => x >= 0.5 && x <= 2), '');
+let mono = true, last = 0;
+for (let x = 0.5; x <= 2; x += 0.01) { const y = samplePitch(x, 1); if (y < last - 1e-9) mono = false; last = y; }
+check('stretched pitch is compressed above 1x but never drops, and stays in range', mono && samplePitch(1.36, 1) < 1.25 && samplePitch(0.8, 1) === 0.8 && [0.5, 1, 2].every((x) => samplePitch(x) > 0.4 && samplePitch(x) < 2), `1.36 -> ${samplePitch(1.36, 1).toFixed(2)}`);
+check('every car has a voicing, the Evo is the darkest', CARS.every((c) => ENGINE_SOUNDS[c.id].tune?.tone && ENGINE_SOUNDS[c.id].tune?.trim) && Math.min(...CARS.map((c) => ENGINE_SOUNDS[c.id].tune?.tone ?? 9e9)) === ENGINE_SOUNDS.evo.tune?.tone, '');
 const fake = { decodeAudioData: async () => { throw new Error('no'); } } as unknown as BaseAudioContext;
 ENGINE_SOUNDS.__test = { character: 'turbo-i4', engine: 'test', layers: [{ file: 'missing.ogg', rpm: 3000, load: 'both' }] };
 let threw = false, res: unknown = 'x';
