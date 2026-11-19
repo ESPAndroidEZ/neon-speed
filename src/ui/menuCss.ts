@@ -74,7 +74,7 @@ h2.rb-title::after{content:'';display:block;width:clamp(48px,6vw,84px);height:3p
 .rb-up .u-d i{width:14px;height:5px;border-radius:2px;background:#ffffff26}.rb-up .u-d i.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
 .rb-up .u-p{font-size:12px;color:var(--text-dim);margin-top:3px}
 .rb-up .u-g{font-size:12px;color:var(--green);margin-top:2px;font-variant-numeric:tabular-nums}
-.rb-up .u-a{font-size:12px;color:var(--text-faint);line-height:1.4;margin-top:3px;max-width:330px;font-weight:500}
+.rb-up{cursor:pointer}.rb-up .u-n::after{content:'?';display:inline-block;margin-left:7px;width:16px;height:16px;border-radius:50%;border:1px solid #ffffff44;font-size:10px;line-height:15px;text-align:center;color:var(--text-dim);vertical-align:middle}.rb-up .u-a{display:none}.rb-up.open .u-a{display:block}.rb-up .u-a{font-size:12px;color:var(--text-faint);line-height:1.4;margin-top:3px;max-width:330px;font-weight:500}
 .rb-set{justify-content:space-between!important;flex-wrap:nowrap!important;width:100%;min-height:40px;gap:10px;border-bottom:1px solid #ffffff0b}
 .rb-set .rb-lbl{flex:1 1 auto;text-align:left;font-size:13px}
 .rb-set input[type=range]{width:min(180px,40vw)!important}

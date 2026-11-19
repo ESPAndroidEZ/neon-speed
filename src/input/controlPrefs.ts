@@ -1,5 +1,6 @@
 import { sanitizeTilt } from './tiltMap';
 import type { TiltPrefs } from './tiltMap';
+import { sanitizeLayout, sanitizeScale, type Layout } from '../ui/touchLayout';
 
 /** Phone control schemes: tilt the phone, the drag "touch wheel", or left/right buttons. */
 export type ControlScheme = 'tilt' | 'wheel' | 'buttons';
@@ -14,13 +15,17 @@ export interface ControlPrefs {
   chosen: boolean;
   /** Schemes whose in-game tutorial was dismissed. */
   seen: ControlScheme[];
+  /** Where the player moved each touch button (`scheme:button` -> screen fraction); absent = the default spot. */
+  layout: Layout;
+  /** Size of all touch buttons, 0.8-1.4. */
+  btnScale: number;
 }
 
 const KEY = 'rb-controls';
 /** Bump with a migration step below when the layout changes. */
 export const CONTROLS_VERSION = 1;
 
-export const defaultControls = (): ControlPrefs => ({ scheme: 'wheel', autoGas: true, tilt: sanitizeTilt(null), chosen: false, seen: [] });
+export const defaultControls = (): ControlPrefs => ({ scheme: 'wheel', autoGas: true, tilt: sanitizeTilt(null), chosen: false, seen: [], layout: {}, btnScale: 1 });
 
 /** Parse stored JSON; corrupt or future versions fall back to defaults, field by field where possible. */
 export function parseControls(json: string | null): ControlPrefs {
@@ -35,6 +40,8 @@ export function parseControls(json: string | null): ControlPrefs {
       tilt: sanitizeTilt(o.tilt),
       chosen: o.chosen === true,
       seen: Array.isArray(o.seen) ? o.seen.filter((s): s is ControlScheme => SCHEMES.includes(s)) : [],
+      layout: sanitizeLayout(o.layout),
+      btnScale: sanitizeScale(o.btnScale),
     };
   } catch {
     return d;

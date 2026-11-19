@@ -3,13 +3,18 @@ import type { ControlPrefs, ControlScheme } from '../input/controlPrefs';
 import { SteerRamp } from '../input/steerRamp';
 import { ICONS } from './icons';
 import { holdButton, place, TOUCH_CSS } from './touchButton';
+import { applyLayout, enableDrag, type Layout } from './touchLayout';
 import { onLangChange, t } from '../i18n';
 
 export interface TouchControls extends InputSource {
   /** Show or hide the overlay (the architect hides it in menus). */
   setVisible(v: boolean): void;
   /** Rebuild the layout for a scheme (tilt / touch wheel / buttons) and the auto-gas choice. */
-  setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'>): void;
+  setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'> & Partial<Pick<ControlPrefs, 'layout' | 'btnScale'>>): void;
+  /** Layout editor: while on, buttons are dragged (not pressed), the overlay stays above menus and `onMoved` fires after each drop. */
+  setEditing(on: boolean, layout?: Layout, onMoved?: () => void): void;
+  /** Current layer (the editor measures the pedals from it). */
+  readonly layer: HTMLElement;
   /** Speed for the digital-steering ramp of the Buttons scheme. */
   speedKph: number;
 }
@@ -29,7 +34,8 @@ const ARROW_R = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="current
 export function createTouchControls(container: HTMLElement, opts?: { onReset?: () => void; onPause?: () => void }): TouchControls {
   const isTouch = matchMedia('(pointer: coarse)').matches;
   let gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
-  let stick = 0, left = false, right = false, auto = false, lastT = 0;
+  let stick = 0, left = false, right = false, auto = false, lastT = 0, editing = false;
+  let stopDrag: (() => void) | null = null;
   const ramp = new SteerRamp();
   const root = document.createElement('div');
   root.className = 'rb-tc';
@@ -45,12 +51,16 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     gas = brake = stick = 0;
     handbrake = nitro = left = right = false;
   };
+  const tag = (el: HTMLDivElement, id: string): HTMLDivElement => {
+    el.dataset.id = id; // the layout editor and saved layouts find buttons by this id
+    return el;
+  };
   const pedal = (k: 'gas' | 'brake', cls: string, label: string, sub = ''): HTMLDivElement =>
-    holdButton(cls, sub ? `${label}<small>${sub}</small>` : label, () => (k === 'gas' ? (gas = 1) : (brake = 1)), () => (k === 'gas' ? (gas = 0) : (brake = 0)));
-  const n2o = (): HTMLDivElement => holdButton('round n2o', t('pad.nitro'), () => { nitro = true; }, () => { nitro = false; });
-  const hb = (): HTMLDivElement => holdButton('round hb', `${t('pad.hand')}<small>${t('pad.handSub')}</small>`, () => { handbrake = true; }, () => { handbrake = false; });
+    tag(holdButton(cls, sub ? `${label}<small>${sub}</small>` : label, () => (k === 'gas' ? (gas = 1) : (brake = 1)), () => (k === 'gas' ? (gas = 0) : (brake = 0))), k);
+  const n2o = (): HTMLDivElement => tag(holdButton('round n2o', t('pad.nitro'), () => { nitro = true; }, () => { nitro = false; }), 'nitro');
+  const hb = (): HTMLDivElement => tag(holdButton('round hb', `${t('pad.hand')}<small>${t('pad.handSub')}</small>`, () => { handbrake = true; }, () => { handbrake = false; }), 'hb');
   const small = (cls: string, icon: string, fn?: () => void, label = ''): HTMLDivElement => {
-    const b = holdButton(`sm ${cls}`, icon, () => fn?.());
+    const b = tag(holdButton(`sm ${cls}`, icon, () => fn?.()), cls === 'rst' ? 'reset' : 'pause');
     b.setAttribute('aria-label', label);
     return b;
   };
@@ -98,9 +108,10 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     return zone;
   }
 
-  let lastP: Pick<ControlPrefs, 'scheme' | 'autoGas'> | null = null;
+  type SchemeArg = Pick<ControlPrefs, 'scheme' | 'autoGas'> & Partial<Pick<ControlPrefs, 'layout' | 'btnScale'>>;
+  let lastP: SchemeArg | null = null;
   onLangChange(() => lastP && setScheme(lastP)); // labels follow the language
-  function setScheme(p: Pick<ControlPrefs, 'scheme' | 'autoGas'>): void {
+  function setScheme(p: SchemeArg): void {
     lastP = p;
     release();
     layer.replaceChildren();
@@ -124,8 +135,8 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
       const arrows = scheme === 'buttons';
       if (!arrows) layer.append(wheelZone());
       else layer.append(
-        place(holdButton('arrow', ARROW_L, () => { left = true; }, () => { left = false; }), { left: S.l, bottom: S.b }),
-        place(holdButton('arrow', ARROW_R, () => { right = true; }, () => { right = false; }), { left: `calc(${S.l} + ${S.u} * 1.15 + 18px)`, bottom: S.b }),
+        place(tag(holdButton('arrow', ARROW_L, () => { left = true; }, () => { left = false; }), 'arrowL'), { left: S.l, bottom: S.b }),
+        place(tag(holdButton('arrow', ARROW_R, () => { right = true; }, () => { right = false; }), 'arrowR'), { left: `calc(${S.l} + ${S.u} * 1.15 + 18px)`, bottom: S.b }),
       );
       const above = arrows ? `calc(${S.b} + ${S.u} * 1.15 + 26px)` : `calc(${S.b} + min(40%, ${S.u} * 2.4))`;
       layer.append(
@@ -137,6 +148,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
         place(reset, { left: `calc(${S.l} + 56px)` }),
       );
     }
+    applyLayout(layer, p.scheme, p.layout ?? {}, p.btnScale ?? 1);
   }
   setScheme({ scheme: 'wheel', autoGas: true });
 
@@ -158,9 +170,18 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
     setVisible(v: boolean): void {
       visible = v;
       if (!v) release();
-      root.style.display = v && isTouch ? '' : 'none';
+      root.style.display = (v && isTouch) || editing ? '' : 'none';
     },
     setScheme,
+    layer,
+    setEditing(on: boolean, layout?: Layout, onMoved?: () => void): void {
+      editing = on;
+      stopDrag?.();
+      stopDrag = on && layout ? enableDrag(root, () => lastP?.scheme ?? 'wheel', layout, () => onMoved?.()) : null;
+      release();
+      root.style.zIndex = on ? '2600' : '';
+      root.style.display = on || (visible && isTouch) ? '' : 'none';
+    },
     dispose: () => root.remove(),
   };
   return api;

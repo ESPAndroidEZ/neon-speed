@@ -76,6 +76,7 @@ export function buildTuneMenu(store: SaveStore, onBack: () => void): HTMLElement
       }
       const row = h('div', 'rb-row rb-up', `<div style="flex:1;min-width:150px"><b class="u-n">${tx(u.name)}</b> <span class="u-d">${'<i class="on"></i>'.repeat(level)}${'<i></i>'.repeat(u.levels.length - level)}</span>${u.id === 'stage' ? ` <div class="u-p">${stageSpec(c.id, level).ps} PS / ${stageSpec(c.id, level).nm} Nm${next ? ` → ${stageSpec(c.id, level + 1).ps} PS / ${stageSpec(c.id, level + 1).nm} Nm (${tx(stageSpec(c.id, level + 1).parts)})` : ''}</div>` : ''}<div class="u-p">${absent ? t('tune.needsTurbo') : next ? tx(next.name) : t('tune.maxed')}</div>${gain}<div class="u-a">${tx(ADVICE[u.id])}</div></div>`);
       row.style.justifyContent = 'space-between';
+      row.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('button')) row.classList.toggle('open'); }); // tap a row for what it does
       if (next && !absent) {
         const b = button(`$${next.price.toLocaleString()}`, () => {
           if (owned && store.buyUpgrade(c.id, u.id, next.price)) render();

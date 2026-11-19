@@ -3,6 +3,8 @@ import type { ControlStore } from '../input/controlPrefs';
 import { SCHEMES } from '../input/controlPrefs';
 import type { TiltInput } from '../input/tiltInput';
 import { calibrate, enableTilt } from './controlsOnboard';
+import { openLayoutEditor } from './layoutEditor';
+import type { TouchControls } from './touchControls';
 import { fullscreenButton } from './fullscreenButton';
 import { keyRows } from './keyRemap';
 import type { KeyBindings } from '../input/keyBindings';
@@ -16,6 +18,8 @@ export interface ControlRowsDeps {
   tilt: TiltInput;
   /** Remappable keyboard keys; their rows show on devices with a keyboard. */
   keys?: KeyBindings;
+  /** The phone buttons, for the "Edit buttons" screen. */
+  touch?: TouchControls;
 }
 
 /** Settings rows for the screen and the phone controls: full screen, scheme, and the tilt options. */
@@ -83,6 +87,17 @@ export function controlRows(d: ControlRowsDeps): HTMLElement[] {
   );
   refresh();
   rows.push(scheme, tiltBox);
-  if (d.keys && !isPhone()) rows.push(...keyRows(d.keys));
+  if (d.touch && isPhone()) {
+    const touch = d.touch;
+    const r = h('div', 'rb-row', `<span class="rb-lbl">${t('ctl.buttons')}</span>`);
+    r.append(button(t('ctl.editBtns'), () => openLayoutEditor(touch, d.controls)));
+    rows.push(r);
+  }
+  if (d.keys && !isPhone()) {
+    for (const r of keyRows(d.keys)) {
+      r.dataset.adv = '1'; // the Settings screen files these under Advanced
+      rows.push(r);
+    }
+  }
   return rows;
 }

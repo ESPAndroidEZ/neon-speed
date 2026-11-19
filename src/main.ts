@@ -136,7 +136,7 @@ menu = new Menu({
   startEvent: (ev) => story.start(ev),
   slots,
   onDriving: applyDriving,
-  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt, keys: controls.bindings }),
+  controlRows: () => controlRows({ fs, controls: controls.prefs, tilt: controls.tilt, keys: controls.bindings, touch }),
   loadSlot: (id) => loadSlot(id),
   online: (back) => buildOnlineMenu(online, back),
 });

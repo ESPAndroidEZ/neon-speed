@@ -153,19 +153,20 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
     return p;
   };
   const driving = drivingRows(d.store, () => d.onDriving?.());
+  const extra = d.extraRows?.() ?? [];
   const gfx = graphicsRows({ store: d.store, engine: d.engine, hud: d.hud, chase: d.game.chase, onAuto: () => applySettings(d) });
   const basic = h('div', 'rb-settings');
   basic.append(
     panel(t('set.secAudio'), [vol, soundMixRow(s, { engine: engVol, music: musVol }, () => applySettings(d), () => d.store.commit()), mute]),
     panel(t('set.secGame'), [langRow(), shake, wp, hint]),
-    panel(t('set.secControls'), [...(d.extraRows?.() ?? []), ...driving.basic]),
+    panel(t('set.secControls'), [...extra.filter((e) => !e.dataset.adv), ...driving.basic]),
     panel(t('set.graphics'), gfx.basic),
   );
   const advanced = h('div', 'rb-settings');
   advanced.append(
     panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), voice, soundCredits()]),
     panel(t('set.secGame'), [sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store)]),
-    panel(t('set.secControls'), driving.advanced),
+    panel(t('set.secControls'), [...extra.filter((e) => e.dataset.adv), ...driving.advanced]),
     panel(t('set.graphics'), gfx.advanced),
   );
   root.append(settingsTabs(basic, advanced), button(t('common.back'), d.onBack));

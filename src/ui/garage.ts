@@ -117,7 +117,6 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const brand = h('div', 'rb-sub', c.brand);
     if (import.meta.env.DEV) brand.append(badge); // model status: dev only
     panel.append(brand, title, h('div', 'rb-blurb', tx(c.blurb)));
-    if (c.tuning.v2) panel.append(h('div', 'rb-note', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
     if (st2 === 'procedural' && import.meta.env.DEV) panel.append(h('div', 'rb-note', t('garage.putGlb', { id: c.id }))); // asset hint: dev only
     panel.insertAdjacentHTML('beforeend', bar(t('garage.accel'), 1 - (st.accel - 3.8) / 3, `${st.accel.toFixed(1)} s`) + bar(t('garage.top'), (st.topKph - 180) / 120, speedText(st.topKph)) + bar(t('garage.grip'), (st.grip - 1) / 0.7, st.grip.toFixed(2)) + bar(t('garage.slide'), st.slide / 1.2, st.slide.toFixed(2)));
     panel.append(
@@ -128,13 +127,6 @@ export function buildGarage(d: GarageDeps): HTMLElement {
         d.visual()?.setPaint(p);
         render();
       }),
-      h('div', 'rb-sub', t('garage.underglow')),
-      swatches(GLOWS, glowOf(c), (g) => {
-        if (owned) d.store.setGlow(c.id, g);
-        else d.store.data.glow[c.id] = g;
-        d.visual()?.setUnderglow(g);
-        render();
-      }),
     );
     const toggle = small(t(lookOpen ? 'garage.appearanceOpen' : 'garage.appearance'), () => {
       lookOpen = !lookOpen;
@@ -142,6 +134,18 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     });
     toggle.style.width = '100%';
     panel.append(toggle);
+    if (lookOpen) { // the rarely used extras sit behind the toggle: how the car drives, underglow, finish, rims...
+      if (c.tuning.v2) panel.append(h('div', 'rb-note', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
+      panel.append(
+        h('div', 'rb-sub', t('garage.underglow')),
+        swatches(GLOWS, glowOf(c), (g) => {
+          if (owned) d.store.setGlow(c.id, g);
+          else d.store.data.glow[c.id] = g;
+          d.visual()?.setUnderglow(g);
+          render();
+        }),
+      );
+    }
     if (lookOpen) panel.append(lookRows(d.store, c.id, owned, (l) => d.visual()?.setAppearance?.(l, paintOf(c)), () => d.preview(c, paintOf(c), glowOf(c))));
     const cal = calibration(c);
     if (cal) panel.append(cal);
