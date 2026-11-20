@@ -27,8 +27,8 @@ export function nearestNode(g: RoadGraph, x: number, z: number): number {
   return best;
 }
 
-/** Quickest route from node `from` to node `to`, or null when there is none. */
-export function findRoute(g: RoadGraph, from: number, to: number): Route | null {
+/** Quickest route from node `from` to node `to`, or null when there is none. `skipEdge` / `skipNode` (1 = closed) shut roads off (city race loops). */
+export function findRoute(g: RoadGraph, from: number, to: number, skipEdge?: Uint8Array, skipNode?: Uint8Array): Route | null {
   const n = g.nodes.length;
   const cost = new Float64Array(n).fill(Infinity), via = new Int32Array(n).fill(-1), done = new Uint8Array(n);
   const goal = g.nodes[to];
@@ -68,7 +68,8 @@ export function findRoute(g: RoadGraph, from: number, to: number): Route | null 
       const e = g.edges[eid];
       if (e.oneWay && e.a !== u) continue; // one-way: a -> b only
       const v = e.a === u ? e.b : e.a;
-      const c = cost[u] + e.length / e.limit;
+      if (skipEdge?.[eid] || (skipNode?.[v] && v !== to)) continue;
+      const c =cost[u] + e.length / e.limit;
       if (c < cost[v]) { cost[v] = c; via[v] = eid; push(v, c + h(v)); }
     }
   }
