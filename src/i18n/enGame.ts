@@ -50,4 +50,5 @@ export const EN_GAME = {
   'guard.reload': 'Reload', 'guard.continue': 'Continue', 'guard.restoring': 'Restoring graphics...', 'pwa.ready': 'Update ready',
   'main.lowFps': 'Frame rate was low: graphics lowered to {tier}. (Settings: Auto quality)',
   'main.loaded': 'Loaded', 'main.badSave': 'That save could not be loaded', 'main.corrupt': 'Some saved games were unreadable and were skipped',
+  'lb.rank': 'Online board: #{rank} of {of}', 'lb.new': 'new best', 'lb.unverified': 'unverified times', 'lb.queued': 'Online board: saved, sent when you are online', 'lb.rejected': 'Online board: this lap was not accepted', 'lb.top': 'Online top 3', 'lb.none': 'No online times yet: set the first',
 } as const;

@@ -1,3 +1,4 @@
+import { installLapFrames } from './leaderboardHook';
 import type { Engine } from '../core/engine';
 import type { LaunchResult } from '../core/launch';
 import { WEATHER } from '../physics/weather';
@@ -32,6 +33,7 @@ const REWARD: Record<string, 'rw.near' | 'rw.slip' | 'rw.clean'> = { 'NEAR MISS'
 export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): CornerGuide {
   const guide = new CornerGuide(document.getElementById('hud') ?? document.body);
   const bestDelta = attachGhost(engine, game, hud); // best-lap ghost car
+  installLapFrames(engine, game); // 10 Hz race trace for the online lap boards
   attachCoach(engine, game); // first-races control hints
   attachWrongWay(engine, game); // WRONG WAY banner after a spin
   attachGapTags(engine, game, bestDelta); // seconds to the rivals ahead / behind, and to your best lap

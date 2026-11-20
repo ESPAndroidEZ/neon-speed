@@ -5,6 +5,7 @@ import type { Weather } from '../types/game';
 import type { ResultsExtra } from '../ui/results';
 import { driftCash } from '../core/career';
 import { t } from '../i18n';
+import { submitLapBoard } from './leaderboardHook';
 
 /**
  * Free race bookkeeping for the map that was just driven: personal bests per map and weather, and the verdict for
@@ -25,6 +26,7 @@ export function finishFreeRace(store: SaveStore, def: TrackDef, weather: Weather
   const prev = store.data.trackBest[key];
   const record = store.recordTrack(key, r.totalTime);
   r.note = pbNote(prev, r.totalTime, record);
+  submitLapBoard(store, def, weather, r); // online lap board (sent in the background, the results line fills in)
   return undefined;
 }
 

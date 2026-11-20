@@ -52,4 +52,5 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'guard.reload': 'Recargar', 'guard.continue': 'Continuar', 'guard.restoring': 'Restaurando gráficos...', 'pwa.ready': 'Actualización lista',
   'main.lowFps': 'Los fotogramas por segundo eran bajos: gráficos reducidos a {tier}. (Ajustes: Calidad automática)',
   'main.loaded': 'Cargado', 'main.badSave': 'No se pudo cargar esa partida', 'main.corrupt': 'Algunas partidas guardadas eran ilegibles y se omitieron',
+  'lb.rank': 'Clasificación online: n.º {rank} de {of}', 'lb.new': 'nuevo récord', 'lb.unverified': 'tiempos sin verificar', 'lb.queued': 'Clasificación online: guardado, se enviará cuando tengas conexión', 'lb.rejected': 'Clasificación online: esta vuelta no se ha aceptado', 'lb.top': 'Top 3 online', 'lb.none': 'Aún no hay tiempos online: marca el primero',
 };

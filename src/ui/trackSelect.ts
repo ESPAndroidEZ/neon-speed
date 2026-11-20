@@ -1,3 +1,4 @@
+import { fillTrackTops, trackBoardKey } from './trackTop';
 import type { SaveStore } from '../core/save';
 import { buildTrack, TRACKS, type TrackDef } from '../data/tracks';
 import type { Weather } from '../types/game';
@@ -90,9 +91,17 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
       <div style="opacity:.85;margin:6px 0;font-size:14px;line-height:1.35">${tx(def.blurb)}</div>
       <div style="font-size:13px;opacity:.9">${t('maps.suits')} ${def.recommendedWeather.map((w) => `${WEATHER_ICON[w]} ${t(`weather.${w}`).toLowerCase()}`).join(' · ')}</div>
       <div style="font-size:12px;opacity:.75;margin-top:4px">${times}</div>`));
+    const key = trackBoardKey(def, d.store);
+    if (key) {
+      const top = h('div', '');
+      top.style.cssText = 'font-size:12px;opacity:.75;margin-top:2px;color:#8fd8ff;min-height:1.3em';
+      top.dataset.lb = key;
+      card.append(top);
+    }
     card.addEventListener('click', () => d.onPick(def));
     row.append(card);
   }
   root.append(row, button(t('common.back'), d.onBack));
+  fillTrackTops(root); // online top 3 per map, filled in when the server answers
   return root;
 }

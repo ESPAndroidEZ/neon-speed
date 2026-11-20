@@ -53,7 +53,7 @@ export class ResultsScreen {
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>
       <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>${splits}${st}
-      <div style="font-size:30px;margin:10px 0 ${split ? '2px' : '10px'};color:var(--green)">+ $${r.cash.toLocaleString()}</div>${split}${notes}
+      <div style="font-size:30px;margin:10px 0 ${split ? '2px' : '10px'};color:var(--green)">+ $${r.cash.toLocaleString()}</div>${split}${notes}<div id="rs-lb" style="font-size:.8em;opacity:.8;color:#8fd8ff;min-height:1.2em"></div>
       <div id="rs-btns" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div></div>`;
     injectCss();
     const touch = isPhone();

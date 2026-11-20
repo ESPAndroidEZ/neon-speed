@@ -27,7 +27,7 @@ Before Redis, try PHP APCu (an in-process cache, no extra service).
 
 ## 4. Phases (do in this order; each phase ends with tests + docs + checkpoint)
 **A. Housekeeping (small, do first)**
-- A1. Automatic daily MySQL backup (`mysqldump | gzip`, keep 14 days, in `/var/backups/neonspeed`), plus a documented restore test.
+- A1 DONE 2026-11-20 (installed, restore test PASSED). Automatic daily MySQL backup (`mysqldump | gzip`, keep 14 days, in `/var/backups/neonspeed`), plus a documented restore test.
 - A2. Ask the server's owner to remove the stale firewall rules for 3306, 4567, 4568, 4444 (old Galera cluster).
 - A3. Deploy the current version (`scripts/deploy-server.sh`) and set the feedback recipient (`scripts/set-feedback-email.sh`).
 - Done when: a backup file exists and a restore into a scratch database works; site shows the feedback form.
@@ -36,7 +36,7 @@ Before Redis, try PHP APCu (an in-process cache, no extra service).
 - nginx passes the real `$remote_addr` to PHP over FastCGI; the single address seen so far was the office network 87.233.x.x, which all testers used. The limits are already per client address. Remaining: one test from a phone on mobile data.
 - Done when: two different phones get different `ip_hash` values in the `feedback` table.
 
-**C. Leaderboards (MySQL first, no Redis)**
+**C. Leaderboards (MySQL first, no Redis)** - BUILT 2026-11-20 (see master-plan W2): board = map + weather-physics level + car tier (and `daily:<day>:...`), best lap with its 10 Hz ghost, checked in `server/api/scores-lib.php`; tables wait for the owner's OK (`scripts/apply-server-schema.sh`). Original sketch:
 - Table `scores(track, weather, car, player_id, time_ms, created, ghost_id)` with indexes on (track, weather, car, time_ms); `api/scores.php` (POST a result, GET top 10 + my rank); show it on the results screen and track select.
 - Trust: store the ghost (position samples) with each score and validate on the server (sane speed, lap length, start/finish crossing) before accepting; flag outliers. A cheat-proof version needs the server to re-simulate, which is a later step.
 - Done when: a result from two different devices appears in the top list, a faked time is rejected, tests cover validation.

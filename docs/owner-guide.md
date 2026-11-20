@@ -13,6 +13,7 @@ A 3D arcade street racer that runs in the browser (phone and PC), English and Sp
 - **Music:** 9 generative deep-house songs plus a synthwave track that shuffle and blend into each other by themselves (style Auto by default; Deep house or Synthwave only in Settings > Advanced > Sound). A small "Now playing" line shows each new song (can be turned off).
 - **Settings:** Basic and Advanced tabs, graphics Auto (adjusts to the device), subtitles off by default.
 - **Tutorial:** four short slides after choosing the language; it says the handbrake is overpowered.
+- **Online lap boards (new, waiting for one OK):** your best lap per map, weather and car class goes to an online board (top 10, your rank, a daily-challenge board). The map screen shows the top 3, the results show "#3 of 41". Times are checked for plausibility (speed, length, checkpoints in order), not verified, and say so. Races driven offline are sent later. Beginner assists and drift maps are left out. It starts working once you OK `scripts/apply-server-schema.sh` (it adds three tables, after a backup).
 - **Feedback and support:** players can send you a message from Crew > Feedback & support, and a "Support the game" tab shows your IBAN (voluntary).
 
 ## 2. How it fits together
@@ -55,7 +56,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - **Turbo, rain and snow physics, and the handbrake feel are locked** (you approved them). They are not changed without asking.
 
 ## 5. Security and housekeeping to know about
-- **Backups:** player data lives on one test server with no automatic backup. Recommended: a daily `mysqldump` (see roadmap, phase A).
+- **Backups (installed 2026-11-20):** the database is dumped every night at 03:30 (14 days kept, `/var/backups/neonspeed`). The first backup was restored into a scratch database and every table matched (`neonspeed-restore-test` PASSED). Our MySQL log rotates weekly.
 - **Old firewall rules:** the server firewall still allows ports 3306, 4567, 4568 and 4444 from anywhere (they belonged to the old Galera cluster). Nothing listens on them now. Recommended to remove them; ask whoever manages the server, since the firewall may be managed by Ansible.
 - **Mail:** feedback emails come from the server's own mail system, so Gmail may put them in spam. Every message is also stored in the database, so nothing is lost.
 - **Your IBAN is in the game's code** and therefore visible to anyone who can see the repository or the website. The repo is listed as public in the notes: decide whether to make it private.
@@ -67,7 +68,8 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - The new Chapter 3 races have not been balanced (are they winnable with your starting cars?).
 - The live website is behind the code: it does not have the feedback form, Chapter 3, cinematics or incremental sync until the next deploy.
 - Real-device performance of the Auto graphics setting.
-- Server housekeeping (backups, restore test, log rotation) is written but NOT installed: it needs your OK (`scripts/setup-server-housekeeping.sh`). The health page goes live with the next deploy.
+- The online lap boards were tested with real AI laps on the server's PHP and with a fake server in the browser, but NOT yet against the real database (the tables need your OK: `scripts/apply-server-schema.sh`, then `node tests/lab/scores-curl.mjs`). Nobody has submitted a real human lap yet.
+- Spanish results screen shows money as "+ $3,000" (English style); the map screen uses "2.500 $". Small, not fixed yet.
 - The new song transitions and the four new songs were checked by measurement (no clicks, same loudness), not by ear: listen to `logs/music/join-*.wav` and `logs/music/house-6..9-*.wav`, or just play for a few minutes.
 
 ## 7. How the documentation works (so it stays true)

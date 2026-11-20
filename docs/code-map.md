@@ -57,6 +57,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - install.ts (65) "Install the app" support for the web build. | fn classifyInstall, installKind, runInstall, onInstallChange; type InstallKind
 - lapCounter.ts (65) Lap logic from sequential track progress. Progress accumulates the wrapped change in ne... | class LapCounter
 - launch.ts (68) Launch timing at the 3-2-1 countdown (player only). The car is locked until GO; how lon... | class LaunchControl; iface LaunchData; type LaunchResult
+- leaderboard.ts (105) Online lap boards (server/api/scores.php). A board is one map + weather (with the weath... | class Leaderboard; const LB_QUEUE_KEY, boardKey, dailyKey; iface LbEntry, LbRow, LbBoard, LbStore; type LbResult
 - looks.ts (45) Look presets (docs/art-direction.md). A look multiplies the weather grade: exposure, bl... | fn setLook; const LOOKS, LOOK_IDS, look; iface Look; type LookId
 - math.ts (31) Easing: maps t in [0, 1] to eased progress in [0, 1]. | const TAU, clamp, lerp, smoothstep, damp, wrapAngle, linear, easeInCubic, easeOutCubic, easeInOutSine, easeInOutCubic; type Ease
 - modelList.ts (9) GLB files found in public/models at build time (vite.config `define`); null in dev and ... | const modelPresent
@@ -156,7 +157,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - driverStats.ts (67) Lifetime driver record. Lives under its own localStorage key (`ns.stats`), not in the g... | fn newStats, parseStats, addRace, recordRace, loadStats; const STATS_KEY; iface DriverStats
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
-- freeRace.ts (39) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
+- freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -164,7 +165,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - ghostData.ts (82) Pure ghost-lap logic (no DOM, no three): recording at 10 Hz, best-lap choice and interp... | fn ghostPose, ghostDelta; class GhostRecorder; const GHOST_HZ, isGhostLap; iface GhostLap, Pose
 - hotkeys.ts (33) In-race keys: R reset, Esc pause / skip / leave the podium, Enter restart a free race. ... | fn installHotkeys; iface HotkeyDeps
 - inputSetup.ts (92) Hand this to the Game; sources are keyboard, gamepad and touch merged (or the dev demo ... | fn createControls; iface Controls
+- lapFrames.ts (48) Samples per second of race time; the server's plausibility check (server/api/scores-lib... | fn bestLapOf; class LapFrames; const LAP_HZ
 - lapPop.ts (18) Pure text for the pop-up shown when a lap ends (no DOM, no i18n): "LAP 2  1:24.10  +0.31". | fn lapPop; iface LapPop
+- leaderboardHook.ts (69) The shared board client (null without server sync: the native app, or before boot ran). | fn leaderboard, installLapFrames, submitLapBoard, boardLine
 - nitroCue.ts (31) Nitro tank cues (display only): "EMPTY" when a burn runs the tank dry, then "READY" onc... | class NitroCue; const NITRO_EMPTY_AT, NITRO_READY_AT; type NitroCueKind
 - onlineRace.ts (107) The player as the room sees them: name and garage car. | fn installOnline; const saveOnlineName; iface OnlineDeps, Online
 - pause.ts (65) Pause state and saving: pause on Esc or a hidden tab, autosave when pausing or leaving,... | class PauseController
@@ -172,7 +175,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - photoFinish.ts (18) A photo finish: the top two finishers crossed the line within PHOTO_GAP seconds, and th... | fn isPhotoFinish; const PHOTO_GAP
 - platform.ts (78) Leave the race for the menu (Android back button from the pause menu). | fn installPlatform; iface PlatformDeps
 - posCue.ts (32) Detects a real change of the player's race position (display only). | class PosCue
-- raceFeedback.ts (97) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
+- raceFeedback.ts (99) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
 - raceStats.ts (43) Per-race driving stats for the results screen (display only: reads the game, never feed... | class RaceStats; const raceStats
 - racerViews.ts (101) Interpolated world pose, valid after update(). | fn rivalPlate; class RacerViews; iface RacerView
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
@@ -191,7 +194,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - en.ts (22) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (73) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
-- enGame.ts (53) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
+- enGame.ts (54) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (13) Online races: English UI strings. | const EN_ONLINE
@@ -207,7 +210,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentG.ts (39) Spanish for the story rewrite: barks and radio, keyed by the exact English text (see es... | const ES_CONTENT_G
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
-- esGame.ts (55) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
+- esGame.ts (56) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (15) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
@@ -341,7 +344,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - touchButton.ts (69) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
 - touchControls.ts (202) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - touchLayout.ts (94) Phone button layout: where the player put each button (centre as a fraction of the scre... | fn sanitizeLayout, applyLayout, enableDrag, presetLayout; const sanitizeScale; type Layout, LayoutPreset
-- trackSelect.ts (98) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
+- trackSelect.ts (107) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
+- trackTop.ts (33) Board shown on a map card: clear weather, the selected car's tier. Null for drift maps ... | fn trackBoardKey, topLine, fillTrackTops
 - tuneMenu.ts (128) Marks an unchanged stat in the upgrade preview so its segment can be dropped in any lan... | fn buildTuneMenu
 - tuneTip.ts (12) One line for the results screen after a lost race: an upgrade the player can buy now an... | fn tuneTip
 - uiKit.ts (42) The NEON SPEED title treatment (styles in ui/theme). | fn injectCss, wordmark, h, button, toast; const money, lapText
