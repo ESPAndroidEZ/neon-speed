@@ -421,7 +421,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - modelCar.ts (116) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
 - modelPrefs.ts (21) Per-car yaw corrections set in the garage (radians), kept in localStorage so a fix work... | fn getYawOverride, setYawOverride
 ## src/world/open
-- chunkGeo.ts (142) Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wa... | fn chunkGeo; const triangles; iface Geo, ChunkGeo
+- chunkGeo.ts (144) Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wa... | fn chunkGeo; const triangles; iface Geo, ChunkGeo
 - chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
 - chunkMesh.ts (112) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
@@ -429,6 +429,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - meetView.ts (28) The car meet: 8 parked show cars (instanced, lamps on) and a pink ring on the ground. 3... | fn meetGroup
 - pedView.ts (44) Pedestrians as one instanced mesh (one draw call): a simple figure (body, head) with a ... | class PedView
 - roamLook.ts (72) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
+- roofKit.ts (90) Roof clutter for Neon Harbor buildings (task 063, built by Claude): AC units, water tan... | fn roofDetails
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
 - trafficView.ts (95) Body paints of the traffic cars (muted, so the player's car stands out). | fn carShapes; class TrafficView
 - trapView.ts (25) Speed cameras as one static mesh (one draw call): a dark post at the kerb with a glowin... | fn trapMesh

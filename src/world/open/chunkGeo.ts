@@ -5,6 +5,7 @@ import { CHUNK } from './chunkIndex';
 import { cornerOf } from './footprints';
 import { SIGNS } from '../city/signs';
 import { groundAt } from './groundCarve';
+import { roofDetails } from './roofKit';
 
 /** Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wall neon). */
 const SIGN_SHARE: Readonly<Record<string, number>> = { strip: 0.75, oldtown: 0.35, downtown: 0.25, harbour: 0.1, industrial: 0.05, hills: 0 };
@@ -73,6 +74,7 @@ function box(walls: Geo, roofs: Geo, f: Footprint): void {
     quad(walls, [p.x, y0, p.z, q.x, y0, q.z, p.x, y1, p.z, q.x, y1, q.z], [nx * s, 0, nz * s], s > 0 ? [0, 0, u1, 0, 0, v1, u1, v1] : [u1, 0, 0, 0, u1, v1, 0, v1]);
   }
   quad(roofs, [c[0].x, y1, c[0].z, c[1].x, y1, c[1].z, c[3].x, y1, c[3].z, c[2].x, y1, c[2].z], [0, 1, 0], [0, 0, 1, 0, 0, 1, 1, 1]);
+  roofDetails(f, y1, (Math.round(f.x * 8) * 73856093) ^ (Math.round(f.z * 8) * 19349663), roofs); // AC units, tanks, masts (task 063)
 }
 
 /** Street lights along an edge (alternate sides): a thin dark post (into `posts`) and a light pool on the tarmac (`pools`). */
