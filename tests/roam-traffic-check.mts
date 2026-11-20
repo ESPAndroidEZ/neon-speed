@@ -19,7 +19,7 @@ function bendLimit(e: (typeof g.edges)[number], k: number, grip: number): number
 function run(grip: number, secs: number, px = 0, pz = 0) {
   const tr = new RoamTraffic(g, 40, 5);
   tr.scatter(px, pz);
-  let off = 0, fast = 0, bends = 0, overBend = 0, red = 0, nan = 0, close = 0, sumV = 0, n = 0;
+  let wrongWay = 0, off = 0, fast = 0, bends = 0, overBend = 0, red = 0, nan = 0, close = 0, sumV = 0, n = 0;
   const stopped = tr.agents.map(() => -1); // edge on which the stop line was already judged
   for (let k = 0; k < secs * 60; k++) {
     tr.step(D, px, pz, grip);
@@ -27,10 +27,12 @@ function run(grip: number, secs: number, px = 0, pz = 0) {
       if (!Number.isFinite(tr.x[i]) || !Number.isFinite(a.speed)) nan++;
       const e = g.edges[a.edge];
       if (a.speed > e.limit + 0.01) fast++;
+      if (e.oneWay && a.dir < 0) wrongWay++;
       const end = g.nodes[a.dir > 0 ? e.b : e.a], toEnd = a.dir > 0 ? e.length - a.s : a.s;
       if (toEnd < end.radius + 2 && stopped[i] !== a.edge) { // crossing the stop line now: the light must not be red
         stopped[i] = a.edge;
-        if (lightFor(end, tr.time, Math.sin(tr.h[i]), Math.cos(tr.h[i])) === 2 && a.speed > 4) red++;
+        const hx = Math.sin(tr.h[i]), hz = Math.cos(tr.h[i]); // a car committed on yellow may clear the line in the first second of red
+        if (lightFor(end, tr.time, hx, hz) === 2 && lightFor(end, tr.time - 1, hx, hz) === 2 && a.speed > 4) red++;
       }
       for (let v = 1; v + 1 < e.cum.length; v++) if (Math.abs(a.s - e.cum[v]) < 1.5) { // at a bend: speed within the grip cap
         const lim = bendLimit(e, v, grip);
@@ -44,7 +46,7 @@ function run(grip: number, secs: number, px = 0, pz = 0) {
       }
     });
   }
-  return { tr, off, fast, bends, overBend, red, nan, close, avg: sumV / n };
+  return { tr, wrongWay, off, fast, bends, overBend, red, nan, close, avg: sumV / n };
 }
 const old = g.nodes.filter((nd) => nd.district === 'oldtown'), ox = old.reduce((a, nd) => a + nd.x, 0) / old.length, oz = old.reduce((a, nd) => a + nd.z, 0) / old.length;
 
@@ -55,10 +57,12 @@ check('no NaN', dry.nan === 0);
 check('cars stay on the tarmac (lane centres)', dry.off === 0, `${dry.off} off-road samples`);
 check('cars move (average over 4 m/s)', dry.avg > 4, `${dry.avg.toFixed(1)} m/s`);
 check('never above the speed limit', dry.fast === 0, String(dry.fast));
-check('nobody runs a red light at speed', dry.red === 0, String(dry.red));
+check('nobody runs a red light (more than 1 s into red, at speed)', dry.red === 0, `${dry.red}`);
 check('cars keep their distance (rare touches only)', dry.close <= 6, `${dry.close} close pairs`);
 check('cheap: under 0.3 ms per step for 40 cars', ms < 0.3, `${(ms * 1000).toFixed(0)} us`);
 const bendy = run(1, 90, ox, oz), wet = run(0.72, 90, ox, oz);
+check('one-way streets only driven a -> b', dry.wrongWay === 0 && bendy.wrongWay === 0, `${dry.wrongWay + bendy.wrongWay} samples`);
+check('old town: no red lights run either', bendy.red === 0, `${bendy.red}`);
 check('old town bends: speed within sqrt(0.55 g x R) (below the player car)', bendy.bends > 200 && bendy.overBend === 0, `${bendy.overBend} of ${bendy.bends} bend samples over`);
 check('rain: the bend speed cap scales with the weather grip', wet.bends > 200 && wet.overBend === 0, `${wet.overBend} of ${wet.bends} over`);
 // the player stands in a lane right ahead of a car: it stops behind

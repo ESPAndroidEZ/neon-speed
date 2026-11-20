@@ -41,6 +41,8 @@ export class RoamTraffic {
   readonly z: Float32Array;
   readonly h: Float32Array;
   private readonly stall: Float32Array;
+  /** Per car, the decision taken when its light turned yellow: 0 none, 1 go, 2 stop (kept until green or the next street). */
+  private readonly yellow: Int8Array;
   private readonly g: RoadGraph;
   private readonly rnd: () => number;
   private readonly near: number[] = [];
@@ -51,6 +53,7 @@ export class RoamTraffic {
     this.g = g;
     this.rnd = createRng(seed);
     this.x = new Float32Array(count); this.z = new Float32Array(count); this.h = new Float32Array(count); this.stall = new Float32Array(count);
+    this.yellow = new Int8Array(count);
     for (let i = 0; i < count; i++) this.agents.push({ edge: 0, lane: 0, dir: 1, s: 0, speed: 0, variant: i % 8, role: 'civil' });
   }
 
@@ -80,10 +83,16 @@ export class RoamTraffic {
       const hx = Math.sin(this.h[i]), hz = Math.cos(this.h[i]);
       const lamp = lightFor(end, this.time, hx, hz);
       const stopAt = toEnd - end.radius - 2; // stop line
-      if (toEnd < 30) want = Math.min(want, TURN_SPEED + toEnd * 0.4); // ease off for the turn at the junction
+      if (lamp === 0) this.yellow[i] = 0;
+      else if (lamp === 1 && this.yellow[i] === 0) { // decide once per yellow: stop only if the car can (else it is a dilemma: go)
+        const canStop = (a.speed * a.speed) / (2 * BRAKE) <= stopAt, canClear = stopAt <= a.speed * yellowLeft(end, this.time, hx, hz) * 0.8;
+        this.yellow[i] = canClear || !canStop ? 1 : 2;
+      }
+      const going = this.yellow[i] === 1 && stopAt > -1;
+      if (toEnd < 30 && !going) want = Math.min(want, TURN_SPEED + toEnd * 0.4); // ease off for the turn at the junction
       if (stopAt > 0 && stopAt < 8 && this.occupied(end, i)) want = Math.min(want, Math.max(0, stopAt - 1)); // give way: someone is in the junction
-      const late = lamp === 1 && stopAt > a.speed * yellowLeft(end, this.time, hx, hz) * 0.8; // cannot clear the line before red
-      if (stopAt > -1 && (lamp === 2 || late)) want = Math.min(want, Math.max(0, Math.sqrt(Math.max(0, 2 * BRAKE * 0.6 * stopAt))));
+      const late = lamp === 1 && this.yellow[i] === 2;
+      if (stopAt > -1 && ((lamp === 2 && !going) || late)) want = Math.min(want, Math.max(0, Math.sqrt(Math.max(0, 2 * BRAKE * 0.6 * stopAt))));
       const ahead = this.gapAhead(i, px, pz);
       if (ahead < 40) want = Math.min(want, Math.max(0, (ahead - GAP) * 0.9));
       a.speed += Math.max(-BRAKE * dt, Math.min(ACCEL * dt, want - a.speed));
@@ -145,18 +154,33 @@ export class RoamTraffic {
     return best;
   }
 
-  /** At the end of an edge: another street from that node (a U-turn only at a dead end). */
+  /** At the end of an edge: another street from that node, entered the way it may be driven (one-way: a -> b only). */
   private turn(i: number, nodeId: number): void {
     const a = this.agents[i], n = this.g.nodes[nodeId];
-    const options = n.edges.length;
-    let next = n.edges[Math.floor(this.rnd() * options)];
-    if (next === a.edge && options > 1) next = n.edges[(n.edges.indexOf(next) + 1) % options];
+    let count = 0;
+    for (const id of n.edges) if (this.enterable(id, a.edge, nodeId)) count++;
+    if (count === 0) { // dead end (or only one-ways pointing in): turn back if allowed, else start over elsewhere
+      const cur = this.g.edges[a.edge];
+      if (cur.oneWay) return this.respawn(i);
+      a.dir = cur.a === nodeId ? 1 : -1;
+      a.s = a.dir > 0 ? 0 : cur.length;
+      return;
+    }
+    let pick = Math.floor(this.rnd() * count), next = a.edge;
+    for (const id of n.edges) if (this.enterable(id, a.edge, nodeId) && pick-- === 0) { next = id; break; }
     const e = this.g.edges[next];
     a.edge = next;
     a.dir = e.a === nodeId ? 1 : -1;
     a.s = a.dir > 0 ? 0 : e.length;
     a.lane = Math.min(a.lane, Math.max(1, e.lanes / 2) - 1);
     a.speed = Math.min(a.speed, e.limit);
+    this.yellow[i] = 0;
+  }
+
+  /** May a car leaving edge `from` at node `nodeId` take edge `id`? (not back the same way; one-ways only a -> b) */
+  private enterable(id: number, from: number, nodeId: number): boolean {
+    const e = this.g.edges[id];
+    return id !== from && (!e.oneWay || e.a === nodeId);
   }
 
   private collectNear(px: number, pz: number): void {
@@ -178,7 +202,7 @@ export class RoamTraffic {
       const e = this.g.edges[this.near[Math.floor(this.rnd() * this.near.length)]];
       const na = this.g.nodes[e.a], nb = this.g.nodes[e.b];
       a.edge = e.id;
-      a.dir = this.rnd() < 0.5 ? 1 : -1;
+      a.dir = e.oneWay || this.rnd() < 0.5 ? 1 : -1;
       a.lane = Math.floor(this.rnd() * Math.max(1, e.lanes / 2));
       a.s = na.radius + 25 + this.rnd() * Math.max(0, e.length - na.radius - nb.radius - 50); // never just before a stop line: room to brake
       a.speed = Math.min(e.limit * 0.6, TURN_SPEED);
