@@ -14,7 +14,7 @@ import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
 import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats';
 import { Juice } from './fx/juice';
-import { attachRaceFeedback } from './game/raceFeedback';
+import { attachRaceFeedback } from './game/raceFeedback'; import { wireFreeDrive } from './game/freeDriveSetup';
 import { Game } from './game/game';
 import { StoryController } from './game/story';
 import { applyDrivingSettings } from './ui/drivingSettings';
@@ -206,7 +206,7 @@ engine.onFrame(() => {
 installRotateHint(() => { if (game.state === 'RACING' && !game.paused) pause.pause(); });
 
 container.addEventListener('pointerdown', () => game.skipIntro());
-installHotkeys({ game, juice, story, pause, leaveToMenu });
+installHotkeys({ game, juice, story, pause, leaveToMenu }); wireFreeDrive({ engine, game, hud, store, toMenu: leaveToMenu, hideMenu: () => menu.hide() }); // Neon Harbor free roam
 hud.mount(fullscreenButton(fs, true));
 controls.onboard();
 

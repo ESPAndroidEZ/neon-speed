@@ -32,8 +32,8 @@ export class Game {
   readonly telemetry: RaceTelemetry = createTelemetry();
   /** Fires once at the finish; may return an objective verdict and buttons for the results screen. */
   onFinish: ((r: RaceResult) => ResultsExtra | void) | null = null;
-  onIntroStart: (() => void) | null = null;
-  onIntroEnd: (() => void) | null = null;
+  onIntroStart: (() => void) | null = null; onIntroEnd: (() => void) | null = null;
+  /** Free roam (game/freeRoam.ts) steps the car and drives camera + HUD while the state is FREEROAM. */ roam: { step(dt: number): void; frame(dt: number): void } | null = null;
   onCountdown: (() => void) | null = null;
   onWeatherChange: ((w: Weather) => void) | null = null;
   onStartRace: (() => void) | null = null;
@@ -167,6 +167,7 @@ export class Game {
   }
 
   private readonly fixed = (dt: number): void => {
+    if (this.state === 'FREEROAM') { if (!this.paused) { this.d.input.sample(this.ctl); this.roam?.step(dt); } return; }
     if (this.state === 'CINEMATIC' || this.state === 'MENU' || this.paused) return;
     this.d.input.sample(this.ctl);
     const was = this.rm.phase;
@@ -174,16 +175,14 @@ export class Game {
     this.d.world.surfaces.setConditions(this.weather, this.physicsLevel, this.weatherIntensity);
     this.rm.step(dt, this.ctl, fillEnv(this.env, this.weather, this.physicsLevel, this.weatherIntensity));
     if (this.plan && this.rm.phase === 'RACING' && this.rm.raceTime > this.plan.at) {
-      const to = this.plan.to;
-      this.plan = null;
+      const to = this.plan.to; this.plan = null;
       this.setWeather(to);
       this.onWeatherChange?.(to);
     }
     this.views.fixedStep(dt);
     const hit = Math.max(this.rm.player.contact.impact, this.rm.carImpact);
     if (hit > 0.8) this.onImpact?.(hit);
-    const pc = this.rm.player.contact;
-    const ps = this.rm.player.car.state;
+    const pc = this.rm.player.contact, ps = this.rm.player.car.state;
     recordImpact(this.impact, pc.impact, pc.contact.x, pc.contact.z);
     recordImpact(this.impact, this.rm.carImpact, ps.position.x, ps.position.z);
     if (was === 'RACING' && this.rm.phase === 'FINISHED' && this.rm.result) {
@@ -197,6 +196,7 @@ export class Game {
     this.views.rollScale = this.weather === 'CLEAR' ? 1 : 1.3 + 0.35 * LEVELS.indexOf(this.physicsLevel);
     this.views.update(alpha, frameDt);
     this.syncView();
+    if (this.state === 'FREEROAM') return void this.roam?.frame(frameDt);
     if (this.state === 'MENU') {
       this.showroomCam.update(this.d.engine.camera, frameDt, this.views.views[0].x, this.views.views[0].z);
       return;

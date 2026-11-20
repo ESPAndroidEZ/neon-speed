@@ -16,7 +16,7 @@ export interface HotkeyDeps {
 export function installHotkeys(d: HotkeyDeps): void {
   const { game, juice, story, pause } = d;
   window.addEventListener('keydown', (e) => {
-    if (e.repeat || game.state === 'MENU') return;
+    if (e.repeat || game.state === 'MENU' || game.state === 'FREEROAM') return; // free roam has its own keys (ui/roamHud)
     if (game.paused && e.code !== 'Escape') return;
     if (e.code === 'KeyR') game.resetToTrack();
     else if (import.meta.env.DEV && e.code === 'KeyP') toast(juice.toggleShowcase() ? 'Particle showcase ON (P)' : 'Particle showcase off');
