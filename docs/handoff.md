@@ -6,7 +6,7 @@ Baton: claude
 Updated: 2026-11-19 (tester feedback round 5 done; Neon Harbor open world: block 0 + 1a done).
 
 ## Next
-1. OWNER: set the git identity in this repo (`git config user.name` / `user.email`, run with `!`; agents cannot type the email) so the 55 uncommitted files (storage, feedback, chapter 3, cinematics, phone work) can be committed and pushed; then `FEEDBACK_EMAIL=<address> scripts/set-feedback-email.sh` and `scripts/deploy-server.sh` (live site is behind: no server storage UI, feedback, Chapter 3, cutscenes).
+1. OWNER: `FEEDBACK_EMAIL=<address> scripts/set-feedback-email.sh`, then deploy with `scripts/deploy-server.sh` (the live site is behind: its client lacks the incremental sync, feedback form, Chapter 3 and the cutscenes; the live API is already the new version). Everything up to commit 2f4ecf0 is pushed.
 2. Playtest on real phones; record engine sounds (owner offered: audio-inbox/<car>/, see docs/skills.md); balance of Chapter 3 races untested; qa-report open rows (#10, #18, #23, #24, #26).
 3. Fun plan: knockout mode; Neon Harbor block 1b (docs/open-world.md).
 Also pending: repo is PUBLIC (owner to decide).
@@ -157,3 +157,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-18 Claude: Install app button on the main menu (Android native install prompt, iPhone/iPad how-to card, see docs/mobile.md), WRONG WAY banner and Pixel's role in Spanish, short-landscape menu spacing so the language pills never cover the logo. `ui/menu.ts` is at 219 lines: split before adding to it.
 - 2026-11-20 Claude (owner asked for more story and cinematics): Chapter 3 "Blood on the Wall" (5 events, final evidence choice, 2 endings, forced manual-gearbox event), 6 showroom cutscenes with player/timeline/replay, server storage (own MySQL on the test server, PHP API, player code), feedback form + donation tab, phone landscape lock + manual launch gas, manual gearbox with perfect shifts, subtitles off by default (opening narration always shown), many visual fixes; build OK, 1379 test lines 0 FAIL; NOT committed (git identity missing), NOT deployed.
 - 2026-11-20 Claude (owner: use the database to improve game performance): incremental + compressed storage sync (see Done); a DB cannot raise FPS, it cut the launch download from ~526 KB to ~28 B when nothing changed. Still uncommitted: git identity missing in this WSL (owner's config command ran elsewhere).
+- 2026-11-20 Claude: git identity works now (owner ran it in a WSL terminal); committed and pushed 2f4ecf0 with all of today's work. Owner asked about Redis: advised NOT now (see docs/skills.md section 6, 'Redis').
