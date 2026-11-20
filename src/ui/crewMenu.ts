@@ -7,6 +7,9 @@ import { t, tx } from '../i18n';
 import { statsCard } from './statsCard';
 import { achievementsCard } from './achievementsUi';
 import { showHowTo } from './howToPlay';
+import { openSupport } from './feedback';
+import { CUTSCENES, cutsceneFlag } from '../data/cutsceneAll';
+import { getCutscenePlayer } from '../game/cutscene';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
 /** Characters whose relationship value is shown once Chapter 2 starts. */
@@ -49,6 +52,12 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
     if (REL_IDS.includes(c.id) && career.completed.includes('c2-redline')) card.append(relBar(rel));
     grid.append(card);
   }
-  root.append(grid, statsCard(), achievementsCard(), button(t('how.open'), () => showHowTo(true)), button(t('common.back'), onBack));
+  const player = getCutscenePlayer();
+  const seen = Object.values(CUTSCENES).filter((c) => career.flags[cutsceneFlag(c.id)]);
+  const cine = h('div', 'rb-row');
+  cine.append(h('div', 'rb-sub', t('cut.title')));
+  for (const c of seen) cine.append(button(tx(c.title), () => { root.style.display = 'none'; player?.play(c, () => { root.style.display = ''; }); }));
+  if (!seen.length || !player) cine.append(h('div', 'rb-sub', t('cut.none')));
+  root.append(grid, cine, statsCard(), achievementsCard(), button(t('how.open'), () => showHowTo(true)), button(t('fb.open'), () => openSupport()), button(t('common.back'), onBack));
   return root;
 }

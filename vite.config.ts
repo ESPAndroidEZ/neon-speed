@@ -17,7 +17,8 @@ export default defineConfig(({ mode, command }) => ({
   // GitHub Pages sub-path (/neon-speed/).
   base: './',
   // host: true exposes the dev server on the LAN so a real phone can load it.
-  server: { host: true, port: 5173 },
+  // RB_API=https://notcarlos.mosidealus.nl npm run dev sends /api to the real server (to test the storage); without it the game runs on its cache
+  server: { host: true, port: 5173, proxy: process.env.RB_API ? { '/api': { target: process.env.RB_API, changeOrigin: true } } : undefined },
   preview: { host: true, port: 4173 },
   build: {
     sourcemap: false,

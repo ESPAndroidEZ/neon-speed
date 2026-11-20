@@ -10,8 +10,15 @@ export class ShowroomCam {
   /** Dev (`?showcar`): hold the camera at this angle (radians) and distance instead of orbiting. */
   fixedAngle: number | null = null;
   distance: number = GARAGE_CONFIG.distance;
+  /** A cutscene takes the camera (game/cutscene): it gets the plain projection and the frame time. */
+  override: ((cam: PerspectiveCamera, dt: number) => void) | null = null;
 
   update(cam: PerspectiveCamera, dt: number, x: number, z: number): void {
+    if (this.override) {
+      this.release(cam);
+      this.override(cam, dt);
+      return;
+    }
     const c = GARAGE_CONFIG;
     if (this.fixedAngle !== null) this.angle = this.fixedAngle;
     else this.angle += dt * c.orbitSpeed;

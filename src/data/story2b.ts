@@ -18,7 +18,7 @@ export const EVENTS_2B: StoryEvent[] = [
     before: CLIFF_BEFORE, afterWin: CLIFF_WIN, afterLose: CLIFF_LOSE, loseAlt: [CLIFF_LOSE_2, CLIFF_LOSE_3],
   },
   {
-    id: 'c2-final', chapter: 2, title: 'The Open Loop', blurb: 'The Council meets at the Wall. Two doors, one race. Win it for the street.',
+    id: 'c2-final', cutBefore: 'ch2-council', chapter: 2, title: 'The Open Loop', blurb: 'The Council meets at the Wall. Two doors, one race. Win it for the street.',
     kind: 'race', weather: 'RAIN', weatherChange: { at: 90, to: 'SNOW' }, laps: 3, rivals: ['dante', 'calloway', 'nova', 'brick'], skillScale: 1.02, needPosition: 2, bonus: 12000, unlocks: [],
     rivalsIf: { sponsor: ['dante', 'calloway', 'vex', 'tank'] },
     card: 'Whatever you choose tonight, the street will remember.',

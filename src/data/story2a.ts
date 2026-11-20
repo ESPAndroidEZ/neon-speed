@@ -4,7 +4,7 @@ import { MAZE_BEFORE, MAZE_LOSE, MAZE_LOSE_2, MAZE_LOSE_3, MAZE_WIN, NEON_BEFORE
 /** Chapter 2, part one: Dante's retaliation, then the Neon Strip and the Container Maze. Text lives in storyLines2a.ts. */
 export const EVENTS_2A: StoryEvent[] = [
   {
-    id: 'c2-redline', chapter: 2, title: 'Redline Rising', blurb: 'Dante answers with lawyers, trucks and a roadblock on the Loop. Break through. Top two.',
+    id: 'c2-redline', cutBefore: 'ch2-open', chapter: 2, title: 'Redline Rising', blurb: 'Dante answers with lawyers, trucks and a roadblock on the Loop. Break through. Top two.',
     kind: 'race', weather: 'CLEAR', laps: 2, rivals: ['rook', 'vex', 'jinx'], skillScale: 0.95, needPosition: 2, bonus: 4000, unlocks: [],
     card: 'Redline wants the street back. Take it first.',
     before: REDLINE_BEFORE, afterWin: REDLINE_WIN, afterLose: REDLINE_LOSE, loseAlt: [REDLINE_LOSE_2, REDLINE_LOSE_3],

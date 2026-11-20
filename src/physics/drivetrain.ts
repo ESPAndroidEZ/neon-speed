@@ -24,6 +24,9 @@ export class Drivetrain {
   manual = false;
   shiftUp = false;
   shiftDown = false;
+  /** Manual gearbox: how good the last upshift was (0 early, 1 good, 2 perfect) and a counter the HUD watches. Perfect / good shifts refill a little nitro. */
+  shiftGrade = 0;
+  shiftSeq = 0;
   private lastUp = false;
   private lastDown = false;
   lastPedal = 0;
@@ -63,6 +66,12 @@ export class Drivetrain {
   private shift(up: boolean): void {
     const t = this.t;
     if (up) {
+      if (this.manual) {
+        const f = this.rpm / t.redlineRpm;
+        this.shiftGrade = f >= 0.9 ? 2 : f >= 0.78 ? 1 : 0;
+        this.shiftSeq++;
+        if (this.shiftGrade) this.nitroLevel = Math.min(1, this.nitroLevel + (this.shiftGrade === 2 ? 0.05 : 0.02));
+      }
       this.gear++;
       this.shiftTimer = t.shiftTime;
       this.events.push(EV_UPSHIFT, this.boost);

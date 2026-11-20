@@ -97,7 +97,19 @@ Flags and relationships (`career.flags`, `career.rel`, -5..5) are saved; the Cre
 versus screen before every race; low-poly 3D figures (Mara by the garage car, rivals leaning on their cars at the grid, Dante at the finale).
 Optional: Tripo GLBs for Dante and Mara (`public/models/characters/<id>.glb`) replace the procedural figures when present (loader hook is a TODO).
 
-## Chapter 3 outline: "Blood on the Wall" (not built)
+## Chapter 3: "Blood on the Wall" (implemented 2026-11-19, first pass)
+Tagline: *The truth is in the road.* Opens after the Chapter 2 epilogue has been shown (`career.epilogueSeen`); the base story and the Legend unlock still end with Chapter 2 (`storyComplete`). Data: `src/data/story3.ts` (events, `CHAPTER_3`, `EPILOGUE_3`), dialogue `storyLines3.ts`, Spanish `i18n/esContentH.ts`, logic `core/career.ts` (`nextEvent3`, `chapter3Open`), test `tests/story3-check.mts`.
+1. *The Lighthouse* [Coast Run, clear, Rook/Vex/Jinx, top two]: Cain shows the cut brake line; from now on he calls the corners on the radio.
+2. *Cain's Gearbox* [Neon Strip, rain, manual gearbox FORCED (`manual: true`), top two]: Redline owns the lap sensors. Rivals change with the Chapter 2 flag (`open`: Nova, Brick; `sponsor`: Vex, Tank) and so do Nova's / Dante's lines.
+3. *Night Shift* [Serpent Drift, rain, no rivals, 7,000 points]: the gate-house logbook has Calloway's name twice. Dante was the courier.
+4. *The North Pass* [Mountain Pass, snow, Calloway + two, top two; unlocks the 535d]: Calloway admits his father cut the line to protect the road (he was nine).
+5. *The Final Loop* [Coast Run, rain to snow at 70 s, Dante + Calloway + one, must win; unlocks the M3]. Before the race: the evidence choice. `public` (take it public: Cain +1, Mara +1, Dante -1) or `deal` (trade it to Dante: Dante +1, Cain -2); they exclude each other. Endings: *The Wall Remembers* (Cain drives one lap at dawn) / *The Quiet Wall* (Dante owns the Wall, black and gold).
+NOT built from the outline below: the live "pace note" co-driver (Cain only speaks in dialogue and, with Subtitles on, race captions), the new short tracks (alley circuit, tram depot, rooftop car park: existing maps were used), the point-to-point dusk-to-dawn loop through all five districts (the final is two laps of Coast Run), the "Redline black and gold" livery for the `sponsor` branch.
+
+## Cinematics (implemented 2026-11-19)
+Six short cutscenes (16-22 s each) play in the showroom around the player's car, with letterbox bars, captions with the speaker's name (always visible, unlike race captions) and a Skip button. They play once (flag `cs:<id>`), before the pre-race dialogue, and can be replayed from Crew > Cinematics. In order: *Redline Rising* (chapter 2 opener, before `c2-redline`: Dante and Rook), *The Council* (before `c2-final`: Nova, Brick, Calloway and Dante around the car, Switch on the radio), *Blood on the Wall* (chapter 3 opener, before `c3-lighthouse`: Cain and Mara), *One Wall, One Truth* (before `c3-final`: Dante, Cain, Calloway), then the two Chapter 3 epilogues before the end card: *Dawn Lap* (flag `public`) and *The Quiet Wall* (flag `deal`). The Chapter 1 opening cinematic is the original race-start one (`camera/shots.ts`). Not built: cutscenes on real city locations (all take place on the showroom stage), voice acting, a Chapter 1 / Chapter 2 ending cutscene, per-character facial animation.
+
+## Chapter 3 original outline (design notes)
 - **Act 1, the lighthouse.** Cain reveals the proof: a brake line cut the night of the crash, and the dock gate log that places
   Dante at the quay. Cain cannot drive any more (his hands), so he rides along in the Rookie's radio: Switch becomes a co-driver
   who calls corners (a live "pace note" feature).

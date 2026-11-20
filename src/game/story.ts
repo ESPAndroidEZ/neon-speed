@@ -1,9 +1,11 @@
-import { applyChoice, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
+import { applyChoice, chapter3Complete, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { buildField, carTier, findRival } from '../data/rivals';
 import { AI_SETTING } from '../physics/aiDifficulty';
+import { CUTSCENES, cutsceneFlag } from '../data/cutsceneAll';
+import type { CutscenePlayer } from './cutscene';
 import { EVENTS, OPENING_CAPTIONS, type Line, type StoryEvent } from '../data/story';
 import { findAnyEvent as findEvent } from '../data/story2';
 import type { DialogueBox, Subtitles } from '../ui/dialogue';
@@ -23,6 +25,7 @@ export interface StoryDeps {
   cards: TitleCards;
   results: ResultsScreen;
   subs: Subtitles;
+  cutscenes: CutscenePlayer;
   /** Close any menu overlay before the cutscene or race starts. */
   hideMenu: () => void;
   /** Back to the chapter screen / ending card. */
@@ -42,7 +45,7 @@ export class StoryController {
     this.d = d;
     const g = d.game;
     g.onIntroStart = () => {
-      if (this.current) d.subs.schedule(OPENING_CAPTIONS);
+      if (this.current) d.subs.schedule(OPENING_CAPTIONS, true); // the opening narration is part of the cinematic
     };
     g.onIntroEnd = () => d.subs.clear();
     d.dialogue.onChoose = (opt) => {
@@ -82,14 +85,31 @@ export class StoryController {
     const save = d.store.data;
     const first = !save.career.seenIntro && save.career.completed.length === 0 && ev.id === EVENTS[0].id;
     const player = findCar(ev.carId ?? save.selected);
-    // finale cutscene: Dante's car on show while he talks; otherwise your own
-    if (ev.id === 'finale' || ev.id === 'c2-final') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
-    else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
-    d.cast?.stage(ev.id === 'finale' || ev.id === 'c2-final' ? 'dante' : 'mara');
-    // cold open: the very first run goes straight to the cinematic and the race; the first conversation comes after it
-    const lines = first ? [] : playable(ev.before, this.view(ev));
-    if (lines.length) d.dialogue.play(lines, () => this.launch(ev, false));
-    else this.launch(ev, first);
+    const go = (): void => {
+      // finale cutscene: Dante's car on show while he talks; otherwise your own
+      if (ev.id === 'finale' || ev.id === 'c2-final') d.game.showroom(findCar(findRival('dante').carId), findRival('dante').color, findRival('dante').glow);
+      else d.game.showroom(player, save.paint[player.id] ?? player.color, save.glow[player.id]);
+      d.cast?.stage(ev.id === 'finale' || ev.id === 'c2-final' ? 'dante' : 'mara');
+      // cold open: the very first run goes straight to the cinematic and the race; the first conversation comes after it
+      const lines = first ? [] : playable(ev.before, this.view(ev));
+      if (lines.length) d.dialogue.play(lines, () => this.launch(ev, false));
+      else this.launch(ev, first);
+    };
+    if (first) go();
+    else this.cutThen(ev.cutBefore, go);
+  }
+
+  /** Play a cutscene once (story flag `cs:<id>`), with the showroom car on stage; then `done`. Unknown, seen or flag-blocked cutscenes just continue. */
+  private cutThen(id: string | undefined, done: () => void): void {
+    const d = this.d;
+    const cs = id ? CUTSCENES[id] : undefined;
+    const c = d.store.data.career;
+    if (!cs || c.flags[cutsceneFlag(cs.id)] || (cs.if && !c.flags[cs.if]) || (cs.unless && c.flags[cs.unless])) return done();
+    c.flags[cutsceneFlag(cs.id)] = true;
+    d.store.commit();
+    const car = findCar(d.store.data.selected);
+    d.game.showroom(car, d.store.data.paint[car.id] ?? car.color, d.store.data.glow[car.id]);
+    d.cutscenes.play(cs, done);
   }
 
   private launch(ev: StoryEvent, cinematic: boolean): void {
@@ -151,6 +171,10 @@ export class StoryController {
         d.store.data.career.epilogueSeen = true;
         d.store.commit();
         d.showEnding(2);
+      } else if (ev.chapter === 3 && chapter3Complete(d.store.data.career) && !d.store.data.career.flags.c3Seen) {
+        d.store.data.career.flags.c3Seen = true;
+        d.store.commit();
+        this.cutThen(`ch3-end-${d.store.data.career.flags.deal ? 'deal' : 'public'}`, () => d.showEnding(3));
       } else if (isDone(d.store.data.career) && !d.store.data.career.endingSeen) {
         d.store.data.career.endingSeen = true;
         d.store.commit();

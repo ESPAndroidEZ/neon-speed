@@ -43,6 +43,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
   let driftArmed = false; // stored record read once per race, not per frame
   let countdownHint = false;
   let seenReward = 0;
+  let seenShift = 0;
   let finalIn = -1; // seconds until FINAL LAP shows (after the lap-time pop-up)
   engine.onFrame((_a, dt) => {
     const rm = game.rm;
@@ -56,7 +57,7 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       hud.popUp(t('launch.hint'), '#e8f6ff');
     }
     if (rm.phase !== 'COUNTDOWN') countdownHint = false;
-    else { driftRecord.abort(); finalLap.reset(); posCue.reset(); weatherCue.reset(); nitroCue.reset(); raceStats.reset(); finalIn = -1; }
+    else { seenShift = me.car.drivetrain.shiftSeq; driftRecord.abort(); finalLap.reset(); posCue.reset(); weatherCue.reset(); nitroCue.reset(); raceStats.reset(); finalIn = -1; }
     if (racing && finalLap.step(rm.playerLap, rm.totalLaps)) finalIn = 1.3;
     if (finalIn >= 0 && !game.paused && (finalIn -= dt) < 0) { finalIn = -1; if (racing) hud.popUp(t('lap.final'), '#ffc23d'); }
     if (racing && !game.paused && weatherCue.step(game.weather !== 'CLEAR', game.weatherIntensity)) hud.popUp(t(game.weather === 'SNOW' ? 'weather.cueSNOW' : 'weather.cueRAIN'), '#18d8ff');
@@ -66,6 +67,11 @@ export function attachRaceFeedback(engine: Engine, game: Game, hud: Hud): Corner
       raceStats.step(game.player.car.state.speed);
       const rec = driftRecord.step(game.telemetry.driftScore);
       if (rec) hud.popUp(t('drift.record', { n: rec }), '#ff2a9d');
+      const dtn = me.car.drivetrain; // manual gearbox: reward a shift near the redline
+      if (dtn.shiftSeq !== seenShift) {
+        seenShift = dtn.shiftSeq;
+        if (dtn.shiftGrade) hud.popUp(t(dtn.shiftGrade === 2 ? 'shift.perfect' : 'shift.good'), dtn.shiftGrade === 2 ? 'var(--green)' : '#18d8ff');
+      }
       const nc = nitroCue.step(game.telemetry.nitroLevel, game.telemetry.nitroActive);
       if (nc) hud.popUp(t(nc === 'EMPTY' ? 'nitro.empty' : 'nitro.ready'), nc === 'EMPTY' ? '#ff5c7a' : '#ff2a9d');
     }

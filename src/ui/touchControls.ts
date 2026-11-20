@@ -4,7 +4,7 @@ import { SteerRamp } from '../input/steerRamp';
 import { ICONS } from './icons';
 import { holdButton, place, TOUCH_CSS } from './touchButton';
 import { applyLayout, enableDrag, type Layout } from './touchLayout';
-import { GEARBOX } from '../physics/gearbox';
+import { manualNow } from '../physics/gearbox';
 import { onLangChange, t } from '../i18n';
 
 export interface TouchControls extends InputSource {
@@ -169,15 +169,15 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
       const dt = lastT ? Math.min(0.1, (now - lastT) / 1000) : 0;
       lastT = now;
       const digital = ramp.update((left ? 1 : 0) - (right ? 1 : 0), api.speedKph, dt);
-      const manualNow = !auto || api.starting; // tilt auto-gas only after GO: holding gas through the countdown timed the launch as EARLY (bogged)
+      const gasByHand = !auto || api.starting; // tilt auto-gas only after GO: holding gas through the countdown timed the launch as EARLY (bogged)
       if ((auto && api.starting) !== (root.dataset.start === '1')) { if (auto && api.starting) root.dataset.start = '1'; else delete root.dataset.start; }
-      out.throttle = on ? (manualNow ? gas : brake > 0 ? 0 : 1) : 0;
+      out.throttle = on ? (gasByHand ? gas : brake > 0 ? 0 : 1) : 0;
       out.brake = on ? brake : 0;
       out.steer = on ? (root.dataset.scheme === 'buttons' ? digital : stick) : 0;
       out.handbrake = on && handbrake;
       out.shiftUp = on && shiftUp;
       out.shiftDown = on && shiftDown;
-      if (root.dataset.manual !== (GEARBOX.manual ? '1' : undefined)) { if (GEARBOX.manual) root.dataset.manual = '1'; else delete root.dataset.manual; }
+      if (root.dataset.manual !== (manualNow() ? '1' : undefined)) { if (manualNow()) root.dataset.manual = '1'; else delete root.dataset.manual; }
       out.nitro = on && nitro;
       return out;
     },

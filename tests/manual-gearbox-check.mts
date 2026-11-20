@@ -72,5 +72,28 @@ e.shiftUp = true;
 run(e, 0.1, 20);
 e.events.drain((type) => { if (type === EV_UPSHIFT) ups++; });
 check('a manual shift pushes the upshift event', ups === 1, `${ups} upshift events`);
+// shift quality (manual only): near the redline = perfect + a little nitro, a lazy early shift = nothing
+{
+  const t = createDefaultTuning();
+  const d = new Drivetrain(t);
+  d.manual = true;
+  d.nitroLevel = 0.5;
+  d.rpm = t.redlineRpm * 0.95;
+  d.shiftUp = true;
+  d.update(D, 20, 1, 0, false);
+  check('a shift near the redline is PERFECT and refills nitro', d.shiftGrade === 2 && d.shiftSeq === 1 && d.nitroLevel > 0.54, `grade ${d.shiftGrade}, nitro ${d.nitroLevel.toFixed(2)}`);
+  const e = new Drivetrain(t);
+  e.manual = true;
+  e.nitroLevel = 0.5;
+  e.rpm = t.redlineRpm * 0.4;
+  e.shiftUp = true;
+  e.update(D, 20, 1, 0, false);
+  check('an early shift gets no grade and no nitro', e.shiftGrade === 0 && e.nitroLevel === 0.5, `grade ${e.shiftGrade}`);
+  const a = new Drivetrain(t);
+  a.nitroLevel = 0.5;
+  a.rpm = t.redlineRpm * 0.95;
+  a.update(D, 20, 1, 0, false);
+  check('the automatic gearbox never grades or rewards', a.shiftSeq === 0 && a.nitroLevel === 0.5);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

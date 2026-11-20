@@ -50,6 +50,7 @@ import { t } from './i18n';
 import { preloadCarModels } from './world/carFactory';
 import { runBootLoader } from './ui/bootLoader';
 import { installRotateHint } from './ui/rotateHint';
+import { CutscenePlayer } from './game/cutscene';
 import { buildWorld } from './world/world';
 
 /* Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip (straight to a race, no menu)
@@ -142,7 +143,7 @@ menu = new Menu({
 });
 const subs = new Subtitles(voice);
 story = new StoryController({
-  game, cast, store, results, dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
+  game, cast, store, results, cutscenes: new CutscenePlayer({ game, cast }), dialogue: new DialogueBox(voice), subs, cards: new TitleCards(),
   hideMenu: () => menu.hide(), showStory: () => menu.story(), showEnding: (c) => menu.showEnding(c),
 });
 const pause = new PauseController(game, slots, new PauseMenu(slots, {
@@ -197,7 +198,7 @@ installRadio(engine, game, subs);
 installMinimap(game, world, (fn) => engine.onFrame(fn));
 let hudShown = true, padsShown = true;
 engine.onFrame(() => {
-  const show = game.state !== 'MENU';
+  const show = game.state !== 'MENU' && game.state !== 'CINEMATIC'; // no HUD or touch buttons over a cutscene
   const pads = show && !game.paused && game.state !== 'PODIUM'; // touch buttons never sit over the pause or results menus
   if (show !== hudShown) hud.setVisible((hudShown = show));
   if (pads !== padsShown) touch.setVisible((padsShown = pads));

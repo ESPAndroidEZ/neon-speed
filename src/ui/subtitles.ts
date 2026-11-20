@@ -55,16 +55,16 @@ export class Subtitles {
     onLangChange(() => { for (const el of Array.from(this.layer.children) as HTMLElement[]) if (el.dataset.src) el.textContent = tx(el.dataset.src); }); // a shown line switches language in place
   }
 
-  schedule(list: readonly Caption[]): void {
+  schedule(list: readonly Caption[], force = false): void {
     this.clear();
     for (const c of list) {
-      this.timers.push(window.setTimeout(() => this.flash(c.text, c.dur, c.kind), c.at * 1000));
+      this.timers.push(window.setTimeout(() => this.flash(c.text, c.dur, c.kind, force), c.at * 1000));
     }
   }
 
   /** Show a single line for `dur` seconds. */
-  flash(text: string, dur: number, kind: Caption['kind'] = 'switch'): void {
-    if (!SUBTITLES.on && kind !== 'title') return;
+  flash(text: string, dur: number, kind: Caption['kind'] = 'switch', force = false): void {
+    if (!SUBTITLES.on && !force && kind !== 'title') return; // in-race captions are optional; cinematic narration is not
     const line = tx(text);
     const el = h('div', '', line);
     el.dataset.src = text;

@@ -1,5 +1,6 @@
 import { EVENTS, type ChoiceOption, type Line, type StoryEvent } from '../data/story';
 import { ALL_EVENTS } from '../data/story2';
+import { EVENTS_3 } from '../data/story3';
 import type { SaveData } from './save';
 import { t } from '../i18n';
 
@@ -30,6 +31,15 @@ export const isDone = (c: CareerState): boolean => EVENTS.every((e) => c.complet
 /** Chapter 2 complete: the epilogue follows the flag the player chose. */
 export const storyComplete = (c: CareerState): boolean => nextEvent(c) === null;
 
+/** Chapter 3 opens once the Chapter 2 epilogue has been shown; its next unplayed event, or null (locked or finished). */
+export function nextEvent3(c: CareerState): StoryEvent | null {
+  if (!storyComplete(c) || !c.epilogueSeen) return null;
+  return EVENTS_3.find((e) => !c.completed.includes(e.id)) ?? null;
+}
+
+export const chapter3Open = (c: CareerState): boolean => storyComplete(c) && c.epilogueSeen;
+export const chapter3Complete = (c: CareerState): boolean => EVENTS_3.every((e) => c.completed.includes(e.id));
+
 /** Drop the lines whose story flag condition is not met. */
 export const playable = (lines: readonly Line[], c: CareerState): Line[] => lines.filter((l) => (!l.if || c.flags[l.if]) && (!l.unless || !c.flags[l.unless]));
 
@@ -40,12 +50,14 @@ export function applyChoice(c: CareerState, opt: ChoiceOption): ChoiceOption['re
   for (const [k, v] of Object.entries(opt.set ?? {})) c.flags[k] = v;
   if (opt.set?.open) delete c.flags.sponsor; // the two doors exclude each other
   if (opt.set?.sponsor) delete c.flags.open;
+  if (opt.set?.public) delete c.flags.deal; // the two ways to end Chapter 3 exclude each other too
+  if (opt.set?.deal) delete c.flags.public;
   for (const [k, v] of Object.entries(opt.rel ?? {})) c.rel[k] = clampRel((c.rel[k] ?? 0) + v);
   return opt.reply;
 }
 
 /** An event is playable if it is already passed (replay) or it is the next one. */
-export const isUnlocked = (c: CareerState, id: string): boolean => c.completed.includes(id) || nextEvent(c)?.id === id;
+export const isUnlocked = (c: CareerState, id: string): boolean => c.completed.includes(id) || nextEvent(c)?.id === id || nextEvent3(c)?.id === id;
 
 export interface EventOutcome {
   passed: boolean;

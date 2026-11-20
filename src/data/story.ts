@@ -88,6 +88,10 @@ export interface StoryEvent {
   cues?: Cue[];
   /** A different field once a story flag is set (the Chapter 2 branch). */
   rivalsIf?: Record<string, string[]>;
+  /** The manual gearbox is forced for this event (Chapter 3 "Cain's Gearbox"). */
+  manual?: boolean;
+  /** Cutscene (data/cutscenes*.ts) played once before the pre-race dialogue. */
+  cutBefore?: string;
 }
 
 export interface Cue {

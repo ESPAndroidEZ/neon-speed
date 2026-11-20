@@ -1,5 +1,6 @@
 import { THEME_CSS } from './theme';
 import { MENU_CSS } from './menuCss';
+import { getLang } from '../i18n';
 
 let injected = false;
 
@@ -29,7 +30,7 @@ export function button(label: string, onClick: () => void, cls = ''): HTMLButton
   return b;
 }
 
-export const money = (n: number): string => `$${n.toLocaleString('en-US')}`;
+export const money = (n: number): string => (getLang() === 'es' ? `${n.toLocaleString('de-DE')} $` : `$${n.toLocaleString('en-US')}`); // Spanish: 1.200 $
 export const lapText = (t: number | null): string => (t === null ? '--' : `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, '0')}`);
 
 /** Small transient message at the bottom centre. */

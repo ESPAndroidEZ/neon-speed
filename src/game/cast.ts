@@ -3,6 +3,7 @@ import { Animator } from '../anim/animator';
 import type { ClipName } from '../anim/clips';
 import { Crowd, type Spot } from '../anim/crowd';
 import { lookOf } from '../data/characters';
+import { yawToward, type CutActor } from '../core/cutsceneTimeline';
 import type { PersonRig } from '../types/people';
 import { buildPerson, lookToSpec } from '../world/peopleAdapter';
 import { STAGE } from '../world/stage';
@@ -28,6 +29,8 @@ export class Cast {
   private crowdKey: unknown = null;
   private starterT = -1;
   private talk = 0;
+  /** Cutscene mode: actors keep the clips the cutscene gives them (no menu idle/talk switching). */
+  scripted = false;
 
   constructor(scene: Scene) {
     this.scene = scene;
@@ -65,6 +68,16 @@ export class Cast {
     this.starterT = -1;
   }
 
+  /** Put a cutscene's actors around the stage (positions are relative to the stage centre). */
+  setScene(list: readonly CutActor[]): void {
+    this.hideAll();
+    for (const a of list) this.place(a.id, STAGE.x + a.at[0], STAGE.z + a.at[1], yawToward(a.at, a.face), a.clip as ClipName);
+  }
+
+  setClip(id: string, clip: string): void {
+    this.get(id).anim.play(clip as ClipName, 0.35);
+  }
+
   /** Dialogue on screen: 0 = silent, 1 = talking (the showroom character gestures). */
   speaking(level: number): void {
     this.talk = level;
@@ -81,6 +94,10 @@ export class Cast {
   update(game: Game, dt: number): void {
     const menu = game.state === 'MENU';
     this.crowdRoot.visible = !menu;
+    if (menu && this.scripted) {
+      for (const a of this.shown) a.anim.update(dt);
+      return;
+    }
     if (menu) {
       this.talk = DIALOGUE.active ? 1 : 0; // the speaker gestures while a line is on screen
       for (const a of this.shown) {

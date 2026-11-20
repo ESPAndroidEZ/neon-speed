@@ -1,0 +1,17 @@
+[Unit]
+Description=Neon Speed MySQL (single node, localhost only)
+After=network.target
+
+[Service]
+Type=notify
+User=mysql
+Group=mysql
+RuntimeDirectory=neonspeed-mysql
+ExecStart=/usr/sbin/mysqld --defaults-file=/etc/neonspeed-mysql/my.cnf
+LimitNOFILE=10000
+Restart=on-failure
+TimeoutSec=300
+MemoryMax=700M
+
+[Install]
+WantedBy=multi-user.target

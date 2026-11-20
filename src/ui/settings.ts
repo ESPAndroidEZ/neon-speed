@@ -13,6 +13,8 @@ import { t } from '../i18n';
 import { langRow } from './langRow';
 import { settingsTabs } from './settingsTabs';
 import { SUBTITLES } from './subtitles';
+import { playerCodeRows } from './playerCode';
+import { openSupport } from './feedback';
 import { GEARBOX } from '../physics/gearbox';
 import { applyUiSizes } from './uiSizes';
 import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
@@ -180,7 +182,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const advanced = h('div', 'rb-settings');
   advanced.append(
     panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), voice, soundCredits()]),
-    panel(t('set.secGame'), [subs, sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store)]),
+    panel(t('set.secGame'), [subs, sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store), button(t('fb.open'), () => openSupport()), ...playerCodeRows()]),
     panel(t('set.secControls'), [...extra.filter((e) => e.dataset.adv), ...driving.advanced]),
     panel(t('set.graphics'), gfx.advanced),
   );
