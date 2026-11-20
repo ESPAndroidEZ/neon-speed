@@ -407,9 +407,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - modelCar.ts (116) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
 - modelPrefs.ts (21) Per-car yaw corrections set in the garage (radians), kept in localStorage so a fix work... | fn getYawOverride, setYawOverride
 ## src/world/open
-- chunkGeo.ts (121) Triangle soup for one material: positions, normals, uvs (indexed). | fn chunkGeo; const triangles; iface Geo, ChunkGeo
+- chunkGeo.ts (139) Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wa... | fn chunkGeo; const triangles; iface Geo, ChunkGeo
 - chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
-- chunkMesh.ts (106) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
+- chunkMesh.ts (112) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
 - roamLook.ts (72) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob

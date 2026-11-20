@@ -3,10 +3,15 @@ import { SIDEWALK, isWater } from '../roads/grammar';
 import { SEA_Y, heightAt } from '../roads/height';
 import { CHUNK } from './chunkIndex';
 import { cornerOf } from './footprints';
+import { SIGNS } from '../city/signs';
+
+/** Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wall neon). */
+const SIGN_SHARE: Readonly<Record<string, number>> = { strip: 0.75, oldtown: 0.35, downtown: 0.25, harbour: 0.1, industrial: 0.05, hills: 0 };
+const SIGN_COLS = 4; // atlas layout of world/city/signs.ts: 4 columns of 256 x 128 cells
 
 /** Triangle soup for one material: positions, normals, uvs (indexed). */
 export interface Geo { pos: number[]; nrm: number[]; uv: number[]; idx: number[] }
-export interface ChunkGeo { ground: Geo; water: Geo; road: Geo; walk: Geo; walls: Geo; roofs: Geo; lamps: Geo }
+export interface ChunkGeo { ground: Geo; water: Geo; road: Geo; walk: Geo; walls: Geo; roofs: Geo; lamps: Geo; signs: Geo }
 
 const geo = (): Geo => ({ pos: [], nrm: [], uv: [], idx: [] });
 const GROUND_N = 8; // ground grid per chunk (16 m quads follow the hills)
@@ -88,9 +93,22 @@ function lamps(pools: Geo, posts: Geo, e: RoadGraph['edges'][number], own: (x: n
   }
 }
 
+/** A neon shop sign on the building's front (local +Z), 2:1 like the atlas cell; which design and whether at all come from the footprint. */
+function sign(o: Geo, f: Footprint): void {
+  const h = ((f.style * 7919 + Math.round(f.x * 13) + Math.round(f.z * 7)) >>> 0) % 1000 / 1000;
+  if (h >= (SIGN_SHARE[f.district] ?? 0) || f.hw < 3) return;
+  const k = Math.round(h * 997) % SIGNS.length, rows = Math.ceil(SIGNS.length / SIGN_COLS);
+  const u0 = (k % SIGN_COLS) / SIGN_COLS, u1 = u0 + 1 / SIGN_COLS, v0 = 1 - (Math.floor(k / SIGN_COLS) + 1) / rows, v1 = v0 + 1 / rows;
+  const fx = Math.sin(f.rot), fz = Math.cos(f.rot), sx = fz, sz = -fx; // front normal, side axis (viewer's right)
+  const w = Math.min(f.hw * 1.4, 7), ht = w / 2, y = heightAt(f.x, f.z) + 3.6 + (h * 31 % 1) * 2.5;
+  const cx = f.x + fx * (f.hd + 0.25), cz = f.z + fz * (f.hd + 0.25);
+  quad(o, [cx - sx * w / 2, y, cz - sz * w / 2, cx + sx * w / 2, y, cz + sz * w / 2, cx - sx * w / 2, y + ht, cz - sz * w / 2, cx + sx * w / 2, y + ht, cz + sz * w / 2],
+    [fx, 0, fz], [u0, v0, u1, v0, u0, v1, u1, v1]);
+}
+
 /** Every piece of one chunk as plain arrays (pure: the three.js wrapper is chunkMesh.ts; tests count triangles here). */
 export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo): ChunkGeo {
-  const out: ChunkGeo = { ground: geo(), water: geo(), road: geo(), walk: geo(), walls: geo(), roofs: geo(), lamps: geo() };
+  const out: ChunkGeo = { ground: geo(), water: geo(), road: geo(), walk: geo(), walls: geo(), roofs: geo(), lamps: geo(), signs: geo() };
   const x0 = -g.half + info.cx * CHUNK, z0 = -g.half + info.cz * CHUNK;
   const own = (x: number, z: number): boolean => x >= x0 && x < x0 + CHUNK && z >= z0 && z < z0 + CHUNK;
   const step = CHUNK / GROUND_N;
@@ -114,7 +132,7 @@ export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
     strip(out.walk, e, own, -w - SIDEWALK, -w, WALK_Y, 4);
   }
   for (const n of g.nodes) if (own(n.x, n.z)) disc(out.road, n.x, n.z, n.radius, heightAt(n.x, n.z) + ROAD_Y + 0.01);
-  for (const i of info.buildings) box(out.walls, out.roofs, fs[i]);
+  for (const i of info.buildings) { box(out.walls, out.roofs, fs[i]); sign(out.signs, fs[i]); }
   return out;
 }
 

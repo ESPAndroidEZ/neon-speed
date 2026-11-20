@@ -5,11 +5,12 @@ import type { ChunkInfo, Footprint, RoadGraph } from '../../types/world';
 import { districtWalls } from './roamLook';
 import type { DistrictId } from '../../types/world';
 import { makeRoadTexture } from '../textures';
+import { makeSignAtlas } from '../city/signs';
 import { chunkGeo, type ChunkGeo, type Geo } from './chunkGeo';
 import type { ChunkJob } from './streamer';
 
 /** One shared material per chunk part (walls: one per district; a chunk uses its own): draw calls = parts x live chunks. */
-export interface RoamMaterials { ground: MeshStandardMaterial; water: Material; road: MeshStandardMaterial; walk: MeshStandardMaterial; walls: Readonly<Record<DistrictId, Material>>; roofs: MeshStandardMaterial; lamps: Readonly<Record<DistrictId, Material>> }
+export interface RoamMaterials { ground: MeshStandardMaterial; water: Material; road: MeshStandardMaterial; walk: MeshStandardMaterial; walls: Readonly<Record<DistrictId, Material>>; roofs: MeshStandardMaterial; lamps: Readonly<Record<DistrictId, Material>>; signs: Material }
 
 const wrap = <T extends Texture>(t: T): T => { t.wrapS = t.wrapT = RepeatWrapping; return t; };
 
@@ -35,8 +36,10 @@ export function roamMaterials(): RoamMaterials & { dispose(): void } {
   const dw = districtWalls();
   const road = wrap(makeRoadTexture());
   const pool = poolTexture();
+  const atlas = makeSignAtlas();
   const lamps = {} as Record<DistrictId, MeshBasicMaterial>;
-  for (const d of DISTRICTS) lamps[d] = new MeshBasicMaterial({ map: pool, color: new Color(DISTRICT_LOOK[d].lamp), transparent: true, opacity: SPARSE.has(d) ? 0.62 : 0.46, blending: AdditiveBlending, depthWrite: false });
+  // pool colour: the district's lamp tint blended 35 % toward warm white (a tint, not a full-colour wash on the road)
+  for (const d of DISTRICTS) lamps[d] = new MeshBasicMaterial({ map: pool, color: new Color(DISTRICT_LOOK[d].lamp).lerp(new Color(0xffe6c8), 0.35), transparent: true, opacity: SPARSE.has(d) ? 0.62 : 0.46, blending: AdditiveBlending, depthWrite: false });
   const m = {
     ground: new MeshStandardMaterial({ color: new Color(0x262e2c), roughness: 0.95 }),
     water: new MeshStandardMaterial({ color: new Color(0x061424), roughness: 0.12, metalness: 0.4 }),
@@ -45,6 +48,7 @@ export function roamMaterials(): RoamMaterials & { dispose(): void } {
     walls: dw.walls,
     roofs: new MeshStandardMaterial({ color: new Color(0x202226), roughness: 0.9 }),
     lamps,
+    signs: new MeshBasicMaterial({ map: atlas, color: new Color(1.15, 1.15, 1.15) }), // same glow as the race maps' shop signs
   };
   return {
     ...m,
@@ -54,6 +58,8 @@ export function roamMaterials(): RoamMaterials & { dispose(): void } {
       for (const l of Object.values(lamps)) l.dispose();
       road.dispose();
       pool.dispose();
+      m.signs.dispose();
+      atlas.dispose();
     },
   };
 }
@@ -68,7 +74,7 @@ function toGeometry(o: Geo): BufferGeometry {
   return b;
 }
 
-const PARTS = ['ground', 'water', 'road', 'walk', 'walls', 'roofs', 'lamps'] as const; // lamps last: additive, drawn over the road
+const PARTS = ['ground', 'water', 'road', 'walk', 'walls', 'roofs', 'signs', 'lamps'] as const; // lamps last: additive, drawn over the road
 
 /**
  * Streaming job for one chunk: slice 1 computes the arrays, then one slice per part turns them into a mesh (so a frame
@@ -88,7 +94,7 @@ export function chunkJob(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
         const mesh = new Mesh(toGeometry(geo[part]), part === 'walls' ? mats.walls[info.district] : part === 'lamps' ? mats.lamps[info.district] : mats[part]);
         mesh.name = part;
         mesh.matrixAutoUpdate = false;
-        mesh.receiveShadow = part !== 'walls' && part !== 'lamps';
+        mesh.receiveShadow = part !== 'walls' && part !== 'lamps' && part !== 'signs';
         if (part === 'lamps') mesh.renderOrder = 2;
         group.add(mesh);
         return { done: false, value: undefined };
