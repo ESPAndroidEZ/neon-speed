@@ -1,33 +1,59 @@
-import { BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, RepeatWrapping, type Material, type Texture } from 'three';
+import { AdditiveBlending, BufferGeometry, CanvasTexture, Color, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, RepeatWrapping, type Material, type Texture } from 'three';
+import { DISTRICTS } from '../../types/world';
+import { DISTRICT_LOOK } from '../../data/world/districtMap';
 import type { ChunkInfo, Footprint, RoadGraph } from '../../types/world';
-import { makeFacadeSheet } from '../city/textures';
+import { districtWalls } from './roamLook';
+import type { DistrictId } from '../../types/world';
 import { makeRoadTexture } from '../textures';
 import { chunkGeo, type ChunkGeo, type Geo } from './chunkGeo';
 import type { ChunkJob } from './streamer';
 
-/** One shared material per chunk part (every chunk uses the same six: draw calls = parts x live chunks). */
-export interface RoamMaterials { ground: Material; water: Material; road: Material; walk: Material; walls: Material; roofs: Material }
+/** One shared material per chunk part (walls: one per district; a chunk uses its own): draw calls = parts x live chunks. */
+export interface RoamMaterials { ground: MeshStandardMaterial; water: Material; road: MeshStandardMaterial; walk: MeshStandardMaterial; walls: Readonly<Record<DistrictId, Material>>; roofs: MeshStandardMaterial; lamps: Readonly<Record<DistrictId, Material>> }
 
 const wrap = <T extends Texture>(t: T): T => { t.wrapS = t.wrapT = RepeatWrapping; return t; };
 
+/** Districts with few lit windows get brighter street lights (readability: `npm run visual` city cases). */
+const SPARSE: ReadonlySet<DistrictId> = new Set(['harbour', 'industrial', 'hills']);
+
+/** Soft round light pool (white; the district's lamp colour tints it). */
+function poolTexture(): CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d') as CanvasRenderingContext2D;
+  const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  r.addColorStop(0, 'rgba(255,255,255,1)');
+  r.addColorStop(0.45, 'rgba(255,255,255,0.45)');
+  r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 0, 64, 64);
+  return new CanvasTexture(c);
+}
+
 /** Built once per free-roam session; `dispose` frees the textures. Canvas textures need a DOM (the browser). */
 export function roamMaterials(): RoamMaterials & { dispose(): void } {
-  const sheet = makeFacadeSheet('concrete', 5);
+  const dw = districtWalls();
   const road = wrap(makeRoadTexture());
-  for (const t of [sheet.map, sheet.emissiveMap, sheet.normalMap, sheet.roughnessMap]) wrap(t);
+  const pool = poolTexture();
+  const lamps = {} as Record<DistrictId, MeshBasicMaterial>;
+  for (const d of DISTRICTS) lamps[d] = new MeshBasicMaterial({ map: pool, color: new Color(DISTRICT_LOOK[d].lamp), transparent: true, opacity: SPARSE.has(d) ? 0.62 : 0.46, blending: AdditiveBlending, depthWrite: false });
   const m = {
-    ground: new MeshStandardMaterial({ color: new Color(0x1c2422), roughness: 0.95 }),
+    ground: new MeshStandardMaterial({ color: new Color(0x262e2c), roughness: 0.95 }),
     water: new MeshStandardMaterial({ color: new Color(0x061424), roughness: 0.12, metalness: 0.4 }),
     road: new MeshStandardMaterial({ map: road, roughness: 0.85 }),
     walk: new MeshStandardMaterial({ color: new Color(0x5d6066), roughness: 0.9 }),
-    walls: new MeshStandardMaterial({ map: sheet.map, normalMap: sheet.normalMap, roughnessMap: sheet.roughnessMap, emissiveMap: sheet.emissiveMap, emissive: new Color(0xffd9a0), emissiveIntensity: 0.9 }),
+    walls: dw.walls,
     roofs: new MeshStandardMaterial({ color: new Color(0x202226), roughness: 0.9 }),
+    lamps,
   };
   return {
     ...m,
     dispose: () => {
-      for (const mat of Object.values(m)) mat.dispose();
-      for (const t of [road, sheet.map, sheet.emissiveMap, sheet.normalMap, sheet.roughnessMap]) t.dispose();
+      for (const mat of [m.ground, m.water, m.road, m.walk, m.roofs]) mat.dispose();
+      dw.dispose();
+      for (const l of Object.values(lamps)) l.dispose();
+      road.dispose();
+      pool.dispose();
     },
   };
 }
@@ -42,7 +68,7 @@ function toGeometry(o: Geo): BufferGeometry {
   return b;
 }
 
-const PARTS = ['ground', 'water', 'road', 'walk', 'walls', 'roofs'] as const;
+const PARTS = ['ground', 'water', 'road', 'walk', 'walls', 'roofs', 'lamps'] as const; // lamps last: additive, drawn over the road
 
 /**
  * Streaming job for one chunk: slice 1 computes the arrays, then one slice per part turns them into a mesh (so a frame
@@ -59,10 +85,11 @@ export function chunkJob(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
       while (k < PARTS.length && geo[PARTS[k]].idx.length === 0) k++;
       if (k < PARTS.length) {
         const part = PARTS[k++];
-        const mesh = new Mesh(toGeometry(geo[part]), mats[part]);
+        const mesh = new Mesh(toGeometry(geo[part]), part === 'walls' ? mats.walls[info.district] : part === 'lamps' ? mats.lamps[info.district] : mats[part]);
         mesh.name = part;
         mesh.matrixAutoUpdate = false;
-        mesh.receiveShadow = part !== 'walls';
+        mesh.receiveShadow = part !== 'walls' && part !== 'lamps';
+        if (part === 'lamps') mesh.renderOrder = 2;
         group.add(mesh);
         return { done: false, value: undefined };
       }

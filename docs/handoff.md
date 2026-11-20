@@ -6,7 +6,7 @@ Baton: claude
 Updated: 2026-11-20 (W4 music done; W1 built, waiting for owner OK; next W2).
 
 ## Next
-0. START HERE: `docs/master-plan.md`. W4 DONE; W1 housekeeping installed; W2 built: owner must OK `scripts/apply-server-schema.sh`, then run `node tests/lab/scores-curl.mjs`; owner sends `docs/admin-request.md`; W3 built (owner: review `docs/online-protocol.md`, OK `scripts/setup-server-lobby.sh` + `scripts/apply-server-schema.sh`; administrator: `/ws/`). W5.1 DONE (pause menu with fast travel + photo added). Next: W5.2 look per district (palettes, neon, weather, night; `npm run visual` must pass in the city) - needs a visual-check mode for Free Drive first.
+0. START HERE: `docs/master-plan.md`. W4 DONE; W1 housekeeping installed; W2 built: owner must OK `scripts/apply-server-schema.sh`, then run `node tests/lab/scores-curl.mjs`; owner sends `docs/admin-request.md`; W3 built (owner: review `docs/online-protocol.md`, OK `scripts/setup-server-lobby.sh` + `scripts/apply-server-schema.sh`; administrator: `/ws/`). W5.1 DONE. W5.2 look: district walls, fog, weather surfaces, street lights built; `npm run visual` city cases pass. Next in W5.2: neon signs on the Strip (sign atlas `world/city/signs.ts`), then W5.3 traffic.
 1. OWNER: `FEEDBACK_EMAIL=<address> scripts/set-feedback-email.sh` (deployed 2026-11-20, commit ab3824f; live health OK). Everything up to commit 2f4ecf0 is pushed.
 2. Playtest on real phones; record engine sounds (owner offered: audio-inbox/<car>/, see docs/skills.md); balance of Chapter 3 races untested; qa-report open rows (#10, #18, #23, #24, #26).
 3. Fun plan: knockout mode; Neon Harbor block 1b (docs/open-world.md).
@@ -127,6 +127,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-20 Claude: W3 finished locally: room-list delay was the lab machine (two software-rendered pages froze for 30+ s; list retries now up to 5x), host hand-over added on server and client; all lobby tests pass.
 - 2026-11-20 Claude: W5.1 Free Drive playable: buildings, streaming chunks, city contact, FREEROAM mode, menu button; unit tests + 60 s bot lab pass within the LOW budget.
 - 2026-11-20 Claude: W5.1 DONE: Free Drive pause menu (fast travel, photo), streaming warm-up fix, race hints hidden in the city; 10-minute bot drive within LOW budget, no leak; 1392 PASS.
+- 2026-11-20 Claude: W5.2 first pass: per-district walls/fog/weather surfaces + street lights; 12 new city cases in npm run visual ALL PASS.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.

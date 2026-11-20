@@ -60,3 +60,6 @@ saturation (mean chroma of the brightest 5% pixels) > 0.20 in Neon Night (target
 | High | 1.0 | < 600 | < 900k | 2048 map | env + planar mirror in rain | full grade, streaks, DoF in garage | 100% |
 | Ultra | native DPR | < 900 | < 1.4M | 4096 map | planar + SSR-like fake | + haze, motion blur | 150% |
 Auto quality lowers the render resolution in 10 % steps (to 60 %) before dropping a tier. Cars merge their static meshes by material (~40 draw calls per car). Geometry is merged per 150 m chunk, instanced props, distance LOD, chunks outside 450 m culled (Low 250 m). Window flicker is one uniform, not per-window logic.
+
+## Neon Harbor districts (W5.2, 2026-11-20)
+Facades: downtown glass, strip concrete with the brightest windows (1.5x), harbour and industrial metal, old town and hills brick. Fog: `DISTRICT_LOOK` colour, tinted 55 % into the weather fog (same rule as races). Street lights every 34 m on alternating sides, light pools in the district's lamp colour (opacity 0.46, 0.62 in the sparse harbour, industrial and hills). Readability bands are the same as races (`npm run visual` city cases).

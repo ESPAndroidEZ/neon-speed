@@ -63,14 +63,14 @@ check(`triangles within ${quality.toUpperCase()} budget (${BUDGET.tris / 1e3}k)`
 check('live chunks bounded (<= 49)', max('chunks') <= 49, `max ${max('chunks')}`);
 check('textures flat', end.textures <= first.textures + 2, `${first.textures} -> ${end.textures}`);
 check('heap flat (end <= first + 40 MB)', !end.heap || end.heap <= first.heap + 40e6, `${(first.heap / 1e6).toFixed(0)} -> ${(end.heap / 1e6).toFixed(0)} MB`);
-await page.locator('.rb-roam button', { hasText: 'Menu' }).click();
+await page.locator('.rb-roam button', { hasText: 'Pause' }).click(); await page.locator('.rb-layer button', { hasText: /^Menu$/ }).click();
 await page.waitForTimeout(1500);
 check('Menu button: back to the main menu, city removed', await page.evaluate(() => window.__rbGame.state === 'MENU' && !window.__rbGame.d.engine.scene.getObjectByName('neon-harbor') && window.__rbGame.world.root.visible));
 const exitGeos = await page.evaluate(() => window.__rbGame.d.engine.renderer.info.memory.geometries);
 await page.locator('button', { hasText: 'Free Drive' }).click(); // a second visit: one-time caches are filled now, a leak would grow again
 await page.waitForFunction(() => window.__rbGame?.state === 'FREEROAM', null, { timeout: 60000 });
 await page.keyboard.down('KeyW'); await page.waitForTimeout(20000); await page.keyboard.press('KeyR'); await page.waitForTimeout(5000); await page.keyboard.up('KeyW');
-await page.locator('.rb-roam button', { hasText: 'Menu' }).click();
+await page.locator('.rb-roam button', { hasText: 'Pause' }).click(); await page.locator('.rb-layer button', { hasText: /^Menu$/ }).click();
 await page.waitForTimeout(1500);
 const exit2 = await page.evaluate(() => window.__rbGame.d.engine.renderer.info.memory.geometries);
 check('no geometry leak per visit (2nd exit within 5 of the 1st)', exit2 - exitGeos <= 5, `menu ${menuGeos}, after 1st visit ${exitGeos} (one-time caches), after 2nd ${exit2}`);

@@ -44,6 +44,9 @@ for (const w of ['clear', 'rain', 'snow']) {
   CASES.push({ name: `${w}-grid`, q: `?skip&ai=3&car=supra&w=${w}&wi=1&ff=1` });
   CASES.push({ name: `${w}-speed`, q: `?skip&demo=straight&ai=0&car=supra&w=${w}&wi=1&at=2&ff=6.5` });
 }
+// Neon Harbor free roam (W5.2): every district in clear, the three busiest in rain and snow
+for (const d of ['downtown', 'strip', 'harbour', 'oldtown', 'hills', 'industrial']) CASES.push({ name: `city-${d}-clear`, q: `?roam=${d}&car=supra&w=clear`, city: true });
+for (const d of ['downtown', 'strip', 'harbour']) for (const w of ['rain', 'snow']) CASES.push({ name: `city-${d}-${w}`, q: `?roam=${d}&car=supra&w=${w}&wi=1`, city: true });
 
 const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 if (only) for (let i = CASES.length - 1; i >= 0; i--) if (!CASES[i].name.includes(only)) CASES.splice(i, 1);
@@ -54,7 +57,7 @@ for (const c of CASES) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(BASE + c.q, { waitUntil: 'load' });
-  await page.waitForTimeout(c.name.endsWith('grid') ? 3500 : 1500);
+  await page.waitForTimeout(c.city ? 7000 : c.name.endsWith('grid') ? 3500 : 1500); // the city is generated and primed after the game loads
   const buf = await page.screenshot();
   writeFileSync(`${OUT}/${c.name}.png`, buf);
   const m = metrics(PNG.sync.read(buf));

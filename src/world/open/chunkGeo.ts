@@ -6,11 +6,12 @@ import { cornerOf } from './footprints';
 
 /** Triangle soup for one material: positions, normals, uvs (indexed). */
 export interface Geo { pos: number[]; nrm: number[]; uv: number[]; idx: number[] }
-export interface ChunkGeo { ground: Geo; water: Geo; road: Geo; walk: Geo; walls: Geo; roofs: Geo }
+export interface ChunkGeo { ground: Geo; water: Geo; road: Geo; walk: Geo; walls: Geo; roofs: Geo; lamps: Geo }
 
 const geo = (): Geo => ({ pos: [], nrm: [], uv: [], idx: [] });
 const GROUND_N = 8; // ground grid per chunk (16 m quads follow the hills)
 const ROAD_Y = 0.04, WALK_Y = 0.16;
+const LAMP_EVERY = 34, LAMP_H = 7, POOL_R = 9; // street lights: spacing along a road (m), post height, light pool radius
 
 function quad(o: Geo, p: readonly number[], n: readonly number[], uv: readonly number[]): void {
   const b = o.pos.length / 3;
@@ -68,9 +69,28 @@ function box(walls: Geo, roofs: Geo, f: Footprint): void {
   quad(roofs, [c[0].x, y1, c[0].z, c[1].x, y1, c[1].z, c[3].x, y1, c[3].z, c[2].x, y1, c[2].z], [0, 1, 0], [0, 0, 1, 0, 0, 1, 1, 1]);
 }
 
+/** Street lights along an edge (alternate sides): a thin dark post (into `posts`) and a light pool on the tarmac (`pools`). */
+function lamps(pools: Geo, posts: Geo, e: RoadGraph['edges'][number], own: (x: number, z: number) => boolean): void {
+  const w = e.width / 2;
+  for (let s = LAMP_EVERY / 2, k = 0, side = 1; s < e.length; s += LAMP_EVERY, side = -side) {
+    while (k + 2 < e.cum.length && e.cum[k + 1] < s) k++;
+    const len = e.cum[k + 1] - e.cum[k] || 1, t = (s - e.cum[k]) / len;
+    const tx = (e.pts[k * 2 + 2] - e.pts[k * 2]) / len, tz = (e.pts[k * 2 + 3] - e.pts[k * 2 + 1]) / len;
+    const cx = e.pts[k * 2] + tx * len * t, cz = e.pts[k * 2 + 1] + tz * len * t;
+    const px = cx + tz * side * (w + 0.6), pz = cz - tx * side * (w + 0.6); // post on the kerb
+    if (!own(px, pz)) continue;
+    const y = yAt(e, k, cx, cz), ox = cx + tz * side * (w - 2.5), oz = cz - tx * side * (w - 2.5);
+    quad(pools, [ox - POOL_R, y + ROAD_Y + 0.03, oz - POOL_R, ox + POOL_R, y + ROAD_Y + 0.03, oz - POOL_R, ox - POOL_R, y + ROAD_Y + 0.03, oz + POOL_R, ox + POOL_R, y + ROAD_Y + 0.03, oz + POOL_R], [0, 1, 0], [0, 0, 1, 0, 0, 1, 1, 1]);
+    const r = 0.12, py = (e.ys ? y : heightAt(px, pz)) + WALK_Y;
+    for (const [ax, az, bx, bz] of [[-r, -r, r, -r], [r, -r, r, r], [r, r, -r, r], [-r, r, -r, -r]]) {
+      quad(posts, [px + ax, py, pz + az, px + bx, py, pz + bz, px + ax, py + LAMP_H, pz + az, px + bx, py + LAMP_H, pz + bz], [(az + bz) === 0 ? Math.sign(ax) : 0, 0, (ax + bx) === 0 ? Math.sign(az) : 0], [0, 0, 1, 0, 0, 1, 1, 1]);
+    }
+  }
+}
+
 /** Every piece of one chunk as plain arrays (pure: the three.js wrapper is chunkMesh.ts; tests count triangles here). */
 export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo): ChunkGeo {
-  const out: ChunkGeo = { ground: geo(), water: geo(), road: geo(), walk: geo(), walls: geo(), roofs: geo() };
+  const out: ChunkGeo = { ground: geo(), water: geo(), road: geo(), walk: geo(), walls: geo(), roofs: geo(), lamps: geo() };
   const x0 = -g.half + info.cx * CHUNK, z0 = -g.half + info.cz * CHUNK;
   const own = (x: number, z: number): boolean => x >= x0 && x < x0 + CHUNK && z >= z0 && z < z0 + CHUNK;
   const step = CHUNK / GROUND_N;
@@ -88,6 +108,7 @@ export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
   for (const id of info.edges) {
     const e = g.edges[id], w = e.width / 2;
     strip(out.road, e, own, -w, w, ROAD_Y, 16);
+    if (e.kind !== 'runway') lamps(out.lamps, out.roofs, e, own);
     if (e.kind === 'bridge' || e.kind === 'runway') continue;
     strip(out.walk, e, own, w, w + SIDEWALK, WALK_Y, 4);
     strip(out.walk, e, own, -w - SIDEWALK, -w, WALK_Y, 4);

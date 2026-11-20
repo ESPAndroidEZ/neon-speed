@@ -133,7 +133,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
 - demoInput.ts (29) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
 - devPanels.ts (17) Dev-only panels (K audio test, ` tuning, F3 FPS). main.ts imports this lazily in dev bu... | fn installDevPanels
-- devStart.ts (108) THROWAWAY dev entry points driven by URL flags: `?skip ?demo ?ai ?at ?ff ?wi ?pause ?sh... | fn runDevStart; iface DevStartDeps
+- devStart.ts (112) THROWAWAY dev entry points driven by URL flags: `?skip ?demo ?ai ?at ?ff ?wi ?pause ?sh... | fn runDevStart; iface DevStartDeps
 - fpsCounter.ts (21) Dev-only FPS + frame-work readout, toggled with F3 (off at start so screenshots stay cl... | fn installFpsCounter
 - peopleGallery.ts (27) THROWAWAY dev scene (`?people`): 12 people in a row on the showroom stage, each playing... | fn showPeopleGallery
 - probe.ts (28) Dev `?probe`: `window.__rbProbe()` projects the player car and points on the road ahead... | fn installProbe
@@ -157,9 +157,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - driverStats.ts (67) Lifetime driver record. Lives under its own localStorage key (`ns.stats`), not in the g... | fn newStats, parseStats, addRace, recordRace, loadStats; const STATS_KEY; iface DriverStats
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
-- freeDriveSetup.ts (12) Free Drive (Neon Harbor) behind the main-menu button. One call from main. | fn wireFreeDrive
+- freeDriveSetup.ts (17) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (153) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
+- freeRoam.ts (163) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -407,10 +407,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - modelCar.ts (116) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
 - modelPrefs.ts (21) Per-car yaw corrections set in the garage (radians), kept in localStorage so a fix work... | fn getYawOverride, setYawOverride
 ## src/world/open
-- chunkGeo.ts (100) Triangle soup for one material: positions, normals, uvs (indexed). | fn chunkGeo; const triangles; iface Geo, ChunkGeo
+- chunkGeo.ts (121) Triangle soup for one material: positions, normals, uvs (indexed). | fn chunkGeo; const triangles; iface Geo, ChunkGeo
 - chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
-- chunkMesh.ts (79) One shared material per chunk part (every chunk uses the same six: draw calls = parts x... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
+- chunkMesh.ts (106) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
+- roamLook.ts (72) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
 ## src/world
 - partsHoods.ts (54) | const HOOD_MORE

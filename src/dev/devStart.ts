@@ -1,3 +1,5 @@
+import { roamDev } from '../game/freeDriveSetup';
+import type { DistrictId } from '../types/world';
 import { showPeopleGallery } from './peopleGallery';
 import { installProbe } from './probe';
 import { buildResult } from '../core/raceResult';
@@ -103,6 +105,8 @@ if (d.direct) {
   else if (scr === 'crew') menu.crew();
   else if (scr === 'online') menu.online();
   else if (q.get('event')) story.start(findEvent(q.get('event') ?? '')); // dev: jump into a story event
+  const roam = q.get('roam'); // dev: Free Drive in a district (visual checks): ?roam=strip&w=rain
+  if (roam && roamDev) { menu.hide(); roamDev.enter(); if (roam !== '1') roamDev.travel(roam as DistrictId); }
 }
 
 }

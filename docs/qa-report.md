@@ -17,7 +17,7 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 10 | Pause list cut off at the bottom in landscape (scrolls, no cue) | layer height | open | open |
 | 11 | Launch tip pop-up behind the speedo in portrait | pop-up position | open | open |
 | 12 | Rotate hint probably expires behind the loading card | 6 s timer starts under z 65 card | open (unconfirmed) | open |
-| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | pre-existing since the merge of main | fixed by the glare/neon changes of 2026-11-19 (chroma 0.21, ALL PASS) | fixed |
+| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | REOPENED 2026-11-20: fails again (chroma 0.14, mean 0.298, 3 of 3 runs). Not from this session: no render/fx/world-race file changed since 1752bfd; the files of the 11-19 fix (21dec2f) were last touched by 2f4ecf0 | was fixed 2026-11-19 (chroma 0.21) | open |
 | 14 | Radio subtitles stack on top of each other | `Subtitles.flash` never removed the line in its slot | a new line replaces the one of the same kind | fixed |
 | 15 | Every rival shows plate RB-0001 | rivals got the default loadout | `rivalPlate(name)` (two letters + four digits, stable) | fixed |
 | 16 | HIGH: white glare blob and streaks on the player car roof (same as the garage glare) | the anamorphic streak pass in `fx/finalFx.ts` summed unbounded HDR over 28 taps (confirmed: blob gone with streaks off or capped) | each tap capped at 1.2; headlight spot moved past the nose (3.6 m) | fixed |

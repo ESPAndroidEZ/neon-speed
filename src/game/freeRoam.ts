@@ -14,25 +14,30 @@ import { createRoadHit } from '../world/roads/roadIndex';
 import { generateRoads } from '../world/roads/generate';
 import { generateFootprints } from '../world/open/footprints';
 import { cellOf, chunkCount, chunkIndex } from '../world/open/chunkIndex';
-import { chunkJob, disposeChunk, roamMaterials } from '../world/open/chunkMesh';
+import { chunkJob, disposeChunk, roamMaterials, type RoamMaterials } from '../world/open/chunkMesh';
+import { districtFog, weatherSurfaces } from '../world/open/roamLook';
+import { look } from '../core/looks';
+import { LOOK_CONFIG } from '../render/lookConfig';
+import type { Weather } from '../types/game';
 import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
  * streamed around the camera, buildings and the quay as walls. The car is the player of a RaceManager that never starts,
  * so the engine sound, effects and camera follow it as in a race; Game hands this module the fixed step and the frame.
  */
-export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void } {
+export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void } {
   const { engine, game } = d;
   let city: City | null = null;
   let ui: RoamHud | null = null;
   let menu: RoamPause | null = null;
   let active = false;
+  let shownWeather: Weather | null = null;
   const hit = createRoadHit(), p = { x: 0, z: 0 };
   const env: PhysicsEnv = fillEnv({ name: 'CLEAR', grip: 1, fogDensity: 0, fogColor: 0, precipitation: 0, roadRoughness: 0, level: 'NORMAL', yawDampMul: 1, assistMul: 1, rearGripMul: 1, intensity: 1 }, 'CLEAR', 'NORMAL');
 
@@ -45,7 +50,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       start: (i) => { const job = chunkJob(g, fs, ci[i], mats); return { next: () => { const r = job.next(); if (r.done) group.add(r.value); return r; } }; },
       dispose: (_i, c) => disposeChunk(c),
     });
-    return { g, fs, contact: new RoamContact(g, fs), streamer, group, dispose: () => { streamer.clear(); mats.dispose(); } };
+    return { g, fs, contact: new RoamContact(g, fs), streamer, group, mats, dispose: () => { streamer.clear(); mats.dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -94,6 +99,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     game.world.root.visible = true;
     ui?.hide();
     menu?.close();
+    shownWeather = null;
+    game.setWeather(game.weather); // the race map's fog and look again
   };
 
   const step = (dt: number): void => {
@@ -115,6 +122,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const s = game.rm.player.car.state;
     city.streamer.update(cellOf(city.g, s.position.x), cellOf(city.g, s.position.z));
     game.chase.update(dt);
+    if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); }
+    districtFog(engine.scene, s.position.x, s.position.z, game.weather, dt, look.fogK * LOOK_CONFIG.fog.densityScale);
     game.rm.player.car.fillTelemetry(game.telemetry);
     d.hud.setBanner('');
     d.hud.update(game.telemetry);
@@ -124,6 +133,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   engine.onFrame(() => { if (active && game.state !== 'FREEROAM') leave(); }); // left through the menu: free the city
 
   return {
+    travel,
     enter: () => {
       city ??= build();
       const store = d.store, spec = findCar(store.data.selected);
