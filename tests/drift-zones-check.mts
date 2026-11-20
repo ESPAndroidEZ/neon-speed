@@ -21,7 +21,7 @@ pts += 2600;
 run.update(z.x + 10, z.z, pts);
 check('score = points earned inside', run.score === 2600, String(run.score));
 check('the 5 m grace at the edge keeps the run', run.update(z.x + 53, z.z, pts) === 0 && run.zone === 0);
-check('leaving ends it with the score', run.update(z.x + 60, z.z, pts + 100) === 2 && run.score === 2700 && run.zone === -1, String(run.score));
+check('leaving ends it with the score (and remembers the zone)', run.update(z.x + 60, z.z, pts + 100) === 2 && run.score === 2700 && run.zone === -1 && run.last === 0, String(run.score));
 run.update(z.x, z.z, pts);
 run.cancel();
 check('a teleport cancels the run', run.zone === -1 && run.score === 0);

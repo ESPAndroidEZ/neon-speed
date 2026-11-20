@@ -22,6 +22,8 @@ export function placeDriftZones(g: RoadGraph, count = 6): DriftZone[] {
  */
 export class DriftRun {
   zone = -1;
+  /** The zone of the current or the last finished run (for the result). */
+  last = -1;
   score = 0;
   private base = 0;
   private readonly zones: readonly DriftZone[];
@@ -39,7 +41,7 @@ export class DriftRun {
     }
     for (let i = 0; i < this.zones.length; i++) {
       const zn = this.zones[i];
-      if (Math.hypot(x - zn.x, z - zn.z) < zn.r) { this.zone = i; this.base = points; this.score = 0; return 1; }
+      if (Math.hypot(x - zn.x, z - zn.z) < zn.r) { this.zone = i; this.last = i; this.base = points; this.score = 0; return 1; }
     }
     return 0;
   }

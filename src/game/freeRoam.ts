@@ -30,6 +30,9 @@ import { roamHud, type RoamHud } from '../ui/roamHud';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
+/** Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, and a teleport. */
+export interface RoamLab { spots(): { zone: { x: number; z: number; r: number } | null; trap: { x: number; z: number; tx: number; tz: number } | null }; placeAt(x: number, z: number, h: number, speed?: number): void }
+
 interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; dispose(): void }
 
 /**
@@ -37,7 +40,7 @@ interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: 
  * streamed around the camera, buildings and the quay as walls. The car is the player of a RaceManager that never starts,
  * so the engine sound, effects and camera follow it as in a race; Game hands this module the fixed step and the frame.
  */
-export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number } {
+export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number; lab: RoamLab } {
   const { engine, game } = d;
   let city: City | null = null;
   let ui: RoamHud | null = null;
@@ -165,6 +168,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   return {
     travel,
     routeLength: () => city?.map.route?.length ?? 0, // labs: the GPS route (m), 0 = none
+    lab: { spots: () => ({ zone: city?.acts.zones[0] ?? null, trap: city?.acts.traps[0] ?? null }), placeAt: (x, z, h, v = 0) => { const c = game.rm.player.car; c.reset(x, z, h); prime(); c.nudge(0, 0, Math.sin(h) * v, Math.cos(h) * v, 0); } },
     enter: () => {
       city ??= build();
       const store = d.store, spec = findCar(store.data.selected);
