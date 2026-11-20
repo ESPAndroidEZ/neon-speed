@@ -5,7 +5,7 @@ import { heightAt } from '../roads/height';
 /**
  * Street furniture along Neon Harbor's sidewalks (task 063-067 set, built by Claude): bins, benches, hydrants and one
  * bus stop per long avenue block. Pure placement (the geometry is furnitureGeo.ts). Each edge is seeded by its own id,
- * so a chunk asking for its edges gets the same items as any other chunk that shares an edge.
+ * so a chunk asking for its edges gets the same items as every other chunk that shares an edge.
  */
 export const FURNITURE_KINDS = ['bench', 'bin', 'hydrant', 'busStop'] as const;
 export type FurnitureKind = (typeof FURNITURE_KINDS)[number];
