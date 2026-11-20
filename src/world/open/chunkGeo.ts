@@ -4,6 +4,7 @@ import { SEA_Y, heightAt } from '../roads/height';
 import { CHUNK } from './chunkIndex';
 import { cornerOf } from './footprints';
 import { SIGNS } from '../city/signs';
+import { groundAt } from './groundCarve';
 
 /** Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wall neon). */
 const SIGN_SHARE: Readonly<Record<string, number>> = { strip: 0.75, oldtown: 0.35, downtown: 0.25, harbour: 0.1, industrial: 0.05, hills: 0 };
@@ -14,7 +15,7 @@ export interface Geo { pos: number[]; nrm: number[]; uv: number[]; idx: number[]
 export interface ChunkGeo { ground: Geo; water: Geo; road: Geo; walk: Geo; walls: Geo; roofs: Geo; lamps: Geo; signs: Geo }
 
 const geo = (): Geo => ({ pos: [], nrm: [], uv: [], idx: [] });
-const GROUND_N = 8; // ground grid per chunk (16 m quads follow the hills)
+const GROUND_N = 16; // ground grid per chunk: 8 m quads (16 m ones bulged through the hill roads)
 const ROAD_Y = 0.04, WALK_Y = 0.16;
 const LAMP_EVERY = 34, LAMP_H = 7, POOL_R = 9; // street lights: spacing along a road (m), post height, light pool radius
 
@@ -119,7 +120,7 @@ export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
         quad(out.water, [ax, SEA_Y, az, bx, SEA_Y, az, ax, SEA_Y, bz, bx, SEA_Y, bz], [0, 1, 0], [ax / 32, az / 32, bx / 32, az / 32, ax / 32, bz / 32, bx / 32, bz / 32]);
         continue;
       }
-      quad(out.ground, [ax, heightAt(ax, az) - 0.05, az, bx, heightAt(bx, az) - 0.05, az, ax, heightAt(ax, bz) - 0.05, bz, bx, heightAt(bx, bz) - 0.05, bz],
+      quad(out.ground, [ax, groundAt(g, ax, az) - 0.05, az, bx, groundAt(g, bx, az) - 0.05, az, ax, groundAt(g, ax, bz) - 0.05, bz, bx, groundAt(g, bx, bz) - 0.05, bz], // roads laid in
         [0, 1, 0], [ax / 16, az / 16, bx / 16, az / 16, ax / 16, bz / 16, bx / 16, bz / 16]);
     }
   }
@@ -128,8 +129,10 @@ export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
     strip(out.road, e, own, -w, w, ROAD_Y, 16);
     if (e.kind !== 'runway') lamps(out.lamps, out.roofs, e, own);
     if (e.kind === 'bridge' || e.kind === 'runway') continue;
-    strip(out.walk, e, own, w, w + SIDEWALK, WALK_Y, 4);
-    strip(out.walk, e, own, -w - SIDEWALK, -w, WALK_Y, 4);
+    const na = g.nodes[e.a], nb = g.nodes[e.b], ra = na.radius + w + SIDEWALK, rb = nb.radius + w + SIDEWALK; // sidewalks stop short of the junction: at angled
+    const walkOwn = (x: number, z: number): boolean => own(x, z) && Math.hypot(x - na.x, z - na.z) > ra && Math.hypot(x - nb.x, z - nb.z) > rb; // crossings they lay over the other road
+    strip(out.walk, e, walkOwn, w, w + SIDEWALK, WALK_Y, 4);
+    strip(out.walk, e, walkOwn, -w - SIDEWALK, -w, WALK_Y, 4);
   }
   for (const n of g.nodes) if (own(n.x, n.z)) disc(out.road, n.x, n.z, n.radius, heightAt(n.x, n.z) + ROAD_Y + 0.01);
   for (const i of info.buildings) { box(out.walls, out.roofs, fs[i]); sign(out.signs, fs[i]); }

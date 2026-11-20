@@ -14,7 +14,8 @@ const check = (n, ok, info = '') => { if (!ok) failed++; console.log(`${ok ? 'PA
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-precise-memory-info', '--js-flags=--expose-gc'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 await page.route('**/api/*.php*', (r) => r.fulfill({ json: { keys: {}, now: Math.floor(Date.now() / 1000) } }));
-await page.addInitScript((q) => { localStorage.setItem('rb-lang', 'en'); localStorage.setItem('rb-quality', q); }, quality);
+// the tier lives in the save's settings (an old 'rb-quality' key was never read by the game)
+await page.addInitScript((q) => { localStorage.setItem('rb-lang', 'en'); if (!localStorage.getItem('racers-blood-save-v1')) localStorage.setItem('racers-blood-save-v1', JSON.stringify({ settings: { quality: q, autoQuality: false, lang: 'en', muted: true } })); }, quality);
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 await page.goto(`${BASE}/?probe&screen=main&lang=en`, { waitUntil: 'load', timeout: 90000 });
