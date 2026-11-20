@@ -266,14 +266,16 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
 ## src/physics
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
+- roamContact.ts (126) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
 - surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
-- trackContact.ts (162) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
+- trackContact.ts (128) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
 ## src/physics/v2
 - arcade.ts (68) v2 arcade layer (plan section 4), on top of the physics and never inside the force code... | fn steerV2, driveTrim, yawAssist, rearHold, carry
 - v2Params.ts (92) Diff codes (numbers, no enum): 0 open, 1 helical, 2 viscous, 3 clutch, 4 active. Layout... | fn buildV2, createV2; iface V2Car
 - v2Step.ts (130) Cornering stiffness grows slower than load: a more heavily loaded axle needs more slip ... | fn stepV2
 - v2Tyre.ts (32) v2 tyres, pure arithmetic (no allocation). Load sensitivity: mu = mu0 * (1 - k * (Fz / ... | fn axleCaps, diffCap; const CAP, lateralCurve
 ## src/physics
+- wallHit.ts (48) What a wall contact reports back (TrackContact and RoamContact both expose these). | fn wallHit; iface WallReport
 - weather.ts (8) Starting values; tune live. Grip multiplies tyres AND brakes. | const WEATHER
 - weatherLevels.ts (61) Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. | fn fillEnv; const LEVELS, gripFor, envFor; iface PhysicsEnv; type PhysicsLevel
 ## src/render
@@ -399,6 +401,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - mergeMeshes.ts (87) Draw-call saver: merges a group's direct Mesh children that share one material into a s... | fn mergeByMaterial, mergeTreeByMaterial
 - modelCar.ts (116) CarVisual for a baked GLB car (Tripo): wheels are part of the mesh so they do not spin ... | fn buildModelCar
 - modelPrefs.ts (21) Per-car yaw corrections set in the garage (radians), kept in localStorage so a fix work... | fn getYawOverride, setYawOverride
+## src/world/open
+- chunkGeo.ts (100) Triangle soup for one material: positions, normals, uvs (indexed). | fn chunkGeo; const triangles; iface Geo, ChunkGeo
+- chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
+- chunkMesh.ts (79) One shared material per chunk part (every chunk uses the same six: draw calls = parts x... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
+- footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
+- streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
+## src/world
 - partsHoods.ts (54) | const HOOD_MORE
 - partsSkirts.ts (55) | const SKIRTS_MORE
 - partsSplitters.ts (49) Wide flat lip with a raised front edge. | const SPLITTER_MORE
