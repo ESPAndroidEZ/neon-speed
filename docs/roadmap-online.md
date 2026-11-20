@@ -32,8 +32,8 @@ Before Redis, try PHP APCu (an in-process cache, no extra service).
 - A3. Deploy the current version (`scripts/deploy-server.sh`) and set the feedback recipient (`scripts/set-feedback-email.sh`).
 - Done when: a backup file exists and a restore into a scratch database works; site shows the feedback form.
 
-**B. Real client address for rate limits (needs nginx / Ansible change)**
-- Pass the real client IP to PHP (`X-Forwarded-For` or proxy protocol from the 87.233.199.x front) so limits are per person. Until then keep the global limits (feedback 40/h, 200/day).
+**B. Real client address for rate limits (NO nginx change needed, checked 2026-11-20)**
+- nginx passes the real `$remote_addr` to PHP over FastCGI; the single address seen so far was the office network 87.233.x.x, which all testers used. The limits are already per client address. Remaining: one test from a phone on mobile data.
 - Done when: two different phones get different `ip_hash` values in the `feedback` table.
 
 **C. Leaderboards (MySQL first, no Redis)**
@@ -42,6 +42,7 @@ Before Redis, try PHP APCu (an in-process cache, no extra service).
 - Done when: a result from two different devices appears in the top list, a faked time is rejected, tests cover validation.
 
 **D. Own lobby / relay server (only when triggered: connection failures, strangers, or leaderboards need server-decided results)**
+- Port: 127.0.0.1:8770 behind `/ws/` (8000 is the administrator's infra-metrics; request text in `docs/admin-request.md`). Housekeeping and backups: `server/README.md`.
 - Technology: a small WebSocket service. Python 3.12 is already there (`asyncio` + `websockets` in a venv, run by systemd as its own user, listening on 127.0.0.1:8000, memory limited). Node would need installing.
 - Needs an nginx change, so ask the Ansible owner: in the `/api/` location (or a new `/ws/` location) add `proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; proxy_read_timeout 3600s;`. Otherwise WebSocket connections are refused.
 - Server holds: rooms (code, host, track, weather, players), a public room list, message relay with a rate limit, race start synchronisation, and the finish list built from the server's own receipt times plus each client's claimed time (validated like phase C).

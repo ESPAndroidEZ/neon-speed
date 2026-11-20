@@ -1,0 +1,10 @@
+[Unit]
+Description=Neon Speed: daily dump of the game database
+After=neonspeed-mysql.service
+Requires=neonspeed-mysql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/neonspeed-backup
+Nice=10
+IOSchedulingClass=idle

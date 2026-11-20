@@ -8,6 +8,7 @@ tsh status >/dev/null 2>&1 || { echo "Not logged in to Teleport: run tsh login f
 npm run build:public >logs/last-public.txt 2>&1 || { tail -20 logs/last-public.txt; exit 1; }
 # the storage API (PHP) rides along: the deploy wipes the docroot, so it must be part of the package
 mkdir -p dist/api && cp server/api/*.php dist/api/
+git log -1 --format='%h %cs' > dist/api/version.txt # shown by api/health.php
 TGZ=$(mktemp --suffix=.tgz)
 tar czf "$TGZ" -C dist .
 tsh scp -q "$TGZ" "webdev@$HOST:/tmp/rb-dist.tgz"

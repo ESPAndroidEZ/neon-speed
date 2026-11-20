@@ -1,6 +1,6 @@
 # Master plan (living file)
 
-The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4 DONE).
+The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4 DONE; W1 built, waiting for OK to install).
 
 Status values: TODO, DOING, BLOCKED (waiting for the owner or the server administrator), DONE (verified, with the evidence in the changelog).
 
@@ -27,12 +27,12 @@ Before (2026-11-20): deep-house songs rotated every 48 bars in a FIXED order wit
 | # | Item | Status | Done when |
 |---|---|---|---|
 | W1.1 | Deploy the current version (`scripts/deploy-server.sh`); owner sets `FEEDBACK_EMAIL` | BLOCKED (owner: tsh login, email) | live site shows feedback form and Chapter 3 |
-| W1.2 | Daily MySQL backup (`mysqldump | gzip`, 14 days, `/var/backups/neonspeed`, cron or systemd timer) and a tested restore into a scratch database | TODO | restore test passes and is written in docs/skills.md |
-| W1.3 | Health endpoint `api/health.php` (DB reachable, disk, version) and a tiny external check script | TODO | returns 200 JSON, tested with curl |
-| W1.4 | Log rotation for `/var/lib/neonspeed-mysql/error.log`; MySQL slow-query log off; memory limits confirmed | TODO | logrotate config in `server/` |
-| W1.5 | Ask the administrator (exact text provided by us): remove stale ufw rules 3306, 4567, 4568, 4444; pass the real client IP to PHP; long cache headers for `/assets/*` (hashed files); WebSocket proxy lines for W3 | BLOCKED (administrator) | each confirmed with a curl / ss check |
-| W1.6 | Real client IP in `storage.php` and `feedback.php` limits (after W1.5) | TODO | two phones get different `ip_hash` |
-| W1.7 | `server/` folder documents every file on the server we created (paths, owners, how to rebuild) | TODO | a fresh server can be rebuilt from `server/` + `scripts/setup-server-db.sh` |
+| W1.2 | Daily MySQL backup (`mysqldump | gzip`, 14 days, `/var/backups/neonspeed`, cron or systemd timer) and a tested restore into a scratch database | BLOCKED (owner OK to install) - built: `server/backup/` (dump without CREATE DATABASE, 14 days, stamp file), `server/systemd/neonspeed-backup.{service,timer}` (03:30), restore test into scratch DB `neonspeed_restoretest`; installer `scripts/setup-server-housekeeping.sh` runs one backup + the restore test. Not run on the server yet | restore test passes and is written in docs/skills.md |
+| W1.3 | Health endpoint `api/health.php` (DB reachable, disk, version) and a tiny external check script | DOING - `server/api/health.php` (db, disk %, backup age, version from `api/version.txt` written by deploy) + `scripts/health-check.sh`; logic run on the server CLI as webdev 2026-11-20: db ok 1 ms, disk 38 % free. Goes live with the next deploy (owner says when) | returns 200 JSON, tested with curl |
+| W1.4 | Log rotation for `/var/lib/neonspeed-mysql/error.log`; MySQL slow-query log off; memory limits confirmed | BLOCKED (owner OK to install, same installer) - `server/logrotate/neonspeed-mysql` (weekly, 8, FLUSH ERROR LOGS); checked: slow log off, binlog off, MemoryMax 700 MB, ~160 MB used | logrotate config in `server/` |
+| W1.5 | Ask the administrator (exact text provided by us): remove stale ufw rules 3306, 4567, 4568, 4444; pass the real client IP to PHP; long cache headers for `/assets/*` (hashed files); WebSocket proxy lines for W3 | BLOCKED (administrator; text ready in `docs/admin-request.md`, owner sends it) - real client IP is NOT needed: nginx already passes `$remote_addr` to PHP (checked); port 8000 is the administrator's infra-metrics, so the lobby uses 127.0.0.1:8770 at `/ws/` | each confirmed with a curl / ss check |
+| W1.6 | Real client IP in `storage.php` and `feedback.php` limits (after W1.5) | DOING - PHP already gets the real address and hashes it per client (all 20 players so far share one hash because they all came from the office network 87.233.x.x); feedback.php comment corrected. Waits for one test from a phone on mobile data | two phones get different `ip_hash` |
+| W1.7 | `server/` folder documents every file on the server we created (paths, owners, how to rebuild) | DONE - `server/README.md` (every path, owner, how to rebuild, checks) | a fresh server can be rebuilt from `server/` + `scripts/setup-server-db.sh` |
 
 ## W2. Leaderboards
 | # | Item | Status | Done when |
@@ -46,7 +46,7 @@ Before (2026-11-20): deep-house songs rotated every 48 bars in a FIXED order wit
 | # | Item | Status | Done when |
 |---|---|---|---|
 | W3.1 | Protocol document (`docs/online-protocol.md`): rooms, join, ready, start, relay, results, errors; versioned | TODO | reviewed by the owner |
-| W3.2 | Python asyncio WebSocket service `server/lobby/` (127.0.0.1:8000, systemd unit, memory limit, rate limits, room list, relay, finish list with server receipt times) | TODO | local tests with a fake client |
+| W3.2 | Python asyncio WebSocket service `server/lobby/` (127.0.0.1:8770 behind `/ws/`; 8000 is taken by the administrator's infra-metrics; systemd unit, memory limit, rate limits, room list, relay, finish list with server receipt times) | TODO | local tests with a fake client |
 | W3.3 | Client transport `net/serverLink.ts` beside PeerJS (PeerJS stays as the fallback); lobby screen with a public room list and quick join | TODO | protocol test with a fake server; screenshots |
 | W3.4 | Administrator adds the nginx WebSocket lines; we install and start the service (owner approves) | BLOCKED (administrator + owner) | two phones on different mobile networks race through the server |
 | W3.5 | Optional TURN (`coturn`) for strict networks | TODO (needs approval) | connection test from a strict network |

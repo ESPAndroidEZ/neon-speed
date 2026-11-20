@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-const PER_HOUR = 40; // the server sees every visitor as one NAT address, so these limits are global, not per person
+const PER_HOUR = 40; // per client address (nginx passes the real REMOTE_ADDR via FastCGI, checked 2026-11-20); people on one office network share it
 const PER_DAY = 200;
 
 function fail(int $code, string $msg): never

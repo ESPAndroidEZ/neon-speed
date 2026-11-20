@@ -1,0 +1,32 @@
+# What we run on the game server (notcarlos.mosidealus.nl)
+
+Everything below was created by us; a fresh server can be rebuilt from this folder plus the scripts named here.
+Not ours (do not touch): nginx config (Ansible), ufw (administrator), `infra-metrics.service` (the administrator's
+FastAPI exporter on 127.0.0.1:8000, it also receives every non-`.php` request under `/api/`), the old `mysql.service`
+(disabled Galera node; its data in /var/lib/mysql is untouched).
+
+| Path on the server | What | Owner / mode | Rebuilt by |
+|---|---|---|---|
+| `/data/www/carlos.mosidealus.nl/public_html/` | the game (dist) + `api/*.php` + `api/version.txt` | webdev | `scripts/deploy-server.sh` (wipes and unpacks) |
+| `api/storage.php`, `api/feedback.php`, `api/health.php` | player sync, feedback, health check | webdev | same (sources in `server/api/`) |
+| `/etc/neonspeed/db.php` | app DB credentials (not in git) | root:webdev 0640 | `scripts/setup-server-db.sh` |
+| `/etc/neonspeed/feedback.php` | feedback recipient (not in git) | root:webdev 0640 | owner: `scripts/set-feedback-email.sh` |
+| `/etc/neonspeed-mysql/my.cnf`, `root.cnf` | our MySQL 8.0 instance config (127.0.0.1:3307, 64 MB pool), root client config | root | `scripts/setup-server-db.sh` (sources `server/db/`) |
+| `/etc/systemd/system/neonspeed-mysql.service` | the instance (MemoryMax 700 MB) | root | same |
+| `/var/lib/neonspeed-mysql/` | data + `error.log` | mysql | same (empty DB + `server/db/schema.sql`); data from a backup |
+| `/etc/apparmor.d/local/usr.sbin.mysqld` | lines allowing the new datadir | root | same |
+| `/usr/local/sbin/neonspeed-backup`, `neonspeed-restore-test` | nightly dump, restore proof | root 0750 | `scripts/setup-server-housekeeping.sh` (sources `server/backup/`) |
+| `/etc/systemd/system/neonspeed-backup.{service,timer}` | backup at 03:30 (+0-15 min), catches up after downtime | root | same (`server/systemd/`) |
+| `/var/backups/neonspeed/*.sql.gz` | 14 days of dumps | root 0600 | created nightly |
+| `/var/backups/neonspeed-last.txt` | time, size, file of the last backup (read by health.php) | root 0644 | created nightly |
+| `/etc/logrotate.d/neonspeed-mysql` | weekly rotation of our MySQL error log, 8 weeks | root | same (`server/logrotate/`) |
+
+## Rebuild from nothing
+1. `scripts/setup-server-db.sh` (instance, schema, user, db.php). 2. Restore the newest dump: copy it over, then
+`zcat neonspeed-*.sql.gz | mysql --defaults-file=/etc/neonspeed-mysql/root.cnf neonspeed`. 3. Owner: `scripts/set-feedback-email.sh`.
+4. `scripts/setup-server-housekeeping.sh`. 5. `scripts/deploy-server.sh`. 6. `scripts/health-check.sh` must print OK.
+
+## Checks
+- Health: `scripts/health-check.sh` (exit 0 = ok; warns when the backup is older than 30 h).
+- Backups: `tsh ssh root@notcarlos.mosidealus.nl 'ls -lh /var/backups/neonspeed; neonspeed-restore-test'`.
+- Memory/slow log (checked 2026-11-20): the instance uses ~160 MB of its 700 MB limit; the slow-query log is off (not set in my.cnf); binary log disabled.

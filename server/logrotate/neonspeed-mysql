@@ -1,0 +1,14 @@
+# Our own MySQL instance's error log (installed as /etc/logrotate.d/neonspeed-mysql). Weekly, 8 weeks, compressed.
+# FLUSH ERROR LOGS makes mysqld reopen the file after the move.
+/var/lib/neonspeed-mysql/error.log {
+    weekly
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 mysql mysql
+    postrotate
+        mysql --defaults-file=/etc/neonspeed-mysql/root.cnf -e 'FLUSH ERROR LOGS' >/dev/null 2>&1 || true
+    endscript
+}

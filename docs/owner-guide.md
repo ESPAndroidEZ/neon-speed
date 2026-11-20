@@ -67,6 +67,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - The new Chapter 3 races have not been balanced (are they winnable with your starting cars?).
 - The live website is behind the code: it does not have the feedback form, Chapter 3, cinematics or incremental sync until the next deploy.
 - Real-device performance of the Auto graphics setting.
+- Server housekeeping (backups, restore test, log rotation) is written but NOT installed: it needs your OK (`scripts/setup-server-housekeeping.sh`). The health page goes live with the next deploy.
 - The new song transitions and the four new songs were checked by measurement (no clicks, same loudness), not by ear: listen to `logs/music/join-*.wav` and `logs/music/house-6..9-*.wav`, or just play for a few minutes.
 
 ## 7. How the documentation works (so it stays true)
