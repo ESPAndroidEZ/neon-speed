@@ -20,7 +20,7 @@
 `docs/handoff.md` status and next steps. `docs/plan.md` phases. `docs/story.md` story and cinematic. `docs/tasks/` Qwen tasks. `docs/inbox/` owner notes.
 
 ## Session start
-Read `docs/skills.md` (where things live, playbooks, gotchas, server and git facts), then `docs/handoff.md` and the newest files in `docs/inbox/`. Open `plan.md` or `story.md` only when the task needs them.
+Read `docs/skills.md` (where things live, playbooks, gotchas, server and git facts), then `docs/handoff.md` and the newest files in `docs/inbox/`. The owner reads `docs/owner-guide.md` and `docs/changelog.md` (index: `docs/README.md`). Open `plan.md` or `story.md` only when the task needs them.
 
 ## Token discipline
 - Never cat files. Use Read with offset/limit (about 150 lines per read, `wc -l` first for unknown files).
@@ -31,6 +31,7 @@ Read `docs/skills.md` (where things live, playbooks, gotchas, server and git fac
 - Screenshots: look at the one you need, downscaled to at most 1280 px wide; never read GLB or other binaries.
 - Delegate broad searches, bot playtests and screenshot reviews to subagents (Explore or general-purpose) so only the conclusion returns to the main context.
 - /clear at each phase boundary after /checkpoint; /compact at about 60% context.
+- DOCS RULE (owner, 2026-11-20): after EVERY change update all affected documentation in the same step (handoff, skills.md, owner-guide.md, changelog.md, roadmap-online.md, story.md, qa-report.md, code map, memory), and end EVERY session with /checkpoint.
 - After every finished block run /checkpoint. Hand well-specified boilerplate to Qwen with /new-task; keep feel-critical work yourself.
 - Default model is Sonnet; Opus only for hard design or tuning problems, then switch back.
 
