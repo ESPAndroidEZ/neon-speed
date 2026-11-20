@@ -1,6 +1,6 @@
 # Neon Speed: owner's guide
 
-Last updated: 2026-11-20 (city races, Free Drive checked in every district, hill road fix).
+Last updated: 2026-11-21 (Neon Harbor details built without Qwen; city races; hill road fix).
 
 For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20, after W2 lap boards, W3 lobby and Free Drive W5.1-W5.4: city, looks, traffic, maps, speed cameras). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
 
@@ -18,6 +18,7 @@ A 3D arcade street racer that runs in the browser (phone and PC), English and Sp
 - **Online lap boards (new, waiting for one OK):** your best lap per map, weather and car class goes to an online board (top 10, your rank, a daily-challenge board). The map screen shows the top 3, the results show "#3 of 41". Times are checked for plausibility (speed, length, checkpoints in order), not verified, and say so. Races driven offline are sent later. Beginner assists and drift maps are left out. It starts working once you OK `scripts/apply-server-schema.sh` (it adds three tables, after a backup).
 - **Own online lobby (built, not installed):** "Open rooms" list and Quick race on the Online screen; falls back to the old peer-to-peer method when our server is not there. If the host leaves, another player takes over and the race goes on. Install needs your OK (`scripts/setup-server-lobby.sh`) plus the administrator's `/ws/` proxy.
 - **Free Drive (Neon Harbor, first version, in this PC's build only):** drive your garage car around the open city from the main menu; Respawn / Pause buttons at the top; the pause menu has fast travel to the six districts and a photo button. Each district has its own look and street lights; rain and snow change the streets; traffic with traffic lights and people on the sidewalks; a minimap, and a full map in the pause menu where a tap sets a GPS route; speed cameras, drift zones and a car meet. Your city records and the spot where you stopped are saved. No missions or city races yet.
+- **Neon Harbor details (new, this PC's build only):** roof clutter, sidewalk furniture, 8 more shop signs, five kinds of traffic (incl. yellow taxis), and a street + district line above the minimap.
 - **City races in Free Drive (new, this PC's build only):** gold rings on the street, one per district (6). Stop in one and a card offers "Street race: Downtown Loop · 2 laps · 1.5 km · 3 rivals"; press Race (or Enter). The race uses a map drawn from the city's own streets (a loop found by the GPS), pays like a free race (once), keeps your best time, and "Back to Free Drive" puts you back at the ring. City races do not go to the online lap boards.
 - **Feedback and support:** players can send you a message from Crew > Feedback & support, and a "Support the game" tab shows your IBAN (voluntary).
 
@@ -79,7 +80,6 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - The automatic picture check found the "Neon Night" look less colourful than its target in one race view (was fixed on 19 November, came back with an earlier update, not today's work); logged as QA #13.
 - City races were tested by a bot in a software browser on this PC (one full race on the Downtown Loop); never by a person, on a phone or a real GPU. The race map is a street map built from the loop, not the Free Drive city itself, so the buildings look like the race maps, not like Neon Harbor's districts.
 - Free Drive was checked with screenshots in all 6 districts and 3 weathers on this PC's software graphics; the street lights in snow still look like plain white bars (small, open).
-- Qwen tasks 063-067 are written but not run (the Qwen server was not running). Start it with `scripts/start-qwen.sh`, then `scripts/qwen-queue.sh 063 064 065 066 067`.
 - Story input needed: city missions (story jobs in Free Drive) wait for your ideas; the story is yours (docs/story.md).
 - Decision needed: jumps in the city. The car physics is flat (2D), so a jump needs either a small vertical model or a faked airtime animation. Tell me which you prefer.
 - Spanish results screen shows money as "+ $3,000" (English style); the map screen uses "2.500 $". Small, not fixed yet.
