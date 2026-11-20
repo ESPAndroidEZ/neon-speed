@@ -1,6 +1,6 @@
 # Neon Speed: owner's guide
 
-For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
+For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20, evening). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
 
 ## 1. What the game is today
 A 3D arcade street racer that runs in the browser (phone and PC), English and Spanish.
@@ -73,7 +73,8 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 | `docs/owner-guide.md` (this) | you | what exists, how to operate it, decisions, risks |
 | `docs/changelog.md` | you | what changed, by date |
 | `docs/roadmap-online.md` | you and Claude | the online / Redis / leaderboard plan |
-| `docs/prompts/server-to-code.md` | you | a ready prompt to start the next big job |
+| `docs/master-plan.md` | you and Claude | the list of big jobs and the status of each item |
+| `docs/prompts/everything.md` | you | the prompt to paste into a new session to start or resume all of it |
 | `docs/handoff.md` | Claude | live status, Done and Next, one log line per session |
 | `docs/skills.md` | Claude and Qwen | where things live in the code, how-tos, server facts |
 | `docs/story.md`, `docs/qa-report.md`, `docs/code-map.md` | Claude | story canon, visual bugs, file index |

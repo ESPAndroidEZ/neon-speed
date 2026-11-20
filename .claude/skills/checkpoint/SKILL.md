@@ -11,6 +11,7 @@ Owner rule (2026-11-20): all documentation is updated after every change, and ev
    - `docs/owner-guide.md`: sections 1 (what exists), 3 (commands, if any changed), 4 (decisions), 5 (security and housekeeping), 6 (what is NOT verified; remove items that got verified, add new unverified ones), and the "last updated" date. Plain language for the owner.
    - `docs/changelog.md`: add or extend today's dated section (newest first), plain language.
    - `docs/skills.md`: new files, playbooks, server facts, gotchas for the agents.
+   - `docs/master-plan.md`: set the status of every item the session touched (TODO / DOING / BLOCKED / DONE with evidence) and the "Last updated" date.
    - `docs/roadmap-online.md`: move phase statuses; `docs/story.md` / `docs/qa-report.md` when the story or a visual bug changed.
    - `docs/prompts/server-to-code.md`: refresh if the roadmap or the rules changed.
    - Memory notes (`~/.claude/projects/-home-carlosgeorgiev-racer-blood/memory/`) when a fact about the server, the owner or the workflow changed.

@@ -1,6 +1,6 @@
 # Roadmap: server, online play, leaderboards (written 2026-11-20)
 
-Status: PLAN, nothing here is built yet except where marked. Update this file whenever a phase moves.
+Status: PLAN, nothing here is built yet except where marked. Update this file whenever a phase moves. The item-by-item status lives in `docs/master-plan.md` (W1 server, W2 leaderboards, W3 lobby); the prompt to start is `docs/prompts/everything.md`.
 
 ## 1. What we have today
 - **Online races:** browser to browser (WebRTC) through the free public PeerJS broker. Room = 4-letter code. One player is the host and relays everyone's data (star shape), up to 8 players, the host picks track and weather. No server of ours. Limits: no TURN relay (strict networks and some mobile data cannot connect), a lag spike on the host hurts everyone, each screen works out the finish order itself, no cash or saves online.

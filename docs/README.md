@@ -6,7 +6,8 @@ Start with the file for your role. Everything is kept up to date at every checkp
 - `owner-guide.md`: what the game is, how it fits together, a cheat sheet of commands, decisions, risks, what is not verified.
 - `changelog.md`: what changed, by date, in plain language.
 - `roadmap-online.md`: the plan for server, leaderboards, own lobby and Redis.
-- `prompts/server-to-code.md`: a ready prompt to start the next big job in a new session.
+- `master-plan.md`: the living list of big jobs (music, server settings, leaderboards, online lobby, open world) with the status of every item.
+- `prompts/everything.md`: the prompt to paste into a new session to start (and, later, resume) all of it. `prompts/server-to-code.md` is the older, smaller version.
 
 **For Claude and Qwen**
 - `skills.md`: where things live in the code, playbooks, server facts, gotchas. Read first.

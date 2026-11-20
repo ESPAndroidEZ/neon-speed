@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-20
+- **Master plan and one prompt for everything.** `docs/master-plan.md` lists the five big jobs (songs that change by themselves, server settings, leaderboards, own online lobby, open-world city driving) with the status of each step; `docs/prompts/everything.md` is the prompt to paste into a new session and to resume later.
 - **Faster launches.** The game now downloads only what changed since last time (about 28 bytes when nothing did, instead of ~526 KB for a big save), and big saves are compressed both ways. The server part is already live; the browser part ships with the next deploy.
 - **Documentation system.** This changelog, the owner's guide, the online/Redis roadmap and a ready-made prompt for the next big job. Rule: docs are updated after every change, and every session ends with a checkpoint.
 - **Decisions:** no Redis yet; own lobby server later (see `docs/roadmap-online.md`).

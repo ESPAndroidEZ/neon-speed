@@ -1,5 +1,7 @@
 # Prompt: "do it all, from the server to the code"
 
+> Superseded by `docs/prompts/everything.md` (same server phases plus music, leaderboards, the lobby and the open world, driven by `docs/master-plan.md`). Kept for reference.
+
 How to use: open a NEW Claude Code session in `~/racer-blood`, log in to the server first (`! tsh login --proxy=tele.true.nl`), set your git name and email once if you have not, then paste everything between the lines below. It is long on purpose: it tells the next session what to read, what it may do alone, and where it must stop and ask. Refresh this file whenever `docs/roadmap-online.md` changes (the checkpoint does it).
 
 ---
