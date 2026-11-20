@@ -6,6 +6,8 @@ import { cornerOf } from './footprints';
 import { SIGNS } from '../city/signs';
 import { groundAt } from './groundCarve';
 import { roofDetails } from './roofKit';
+import { placeFurniture } from './streetFurniture';
+import { furnitureGeo } from './furnitureGeo';
 
 /** Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wall neon). */
 const SIGN_SHARE: Readonly<Record<string, number>> = { strip: 0.75, oldtown: 0.35, downtown: 0.25, harbour: 0.1, industrial: 0.05, hills: 0 };
@@ -135,6 +137,7 @@ export function chunkGeo(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
     const walkOwn = (x: number, z: number): boolean => own(x, z) && Math.hypot(x - na.x, z - na.z) > ra && Math.hypot(x - nb.x, z - nb.z) > rb; // crossings they lay over the other road
     strip(out.walk, e, walkOwn, w, w + SIDEWALK, WALK_Y, 4);
     strip(out.walk, e, walkOwn, -w - SIDEWALK, -w, WALK_Y, 4);
+    furnitureGeo(placeFurniture(g, [id], g.seed), own, out.roofs); // benches, bins, hydrants, bus shelters (dark, like the posts)
   }
   for (const n of g.nodes) if (own(n.x, n.z)) disc(out.road, n.x, n.z, n.radius, heightAt(n.x, n.z) + ROAD_Y + 0.01);
   for (const i of info.buildings) { box(out.walls, out.roofs, fs[i]); sign(out.signs, fs[i]); }
