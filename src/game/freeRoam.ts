@@ -15,6 +15,7 @@ import { RoamPeds } from '../physics/roamPeds';
 import { PedView } from '../world/open/pedView';
 import { roamMap, type RoamMap } from '../ui/roamMap';
 import { RoamActivities } from './roamActivities';
+import { RoamProgress } from './roamProgress';
 import { fillEnv, type PhysicsEnv } from '../physics/weatherLevels';
 import { createRoadHit } from '../world/roads/roadIndex';
 import { generateRoads } from '../world/roads/generate';
@@ -33,7 +34,7 @@ import type { DistrictId } from '../types/world';
 /** Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, and a teleport. */
 export interface RoamLab { spots(): { zone: { x: number; z: number; r: number } | null; trap: { x: number; z: number; tx: number; tz: number } | null; meet: { x: number; z: number; r: number } | null }; placeAt(x: number, z: number, h: number, speed?: number): void }
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; progress: RoamProgress; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
@@ -66,7 +67,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     group.add(trafficView.group, pedView.mesh);
     const map = roamMap(g, ci, contact.roads, () => menu?.open());
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
-    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
+    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -115,6 +116,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   const leave = (): void => {
     active = false;
+    city?.progress.save(); // the last spot from the frame updates
     game.roam = null;
     city?.streamer.clear();
     if (city) engine.scene.remove(city.group);
@@ -154,6 +156,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.trafficView.update(city.traffic, s.position.x, s.position.z);
     city.pedView.update(city.peds);
     city.map.update(dt, s.position.x, s.position.z, s.heading, city.traffic);
+    city.progress.update(dt, s.position.x, s.position.z, s.heading);
     game.chase.update(dt);
     if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); }
     districtFog(engine.scene, s.position.x, s.position.z, game.weather, dt, look.fogK * LOOK_CONFIG.fog.densityScale);
@@ -182,7 +185,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.world.root.visible = false; // the race map's meshes; sky and lights stay
       setCast(false); // race crowd and story characters stand at race spots
       engine.scene.add(city.group);
-      game.rm.player.car.reset(0, 0, 0);
+      const from = city.progress.start(); // where the last Free Drive ended (snapped onto the road below)
+      game.rm.player.car.reset(from?.x ?? 0, from?.z ?? 0, from?.h ?? 0);
       respawn();
       prime();
       game.roam = { step, frame };

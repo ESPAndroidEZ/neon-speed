@@ -27,6 +27,9 @@ export class RoamActivities {
   private readonly hud: Hud;
   private readonly disposers: (() => void)[] = [];
   private readonly carName: () => string;
+  /** Set by RoamProgress: a new best (key `trap:<id>` / `zone:<id>`) and a first visit (place id) are saved. */
+  onRecord: (key: string, value: number) => void = () => {};
+  onVisit: (id: string) => void = () => {};
   private meet: MeetWatch | null = null;
   /** Where the car meet is (null when the harbour has no spot for it). */
   readonly meetSpot: { x: number; z: number; r: number } | null;
@@ -69,14 +72,14 @@ export class RoamActivities {
     const ev = this.run.update(x, z, car.drift.bank + car.drift.chain);
     if (ev === 1) this.hud.popUp(t('roam.zoneIn'), '#18d8ff');
     else if (ev === 2) this.zoneDone(this.run.score);
-    if (this.meet?.update(x, z, car.state.speed, dt)) this.hud.popUp(t('roam.meet', { car: this.carName() }), '#ff2a9d');
+    if (this.meet?.update(x, z, car.state.speed, dt)) { this.hud.popUp(t('roam.meet', { car: this.carName() }), '#ff2a9d'); this.onVisit('meet'); }
   }
 
   /** A zone run just ended: its score, and a new best for that zone when it is one. */
   private zoneDone(score: number): void {
     const id = this.run.last;
     const best = this.zoneBest.get(id) ?? 0;
-    if (score > best) this.zoneBest.set(id, score);
+    if (score > best) { this.zoneBest.set(id, score); this.onRecord(`zone:${id}`, score); }
     this.hud.popUp(t(score > best && best > 0 ? 'roam.zoneBest' : 'roam.zoneOut', { n: score.toLocaleString() }), score > best ? '#ffd27d' : '#8fd8ff');
   }
 
@@ -86,7 +89,7 @@ export class RoamActivities {
 
   private caught(id: number, kmh: number): void {
     const best = this.trapBest.get(id) ?? 0;
-    if (kmh > best) this.trapBest.set(id, kmh);
+    if (kmh > best) { this.trapBest.set(id, kmh); this.onRecord(`trap:${id}`, kmh); }
     this.hud.popUp(t(kmh > best && best > 0 ? 'roam.trapBest' : 'roam.trap', { v: speedText(kmh) }), kmh > best ? '#ffd27d' : '#8fd8ff');
   }
 }
