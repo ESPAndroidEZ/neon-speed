@@ -34,6 +34,7 @@ export function roomList(L: Lobby, player: () => NetPlayer): HTMLElement {
       (row.children[1] as HTMLElement).textContent = roomText(r);
       const b = button(t('on.join'), () => void L.join(r.code, player()));
       b.disabled = r.racing || r.n >= r.max || L.busy;
+      b.style.cssText += ';min-width:0;flex:0 0 auto;padding:8px 14px'; // the room text keeps the width
       row.append(b);
       box.append(row);
     }
@@ -44,7 +45,7 @@ export function roomList(L: Lobby, player: () => NetPlayer): HTMLElement {
   const load = (): void => {
     void L.link.rooms().then((rooms) => {
       if (L.link.serverKnown) fill(rooms);
-      else if (++tries < 3) setTimeout(() => { if (box.isConnected) load(); }, 12000); // slow start or a blip
+      else if (++tries < 5) setTimeout(() => { if (box.isConnected) load(); }, 12000); // slow start or a blip
     });
   };
   load();

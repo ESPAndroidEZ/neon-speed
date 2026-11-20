@@ -54,14 +54,16 @@ try {
   check('finish stamped by the server', await until(() => fins.length === 1) && fins[0] >= 40, `${fins[0]} ms`);
   const full = await c.join('QWRT').then(() => '', (e) => (e as { type: string }).type);
   check('joining a racing room: type racing (Lobby shows it)', full === 'racing');
+  const promoted: string[] = [];
+  b.onPromote = (host) => promoted.push(host);
   a.close();
-  check('host leaves: the guest loses its host', await until(() => leftB.includes(atB[0]?.[0] ?? '?')));
+  check('host leaves: the only guest becomes the host', await until(() => promoted[0] === b.myId) && leftB.length === 0);
   b.close(); c.close();
 
   // HybridLink: server first, PeerJS when the server is down or does not know the code
   const fakePeer = (): NetLink & { calls: string[] } => {
     const calls: string[] = [];
-    return { calls, myId: 'peer-id', onMsg: () => {}, onJoin: () => {}, onLeave: () => {}, onError: () => {}, host: async (code) => { calls.push(`host ${code}`); }, join: async (code) => { calls.push(`join ${code}`); }, send: () => {}, broadcast: () => {}, kick: () => {}, close: () => {} };
+    return { calls, myId: 'peer-id', onMsg: () => {}, onJoin: () => {}, onLeave: () => {}, onError: () => {}, onPromote: () => {}, host: async (code) => { calls.push(`host ${code}`); }, join: async (code) => { calls.push(`join ${code}`); }, send: () => {}, broadcast: () => {}, kick: () => {}, close: () => {} };
   };
   const p1 = fakePeer();
   const up = new HybridLink(new ServerLink(url, ws), p1);

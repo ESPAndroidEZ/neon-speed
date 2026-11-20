@@ -7,6 +7,8 @@ export interface NetLink {
   onJoin: (id: string) => void;
   onLeave: (id: string) => void;
   onError: (code: string, msg: string) => void;
+  /** The host left and `host` took over (own lobby server only; PeerJS rooms end instead). */
+  onPromote: (host: string, old: string) => void;
   host(code: string, pub?: boolean): Promise<void>;
   join(code: string): Promise<void>;
   send(to: string, m: NetMsg): void;
@@ -55,6 +57,7 @@ export class ServerLink implements NetLink {
   onJoin: (id: string) => void = () => {};
   onLeave: (id: string) => void = () => {};
   onError: (code: string, msg: string) => void = () => {};
+  onPromote: (host: string, old: string) => void = () => {};
   /** A player's finish as stamped by the server (ms after the host's go). */
   onFin: (id: string, at: number) => void = () => {};
 
@@ -171,7 +174,11 @@ export class ServerLink implements NetLink {
     if (r.t === 'msg' && typeof r.from === 'string' && isMsg(r.m)) this.onMsg(r.from, r.m);
     else if (r.t === 'peer' && typeof r.id === 'string') this.onJoin(r.id);
     else if (r.t === 'gone' && typeof r.id === 'string') this.onLeave(r.id);
-    else if (r.t === 'fin' && typeof r.id === 'string' && typeof r.at === 'number') this.onFin(r.id, r.at);
+    else if (r.t === 'promote' && typeof r.host === 'string') {
+      this.hostId = r.host;
+      if (r.host === this.myId) this.role = 'host';
+      this.onPromote(r.host, String(r.old ?? ''));
+    } else if (r.t === 'fin' && typeof r.id === 'string' && typeof r.at === 'number') this.onFin(r.id, r.at);
   }
 
   private lost(ws: WsLike): void {

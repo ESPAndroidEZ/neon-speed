@@ -14,6 +14,8 @@ export class PeerLink {
   onJoin: (id: string) => void = () => {};
   onLeave: (id: string) => void = () => {};
   onError: (code: string, msg: string) => void = () => {};
+  /** Never fires: a PeerJS room ends when its host leaves (only the own lobby server hands the room over). */
+  onPromote: (host: string, old: string) => void = () => {};
 
   private async make(id?: string): Promise<Peer> {
     const { Peer: P } = await import('peerjs');

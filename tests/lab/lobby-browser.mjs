@@ -26,49 +26,38 @@ try {
   const a = await open('Alice');
   await quick(a).waitFor({ timeout: 30000 });
   check('online screen shows the open-rooms panel when the server answers', await quick(a).isVisible());
-  await a.screenshot({ path: `logs/shots/lobby-empty-${lang}.png` });
+  await a.waitForTimeout(2500); // menus fade in
+  await a.screenshot({ path: `logs/shots/lobby-empty-${lang}.png`, timeout: 90000 });
   await quick(a).click();
   await a.waitForFunction(() => /\b[A-Z]{4}\b/.test(document.querySelector('.rb-logo')?.textContent ?? ''), null, { timeout: 15000 });
   const code = (await a.locator('.rb-logo').textContent()).trim();
   check('Quick race with no rooms opens a public room', /^[A-Z]{4}$/.test(code), code);
   const t0 = Date.now();
   const b = await open('Bob');
-  console.log('B loaded after', Date.now() - t0, 'ms');
-  for (let k = 0; k < 8; k++) {
-    await b.waitForTimeout(5000);
-    console.log('B poll', Date.now() - t0, await b.evaluate(async (u) => {
-      const boxes = [...document.querySelectorAll('section.rb-panel')].map((e) => e.style.display || 'shown').join(',');
-      const url = performance.getEntriesByType('resource').map((e) => e.name).find((n) => n.includes('/src/net/serverLink.ts'));
-      if (!url) return `boxes ${boxes}; module not loaded`;
-      const m = await import(url);
-      const l = new m.ServerLink(u, (x) => new WebSocket(x));
-      const t = performance.now();
-      const r = await l.rooms();
-      l.close();
-      return `boxes ${boxes}; class: ${r.length} rooms, listed ${l.listed}, ${Math.round(performance.now() - t)} ms`;
-    }, `ws://127.0.0.1:${port}/ws/`));
-  }
-  b.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('B console:', m.text().slice(0, 200)); });
-  b.on('pageerror', (e) => console.log('B error:', e.message.slice(0, 200)));
-  const seen = await b.waitForFunction((c) => document.body.innerText.includes(c), code, { timeout: 90000, polling: 1000 }).then(() => '', async () => (await b.evaluate(() => document.body.innerText)).slice(0, 600));
-  if (seen) console.log('B probe:', JSON.stringify(seen.slice(0, 40)), await b.evaluate((u) => new Promise((res) => { const w = new WebSocket(u); const log = []; w.onopen = () => { log.push('open'); w.send(JSON.stringify({ t: 'hi', v: 1 })); }; w.onmessage = (e) => { log.push(String(e.data)); if (log.length > 1) w.send(JSON.stringify({ t: 'list' })); if (log.length > 2) res(log.join(' ')); }; w.onclose = (e) => res(log.join(' ') + ' closed ' + e.code); setTimeout(() => res(log.join(' ') + ' timeout'), 4000); }), `ws://127.0.0.1:${port}/ws/`));
-  check("second player sees the room in the list", !seen, code);
+  // the page may freeze for tens of seconds while two software-rendered games compile shaders on one CPU (lab only):
+  // the list retries, so allow up to 3 minutes
+  const seen = await b.waitForFunction((c) => document.body.innerText.includes(c), code, { timeout: 180000, polling: 2000 }).then(() => true, () => false);
+  check('second player sees the room in the list', seen, `${code} after ${Math.round((Date.now() - t0) / 1000)} s`);
+  const sc = await b.evaluate(() => { const r = document.querySelector('section.rb-panel')?.closest('.rb-layer'); return r ? { auto: getComputedStyle(r).overflowY, fits: r.scrollHeight <= r.clientHeight } : null; });
+  check('a long online screen scrolls instead of cutting off', !!sc && (sc.fits || sc.auto === 'auto' || sc.auto === 'scroll'), JSON.stringify(sc));
+  const row = await b.evaluate(() => { const b = [...document.querySelectorAll('section.rb-panel .rb-row')].find((r) => /^[A-Z]{4}/.test(r.textContent ?? '')); return b ? Math.round(b.getBoundingClientRect().height) : -1; });
+  check('room row stays compact (one or two lines)', row > 0 && row < 70, `${row} px`);
+  await b.waitForTimeout(2500);
   await b.screenshot({ path: `logs/shots/lobby-list-${lang}.png`, timeout: 90000 });
-  console.log('B before quick click', Date.now() - t0, 'ms');
   await quick(b).click();
-  console.log('B clicked', Date.now() - t0, 'ms');
   await b.waitForFunction(() => document.querySelector('.rb-logo') !== null, null, { timeout: 15000 });
   const joined = (await b.locator('.rb-logo').textContent()).trim();
   check('Quick race joins the open room', joined === code, joined);
   await a.waitForFunction(() => /Bob/.test(document.body.innerText), null, { timeout: 15000 });
   check('host sees the guest by name', true);
-  await a.screenshot({ path: `logs/shots/lobby-room-${lang}.png` });
+  await a.waitForTimeout(2500);
+  await a.screenshot({ path: `logs/shots/lobby-room-${lang}.png`, timeout: 90000 });
   await a.locator('button', { hasText: lang === 'es' ? /Empezar|Iniciar|Salir/ : 'Start race for everyone' }).first().click();
   const racing = async (p) => p.waitForFunction(() => !document.querySelector('.rb-logo')?.isConnected, null, { timeout: 60000 }).then(() => true, () => false);
   const [ra, rb] = await Promise.all([racing(a), racing(b)]);
   check('host starts: both pages leave the room screen for the race', ra && rb);
   await a.waitForTimeout(6000);
-  await b.screenshot({ path: `logs/shots/lobby-race-${lang}.png` });
+  await b.screenshot({ path: `logs/shots/lobby-race-${lang}.png`, timeout: 90000 });
 } finally {
   await browser.close();
   lobby.kill();

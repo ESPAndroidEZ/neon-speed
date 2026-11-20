@@ -232,14 +232,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src
 - main.ts (218) Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip...
 ## src/net
-- hybridLink.ts (127) How long to skip the lobby server after it failed to answer (s): no 4-second wait on ev... | fn lobbyUrl; class HybridLink
-- lobby.ts (200) Online room: who is in it, the host's race settings and the start handshake. The host i... | class Lobby; type LobbyError
+- hybridLink.ts (129) How long to skip the lobby server after it failed to answer (s): no 4-second wait on ev... | fn lobbyUrl; class HybridLink
+- lobby.ts (205) Online room: who is in it, the host's race settings and the start handshake. The host i... | class Lobby; type LobbyError
 - makeLink.ts (13) The game's transport: own lobby server (when there is one for this page) with PeerJS as... | fn createLink
 - netAgent.ts (71) Extra look-ahead for the one-way network delay (s). | class NetAgent
 - netGrid.ts (14) Same grid on every screen: slot = position in the host's roster (the local grid always ... | fn placeGrid
-- peerLink.ts (84) WebRTC transport (PeerJS: free public broker for the handshake, then direct peer-to-pee... | class PeerLink
+- peerLink.ts (86) WebRTC transport (PeerJS: free public broker for the handshake, then direct peer-to-pee... | class PeerLink
 - protocol.ts (69) Online race messages (JSON over WebRTC data channels, star around the host). Pure types... | fn makeRoomCode, isMsg; const MAX_PLAYERS, ROOM_PREFIX, SEND_HZ, cleanCode, cleanName; iface NetPlayer, RoomSettings, NetState; type NetMsg
-- serverLink.ts (188) What `Lobby` needs from a transport. PeerLink (WebRTC), ServerLink (own lobby server) a... | class ServerLink; const PROTOCOL_VERSION; iface NetLink, RoomInfo, WsLike
+- serverLink.ts (195) What `Lobby` needs from a transport. PeerLink (WebRTC), ServerLink (own lobby server) a... | class ServerLink; const PROTOCOL_VERSION; iface NetLink, RoomInfo, WsLike
 ## src/physics
 - aiDifficulty.ts (59) AI difficulty levels and personalities. Pure data: the AI reads these, nothing else cha... | const DIFFICULTIES, AI_SETTING, RUBBER_MAX, LEVELS, STYLES; iface Level, Style; type Difficulty, DriveStyle
 - aiLine.ts (108) The racing line of a track: lateral offsets from the centre line, line points, and the ... | fn racingLine, speedProfile; const marginFor; iface RacingLine, SpeedLimits
@@ -332,7 +332,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - playerCode.ts (30) Settings rows for server saving: the player code (copy it, or type another to load that... | fn playerCodeRows
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- roomList.ts (52) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
+- roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
 - settings.ts (205) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps

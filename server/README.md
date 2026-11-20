@@ -27,11 +27,12 @@ FastAPI exporter on 127.0.0.1:8000, it also receives every non-`.php` request un
 ## Rebuild from nothing
 1. `scripts/setup-server-db.sh` (instance, schema, user, db.php). 2. Restore the newest dump: copy it over, then
 `zcat neonspeed-*.sql.gz | mysql --defaults-file=/etc/neonspeed-mysql/root.cnf neonspeed`. 3. Owner: `scripts/set-feedback-email.sh`.
-4. `scripts/setup-server-housekeeping.sh`. 5. `scripts/deploy-server.sh`. 6. `scripts/health-check.sh` must print OK.
+4. `scripts/setup-server-housekeeping.sh`. 5. `scripts/apply-server-schema.sh` (board tables). 6. `scripts/setup-server-lobby.sh` (online lobby; nginx `/ws/` from the administrator). 7. `scripts/deploy-server.sh`. 8. `scripts/health-check.sh` must print OK.
 
 ## Checks
 - Housekeeping installed 2026-11-20: first backup 3.6 KB, restore test PASSED, timer active (03:30).
 - Lap board rules: `node tests/lab/scores-php.mjs` (runs on the server's PHP CLI, read-only). Live API: `node tests/lab/scores-curl.mjs` (after the schema; writes one test player "LB Test").
+- Lobby: `python3 server/lobby/test_lobby.py` (local); after install `systemctl status neonspeed-lobby`, and through nginx `curl -si -H 'Connection: Upgrade' -H 'Upgrade: websocket' -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' https://notcarlos.mosidealus.nl/ws/` must answer 101.
 - Health: `scripts/health-check.sh` (exit 0 = ok; warns when the backup is older than 30 h).
 - Backups: `tsh ssh root@notcarlos.mosidealus.nl 'ls -lh /var/backups/neonspeed; neonspeed-restore-test'`.
 - Memory/slow log (checked 2026-11-20): the instance uses ~160 MB of its 700 MB limit; the slow-query log is off (not set in my.cnf); binary log disabled.

@@ -112,19 +112,22 @@ class Hub:
         return r
 
     def leave(self, m):
-        """Remove m from its room: a guest leaving tells the host; the host leaving closes the room."""
+        """Remove m from its room: a guest leaving tells the host; when the host leaves, the guest who joined first
+        becomes the host (everyone gets `promote`), so a race goes on; the last one out frees the code."""
         r = self.rooms.pop(m.room, None) if m.room else None
         if r is None:
             m.room = None
             return
         m.room = None
         del r.members[m.id]
-        if r.host is m:
-            for g in r.members.values():
-                g.room = None
-                g.send({"t": "gone", "id": m.id})
+        if not r.members:
             return
         self.rooms[r.code] = r
+        if r.host is m:
+            r.host = next(iter(r.members.values()))  # dicts keep join order
+            for g in r.members.values():
+                g.send({"t": "promote", "host": r.host.id, "old": m.id})
+            return
         r.host.send({"t": "gone", "id": m.id})
 
     # --- relay -----------------------------------------------------------------------------------------------------

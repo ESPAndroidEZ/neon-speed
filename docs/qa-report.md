@@ -32,6 +32,9 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 25 | Portrait: rotate toast over the cash pill, SELECT MAP title touching it | `ui/rotateHint`, `.rb-cash` | open | open |
 | 26 | Online screen layout (alignment, tiny help text), ES default name "Driver" | `ui/onlineMenu` | open | open |
 | 27 | ES: money "(1,200 $)" instead of "1.200 $"; "Dock Sprint" untranslated; tuning stats uppercased ("6.8 S") | number format / data strings / CSS uppercase | open | open |
+| 28 | ES results: prize "+ $3,000" (English format; same family as #27) | `ui/results` (toLocaleString without locale) | open | open |
+| 29 | Online room (ES): ~60 px empty gap in the track picker after "Cliffside Run" (a blank or wrapped button) | `ui/onlineMenu` pick row | open | open |
+| 30 | A pedestrian and a parked car right beside the start line (seen in an online race start, ES and EN) | `world/` people / props layout | open | open |
 Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). All three reviews are in.
 
 ## 2026-11-19 survey

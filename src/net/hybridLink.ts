@@ -20,6 +20,7 @@ export class HybridLink implements NetLink {
   onJoin: (id: string) => void = () => {};
   onLeave: (id: string) => void = () => {};
   onError: (code: string, msg: string) => void = () => {};
+  onPromote: (host: string, old: string) => void = () => {};
 
   constructor(server: ServerLink | null, peer: NetLink, now: () => number = Date.now) {
     this.server = server;
@@ -31,6 +32,7 @@ export class HybridLink implements NetLink {
       l.onJoin = (id) => { if (this.active === l) this.onJoin(id); };
       l.onLeave = (id) => { if (this.active === l) this.onLeave(id); };
       l.onError = (c, m) => { if (this.active === l) this.onError(c, m); };
+      l.onPromote = (h, o) => { if (this.active === l) this.onPromote(h, o); };
     }
   }
 

@@ -23,10 +23,10 @@ Client -> server
 | t | fields | meaning |
 |---|---|---|
 | `hi` | `v` (protocol version, 1) | first message; anything else first closes with error `hello` |
-| `host` | `code`, `pub` (bool), `track`, `weather`, `name` | open a room with this code |
+| `host` | `code`, `pub` (bool) | open a room with this code (`pub`: listed in the public room list) |
 | `join` | `code` | join a room |
 | `list` | | ask for the public room list |
-| `meta` | `track`, `weather`, `racing`, `pub` | host only: update what the room list shows |
+| `meta` | `track`, `weather`, `racing`, `pub` | host only, optional: update what the room list shows (the game does not need it: see below) |
 | `to` | `to` (id), `m` (NetMsg) | pass `m` to one member of my room |
 | `all` | `m`, `skip` (id, optional) | pass `m` to every other member (host) / to the host (guest) |
 | `kick` | `id` | host only: remove a guest |
@@ -43,15 +43,18 @@ Server -> client
 | `gone` | `id` | a peer left: for the host a guest, for a guest the host |
 | `msg` | `from`, `m` | a NetMsg from a peer |
 | `rooms` | `rooms`: `[{code, n, max, track, weather, racing}]` | public rooms that are not full, newest first, at most 50 |
+| `promote` | `host`, `old` | the host (`old`) left: `host` (the guest who joined first) is the host now; the room and a running race go on |
 | `fin` | `id`, `at` (server ms since the room's `go`) | sent to the whole room when a player's first `st` with `fin > 0` passes |
 | `err` | `code`, `msg` | see section 4; after `hello`, `version`, `flood`, `size` the server closes |
 
 Rules the server enforces
 - Guests may only send `to` the host (or `all`, which reaches only the host); the host may send to anyone in the room.
 - `m` must look like a NetMsg (`k` is one of the known kinds); the server does not change it.
-- When the **host leaves**, every guest gets `gone` for the host and the room is closed (W3.3 may add host migration:
-  then the server would send `{t:'promote', host}` instead; not in version 1).
-- A room code is free again when its room is empty. Codes: 4 letters, `ABCDEFGHJKLMNPQRSTUVWXYZ` (same as `makeRoomCode`).
+- When the **host leaves**, the guest who joined first becomes the host and everyone gets `promote` (added 2026-11-20,
+  optional for clients: an old client ignores it). The new host's `Lobby` relays from then on, so a race goes on
+  (tested in `tests/lobby-handover-check.mts`). PeerJS rooms cannot do this: there the room ends with the host.
+- A room code is free again when the last member leaves. Codes: 4 letters, `ABCDEFGHJKLMNPQRSTUVWXYZ` (same as `makeRoomCode`).
+- The room list's track, weather and "racing" come from the host's own `lobby` NetMsg (`settings`, `racing`) as it passes, and `start` / `go` mark the room as racing; so the game sends no extra messages.
 - The `go` time of a room is when the host's `go` message passes; `fin.at` is measured from it.
 
 ## 4. Errors (`err.code`)
@@ -66,11 +69,17 @@ messages per second, or 600 per 10 s), `size` (frame over 4096 bytes), `busy` (s
 messages per second per connection (state packets are 20 per second), 4 KB per message. systemd `MemoryMax=128M`.
 The server stores nothing on disk and logs only counts (no addresses, no names).
 
-## 6. Versioning
+## 6. Client behaviour (src/net)
+- `HybridLink`: host on the server when it answers, else PeerJS; join on the server first, and when the server does not know the code (`nope`) or is down, through PeerJS. After a failed host/join the server is skipped for 60 s (10 s after a failed room listing), so nobody waits twice.
+- Every request waits up to 8 s for its reply (a phone busy loading the game can take seconds to run the first socket event); requests on one link are queued, one reply at a time.
+- The Online screen shows "Open rooms" only when a listing reached the server; it retries up to 4 times, 12 s apart.
+- Dev: there is no lobby on the dev server unless localStorage `ns-lobby-url` is set (e.g. `ws://127.0.0.1:8770/ws/`).
+
+## 7. Versioning
 `hi.v` is the protocol version. The server answers `welcome` with its own `v`; a client that does not know it falls back
 to PeerJS. New optional fields may be added without a version change; removing or renaming one needs `v` 2.
 
-## 7. Example
+## 8. Example
 ```
 guest -> {"t":"hi","v":1}                <- {"t":"welcome","v":1,"id":"k3j9x0qa"}
 guest -> {"t":"join","code":"QWRT"}      <- {"t":"joined","code":"QWRT","host":"h7d2m1zp"}

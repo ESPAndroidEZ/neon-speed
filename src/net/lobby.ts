@@ -38,6 +38,11 @@ export class Lobby {
       this.checkGo();
       this.pushLobby();
     };
+    L.onPromote = (host, old) => { // own lobby server: the host left, the room (and a running race) goes on
+      this.players = this.players.filter((p) => p.id !== old);
+      this.hostId = host;
+      if (host === this.me.id) { this.role = 'host'; this.roster = []; this.pushLobby(); } else this.onChange();
+    };
     L.onError = (code, msg) => {
       if (this.busy) return; // the pending create/join reports it
       if (code === 'peer-unavailable' || code === 'network' || code === 'server-error') this.fail('net', msg);
