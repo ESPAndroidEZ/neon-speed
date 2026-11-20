@@ -7,7 +7,7 @@ import { installFreeRoam } from './freeRoam';
 import type { DistrictId } from '../types/world';
 
 /** Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. */
-export let roamDev: { enter(): void; travel(d: DistrictId): void } | null = null;
+export let roamDev: { enter(): void; travel(d: DistrictId): void; routeLength(): number } | null = null;
 
 /** Free Drive (Neon Harbor) behind the main-menu button. One call from main. */
 export function wireFreeDrive(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void; hideMenu: () => void }): void {

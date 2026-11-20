@@ -53,4 +53,5 @@ export const EN_GAME = {
   'lb.rank': 'Online board: #{rank} of {of}', 'lb.new': 'new best', 'lb.unverified': 'unverified times', 'lb.queued': 'Online board: saved, sent when you are online', 'lb.rejected': 'Online board: this lap was not accepted', 'lb.top': 'Online top 3', 'lb.none': 'No online times yet: set the first',
   'menu.freeDrive': 'Free Drive', 'roam.respawn': 'Respawn', 'roam.keys': 'Neon Harbor · R respawn · Esc pause', 'roam.loading': 'Building the city… {n}/{of}',
   'roam.pause': 'Pause', 'roam.travel': 'Fast travel', 'district.downtown': 'Downtown', 'district.harbour': 'Harbour', 'district.oldtown': 'Old Town', 'district.strip': 'The Strip', 'district.hills': 'The Hills', 'district.industrial': 'Industrial', 'district.bay': 'The Bay',
+  'roam.map': 'Map', 'roam.mapHint': 'Tap a place to set a waypoint: the GPS shows the way on the minimap.', 'roam.clear': 'Clear route', 'roam.arrived': 'You have arrived',
 } as const;

@@ -13,6 +13,7 @@ import { RoamTraffic } from '../physics/roamTraffic';
 import { TrafficView } from '../world/open/trafficView';
 import { RoamPeds } from '../physics/roamPeds';
 import { PedView } from '../world/open/pedView';
+import { roamMap, type RoamMap } from '../ui/roamMap';
 import { fillEnv, type PhysicsEnv } from '../physics/weatherLevels';
 import { createRoadHit } from '../world/roads/roadIndex';
 import { generateRoads } from '../world/roads/generate';
@@ -28,14 +29,14 @@ import { roamHud, type RoamHud } from '../ui/roamHud';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
  * streamed around the camera, buildings and the quay as walls. The car is the player of a RaceManager that never starts,
  * so the engine sound, effects and camera follow it as in a race; Game hands this module the fixed step and the frame.
  */
-export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void } {
+export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number } {
   const { engine, game } = d;
   let city: City | null = null;
   let ui: RoamHud | null = null;
@@ -59,7 +60,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const peds = new RoamPeds(g, 30), pedView = new PedView(30);
     contact.traffic = traffic;
     group.add(trafficView.group, pedView.mesh);
-    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); } };
+    const map = roamMap(g, ci, contact.roads, () => menu?.open());
+    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -99,7 +101,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   const setPaused = (on: boolean): void => {
     game.paused = on;
-    if (on) menu?.open(); else menu?.close();
+    if (on) menu?.open(); else { menu?.close(); city?.map.closeFull(); }
   };
 
   const setCast = (on: boolean): void => { const c = engine.scene.getObjectByName('cast'); if (c) c.visible = on; };
@@ -113,6 +115,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     setCast(true);
     ui?.hide();
     menu?.close();
+    city?.map.show(false);
     shownWeather = null;
     game.setWeather(game.weather); // the race map's fog and look again
   };
@@ -142,6 +145,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.streamer.update(cellOf(city.g, s.position.x), cellOf(city.g, s.position.z));
     city.trafficView.update(city.traffic, s.position.x, s.position.z);
     city.pedView.update(city.peds);
+    city.map.update(dt, s.position.x, s.position.z, s.heading, city.traffic);
     game.chase.update(dt);
     if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); }
     districtFog(engine.scene, s.position.x, s.position.z, game.weather, dt, look.fogK * LOOK_CONFIG.fog.densityScale);
@@ -155,6 +159,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   return {
     travel,
+    routeLength: () => city?.map.route?.length ?? 0, // labs: the GPS route (m), 0 = none
     enter: () => {
       city ??= build();
       const store = d.store, spec = findCar(store.data.selected);
@@ -178,8 +183,9 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.syncView(true);
       active = true;
       ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused) });
-      menu ??= roamPause({ resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
+      menu ??= roamPause({ map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
+      city.map.show(true);
     },
   };
 }

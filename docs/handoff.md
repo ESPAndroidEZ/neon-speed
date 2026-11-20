@@ -131,6 +131,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-20 Claude: W5.2 DONE: neon shop signs + softer lamp tint; city visual 12/12, 1393 PASS.
 - 2026-11-20 Claude: W5.3 DONE: city traffic with lights and a grip cap below the player, pedestrians on the sidewalks; cast grouped under `cast` (hidden in the city); 1410 PASS.
 - 2026-11-20 Claude: W5.4 started: GPS route finder (A*, exact, one-way aware); traffic fixed to respect one-way streets and latch yellow decisions.
+- 2026-11-20 Claude: W5.4 maps: minimap + full map with tap-to-waypoint GPS (ui/roamMap.ts); lab roam-map ALL PASS.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.

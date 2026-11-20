@@ -160,7 +160,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - freeDriveSetup.ts (17) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (185) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
+- freeRoam.ts (191) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -197,7 +197,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - en.ts (22) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (73) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
-- enGame.ts (56) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
+- enGame.ts (57) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
@@ -213,7 +213,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentG.ts (39) Spanish for the story rewrite: barks and radio, keyed by the exact English text (see es... | const ES_CONTENT_G
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
-- esGame.ts (58) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
+- esGame.ts (59) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
@@ -341,6 +341,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - roamHud.ts (32) Free Drive overlay: Respawn and Pause buttons (phones have no keyboard), the key hint, ... | fn roamHud; iface RoamHud
+- roamMap.ts (134) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamPause.ts (34) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint

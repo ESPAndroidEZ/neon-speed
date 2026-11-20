@@ -7,7 +7,7 @@ import { button, h } from './uiKit';
 export interface RoamPause { open(): void; close(): void; readonly isOpen: boolean }
 
 /** Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respawn, back to the menu. */
-export function roamPause(a: { resume: () => void; travel: (d: DistrictId) => void; respawn: () => void; exit: () => void; photo: PhotoSource }): RoamPause {
+export function roamPause(a: { map: () => void; resume: () => void; travel: (d: DistrictId) => void; respawn: () => void; exit: () => void; photo: PhotoSource }): RoamPause {
   const root = h('div', 'rb-layer dim');
   root.style.cssText += ';display:none;overflow:auto;z-index:30';
   let on = false;
@@ -24,7 +24,7 @@ export function roamPause(a: { resume: () => void; travel: (d: DistrictId) => vo
     places.append(b);
   }
   panel.append(h('h3', '', t('roam.travel')), places);
-  root.append(h('h2', 'rb-title', t('pause.title')), button(t('pause.resume'), go(a.resume), 'hot'), panel, photoButton(a.photo), button(t('roam.respawn'), go(a.respawn)), button(t('common.menu'), go(a.exit)));
+  root.append(h('h2', 'rb-title', t('pause.title')), button(t('pause.resume'), go(a.resume), 'hot'), button(t('roam.map'), () => { on = false; a.map(); }), panel, photoButton(a.photo), button(t('roam.respawn'), go(a.respawn)), button(t('common.menu'), go(a.exit)));
   document.body.appendChild(root);
   return {
     open: () => { on = true; root.style.display = 'flex'; },
