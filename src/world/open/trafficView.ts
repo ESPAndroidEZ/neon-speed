@@ -11,7 +11,7 @@ const LIGHT_COL = [0x39ff88, 0xffc23a, 0xff2a3a]; // green, yellow, red
 const MAX_HEADS = 96;
 
 /** Low-poly saloon: body box + cabin box (one geometry), and its lamps: white front, red rear quads with vertex colours. */
-function shapes(): { body: BufferGeometry; lamps: BufferGeometry } {
+export function carShapes(): { body: BufferGeometry; lamps: BufferGeometry } {
   const lower = new BoxGeometry(1.8, 0.7, 4.4).translate(0, 0.55, 0);
   const cabin = new BoxGeometry(1.6, 0.55, 2.2).translate(0, 1.15, -0.2);
   const body = mergeGeometries([lower, cabin]) as BufferGeometry;
@@ -42,7 +42,7 @@ export class TrafficView {
 
   constructor(g: RoadGraph, count: number) {
     this.g = g;
-    const s = shapes();
+    const s = carShapes();
     const bodyMat = new MeshStandardMaterial({ roughness: 0.45, metalness: 0.5 });
     const lampMat = new MeshBasicMaterial({ vertexColors: true });
     const headMat = new MeshBasicMaterial();

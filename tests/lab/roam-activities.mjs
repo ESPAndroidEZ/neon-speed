@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 
 const BASE = process.env.BASE ?? 'http://localhost:5173';
 const lang = process.argv[2] === 'es' ? 'es' : 'en';
-const L = lang === 'es' ? { zone: 'Zona de derrape', trap: 'Radar' } : { zone: 'Drift zone', trap: 'Speed trap' };
+const L = lang === 'es' ? { zone: 'Zona de derrape', trap: 'Radar', meet: 'Quedada' } : { zone: 'Drift zone', trap: 'Speed trap', meet: 'Car meet' };
 let failed = 0;
 const check = (n, ok, info = '') => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}${info ? `  (${info})` : ''}`); };
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
@@ -37,6 +37,12 @@ await page.keyboard.down('KeyW');
 for (let i = 0; i < 90 && !pops.some((p) => p.includes(L.trap)); i++) await page.waitForTimeout(500);
 await page.keyboard.up('KeyW');
 check('driving through a speed camera shows the speed', pops.some((p) => p.includes(L.trap)), pops.slice(-2).join(' | '));
+const m = spots.meet; // stand still in the middle of the car meet: greeted after 2 s
+await lab('placeAt', [m.x, m.z, 0, 0]);
+for (let i = 0; i < 40 && !pops.some((p) => p.includes(L.meet)); i++) await page.waitForTimeout(500);
+check('standing in the car meet: the crew greets you', pops.some((p) => p.includes(L.meet)), pops.slice(-1).join(''));
+check('the meet is drawn (parked cars + ring)', await page.evaluate(() => window.__rbGame.d.engine.scene.getObjectByName('car-meet')?.children.length === 3));
+await page.screenshot({ path: `logs/shots/roam-meet-${lang}.png`, timeout: 90000 });
 check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
 await browser.close();
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');

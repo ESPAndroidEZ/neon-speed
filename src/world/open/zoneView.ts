@@ -1,9 +1,8 @@
 import { AdditiveBlending, BufferGeometry, Color, Float32BufferAttribute, Mesh, MeshBasicMaterial } from 'three';
-import type { DriftZone } from '../../core/driftZones';
 import { heightAt } from '../roads/height';
 
 /** Drift zones as glowing rings on the ground: every zone in one mesh (one draw call). */
-export function zoneMesh(zones: readonly DriftZone[]): Mesh {
+export function zoneMesh(zones: readonly { x: number; z: number; r: number }[], color = 0x18d8ff): Mesh {
   const pos: number[] = [], idx: number[] = [], SEG = 48, W = 1.6;
   for (const z of zones) {
     const y = heightAt(z.x, z.z) + 0.08, b = pos.length / 3;
@@ -16,7 +15,7 @@ export function zoneMesh(zones: readonly DriftZone[]): Mesh {
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
   geo.setIndex(idx);
-  const mesh = new Mesh(geo, new MeshBasicMaterial({ color: new Color(0x18d8ff), transparent: true, opacity: 0.55, blending: AdditiveBlending, depthWrite: false, side: 2 }));
+  const mesh = new Mesh(geo, new MeshBasicMaterial({ color: new Color(color), transparent: true, opacity: 0.55, blending: AdditiveBlending, depthWrite: false, side: 2 }));
   mesh.name = 'drift-zones';
   mesh.matrixAutoUpdate = false;
   mesh.renderOrder = 2;

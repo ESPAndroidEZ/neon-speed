@@ -30,6 +30,8 @@ export class RoamContact {
   rain = 0;
   /** City traffic: solid boxes; a car hit hard stops for a moment. */
   traffic: RoamTraffic | null = null;
+  /** Parked cars (x, z, heading triples): solid like traffic, never move. */
+  parked: Float32Array = new Float32Array(0);
   private hitCar = -1;
   readonly roads: RoadIndex;
   private readonly graph: RoadGraph;
@@ -80,6 +82,7 @@ export class RoamContact {
       this.water(cx, cz);
       this.border(cx, cz);
       this.cars(cx, cz);
+      this.parkedCars(cx, cz);
     }
     if (this.pen > 0) wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this);
     if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar);
@@ -121,6 +124,19 @@ export class RoamContact {
 
   private edgeTry(d: number, lx: number, lz: number, ux: number, uz: number): void {
     if (d < this.wb && !isWater(lx, lz)) { this.wb = d; this.wnx = ux; this.wnz = uz; }
+  }
+
+  private parkedCars(cx: number, cz: number): void {
+    const p = this.parked;
+    for (let i = 0; i + 2 < p.length; i += 3) {
+      const dx = cx - p[i], dz = cz - p[i + 1];
+      if (dx * dx + dz * dz > 9) continue;
+      const fx = Math.sin(p[i + 2]), fz = Math.cos(p[i + 2]);
+      const lz = dx * fx + dz * fz, lx = dx * fz - dz * fx, ox = 0.9 - Math.abs(lx), oz = 2.2 - Math.abs(lz);
+      if (ox <= 0 || oz <= 0) continue;
+      if (ox < oz) this.set(ox, fz * Math.sign(lx), -fx * Math.sign(lx), cx, cz);
+      else this.set(oz, fx * Math.sign(lz), fz * Math.sign(lz), cx, cz);
+    }
   }
 
   /** Traffic cars as 1.8 m x 4.4 m boxes (same test as buildings). */

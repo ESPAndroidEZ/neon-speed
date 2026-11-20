@@ -56,4 +56,5 @@ export const EN_GAME = {
   'roam.map': 'Map', 'roam.mapHint': 'Tap a place to set a waypoint: the GPS shows the way on the minimap.', 'roam.clear': 'Clear route', 'roam.arrived': 'You have arrived',
   'roam.trap': 'Speed trap: {v}', 'roam.trapBest': 'Speed trap: {v} · new best!',
   'roam.zoneIn': 'Drift zone: show what you have!', 'roam.zoneOut': 'Drift zone: {n} points', 'roam.zoneBest': 'Drift zone: {n} points · new best!',
+  'roam.meet': 'Car meet: the crew checks out your {car}',
 } as const;
