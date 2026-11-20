@@ -54,4 +54,5 @@ export const EN_GAME = {
   'menu.freeDrive': 'Free Drive', 'roam.respawn': 'Respawn', 'roam.keys': 'Neon Harbor · R respawn · Esc pause', 'roam.loading': 'Building the city… {n}/{of}',
   'roam.pause': 'Pause', 'roam.travel': 'Fast travel', 'district.downtown': 'Downtown', 'district.harbour': 'Harbour', 'district.oldtown': 'Old Town', 'district.strip': 'The Strip', 'district.hills': 'The Hills', 'district.industrial': 'Industrial', 'district.bay': 'The Bay',
   'roam.map': 'Map', 'roam.mapHint': 'Tap a place to set a waypoint: the GPS shows the way on the minimap.', 'roam.clear': 'Clear route', 'roam.arrived': 'You have arrived',
+  'roam.trap': 'Speed trap: {v}', 'roam.trapBest': 'Speed trap: {v} · new best!',
 } as const;

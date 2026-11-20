@@ -74,6 +74,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - save.ts (186) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
 - saveParse.ts (96) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
+- speedTraps.ts (32) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; iface SpeedTrap
 - styleCombo.ts (76) What the combo saves (part of the reward snapshot). | class StyleCombo; const COMBO; iface ComboData
 - tipBag.ts (36) Shuffled bag: every item comes out once before any repeats, and the first item of a new... | class TipBag
 - viewport.ts (44) Keeps the game sized to the REAL visible viewport: ResizeObserver on the container, vis... | fn watchViewport; const isPortrait
@@ -160,7 +161,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - freeDriveSetup.ts (17) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (191) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
+- freeRoam.ts (210) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -197,7 +198,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - en.ts (22) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (73) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
-- enGame.ts (57) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
+- enGame.ts (58) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
@@ -213,7 +214,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentG.ts (39) Spanish for the story rewrite: barks and radio, keyed by the exact English text (see es... | const ES_CONTENT_G
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
-- esGame.ts (59) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
+- esGame.ts (60) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
@@ -419,6 +420,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roamLook.ts (72) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
 - trafficView.ts (95) Body paints of the traffic cars (muted, so the player's car stands out). | class TrafficView
+- trapView.ts (25) Speed cameras as one static mesh (one draw call): a dark post at the kerb with a glowin... | fn trapMesh
 ## src/world
 - partsHoods.ts (54) | const HOOD_MORE
 - partsSkirts.ts (55) | const SKIRTS_MORE

@@ -14,6 +14,10 @@ import { TrafficView } from '../world/open/trafficView';
 import { RoamPeds } from '../physics/roamPeds';
 import { PedView } from '../world/open/pedView';
 import { roamMap, type RoamMap } from '../ui/roamMap';
+import { crossed, placeSpeedTraps, type SpeedTrap } from '../core/speedTraps';
+import { trapMesh } from '../world/open/trapView';
+import { speedText } from './speedUnit';
+import { t as tr } from '../i18n';
 import { fillEnv, type PhysicsEnv } from '../physics/weatherLevels';
 import { createRoadHit } from '../world/roads/roadIndex';
 import { generateRoads } from '../world/roads/generate';
@@ -29,7 +33,7 @@ import { roamHud, type RoamHud } from '../ui/roamHud';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; traps: SpeedTrap[]; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
@@ -44,6 +48,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   let active = false;
   let shownWeather: Weather | null = null;
   const cars = new Float32Array(2 * 41);
+  const trapBest = new Map<number, number>(); // km/h per camera (saved with `roam` in W5.5)
+  let lastX = 0, lastZ = 0;
   const hit = createRoadHit(), p = { x: 0, z: 0 };
   const env: PhysicsEnv = fillEnv({ name: 'CLEAR', grip: 1, fogDensity: 0, fogColor: 0, precipitation: 0, roadRoughness: 0, level: 'NORMAL', yawDampMul: 1, assistMul: 1, rearGripMul: 1, intensity: 1 }, 'CLEAR', 'NORMAL');
 
@@ -61,7 +67,9 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     contact.traffic = traffic;
     group.add(trafficView.group, pedView.mesh);
     const map = roamMap(g, ci, contact.roads, () => menu?.open());
-    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); } };
+    const traps = placeSpeedTraps(g), cams = trapMesh(traps);
+    group.add(cams);
+    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, traps, dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); cams.geometry.dispose(); (cams.material as { dispose(): void }).dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -80,6 +88,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const s = game.rm.player.car.state, cx = cellOf(city.g, s.position.x), cz = cellOf(city.g, s.position.z);
     city.traffic.scatter(s.position.x, s.position.z); // traffic and people around the new spot too
     city.peds.scatter(s.position.x, s.position.z);
+    lastX = s.position.x; lastZ = s.position.z; // a teleport is not a pass through a camera
     city.streamer.update(cx, cz); // the first update picks the wanted cells
     for (let i = 0; i < 100 && city.streamer.pending; i++) city.streamer.update(cx, cz);
   };
@@ -120,6 +129,13 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     game.setWeather(game.weather); // the race map's fog and look again
   };
 
+  /** Speed camera: the speed, and a new best for that camera when it is one. */
+  const caught = (id: number, kmh: number): void => {
+    const best = trapBest.get(id) ?? 0;
+    if (kmh > best) trapBest.set(id, kmh);
+    d.hud.popUp(kmh > best && best > 0 ? tr('roam.trapBest', { v: speedText(kmh) }) : tr('roam.trap', { v: speedText(kmh) }), kmh > best ? '#ffd27d' : '#8fd8ff');
+  };
+
   const step = (dt: number): void => {
     if (!city) return;
     const r = game.rm.player, c = city.contact;
@@ -132,6 +148,9 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     for (let i = 0; i < t.agents.length; i++) { cars[2 + i * 2] = t.x[i]; cars[3 + i * 2] = t.z[i]; }
     city.peds.step(dt, cars[0], cars[1], cars, t.agents.length + 1);
     c.update(r.car);
+    const sx = r.car.state.position.x, sz = r.car.state.position.z;
+    for (const tp of city.traps) if (crossed(tp, lastX, lastZ, sx, sz)) caught(tp.id, Math.abs(r.car.state.speed) * 3.6);
+    lastX = sx; lastZ = sz;
     const tc = r.contact; // the race contact is idle here: mirror what the city reports, for sparks, shake and sound
     tc.impact = c.impact; tc.scrape = c.scrape; tc.offroad = c.offroad; tc.groundY = c.groundY; tc.pitch = c.pitch;
     tc.contact.x = c.contact.x; tc.contact.z = c.contact.z;

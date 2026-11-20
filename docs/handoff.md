@@ -6,7 +6,7 @@ Baton: claude
 Updated: 2026-11-20 (W4 music done; W1 built, waiting for owner OK; next W2).
 
 ## Next
-0. START HERE: `docs/master-plan.md`. W4 DONE; W1 housekeeping installed; W2 built: owner must OK `scripts/apply-server-schema.sh`, then run `node tests/lab/scores-curl.mjs`; owner sends `docs/admin-request.md`; W3 built (owner: review `docs/online-protocol.md`, OK `scripts/setup-server-lobby.sh` + `scripts/apply-server-schema.sh`; administrator: `/ws/`). W5.1 DONE. W5.2 DONE (district walls, fog, weather surfaces, street lights, neon signs; city visual 12/12). W5.3 DONE (traffic, lights, pedestrians). Next: W5.4 GPS (A* on the road graph) + minimap + full map, speed traps, jumps, drift zones, car meet; qa #13 (neon-clear chroma) needs a bisect.
+0. START HERE: `docs/master-plan.md`. W4 DONE; W1 housekeeping installed; W2 built: owner must OK `scripts/apply-server-schema.sh`, then run `node tests/lab/scores-curl.mjs`; owner sends `docs/admin-request.md`; W3 built (owner: review `docs/online-protocol.md`, OK `scripts/setup-server-lobby.sh` + `scripts/apply-server-schema.sh`; administrator: `/ws/`). W5.1 DONE. W5.2 DONE (district walls, fog, weather surfaces, street lights, neon signs; city visual 12/12). W5.4 DOING: GPS + minimap + full map + speed traps done; next drift zones, car meet; jumps need a design (physics is 2D). WATCH: free-roam draw calls up to 217 of 250 (LOW): merge parts (e.g. signs into walls) before adding more. `game/freeRoam.ts` is at 210 lines: new features go in new modules. qa #13 (neon-clear chroma) needs a bisect. Owner: review `docs/online-protocol.md`; OK `scripts/apply-server-schema.sh` and `scripts/setup-server-lobby.sh`; send `docs/admin-request.md`.
 1. OWNER: `FEEDBACK_EMAIL=<address> scripts/set-feedback-email.sh` (deployed 2026-11-20, commit ab3824f; live health OK). Everything up to commit 2f4ecf0 is pushed.
 2. Playtest on real phones; record engine sounds (owner offered: audio-inbox/<car>/, see docs/skills.md); balance of Chapter 3 races untested; qa-report open rows (#10, #18, #23, #24, #26).
 3. Fun plan: knockout mode; Neon Harbor block 1b (docs/open-world.md).
@@ -132,6 +132,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-20 Claude: W5.3 DONE: city traffic with lights and a grip cap below the player, pedestrians on the sidewalks; cast grouped under `cast` (hidden in the city); 1410 PASS.
 - 2026-11-20 Claude: W5.4 started: GPS route finder (A*, exact, one-way aware); traffic fixed to respect one-way streets and latch yellow decisions.
 - 2026-11-20 Claude: W5.4 maps: minimap + full map with tap-to-waypoint GPS (ui/roamMap.ts); lab roam-map ALL PASS.
+- 2026-11-20 Claude: W5.4 speed traps (12 cameras, best per camera, pop-up); 1426 PASS; checkpoint.
 
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
