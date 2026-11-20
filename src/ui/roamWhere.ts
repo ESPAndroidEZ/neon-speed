@@ -27,7 +27,7 @@ export class RoamWhere {
     this.roads = roads;
     this.el = document.createElement('div');
     this.el.className = 'rb-where';
-    this.el.style.cssText = 'position:fixed;left:max(12px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 150px);max-width:min(340px,60vw);z-index:11;font:700 13px system-ui,sans-serif;color:#cfefff;text-shadow:0 1px 3px #000;pointer-events:none';
+    this.el.style.cssText = 'position:fixed;left:max(12px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 175px);max-width:min(340px,60vw);z-index:11;font:700 13px system-ui,sans-serif;color:#cfefff;text-shadow:0 1px 3px #000;pointer-events:none';
     this.line = document.createElement('div');
     this.line.style.cssText = 'font-weight:500;font-size:12px;opacity:.85;margin-top:3px;transition:opacity .6s';
     const name = document.createElement('div');

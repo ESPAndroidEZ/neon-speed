@@ -56,7 +56,10 @@ for (const c of CASES) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.goto(BASE + c.q, { waitUntil: 'load' });
+  await page.goto(BASE + c.q + '&probe', { waitUntil: 'load' });
+  // wait until the race (or Free Drive) really runs: a fixed delay after 'load' caught the loading card on a slow first page
+  await page.waitForFunction(() => ['RACING', 'FREEROAM', 'PODIUM'].includes(window.__rbGame?.state), null, { timeout: 90000 }).catch(() => errors.push('never reached the race'));
+  await page.evaluate(() => new Promise((r) => { let n = 0; const f = () => (++n >= 10 ? r(null) : requestAnimationFrame(f)); requestAnimationFrame(f); })); // ten frames drawn
   await page.waitForTimeout(c.city ? 7000 : c.name.endsWith('grid') ? 3500 : 1500); // the city is generated and primed after the game loads
   const buf = await page.screenshot();
   writeFileSync(`${OUT}/${c.name}.png`, buf);

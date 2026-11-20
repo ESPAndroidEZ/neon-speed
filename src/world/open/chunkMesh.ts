@@ -46,7 +46,7 @@ export function roamMaterials(): RoamMaterials & { dispose(): void } {
     road: new MeshStandardMaterial({ map: road, roughness: 0.85 }),
     walk: new MeshStandardMaterial({ color: new Color(0x5d6066), roughness: 0.9 }),
     walls: dw.walls,
-    roofs: new MeshStandardMaterial({ color: new Color(0x202226), roughness: 0.9 }),
+    roofs: new MeshStandardMaterial({ color: new Color(0x202226), roughness: 0.9, vertexColors: true }), // vertex colour: side faces darker (SIDE_SHADE)
     lamps,
     signs: new MeshBasicMaterial({ map: atlas, color: new Color(1.15, 1.15, 1.15) }), // same glow as the race maps' shop signs
   };
@@ -64,11 +64,19 @@ export function roamMaterials(): RoamMaterials & { dispose(): void } {
   };
 }
 
-function toGeometry(o: Geo): BufferGeometry {
+/** Roofs part: side faces (posts, furniture, roof clutter) get SIDE_SHADE so snow whitens only what faces up (qa #33). */
+export const SIDE_SHADE = 0.22;
+
+function toGeometry(o: Geo, shadeSides = false): BufferGeometry {
   const b = new BufferGeometry();
   b.setAttribute('position', new Float32BufferAttribute(o.pos, 3));
   b.setAttribute('normal', new Float32BufferAttribute(o.nrm, 3));
   b.setAttribute('uv', new Float32BufferAttribute(o.uv, 2));
+  if (shadeSides) {
+    const c = new Float32Array(o.pos.length);
+    for (let i = 0; i < c.length; i += 3) c[i] = c[i + 1] = c[i + 2] = o.nrm[i + 1] > 0.5 ? 1 : SIDE_SHADE;
+    b.setAttribute('color', new Float32BufferAttribute(c, 3));
+  }
   b.setIndex(o.idx);
   b.computeBoundingSphere();
   return b;
@@ -91,7 +99,7 @@ export function chunkJob(g: RoadGraph, fs: readonly Footprint[], info: ChunkInfo
       while (k < PARTS.length && geo[PARTS[k]].idx.length === 0) k++;
       if (k < PARTS.length) {
         const part = PARTS[k++];
-        const mesh = new Mesh(toGeometry(geo[part]), part === 'walls' ? mats.walls[info.district] : part === 'lamps' ? mats.lamps[info.district] : mats[part]);
+        const mesh = new Mesh(toGeometry(geo[part], part === 'roofs'), part === 'walls' ? mats.walls[info.district] : part === 'lamps' ? mats.lamps[info.district] : mats[part]);
         mesh.name = part;
         mesh.matrixAutoUpdate = false;
         mesh.receiveShadow = part !== 'walls' && part !== 'lamps' && part !== 'signs';

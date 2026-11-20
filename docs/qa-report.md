@@ -17,7 +17,7 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 10 | Pause list cut off at the bottom in landscape (scrolls, no cue) | layer height | open | open |
 | 11 | Launch tip pop-up behind the speedo in portrait | pop-up position | open | open |
 | 12 | Rotate hint probably expires behind the loading card | 6 s timer starts under z 65 card | open (unconfirmed) | open |
-| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | REOPENED 2026-11-20: fails again (chroma 0.14, mean 0.298, 3 of 3 runs). Not from this session: no render/fx/world-race file changed since 1752bfd; the files of the 11-19 fix (21dec2f) were last touched by 2f4ecf0 | was fixed 2026-11-19 (chroma 0.21) | open |
+| 13 | `npm run visual` neon-clear chroma 0.14 < 0.20 | FIXED 2026-11-21: not a look regression. The check captured a fixed 1.5 s after page load, which on a slow first page caught the loading card / grid instead of the race (even 21dec2f gave 0.14 that way). `scripts/visual-check.mjs` now waits for RACING/FREEROAM (`&probe`) and 10 drawn frames: neon-clear 0.21 in 3 of 3 runs alone and in full runs | was fixed 2026-11-19 (chroma 0.21) | fixed |
 | 14 | Radio subtitles stack on top of each other | `Subtitles.flash` never removed the line in its slot | a new line replaces the one of the same kind | fixed |
 | 15 | Every rival shows plate RB-0001 | rivals got the default loadout | `rivalPlate(name)` (two letters + four digits, stable) | fixed |
 | 16 | HIGH: white glare blob and streaks on the player car roof (same as the garage glare) | the anamorphic streak pass in `fx/finalFx.ts` summed unbounded HDR over 28 taps (confirmed: blob gone with streaks off or capped) | each tap capped at 1.2; headlight spot moved past the nose (3.6 m) | fixed |
@@ -37,8 +37,8 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 30 | A pedestrian and a parked car right beside the start line (seen in an online race start, ES and EN) | `world/` people / props layout | open | open |
 | 31 | Free Drive Hills: the ground poked through the road and sidewalk wedges lay over junctions (screenshot QA, all weathers) | FIXED 2026-11-20: `world/open/groundCarve.ts` + 8 m ground grid + sidewalks stop short of junctions; `tests/ground-carve-check.mts` 12397 -> 0 covered samples; re-shot | fixed |
 | 32 | Free Drive: "Now playing" covered the top bar (Pause, key hint) | FIXED 2026-11-20: shown at the bottom centre in Free Drive (checked in a live page: 680-706 px vs bar 10-54 px) | fixed |
-| 33 | Free Drive snow: street-light posts look like flat glowing white bars (no lamp head) | open (screenshot QA 2026-11-20, low) | open |
-| 34 | `npm run visual`: one race case sometimes comes out near-black in a full run (rain-speed mean 0.036, grit-clear 0.021) and passes alone (3/3, 2/2) | open: flaky capture timing, not a look regression | open |
+| 33 | Free Drive snow: street-light posts look like flat glowing white bars (no lamp head) | FIXED 2026-11-21: the roofs part (posts, furniture, roof clutter) has a vertex colour, side faces 0.22 (`SIDE_SHADE` in `world/open/chunkMesh.ts`), so snow whitens only what faces up; re-shot in snow and clear | fixed |
+| 34 | `npm run visual`: one race case sometimes came out near-black in a full run | FIXED 2026-11-21 with #13 (same cause: capture before the race ran) | fixed |
 Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). All three reviews are in.
 
 ## 2026-11-19 survey
