@@ -53,5 +53,6 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'main.lowFps': 'Los fotogramas por segundo eran bajos: gráficos reducidos a {tier}. (Ajustes: Calidad automática)',
   'main.loaded': 'Cargado', 'main.badSave': 'No se pudo cargar esa partida', 'main.corrupt': 'Algunas partidas guardadas eran ilegibles y se omitieron',
   'lb.rank': 'Clasificación online: n.º {rank} de {of}', 'lb.new': 'nuevo récord', 'lb.unverified': 'tiempos sin verificar', 'lb.queued': 'Clasificación online: guardado, se enviará cuando tengas conexión', 'lb.rejected': 'Clasificación online: esta vuelta no se ha aceptado', 'lb.top': 'Top 3 online', 'lb.none': 'Aún no hay tiempos online: marca el primero',
-  'menu.freeDrive': 'Conducción libre', 'roam.respawn': 'Reaparecer', 'roam.keys': 'Neon Harbor · R reaparecer · Esc menú', 'roam.loading': 'Construyendo la ciudad… {n}/{of}',
+  'menu.freeDrive': 'Conducción libre', 'roam.respawn': 'Reaparecer', 'roam.keys': 'Neon Harbor · R reaparecer · Esc pausa', 'roam.loading': 'Construyendo la ciudad… {n}/{of}',
+  'roam.pause': 'Pausa', 'roam.travel': 'Viaje rápido', 'district.downtown': 'Centro', 'district.harbour': 'Puerto', 'district.oldtown': 'Casco Antiguo', 'district.strip': 'La Avenida', 'district.hills': 'Las Colinas', 'district.industrial': 'Zona Industrial', 'district.bay': 'La Bahía',
 };

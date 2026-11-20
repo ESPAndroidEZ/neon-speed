@@ -1,0 +1,50 @@
+// Free Drive pause menu (ui/roamPause.ts): chunks are ready when Free Drive opens, Esc pauses (car frozen), fast travel
+// moves the car to another district with the city built there, Photo downloads a PNG, Esc resumes. Needs `npm run dev`.
+// Usage: node tests/lab/roam-pause.mjs [es]  -> screenshots logs/shots/roam-pause-<lang>.png
+import { chromium } from 'playwright';
+import { mkdirSync } from 'node:fs';
+
+const BASE = process.env.BASE ?? 'http://localhost:5173';
+const lang = process.argv[2] === 'es' ? 'es' : 'en';
+const L = lang === 'es' ? { drive: 'Conducción libre', harbour: 'Puerto', photo: 'Foto' } : { drive: 'Free Drive', harbour: 'Harbour', photo: 'Photo' };
+mkdirSync('logs/shots', { recursive: true });
+let failed = 0;
+const check = (n, ok, info = '') => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}${info ? `  (${info})` : ''}`); };
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, acceptDownloads: true });
+await page.route('**/api/*.php*', (r) => r.fulfill({ json: { keys: {}, now: 1 } }));
+await page.addInitScript((l) => localStorage.setItem('rb-lang', l), lang);
+const errors = [];
+page.on('pageerror', (e) => errors.push(e.message));
+await page.goto(`${BASE}/?probe&screen=main&lang=${lang}`, { waitUntil: 'load', timeout: 90000 });
+await page.locator('button', { hasText: L.drive }).click({ timeout: 90000 });
+await page.waitForFunction(() => window.__rbGame?.state === 'FREEROAM', null, { timeout: 60000 });
+const st = () => page.evaluate(() => { const g = window.__rbGame, s = g.rm.player.car.state, c = g.d.engine.scene.getObjectByName('neon-harbor'); return { x: s.position.x, z: s.position.z, paused: g.paused, chunks: c?.children.length ?? 0 }; });
+const s0 = await st();
+check('chunks around the car are ready when Free Drive opens', s0.chunks >= 15, `${s0.chunks} chunks`);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(500);
+await page.keyboard.down('KeyW');
+await page.waitForTimeout(2000);
+const s1 = await st();
+await page.keyboard.up('KeyW');
+check('Esc pauses: menu open, car frozen', s1.paused && Math.hypot(s1.x - s0.x, s1.z - s0.z) < 0.5, `moved ${Math.hypot(s1.x - s0.x, s1.z - s0.z).toFixed(2)} m`);
+await page.waitForTimeout(1500);
+await page.screenshot({ path: `logs/shots/roam-pause-${lang}.png`, timeout: 90000 });
+const dl = page.waitForEvent('download', { timeout: 20000 }).then((d) => d.suggestedFilename(), () => '');
+await page.locator('button', { hasText: L.photo }).first().click();
+const file = await dl;
+check('Photo saves a PNG', /\.png$/.test(file), file);
+await page.locator('button', { hasText: L.harbour }).click();
+await page.waitForTimeout(1000);
+const s2 = await st();
+check('fast travel: unpaused, far away, city built there', !s2.paused && Math.hypot(s2.x - s0.x, s2.z - s0.z) > 500 && s2.chunks >= 15, `${Math.hypot(s2.x - s0.x, s2.z - s0.z).toFixed(0)} m, ${s2.chunks} chunks`);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(400);
+check('Esc again resumes', !(await st()).paused);
+check('no page errors', errors.length === 0, errors.slice(0, 2).join(' | '));
+await browser.close();
+console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
+process.exit(failed ? 1 : 0);

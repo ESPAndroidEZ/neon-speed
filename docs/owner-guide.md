@@ -15,7 +15,7 @@ A 3D arcade street racer that runs in the browser (phone and PC), English and Sp
 - **Tutorial:** four short slides after choosing the language; it says the handbrake is overpowered.
 - **Online lap boards (new, waiting for one OK):** your best lap per map, weather and car class goes to an online board (top 10, your rank, a daily-challenge board). The map screen shows the top 3, the results show "#3 of 41". Times are checked for plausibility (speed, length, checkpoints in order), not verified, and say so. Races driven offline are sent later. Beginner assists and drift maps are left out. It starts working once you OK `scripts/apply-server-schema.sh` (it adds three tables, after a backup).
 - **Own online lobby (built, not installed):** "Open rooms" list and Quick race on the Online screen; falls back to the old peer-to-peer method when our server is not there. If the host leaves, another player takes over and the race goes on. Install needs your OK (`scripts/setup-server-lobby.sh`) plus the administrator's `/ws/` proxy.
-- **Free Drive (Neon Harbor, first version, in this PC's build only):** drive your garage car around the open city from the main menu; Respawn / Menu buttons at the top. No traffic, missions or district looks yet.
+- **Free Drive (Neon Harbor, first version, in this PC's build only):** drive your garage car around the open city from the main menu; Respawn / Pause buttons at the top; the pause menu has fast travel to the six districts and a photo button. No traffic, missions or district looks yet.
 - **Feedback and support:** players can send you a message from Crew > Feedback & support, and a "Support the game" tab shows your IBAN (voluntary).
 
 ## 2. How it fits together

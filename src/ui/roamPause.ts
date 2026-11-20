@@ -1,0 +1,34 @@
+import type { DistrictId } from '../types/world';
+import { DISTRICTS } from '../types/world';
+import { t, type StringKey } from '../i18n';
+import { photoButton, type PhotoSource } from './photo';
+import { button, h } from './uiKit';
+
+export interface RoamPause { open(): void; close(): void; readonly isOpen: boolean }
+
+/** Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respawn, back to the menu. */
+export function roamPause(a: { resume: () => void; travel: (d: DistrictId) => void; respawn: () => void; exit: () => void; photo: PhotoSource }): RoamPause {
+  const root = h('div', 'rb-layer dim');
+  root.style.cssText += ';display:none;overflow:auto;z-index:30';
+  let on = false;
+  const close = (): void => { on = false; root.style.display = 'none'; };
+  const go = (fn: () => void) => () => { close(); fn(); };
+  const panel = h('section', 'rb-panel');
+  panel.style.width = 'min(480px,94vw)';
+  const places = h('div', 'rb-row');
+  places.style.cssText += ';flex-wrap:wrap;justify-content:center';
+  for (const d of DISTRICTS) {
+    if (d === 'bay') continue; // water
+    const b = button(t(`district.${d}` as StringKey), go(() => a.travel(d)));
+    b.style.cssText += ';min-width:0;padding:8px 12px;font-size:13px';
+    places.append(b);
+  }
+  panel.append(h('h3', '', t('roam.travel')), places);
+  root.append(h('h2', 'rb-title', t('pause.title')), button(t('pause.resume'), go(a.resume), 'hot'), panel, photoButton(a.photo), button(t('roam.respawn'), go(a.respawn)), button(t('common.menu'), go(a.exit)));
+  document.body.appendChild(root);
+  return {
+    open: () => { on = true; root.style.display = 'flex'; },
+    close,
+    get isOpen() { return on; },
+  };
+}

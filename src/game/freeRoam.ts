@@ -17,6 +17,8 @@ import { cellOf, chunkCount, chunkIndex } from '../world/open/chunkIndex';
 import { chunkJob, disposeChunk, roamMaterials } from '../world/open/chunkMesh';
 import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
+import { roamPause, type RoamPause } from '../ui/roamPause';
+import type { DistrictId } from '../types/world';
 
 interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; dispose(): void }
 
@@ -29,6 +31,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   const { engine, game } = d;
   let city: City | null = null;
   let ui: RoamHud | null = null;
+  let menu: RoamPause | null = null;
   let active = false;
   const hit = createRoadHit(), p = { x: 0, z: 0 };
   const env: PhysicsEnv = fillEnv({ name: 'CLEAR', grip: 1, fogDensity: 0, fogColor: 0, precipitation: 0, roadRoughness: 0, level: 'NORMAL', yawDampMul: 1, assistMul: 1, rearGripMul: 1, intensity: 1 }, 'CLEAR', 'NORMAL');
@@ -55,6 +58,34 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     car.reset(p.x, p.z, h + back);
   };
 
+  /** Build the chunks around the car before showing it (enter, fast travel): up to ~0.3 s of slices, the rest streams. */
+  const prime = (): void => {
+    if (!city) return;
+    const s = game.rm.player.car.state, cx = cellOf(city.g, s.position.x), cz = cellOf(city.g, s.position.z);
+    city.streamer.update(cx, cz); // the first update picks the wanted cells
+    for (let i = 0; i < 100 && city.streamer.pending; i++) city.streamer.update(cx, cz);
+  };
+
+  /** Fast travel: onto a road at the junction nearest the middle of the district's streets. */
+  const travel = (dist: DistrictId): void => {
+    if (!city) return;
+    const nodes = city.g.nodes.filter((n) => n.district === dist && n.edges.length > 1);
+    if (!nodes.length) return;
+    const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length, cz = nodes.reduce((a, n) => a + n.z, 0) / nodes.length;
+    const n = nodes.reduce((b, m) => (Math.hypot(m.x - cx, m.z - cz) < Math.hypot(b.x - cx, b.z - cz) ? m : b));
+    const e = city.g.edges[n.edges[0]];
+    const fromA = e.a === n.id, s = fromA ? n.radius + 6 : e.length - n.radius - 6;
+    const h = city.contact.roads.pointAt(e.id, s, 0, p);
+    game.rm.player.car.reset(p.x, p.z, fromA ? h : h + Math.PI);
+    prime();
+    game.syncView(true);
+  };
+
+  const setPaused = (on: boolean): void => {
+    game.paused = on;
+    if (on) menu?.open(); else menu?.close();
+  };
+
   const leave = (): void => {
     active = false;
     game.roam = null;
@@ -62,6 +93,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     if (city) engine.scene.remove(city.group);
     game.world.root.visible = true;
     ui?.hide();
+    menu?.close();
   };
 
   const step = (dt: number): void => {
@@ -106,14 +138,15 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       engine.scene.add(city.group);
       game.rm.player.car.reset(0, 0, 0);
       respawn();
-      for (let i = 0; i < 40 && city.streamer.pending; i++) city.streamer.update(cellOf(city.g, game.rm.player.car.state.position.x), cellOf(city.g, game.rm.player.car.state.position.z));
+      prime();
       game.roam = { step, frame };
       game.state = 'FREEROAM';
       game.paused = false;
       game.views.update(0, 0);
       game.syncView(true);
       active = true;
-      ui ??= roamHud({ respawn, exit: () => d.toMenu() });
+      ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused) });
+      menu ??= roamPause({ resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
     },
   };
