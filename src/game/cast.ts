@@ -20,7 +20,6 @@ import type { Game } from './game';
 interface Actor { rig: PersonRig; anim: Animator }
 
 export class Cast {
-  private readonly scene: Scene;
   private readonly cache = new Map<string, Actor>();
   private readonly shown = new Set<Actor>();
   private readonly crowdRoot = new Group();
@@ -33,7 +32,7 @@ export class Cast {
   scripted = false;
 
   constructor(scene: Scene) {
-    this.scene = scene;
+    this.crowdRoot.name = 'cast';
     scene.add(this.crowdRoot);
   }
 
@@ -55,14 +54,14 @@ export class Cast {
     a.rig.root.position.set(x, y, z);
     a.rig.root.rotation.y = yaw;
     if (!this.shown.has(a)) {
-      this.scene.add(a.rig.root);
+      this.crowdRoot.add(a.rig.root); // under the cast root (at the origin): free roam hides the whole cast by name
       this.shown.add(a);
     }
     return a;
   }
 
   hideAll(): void {
-    for (const a of this.shown) this.scene.remove(a.rig.root);
+    for (const a of this.shown) this.crowdRoot.remove(a.rig.root);
     this.shown.clear();
     this.gridKey = null;
     this.starterT = -1;

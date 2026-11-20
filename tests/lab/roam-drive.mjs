@@ -31,7 +31,7 @@ await page.evaluate(() => {
 const sample = () => page.evaluate(() => {
   const g = window.__rbGame, st = g.rm.player.car.state, info = g.d.engine.renderer.info;
   const city = g.d.engine.scene.getObjectByName('neon-harbor');
-  return { state: g.state, x: st.position.x, z: st.position.z, speed: st.speed, calls: window.__roam.calls, tris: window.__roam.tris, chunks: city?.children.length ?? 0, cityMeshes: city ? city.children.reduce((a, c) => a + c.children.length, 0) : 0, geos: info.memory.geometries, textures: info.memory.textures, heap: performance.memory?.usedJSHeapSize ?? 0 };
+  return { state: g.state, x: st.position.x, z: st.position.z, speed: st.speed, calls: window.__roam.calls, tris: window.__roam.tris, chunks: city ? city.children.filter((c) => c.name.startsWith('chunk')).length : 0, traffic: city?.getObjectByName('traffic')?.children[0]?.count ?? 0, cityMeshes: city ? city.children.reduce((a, c) => a + c.children.length, 0) : 0, geos: info.memory.geometries, textures: info.memory.textures, heap: performance.memory?.usedJSHeapSize ?? 0 };
 });
 const samples = [];
 let stuck = 0, respawns = 0, dist = 0, last = await sample();
@@ -60,19 +60,20 @@ check('stays in Free Drive the whole time, no page errors', samples.every((s) =>
 check('the bot covers ground (> 1 km or 2 m/s average)', dist > Math.min(1000, SECS * 2), `${(dist / 1000).toFixed(2)} km, ${respawns} respawns`);
 check(`draw calls within ${quality.toUpperCase()} budget (${BUDGET.calls})`, max('calls') <= BUDGET.calls, `max ${max('calls')}`);
 check(`triangles within ${quality.toUpperCase()} budget (${BUDGET.tris / 1e3}k)`, max('tris') <= BUDGET.tris, `max ${(max('tris') / 1e3).toFixed(0)}k`);
+check('40 traffic cars around the player', samples.every((x) => x.traffic === 40), `${samples[samples.length - 1].traffic}`);
 check('live chunks bounded (<= 49)', max('chunks') <= 49, `max ${max('chunks')}`);
-check('textures flat', end.textures <= first.textures + 2, `${first.textures} -> ${end.textures}`);
 check('heap flat (end <= first + 40 MB)', !end.heap || end.heap <= first.heap + 40e6, `${(first.heap / 1e6).toFixed(0)} -> ${(end.heap / 1e6).toFixed(0)} MB`);
 await page.locator('.rb-roam button', { hasText: 'Pause' }).click(); await page.locator('.rb-layer button', { hasText: /^Menu$/ }).click();
 await page.waitForTimeout(1500);
 check('Menu button: back to the main menu, city removed', await page.evaluate(() => window.__rbGame.state === 'MENU' && !window.__rbGame.d.engine.scene.getObjectByName('neon-harbor') && window.__rbGame.world.root.visible));
-const exitGeos = await page.evaluate(() => window.__rbGame.d.engine.renderer.info.memory.geometries);
+const [exitGeos, exitTex] = await page.evaluate(() => [window.__rbGame.d.engine.renderer.info.memory.geometries, window.__rbGame.d.engine.renderer.info.memory.textures]);
 await page.locator('button', { hasText: 'Free Drive' }).click(); // a second visit: one-time caches are filled now, a leak would grow again
 await page.waitForFunction(() => window.__rbGame?.state === 'FREEROAM', null, { timeout: 60000 });
 await page.keyboard.down('KeyW'); await page.waitForTimeout(20000); await page.keyboard.press('KeyR'); await page.waitForTimeout(5000); await page.keyboard.up('KeyW');
 await page.locator('.rb-roam button', { hasText: 'Pause' }).click(); await page.locator('.rb-layer button', { hasText: /^Menu$/ }).click();
 await page.waitForTimeout(1500);
-const exit2 = await page.evaluate(() => window.__rbGame.d.engine.renderer.info.memory.geometries);
+const [exit2, exitTex2] = await page.evaluate(() => [window.__rbGame.d.engine.renderer.info.memory.geometries, window.__rbGame.d.engine.renderer.info.memory.textures]);
+check('no texture leak per visit (2nd exit within 1 of the 1st)', exitTex2 - exitTex <= 1, `${exitTex} -> ${exitTex2}`);
 check('no geometry leak per visit (2nd exit within 5 of the 1st)', exit2 - exitGeos <= 5, `menu ${menuGeos}, after 1st visit ${exitGeos} (one-time caches), after 2nd ${exit2}`);
 await browser.close();
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');

@@ -2,6 +2,7 @@ import type { Footprint, RoadGraph } from '../types/world';
 import { SURFACES } from '../types/world';
 import type { CarController } from './carController';
 import { wallHit } from './wallHit';
+import type { RoamTraffic } from './roamTraffic';
 import { CELL, isWater } from '../data/world/districtMap';
 import { heightAt, slopeAlong } from '../world/roads/height';
 import { RoadIndex, createRoadHit } from '../world/roads/roadIndex';
@@ -27,6 +28,9 @@ export class RoamContact {
   pitch = 0;
   /** Rain 0..1: low spots of the tarmac hold water. */
   rain = 0;
+  /** City traffic: solid boxes; a car hit hard stops for a moment. */
+  traffic: RoamTraffic | null = null;
+  private hitCar = -1;
   readonly roads: RoadIndex;
   private readonly graph: RoadGraph;
   private readonly fs: readonly Footprint[];
@@ -68,14 +72,17 @@ export class RoamContact {
     st.position.y = this.groundY;
     const sh = Math.sin(st.heading), ch = Math.cos(st.heading);
     this.pen = 0;
+    this.hitCar = -1;
     for (let k = 0; k < POINTS.length; k++) {
       const cx = x + ch * POINTS[k][0] + sh * POINTS[k][1];
       const cz = z - sh * POINTS[k][0] + ch * POINTS[k][1];
       this.buildings(cx, cz);
       this.water(cx, cz);
       this.border(cx, cz);
+      this.cars(cx, cz);
     }
     if (this.pen > 0) wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this);
+    if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar);
   }
 
   private set(pen: number, nx: number, nz: number, px: number, pz: number): void {
@@ -114,6 +121,24 @@ export class RoamContact {
 
   private edgeTry(d: number, lx: number, lz: number, ux: number, uz: number): void {
     if (d < this.wb && !isWater(lx, lz)) { this.wb = d; this.wnx = ux; this.wnz = uz; }
+  }
+
+  /** Traffic cars as 1.8 m x 4.4 m boxes (same test as buildings). */
+  private cars(cx: number, cz: number): void {
+    const t = this.traffic;
+    if (!t) return;
+    for (let i = 0; i < t.agents.length; i++) {
+      const dx = cx - t.x[i], dz = cz - t.z[i];
+      if (dx * dx + dz * dz > 9) continue;
+      const fx = Math.sin(t.h[i]), fz = Math.cos(t.h[i]);
+      const lz = dx * fx + dz * fz, lx = dx * fz - dz * fx;
+      const ox = 0.9 - Math.abs(lx), oz = 2.2 - Math.abs(lz);
+      if (ox <= 0 || oz <= 0) continue;
+      const before = this.pen;
+      if (ox < oz) this.set(ox, fz * Math.sign(lx), -fx * Math.sign(lx), cx, cz);
+      else this.set(oz, fx * Math.sign(lz), fz * Math.sign(lz), cx, cz);
+      if (this.pen > before) this.hitCar = i;
+    }
   }
 
   private border(cx: number, cz: number): void {

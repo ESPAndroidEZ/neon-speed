@@ -150,7 +150,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - achievements.ts (81) One finished race as the achievements see it (plain values, so tests can build it). | fn parseAch, evaluateRace, loadAch, recordAchievements; const ACH_KEY, ACHIEVEMENTS; iface AchRace, AchState
 - blurPause.ts (16) A mouse-style pointer (desktop). Touch devices fire blur for harmless reasons, so they ... | fn shouldPauseOnBlur; iface BlurFacts
 - cashSplit.ts (12) Where a race payout came from (display only): the finishing-position prize and the shar... | fn cashSplit; iface CashSplit
-- cast.ts (156) The people in the world, all on the people contract (src/types/people) and the procedur... | class Cast
+- cast.ts (155) The people in the world, all on the people contract (src/types/people) and the procedur... | class Cast
 - coachLogic.ts (76) Driving coach: which control to hint next. Pure and allocation free; display lives in `... | fn coachUpdate; const COACH_STEPS, COACH_EXPIRE, COACH_MAX_RACES, newCoachMemory, newCoachRun; iface CoachMemory, CoachRun
 - cutscene.ts (108) Plays a cutscene (data/cutscenes*.ts) in the showroom: the camera follows the shots (co... | class CutscenePlayer; const getCutscenePlayer; iface CutsceneDeps
 - driftRecord.ts (35) Tells the player when a banked drift beats their lifetime best (display only). | class DriftRecordCue
@@ -159,7 +159,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - freeDriveSetup.ts (17) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (163) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
+- freeRoam.ts (185) Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage... | fn installFreeRoam
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -268,7 +268,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
 ## src/physics
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
-- roamContact.ts (126) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
+- roamContact.ts (151) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
+- roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
+- roamTraffic.ts (192) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
 - surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - trackContact.ts (128) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
 ## src/physics/v2
@@ -411,8 +413,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
 - chunkMesh.ts (112) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
+- pedView.ts (44) Pedestrians as one instanced mesh (one draw call): a simple figure (body, head) with a ... | class PedView
 - roamLook.ts (72) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
+- trafficView.ts (95) Body paints of the traffic cars (muted, so the player's car stands out). | class TrafficView
 ## src/world
 - partsHoods.ts (54) | const HOOD_MORE
 - partsSkirts.ts (55) | const SKIRTS_MORE
