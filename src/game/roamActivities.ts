@@ -11,6 +11,7 @@ import { meetGroup } from '../world/open/meetView';
 import type { RoamContact } from '../physics/roamContact';
 import { speedText } from './speedUnit';
 import { t } from '../i18n';
+import { CityRaceSpots, RING } from './cityRaces';
 
 /**
  * Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that follow). Built with the city,
@@ -35,6 +36,8 @@ export class RoamActivities {
   readonly meetSpot: { x: number; z: number; r: number } | null;
   private lastX = 0;
   private lastZ = 0;
+  /** City race start rings (W5.5). */
+  readonly races: CityRaceSpots;
 
   constructor(g: RoadGraph, group: Group, hud: Hud, contact: RoamContact, carName: () => string) {
     this.hud = hud;
@@ -44,7 +47,9 @@ export class RoamActivities {
     this.zones = placeDriftZones(g);
     this.run = new DriftRun(this.zones);
     const rings = zoneMesh(this.zones);
-    group.add(cams, rings);
+    this.races = new CityRaceSpots(g);
+    const starts = zoneMesh(this.races.races.map((r) => ({ x: r.x, z: r.z, r: RING })), 0xffb020);
+    group.add(cams, rings, starts);
     const meet = placeCarMeet(g, this.zones);
     this.meetSpot = meet;
     if (meet) {
@@ -54,7 +59,7 @@ export class RoamActivities {
       this.meet = new MeetWatch(meet);
       contact.parked = Float32Array.from(meet.slots.flatMap((s) => [s.x, s.z, s.h]));
     }
-    this.disposers.push(() => { for (const m of [cams, rings]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
+    this.disposers.push(() => { for (const m of [cams, rings, starts]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
   }
 
   /** After a teleport (enter, fast travel, respawn): the jump is not a pass through anything. */
@@ -62,6 +67,7 @@ export class RoamActivities {
     this.lastX = x;
     this.lastZ = z;
     this.run.cancel();
+    this.races.place(x, z);
   }
 
   step(car: CarController, dt: number): void {
@@ -69,6 +75,7 @@ export class RoamActivities {
     for (let i = 0; i < this.traps.length; i++) if (crossed(this.traps[i], this.lastX, this.lastZ, x, z)) this.caught(i, Math.abs(car.state.speed) * 3.6);
     this.lastX = x;
     this.lastZ = z;
+    this.races.step(x, z, car.state.speed);
     const ev = this.run.update(x, z, car.drift.bank + car.drift.chain);
     if (ev === 1) this.hud.popUp(t('roam.zoneIn'), '#18d8ff');
     else if (ev === 2) this.zoneDone(this.run.score);

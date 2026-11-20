@@ -36,4 +36,7 @@ export const ES_CONTENT_G: Record<string, string> = {
   'Nova does not like being paid to lose.': 'A Nova no le gusta que le paguen por perder.',
   'Brick gave his word to the union. He has never broken it.': 'Brick dio su palabra al sindicato. Nunca la ha roto.',
   'Calloway built the rail. He is starting to wonder who paid for it.': 'Calloway construyó la barandilla. Empieza a preguntarse quién la pagó.',
+  'Downtown Loop': 'Circuito del Centro', 'Harbour Loop': 'Circuito del Puerto', 'Old Town Loop': 'Circuito del Casco Viejo', 'Strip Loop': 'Circuito del Strip', 'Hills Loop': 'Circuito de las Colinas', 'Industrial Loop': 'Circuito Industrial', 'Bay Loop': 'Circuito de la Bahía',
+  'Downtown': 'Centro', 'Harbour': 'Puerto', 'Old Town': 'Casco Viejo', 'Strip': 'Strip', 'Hills': 'Colinas', 'Industrial': 'Industrial', 'Bay': 'Bahía',
+  'A street race through Neon Harbor, picked from the GPS.': 'Una carrera callejera por Neon Harbor, trazada con el GPS.',
 };

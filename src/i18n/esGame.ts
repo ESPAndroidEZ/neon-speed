@@ -59,4 +59,6 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'roam.trap': 'Radar: {v}', 'roam.trapBest': 'Radar: {v} · ¡nuevo récord!',
   'roam.zoneIn': 'Zona de derrape: ¡a ver qué sabes hacer!', 'roam.zoneOut': 'Zona de derrape: {n} puntos', 'roam.zoneBest': 'Zona de derrape: {n} puntos · ¡nuevo récord!',
   'roam.meet': 'Quedada: la peña se fija en tu {car}',
+  'city.offer': 'Carrera callejera: {name}', 'city.info': '{laps} vueltas · {km} km · {n} rivales', 'city.best': 'récord {time}', 'city.race': 'Correr', 'city.key': 'Intro',
+  'city.won': 'Has ganado el {name}', 'city.place': '{name}: has terminado P{pos}', 'city.back': 'Volver a Conducción libre',
 };

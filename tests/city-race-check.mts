@@ -68,5 +68,21 @@ check('findRoute: closed roads and junctions are avoided', tries > 10 && usedClo
 check('findRoute: empty closures give the same route', same === tries, `${same}/${tries}`);
 check('no race uses the motorway, the runway or the bridge', fast.size > 0 && races.every((r) => r.edges.length > 3 && r.edges.every((e) => !fast.has(e))), `${fast.size} fast roads closed`);
 
+// start rings stay clear of the other activities (a drift zone, a speed camera or the car meet would trigger too)
+import { placeDriftZones } from '../src/core/driftZones.ts';
+import { placeSpeedTraps } from '../src/core/speedTraps.ts';
+import { placeCarMeet } from '../src/core/carMeet.ts';
+import { RING } from '../src/game/cityRaces.ts';
+{
+  const zones = placeDriftZones(g), traps = placeSpeedTraps(g), meet = placeCarMeet(g, zones);
+  let clash = '';
+  for (const r of races) {
+    for (const z of zones) if (Math.hypot(z.x - r.x, z.z - r.z) < z.r + RING + 5) clash += ` ${r.id}~zone`;
+    for (const c of traps) if (Math.hypot(c.x - r.x, c.z - r.z) < RING + 15) clash += ` ${r.id}~camera`;
+    if (meet && Math.hypot(meet.x - r.x, meet.z - r.z) < meet.r + RING + 5) clash += ` ${r.id}~meet`;
+  }
+  check('start rings clear of drift zones, cameras and the car meet', clash === '', clash.trim());
+}
+
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

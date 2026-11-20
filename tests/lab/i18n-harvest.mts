@@ -25,6 +25,7 @@ function walk(v: unknown, out: Set<string>, key = ''): void {
 }
 
 /** Every English string in src/data that the player can read and that goes through tx(). */
+import { CITY_TEXT } from '../../src/core/cityRace.ts';
 export function harvest(): string[] {
   const out = new Set<string>();
   const list = (a: unknown): void => { for (const s of a as string[]) out.add(s); };
@@ -34,6 +35,7 @@ export function harvest(): string[] {
   for (const l of Object.values(RIVAL_RADIO_2)) list(l);
   for (const l of Object.values(BARKS)) list(l);
   list(TIPS);
+  list(CITY_TEXT);
   walk([PREVIOUSLY, CREW, CHAPTER, ENDING, EVENTS, ALL_EVENTS, EVERY_EVENT, CHAPTER_2, EPILOGUE, CHAPTER_3, EPILOGUE_3, Object.values(CUTSCENES)], out);
   for (const c of OPENING_CAPTIONS) out.add(c.text);
   for (const a of Object.values(ADVICE)) out.add(a);

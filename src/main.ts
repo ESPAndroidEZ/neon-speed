@@ -206,7 +206,7 @@ engine.onFrame(() => {
 installRotateHint(() => { if (game.state === 'RACING' && !game.paused) pause.pause(); });
 
 container.addEventListener('pointerdown', () => game.skipIntro());
-installHotkeys({ game, juice, story, pause, leaveToMenu }); wireFreeDrive({ engine, game, hud, store, toMenu: leaveToMenu, hideMenu: () => menu.hide() }); // Neon Harbor free roam
+installHotkeys({ game, juice, story, pause, leaveToMenu }); wireFreeDrive({ engine, game, hud, store, toMenu: leaveToMenu, hideMenu: () => menu.hide(), hideResults: () => results.hide() }); // Neon Harbor free roam
 hud.mount(fullscreenButton(fs, true));
 controls.onboard();
 

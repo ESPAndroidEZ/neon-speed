@@ -33,6 +33,9 @@ export const CITY_PREFIX = 'city-';
 export const isCityTrack = (id: string): boolean => id.startsWith(CITY_PREFIX);
 
 const NAMES: Record<DistrictId, string> = { downtown: 'Downtown Loop', harbour: 'Harbour Loop', oldtown: 'Old Town Loop', strip: 'Strip Loop', hills: 'Hills Loop', industrial: 'Industrial Loop', bay: 'Bay Loop' };
+const BLURB = 'A street race through Neon Harbor, picked from the GPS.';
+/** Every player-visible text of the city maps (tests/lab/i18n-harvest.mts checks the Spanish). */
+export const CITY_TEXT: readonly string[] = [...Object.values(NAMES), ...Object.values(NAMES).map((n) => n.replace(' Loop', '')), BLURB];
 const FAST: ReadonlySet<string> = new Set(['highway', 'runway', 'bridge']); // no races over the motorway or the airport
 const LAPS = 2;
 const MIN_LEN = 1000, MAX_LEN = 2800;
@@ -116,7 +119,7 @@ function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[]
   for (let i = 0; i < vs.length; i++) { const b = vs[(i + 1) % vs.length], l = Math.hypot(b.x - vs[i].x, b.z - vs[i].z); if (l > bl) { bl = l; best = i; } }
   const a = vs[best], b = vs[(best + 1) % vs.length];
   const def: TrackDef = {
-    id, name: NAMES[district], district: NAMES[district].replace(' Loop', ''), blurb: 'A street race through Neon Harbor, picked from the GPS.',
+    id, name: NAMES[district], district: NAMES[district].replace(' Loop', ''), blurb: BLURB,
     theme: district === 'harbour' || district === 'industrial' ? 'port' : 'city', type: 'circuit', vertices: vs,
     start: [a.x + (b.x - a.x) * 0.7, a.z + (b.z - a.z) * 0.7], laps: LAPS, propsDensity: 0.6, defaultWeather: 'CLEAR', recommendedWeather: ['CLEAR', 'RAIN'],
   };

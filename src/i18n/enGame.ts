@@ -57,4 +57,6 @@ export const EN_GAME = {
   'roam.trap': 'Speed trap: {v}', 'roam.trapBest': 'Speed trap: {v} · new best!',
   'roam.zoneIn': 'Drift zone: show what you have!', 'roam.zoneOut': 'Drift zone: {n} points', 'roam.zoneBest': 'Drift zone: {n} points · new best!',
   'roam.meet': 'Car meet: the crew checks out your {car}',
+  'city.offer': 'Street race: {name}', 'city.info': '{laps} laps · {km} km · {n} rivals', 'city.best': 'best {time}', 'city.race': 'Race', 'city.key': 'Enter',
+  'city.won': 'You won the {name}', 'city.place': '{name}: you finished P{pos}', 'city.back': 'Back to Free Drive',
 } as const;
