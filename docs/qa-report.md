@@ -35,6 +35,10 @@ Screenshots: `logs/qa/{menus,race,phone}/` (subagent captures, max 1280 px, Swif
 | 28 | ES results: prize "+ $3,000" (English format; same family as #27) | `ui/results` (toLocaleString without locale) | open | open |
 | 29 | Online room (ES): ~60 px empty gap in the track picker after "Cliffside Run" (a blank or wrapped button) | `ui/onlineMenu` pick row | open | open |
 | 30 | A pedestrian and a parked car right beside the start line (seen in an online race start, ES and EN) | `world/` people / props layout | open | open |
+| 31 | Free Drive Hills: the ground poked through the road and sidewalk wedges lay over junctions (screenshot QA, all weathers) | FIXED 2026-11-20: `world/open/groundCarve.ts` + 8 m ground grid + sidewalks stop short of junctions; `tests/ground-carve-check.mts` 12397 -> 0 covered samples; re-shot | fixed |
+| 32 | Free Drive: "Now playing" covered the top bar (Pause, key hint) | FIXED 2026-11-20: shown at the bottom centre in Free Drive (checked in a live page: 680-706 px vs bar 10-54 px) | fixed |
+| 33 | Free Drive snow: street-light posts look like flat glowing white bars (no lamp head) | open (screenshot QA 2026-11-20, low) | open |
+| 34 | `npm run visual`: one race case sometimes comes out near-black in a full run (rain-speed mean 0.036, grit-clear 0.021) and passes alone (3/3, 2/2) | open: flaky capture timing, not a look regression | open |
 Race luminance and clipping all inside the bands (mean 0.12-0.39, clipped <= 0.68 %). All three reviews are in.
 
 ## 2026-11-19 survey

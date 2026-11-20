@@ -77,6 +77,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 - Visual look bugs: bright HDR emissive (multiplier > 2) on long meshes washes out through bloom; keep strips near 1.2-1.6.
 - Labs that `import()` source files inside the dev page: Vite adds `?t=<edit time>` to imports of files edited after the server started, so a bare `/src/x.ts` import can be a SECOND module instance (separate globals such as `MUSIC_SOURCE`). Import the URL from `performance.getEntriesByType('resource')` (see `tests/lab/music-join.mjs`).
 - `npm run visual` needs `LD_LIBRARY_PATH` set like the labs (else Chromium fails with libnspr4.so). `rain-speed` failed once in a full run (mean 0.036) and passed 3 of 3 alone: treat a single dark result as flaky, rerun with `--only <case>`.
+- Labs: the graphics tier is `settings.quality` (+ `autoQuality: false`) in the save `racers-blood-save-v1`; a key `rb-quality` does nothing. Free Drive ground height = `groundAt(g, x, z)` (`world/open/groundCarve.ts`), NOT `heightAt`, wherever something must sit on the visible ground near roads. Bench: `node tests/lab/roam-bench.mjs [low|high|both]`.
 - `tests/save-roundtrip.mts` guards the rule "a restored race runs identically": new per-race state must be in the snapshot.
 
 ## 8. Open work (see handoff for the live list)

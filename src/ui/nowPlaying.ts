@@ -19,6 +19,9 @@ function show(name: string): void {
       + 'border-radius:999px;background:#0a0f1ccc;border:1px solid #18d8ff55;color:#cfefff;font:600 12px/1.3 system-ui,sans-serif;'
       + 'letter-spacing:.03em;white-space:nowrap;pointer-events:none;z-index:55;opacity:0;transition:opacity .5s ease';
     document.body.appendChild(el);
+    const css = document.createElement('style'); // Free Drive: the top centre holds the bar and the race offer
+    css.textContent = 'body.rb-roaming .rb-np{top:auto!important;bottom:max(14px,env(safe-area-inset-bottom))}';
+    document.head.appendChild(css);
   }
   el.textContent = t('set.nowPlayingLine', { song: name });
   el.style.opacity = '1';

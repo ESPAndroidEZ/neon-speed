@@ -76,6 +76,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - Free Drive was driven only by a bot in a software-rendered browser on this PC (frame rate there is low); never on a phone or a real GPU. Performance on phones is unknown.
 - The automatic picture check found the "Neon Night" look less colourful than its target in one race view (was fixed on 19 November, came back with an earlier update, not today's work); logged as QA #13.
 - City races were tested by a bot in a software browser on this PC (one full race on the Downtown Loop); never by a person, on a phone or a real GPU. The race map is a street map built from the loop, not the Free Drive city itself, so the buildings look like the race maps, not like Neon Harbor's districts.
+- Free Drive was checked with screenshots in all 6 districts and 3 weathers on this PC's software graphics; the street lights in snow still look like plain white bars (small, open).
 - Qwen tasks 063-067 are written but not run (the Qwen server was not running). Start it with `scripts/start-qwen.sh`, then `scripts/qwen-queue.sh 063 064 065 066 067`.
 - Story input needed: city missions (story jobs in Free Drive) wait for your ideas; the story is yours (docs/story.md).
 - Decision needed: jumps in the city. The car physics is flat (2D), so a jump needs either a small vertical model or a faked airtime animation. Tell me which you prefer.

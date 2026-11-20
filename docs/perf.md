@@ -69,6 +69,33 @@ Code 408 KB gzip (budget 700), audio 2.6 MB (48 engine WAV loops), models 2.4 MB
 ~5.6 MB (budget 12 MB). Live first load: 0.3-1.3 s to the load event and 1.3 MB transferred including a race start
 (engine loops and models stream in later). Release builds only request the GLBs they ship (`core/modelList`).
 
+
+## Free Drive (Neon Harbor) bench, 2026-11-20 (`tests/lab/roam-bench.mjs`)
+Every district with streets x 3 weathers, standing at the district's middle and looking four ways (worst of the four). Main-scene draw calls and triangles; frame times are SwiftShader (software) and RELATIVE only. LOW after the hill-ground fix (8 m ground grid):
+
+| District | Weather | Draw calls | Triangles | Frame avg / p95 (ms, SwiftShader) |
+|---|---|---|---|---|
+| downtown | CLEAR | 144 | 32k | 51.5 / 83.3 |
+| downtown | RAIN | 146 | 47k | 77.7 / 150 |
+| downtown | SNOW | 145 | 41k | 76.8 / 116.7 |
+| harbour | CLEAR | 133 | 33k | 39.6 / 83.3 |
+| harbour | RAIN | 135 | 47k | 67.7 / 166.6 |
+| harbour | SNOW | 134 | 42k | 73.7 / 100.1 |
+| oldtown | CLEAR | 146 | 34k | 47.3 / 83.3 |
+| oldtown | RAIN | 148 | 49k | 73.3 / 116.7 |
+| oldtown | SNOW | 147 | 43k | 77.1 / 100 |
+| strip | CLEAR | 147 | 32k | 49.3 / 83.4 |
+| strip | RAIN | 149 | 46k | 77.7 / 150 |
+| strip | SNOW | 148 | 41k | 85.2 / 150.1 |
+| hills | CLEAR | 127 | 32k | 39.8 / 83.3 |
+| hills | RAIN | 129 | 46k | 69.9 / 149.9 |
+| hills | SNOW | 128 | 41k | 70.2 / 116.7 |
+| industrial | CLEAR | 130 | 31k | 39 / 66.7 |
+| industrial | RAIN | 132 | 45k | 69.7 / 100 |
+| industrial | SNOW | 131 | 40k | 71.2 / 100.1 |
+
+HIGH (same run before the ground fix, tier verified through the save): worst 154 draw calls (oldtown RAIN), 57k triangles (strip RAIN); budgets LOW 250 / 600k, HIGH 500 / 1.5M: ALL PASS. The city geometry does not change with the tier (shared materials); HIGH costs more per pixel. Standing still; while driving `roam-drive.mjs` has seen up to ~217 calls (traffic and people near the car). Rain and snow frames cost about 1.5-2x clear (fill), as in the races.
+
 ## Open
 - Real-device numbers: the 60 fps on Low target needs a phone (SwiftShader cannot show it).
 - Rain/snow on Low cost ~1.8x clear in SwiftShader with the same draw calls: fill (wet road, puddles, streaks). Profile
