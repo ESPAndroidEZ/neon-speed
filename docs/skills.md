@@ -2,7 +2,7 @@
 
 Doc map: `docs/README.md`. The owner's plain-language guide is `docs/owner-guide.md`, the dated list of changes `docs/changelog.md`, the server/online plan `docs/roadmap-online.md`, a ready next-job prompt `docs/prompts/server-to-code.md`. After EVERY change update all affected docs (see CLAUDE.md DOCS RULE); end sessions with /checkpoint.
 
-For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `docs/code-map.md` (one line per file; regenerate with `npm run map`). Open a source file only after grep / the map told you which one. Updated 2026-11-19.
+For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `docs/code-map.md` (one line per file; regenerate with `npm run map`). Open a source file only after grep / the map told you which one. Updated 2026-11-20 (lap boards, own lobby, Neon Harbor Free Drive).
 
 ## 1. Mental model (5 lines)
 - `src/main.ts` wires everything. `game/game.ts` (Game) owns the state machine MENU / CINEMATIC / RACING / PODIUM and the fixed 1/60 s loop; `core/raceManager.ts` runs racers; `physics/carController.ts` steps one car (legacy model in `physics/legacy`, v2 in `physics/v2`, both call `physics/drivetrain.ts`).

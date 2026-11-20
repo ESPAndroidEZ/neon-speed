@@ -15,14 +15,14 @@ Work through `docs/master-plan.md` top to bottom: W4 music (done), W1 server set
 1. `docs/master-plan.md` (status of every item, evidence, what is blocked and by whom)
 2. `docs/handoff.md`: only the sections "Next" and "Done" (use Grep or a line range; its lines are long)
 3. `docs/skills.md` (where things live, server facts, gotchas)
-4. For W3: `docs/roadmap-online.md` and `docs/admin-request.md`. For W5: `docs/open-world.md`. For server work: `server/README.md`.
+4. For W3: `docs/roadmap-online.md`, `docs/online-protocol.md` and `docs/admin-request.md`. For W5: `docs/open-world.md`. For server work: `server/README.md`.
 Find code with `docs/code-map.md` and Grep; open a source file only with a line range. Skip `owner-guide.md` and `changelog.md` when reading (you only write to them).
 
 ## Definition of done for a block
 - `npm run build:q` OK and `npm run test:q` with `grep -c "^FAIL" logs/last-test.txt` = 0; `npm run visual:q` when lights, fog, bloom or the world change.
 - A new test proves the block's "Done when" from the master plan (unit test in `tests/*.mts`, or a lab in `tests/lab/` when it needs a browser or the server).
 - Docs in the SAME step: master-plan.md (status + evidence), handoff.md (Done entry + ONE Log line), skills.md (new files, gotchas), owner-guide.md (sections 1, 5, 6), changelog.md (plain language), roadmap-online.md / story.md / qa-report.md / server/README.md where relevant, `npm run map`, memory notes when a fact about the owner, the server or the workflow changed (and correct memory that turned out wrong).
-- Commit and push (git identity is set; end messages with the Co-Authored-By line). After each workstream: /checkpoint.
+- Commit and push after EVERY substep (a pure module + its test is one commit, the wiring + lab the next; owner 2026-11-20). Git identity is set; end messages with the Co-Authored-By line. After each workstream: /checkpoint.
 
 ## Code rules (the build enforces some)
 - Every .ts file under 220 lines; main.ts, game/game.ts, core/raceManager.ts, ui/menu.ts are full: put new code in new modules and wire it with one line.
@@ -52,7 +52,7 @@ Never type the owner's email address in a command, file or commit (a guard block
 Do not claim anything works unless you ran it, and say how (test name, numbers). Separate clearly: verified, built but not installed or deployed, and untested (for example "not heard by ear", "not tried on a real phone").
 
 ## Context budget
-Delegate broad searches, bot playtests and screenshot reviews to subagents so only conclusions return. Use quiet wrappers and `grep -c` on logs. When context is over about 60 %: finish the current block, /checkpoint, and stop.
+Delegate broad searches, bot playtests and screenshot reviews to subagents so only conclusions return. Use quiet wrappers and `grep -c` on logs. Do not stop on a guessed context limit (the window is 1M tokens): check /context; around 85 % finish the block, /checkpoint and stop.
 
 ## End of session: reply in this shape (max ~20 lines)
 1. Done (with the test that proves each item)
