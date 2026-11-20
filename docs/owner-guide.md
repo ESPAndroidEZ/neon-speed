@@ -1,6 +1,6 @@
 # Neon Speed: owner's guide
 
-For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20, evening). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
+For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20, after W4 music). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
 
 ## 1. What the game is today
 A 3D arcade street racer that runs in the browser (phone and PC), English and Spanish.

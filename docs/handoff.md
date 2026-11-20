@@ -6,7 +6,7 @@ Baton: claude
 Updated: 2026-11-20 (W4 music done; next W1 server settings).
 
 ## Next
-0. START HERE: `docs/master-plan.md` (W4 music, W1 server settings, W2 leaderboards, W3 lobby, W5 open world); the owner pastes `docs/prompts/everything.md` into a new session.
+0. START HERE: `docs/master-plan.md`. W4 music DONE (2026-11-20, committed, NOT deployed); next W1 server settings (W1.2 backups first; server changes need the owner's OK).
 1. OWNER: `FEEDBACK_EMAIL=<address> scripts/set-feedback-email.sh`, then deploy with `scripts/deploy-server.sh` (the live site is behind: its client lacks the incremental sync, feedback form, Chapter 3 and the cutscenes; the live API is already the new version). Everything up to commit 2f4ecf0 is pushed.
 2. Playtest on real phones; record engine sounds (owner offered: audio-inbox/<car>/, see docs/skills.md); balance of Chapter 3 races untested; qa-report open rows (#10, #18, #23, #24, #26).
 3. Fun plan: knockout mode; Neon Harbor block 1b (docs/open-world.md).
