@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-20
+- **The website is up to date again** (2026-11-20): Chapter 3, cinematics, the feedback form, the new music and the health page are live. A quick check page (`/api/health.php`) shows the database, disk space and the age of the last backup.
 - **Backups are running.** The server now saves the game database every night (14 days kept) and the first backup was restored into a test copy that matched exactly. Our database log is rotated weekly.
 - **Online lap boards (ready, one OK needed).** Your best lap per map, weather and car class can go to an online board: the map screen shows the top 3, the results say "#3 of 41", and the daily challenge has its own board. Fake times (too fast, teleports, wrong way round) are refused; the boards say "unverified times" because nobody checks by hand. Laps driven offline are sent later. To switch it on, OK the command `scripts/apply-server-schema.sh` (it makes a backup first, then adds three tables).
 - **Better start prompt (version 2)** in `docs/prompts/everything.md`: has an APPROVALS line (say up front what server changes are OK), keeps working when an item is waiting for someone, reads less, and ends every session with the same short report.

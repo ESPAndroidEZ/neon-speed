@@ -66,7 +66,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - Never played on a real iPhone or Android phone by anyone but you and friends: landscape lock, tilt, the button editor and long-press behaviour are only tested in an emulator.
 - The engine sound changes (less shrill) were never heard.
 - The new Chapter 3 races have not been balanced (are they winnable with your starting cars?).
-- The live website is behind the code: it does not have the feedback form, Chapter 3, cinematics or incremental sync until the next deploy.
+- The live website was updated on 2026-11-20 (version ab3824f): feedback form, Chapter 3, cinematics, new music and the lap boards (boards answer "not ready" until the tables are added). The feedback email address is still not set: messages are kept in the database.
 - Real-device performance of the Auto graphics setting.
 - The online lap boards were tested with real AI laps on the server's PHP and with a fake server in the browser, but NOT yet against the real database (the tables need your OK: `scripts/apply-server-schema.sh`, then `node tests/lab/scores-curl.mjs`). Nobody has submitted a real human lap yet.
 - Spanish results screen shows money as "+ $3,000" (English style); the map screen uses "2.500 $". Small, not fixed yet.
