@@ -72,9 +72,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - raceSnapshot.ts (57) JSON-safe snapshot of the whole race: timers, every racer's car, lap counter, AI state. | fn snapshotRace, restoreRace; iface RaceData
 - rewards.ts (98) Racer fields the rewards read (structural, so tests can pass plain objects). | class RaceRewards; const REWARD; iface RewardRacer, RewardData; type RewardKind
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
+- roamSaveParse.ts (33) The Free Drive part of a save (`SaveData.roam`, contract `RoamSave` in types/world.ts),... | fn parseRoam; const emptyRoam
 - route.ts (88) GPS for Neon Harbor: the quickest way over the road graph (A*, cost = length / speed li... | fn nearestNode, findRoute; iface Route
-- save.ts (186) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
-- saveParse.ts (96) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- save.ts (189) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
+- saveParse.ts (99) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
 - speedTraps.ts (32) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; iface SpeedTrap
 - styleCombo.ts (76) What the combo saves (part of the reward snapshot). | class StyleCombo; const COMBO; iface ComboData
@@ -163,7 +164,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - freeDriveSetup.ts (17) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (41) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (200) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
+- freeRoam.ts (204) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -187,7 +188,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
-- roamActivities.ts (92) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamActivities.ts (95) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamProgress.ts (65) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - saveGame.ts (67) Can this moment be saved? Only a race in progress (countdown or racing) that was set up... | fn canSave, captureGame, restoreGame
 - showroomCam.ts (44) Slow orbit around the car for the menu and garage. The car's screen position comes from... | class ShowroomCam
 - speedUnit.ts (53) Speed display unit (km/h or mph). Display only: physics stays in m/s. Own localStorage ... | fn parseUnit, getUnit, setUnit, loadUnit, toUnit, unitLabel, speedText; const UNITS_KEY; type SpeedUnit
