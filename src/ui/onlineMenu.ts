@@ -5,6 +5,7 @@ import { t } from '../i18n';
 import { cleanCode, cleanName, MAX_PLAYERS } from '../net/protocol';
 import { tx, type StringKey } from '../i18n';
 import { button, h } from './uiKit';
+import { roomList } from './roomList';
 
 const WEATHERS = ['CLEAR', 'RAIN', 'SNOW'] as const;
 
@@ -42,7 +43,7 @@ export function buildOnlineMenu(o: Online, onBack: () => void): HTMLElement {
       const row = (label: string, ...els: HTMLElement[]) => { const r = h('div', 'rb-row', `<span class="rb-lbl">${label}</span>`); r.append(...els); return r; };
       panel.append(row(t('on.name'), name), h('div', 'rb-sub', t('on.yourCar', { car: findCar(me.car).name })), create, row(t('on.code'), codeIn, join));
       if (L.busy) panel.append(h('div', 'rb-sub', t('on.connecting')));
-      root.append(panel);
+      root.append(panel, roomList(L, player)); // open rooms on our lobby server (hidden when it is not reachable)
       if (err) root.append(err);
       root.append(h('div', 'rb-hint', t('on.how')), button(t('common.back'), onBack));
       codeIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') join.click(); });

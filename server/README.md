@@ -21,6 +21,7 @@ FastAPI exporter on 127.0.0.1:8000, it also receives every non-`.php` request un
 | `/etc/systemd/system/neonspeed-backup.{service,timer}` | backup at 03:30 (+0-15 min), catches up after downtime | root | same (`server/systemd/`) |
 | `/var/backups/neonspeed/*.sql.gz` | 14 days of dumps | root 0600 | created nightly |
 | `/var/backups/neonspeed-last.txt` | time, size, file of the last backup (read by health.php) | root 0644 | created nightly |
+| `/opt/neonspeed-lobby/{lobby,rooms,wsproto}.py`, `/etc/systemd/system/neonspeed-lobby.service` | online lobby on 127.0.0.1:8770 (NOT installed yet; DynamicUser, MemoryMax 128M, stores nothing) | root 0644 | `scripts/setup-server-lobby.sh` (owner OK; sources `server/lobby/`, `server/systemd/`) |
 | `/etc/logrotate.d/neonspeed-mysql` | weekly rotation of our MySQL error log, 8 weeks | root | same (`server/logrotate/`) |
 
 ## Rebuild from nothing

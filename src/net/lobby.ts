@@ -1,4 +1,4 @@
-import { PeerLink } from './peerLink';
+import { createLink } from './makeLink';
 import { makeRoomCode, MAX_PLAYERS, type NetMsg, type NetPlayer, type NetState, type RoomSettings } from './protocol';
 
 export type LobbyError = '' | 'noRoom' | 'full' | 'racing' | 'hostLeft' | 'net';
@@ -8,7 +8,7 @@ export type LobbyError = '' | 'noRoom' | 'full' | 'racing' | 'hostLeft' | 'net';
  * message, and its "start" puts everyone on the same grid; it says "go" once all players loaded (or after 15 s).
  */
 export class Lobby {
-  readonly link = new PeerLink();
+  readonly link = createLink();
   role: 'none' | 'host' | 'guest' = 'none';
   code = '';
   me: NetPlayer = { id: '', name: '', car: '', paint: 0 };
@@ -48,12 +48,13 @@ export class Lobby {
     return this.role !== 'none';
   }
 
-  async create(me: NetPlayer): Promise<void> {
+  /** pub: listed in the lobby server's public room list (quick join). */
+  async create(me: NetPlayer, pub = false): Promise<void> {
     await this.run(async () => {
       for (let tries = 0; tries < 4; tries++) {
         this.code = makeRoomCode();
         try {
-          await this.link.host(this.code);
+          await this.link.host(this.code, pub);
           break;
         } catch (e) {
           this.link.close();
@@ -87,7 +88,7 @@ export class Lobby {
       this.link.close();
       this.role = 'none';
       const type = (e as { type?: string }).type;
-      this.error = type === 'peer-unavailable' ? 'noRoom' : 'net';
+      this.error = type === 'peer-unavailable' ? 'noRoom' : type === 'full' ? 'full' : type === 'racing' ? 'racing' : 'net';
       this.errorText = (e as Error).message ?? '';
     }
     this.busy = false;

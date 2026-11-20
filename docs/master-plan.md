@@ -1,6 +1,6 @@
 # Master plan (living file)
 
-The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4 DONE; W1 housekeeping installed; W2 built, schema waits for the owner's OK).
+The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4 DONE; W1 housekeeping installed; W2 built, schema waits for the owner's OK; W3 lobby built, browser lab has one open issue).
 
 Status values: TODO, DOING, BLOCKED (waiting for the owner or the server administrator), DONE (verified, with the evidence in the changelog).
 
@@ -45,9 +45,9 @@ Before (2026-11-20): deep-house songs rotated every 48 bars in a FIXED order wit
 ## W3. Online customer lobby (own server) 
 | # | Item | Status | Done when |
 |---|---|---|---|
-| W3.1 | Protocol document (`docs/online-protocol.md`): rooms, join, ready, start, relay, results, errors; versioned | TODO | reviewed by the owner |
-| W3.2 | Python asyncio WebSocket service `server/lobby/` (127.0.0.1:8770 behind `/ws/`; 8000 is taken by the administrator's infra-metrics; systemd unit, memory limit, rate limits, room list, relay, finish list with server receipt times) | TODO | local tests with a fake client |
-| W3.3 | Client transport `net/serverLink.ts` beside PeerJS (PeerJS stays as the fallback); lobby screen with a public room list and quick join | TODO | protocol test with a fake server; screenshots |
+| W3.1 | Protocol document (`docs/online-protocol.md`): rooms, join, ready, start, relay, results, errors; versioned | DOING (waiting for the owner's review) - `docs/online-protocol.md` v1 written: switchboard, messages, errors, limits, versioning | reviewed by the owner |
+| W3.2 | Python asyncio WebSocket service `server/lobby/` (127.0.0.1:8770 behind `/ws/`; 8000 is taken by the administrator's infra-metrics; systemd unit, memory limit, rate limits, room list, relay, finish list with server receipt times) | DOING - built `server/lobby/` (Python 3.12 standard library only, no packages: `wsproto.py` RFC 6455, `rooms.py` rules, `lobby.py` service; limits 400 conns / 200 rooms / 20 per address / 60 msg/s / 4 KB; pings every 25 s; finish receipt times), `server/systemd/neonspeed-lobby.service` (DynamicUser, MemoryMax 128M), installer `scripts/setup-server-lobby.sh` (owner OK). Evidence: `server/lobby/test_lobby.py` ALL PASS locally and on the server's Python (piped, temporary loopback port); port 8770 is free (read-only `ss`) | local tests with a fake client |
+| W3.3 | Client transport `net/serverLink.ts` beside PeerJS (PeerJS stays as the fallback); lobby screen with a public room list and quick join | DOING - built `net/serverLink.ts` (same interface as PeerLink), `net/hybridLink.ts` (server first, PeerJS fallback, 60 s skip after a failure), `net/makeLink.ts`, Lobby uses it; `ui/roomList.ts` (Open rooms + Quick race, EN/ES). Evidence: `tests/server-link-check.mts` ALL PASS against the real Python lobby. OPEN: `tests/lab/lobby-browser.mjs` - Quick race, join, start for both PASS, but in the 2nd page the room list appears only after ~90 s (investigating: game start-up timing; debug probes still in the lab) | protocol test with a fake server; screenshots |
 | W3.4 | Administrator adds the nginx WebSocket lines; we install and start the service (owner approves) | BLOCKED (administrator + owner) | two phones on different mobile networks race through the server |
 | W3.5 | Optional TURN (`coturn`) for strict networks | TODO (needs approval) | connection test from a strict network |
 

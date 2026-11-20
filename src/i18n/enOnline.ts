@@ -10,4 +10,5 @@ export const EN_ONLINE = {
   'on.leave': 'Leave room', 'on.lobby': 'Back to the room', 'on.result': 'Online race', 'on.waitGrid': 'Waiting for all players…',
   'on.err.noRoom': 'No room with that code.', 'on.err.full': 'That room is full.', 'on.err.racing': 'A race is running in that room.',
   'on.err.hostLeft': 'The host left the room.', 'on.err.net': 'Connection problem. Check your internet and try again. {msg}',
+  'on.open': 'Open rooms', 'on.quick': 'Quick race', 'on.quickHow': 'Quick race joins the newest open room.', 'on.noRooms': 'No open rooms right now. Quick race opens one that anyone can join.', 'on.refresh': 'Refresh',
 } as const;

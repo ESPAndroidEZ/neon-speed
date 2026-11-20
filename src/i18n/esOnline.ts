@@ -12,4 +12,5 @@ export const ES_ONLINE: Record<keyof typeof EN_ONLINE, string> = {
   'on.leave': 'Salir de la sala', 'on.lobby': 'Volver a la sala', 'on.result': 'Carrera online', 'on.waitGrid': 'Esperando a todos los jugadores…',
   'on.err.noRoom': 'No hay ninguna sala con ese código.', 'on.err.full': 'Esa sala está llena.', 'on.err.racing': 'Hay una carrera en curso en esa sala.',
   'on.err.hostLeft': 'El anfitrión ha salido de la sala.', 'on.err.net': 'Problema de conexión. Revisa tu internet e inténtalo de nuevo. {msg}',
+  'on.open': 'Salas abiertas', 'on.quick': 'Carrera rápida', 'on.quickHow': 'Carrera rápida te une a la sala abierta más reciente.', 'on.noRooms': 'Ahora no hay salas abiertas. Carrera rápida abre una a la que cualquiera puede unirse.', 'on.refresh': 'Actualizar',
 };

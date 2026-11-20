@@ -197,7 +197,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enGame.ts (54) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
-- enOnline.ts (13) Online races: English UI strings. | const EN_ONLINE
+- enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - es.ts (17) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
 - esContent.ts (15) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
@@ -213,7 +213,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esGame.ts (56) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
-- esOnline.ts (15) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
+- esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
 - langPrefs.ts (27) The slice of the save store the language needs (no dependency on core/save). | fn initLang, chooseLang
 ## src/input
@@ -232,11 +232,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src
 - main.ts (218) Bootstrap: engine, world, UI, save, audio, story, then the menu. Dev query flags: ?skip...
 ## src/net
-- lobby.ts (199) Online room: who is in it, the host's race settings and the start handshake. The host i... | class Lobby; type LobbyError
+- hybridLink.ts (127) How long to skip the lobby server after it failed to answer (s): no 4-second wait on ev... | fn lobbyUrl; class HybridLink
+- lobby.ts (200) Online room: who is in it, the host's race settings and the start handshake. The host i... | class Lobby; type LobbyError
+- makeLink.ts (13) The game's transport: own lobby server (when there is one for this page) with PeerJS as... | fn createLink
 - netAgent.ts (71) Extra look-ahead for the one-way network delay (s). | class NetAgent
 - netGrid.ts (14) Same grid on every screen: slot = position in the host's roster (the local grid always ... | fn placeGrid
 - peerLink.ts (84) WebRTC transport (PeerJS: free public broker for the handshake, then direct peer-to-pee... | class PeerLink
 - protocol.ts (69) Online race messages (JSON over WebRTC data channels, star around the host). Pure types... | fn makeRoomCode, isMsg; const MAX_PLAYERS, ROOM_PREFIX, SEND_HZ, cleanCode, cleanName; iface NetPlayer, RoomSettings, NetState; type NetMsg
+- serverLink.ts (188) What `Lobby` needs from a transport. PeerLink (WebRTC), ServerLink (own lobby server) a... | class ServerLink; const PROTOCOL_VERSION; iface NetLink, RoomInfo, WsLike
 ## src/physics
 - aiDifficulty.ts (59) AI difficulty levels and personalities. Pure data: the AI reads these, nothing else cha... | const DIFFICULTIES, AI_SETTING, RUBBER_MAX, LEVELS, STYLES; iface Level, Style; type Difficulty, DriveStyle
 - aiLine.ts (108) The racing line of a track: lateral offsets from the centre line, line points, and the ... | fn racingLine, speedProfile; const marginFor; iface RacingLine, SpeedLimits
@@ -323,12 +326,13 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
 - nowPlaying.ts (34) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
-- onlineMenu.ts (96) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
+- onlineMenu.ts (97) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
 - pauseMenu.ts (108) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
 - playerCode.ts (30) Settings rows for server saving: the player code (copy it, or type another to load that... | fn playerCodeRows
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
+- roomList.ts (52) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
 - settings.ts (205) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
