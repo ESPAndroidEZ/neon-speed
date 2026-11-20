@@ -1,3 +1,4 @@
+import type { RoamSave } from '../types/world';
 import { setLoadout as setLiveLoadout } from '../world/loadoutStore';
 import { setBuild } from '../data/carBuild';
 import { defaultSetup, type Setup } from '../data/setup';
@@ -40,6 +41,8 @@ export interface SaveData {
   career: CareerState;
   /** Ids of the last races already paid out (a restored save of a finished race pays nothing twice). */
   paid?: string[];
+  /** Free Drive progress (Neon Harbor): position, records, visited places. Absent until the first Free Drive. */
+  roam?: RoamSave;
 }
 
 /** Minimal storage shape so tests can pass an in-memory object. localStorage satisfies it. */
