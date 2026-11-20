@@ -29,19 +29,19 @@ Before Redis, try PHP APCu (an in-process cache, no extra service).
 **A. Housekeeping (small, do first)**
 - A1 DONE 2026-11-20 (installed, restore test PASSED). Automatic daily MySQL backup (`mysqldump | gzip`, keep 14 days, in `/var/backups/neonspeed`), plus a documented restore test.
 - A2. Ask the server's owner to remove the stale firewall rules for 3306, 4567, 4568, 4444 (old Galera cluster).
-- A3. Deploy the current version (`scripts/deploy-server.sh`) and set the feedback recipient (`scripts/set-feedback-email.sh`).
+- A3. DONE 2026-11-21 for the deploy (live 2a6611b); the feedback recipient still waits for the owner. Deploy the current version (`scripts/deploy-server.sh`) and set the feedback recipient (`scripts/set-feedback-email.sh`).
 - Done when: a backup file exists and a restore into a scratch database works; site shows the feedback form.
 
 **B. Real client address for rate limits (NO nginx change needed, checked 2026-11-20)**
 - nginx passes the real `$remote_addr` to PHP over FastCGI; the single address seen so far was the office network 87.233.x.x, which all testers used. The limits are already per client address. Remaining: one test from a phone on mobile data.
 - Done when: two different phones get different `ip_hash` values in the `feedback` table.
 
-**C. Leaderboards (MySQL first, no Redis)** - BUILT 2026-11-20 (see master-plan W2): board = map + weather-physics level + car tier (and `daily:<day>:...`), best lap with its 10 Hz ghost, checked in `server/api/scores-lib.php`; tables wait for the owner's OK (`scripts/apply-server-schema.sh`). Original sketch:
+**C. Leaderboards (MySQL first, no Redis)** - LIVE 2026-11-21 (tables applied after a backup + restore test; the API answers; first real scores come from players) - BUILT 2026-11-20 (see master-plan W2): board = map + weather-physics level + car tier (and `daily:<day>:...`), best lap with its 10 Hz ghost, checked in `server/api/scores-lib.php`; tables wait for the owner's OK (`scripts/apply-server-schema.sh`). Original sketch:
 - Table `scores(track, weather, car, player_id, time_ms, created, ghost_id)` with indexes on (track, weather, car, time_ms); `api/scores.php` (POST a result, GET top 10 + my rank); show it on the results screen and track select.
 - Trust: store the ghost (position samples) with each score and validate on the server (sane speed, lap length, start/finish crossing) before accepting; flag outliers. A cheat-proof version needs the server to re-simulate, which is a later step.
 - Done when: a result from two different devices appears in the top list, a faked time is rejected, tests cover validation.
 
-**D. Own lobby / relay server** - BUILT 2026-11-20, tested locally (server tests, real-server link tests, two-browser lab, host hand-over); install waits for the owner's OK (`scripts/setup-server-lobby.sh`) and the administrator's `/ws/` (master-plan W3; protocol `docs/online-protocol.md`; Python standard library, no packages). Original sketch: ** (only when triggered: connection failures, strangers, or leaderboards need server-decided results)**
+**D. Own lobby / relay server** - INSTALLED on the server 2026-11-21 (service active on 127.0.0.1:8770); players reach it once the administrator adds `/ws/` - BUILT 2026-11-20, tested locally (server tests, real-server link tests, two-browser lab, host hand-over); install waits for the owner's OK (`scripts/setup-server-lobby.sh`) and the administrator's `/ws/` (master-plan W3; protocol `docs/online-protocol.md`; Python standard library, no packages). Original sketch: ** (only when triggered: connection failures, strangers, or leaderboards need server-decided results)**
 - Port: 127.0.0.1:8770 behind `/ws/` (8000 is the administrator's infra-metrics; request text in `docs/admin-request.md`). Housekeeping and backups: `server/README.md`.
 - Technology: a small WebSocket service. Python 3.12 is already there (`asyncio` + `websockets` in a venv, run by systemd as its own user, listening on 127.0.0.1:8000, memory limited). Node would need installing.
 - Needs an nginx change, so ask the Ansible owner: in the `/api/` location (or a new `/ws/` location) add `proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; proxy_read_timeout 3600s;`. Otherwise WebSocket connections are refused.

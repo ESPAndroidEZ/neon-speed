@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-21
+- **Live on the website.** Free Drive in Neon Harbor, city races, the new details and all fixes are now on notcarlos.mosidealus.nl. The online lap boards are switched on (empty until people race). Our own online lobby is running on the server; players reach it as soon as the administrator adds one web-server line (until then online races use the old peer-to-peer method, as before).
 - **Neon Harbor looks lived-in.** Roofs have air-conditioning units, water tanks and antennas; sidewalks have benches, bins, fire hydrants and bus shelters; eight new shop signs (fish market, sailor bar, 24 h diner, tyre shop, bakery, tattoo, karaoke...), and long shop names no longer run off their signs. Traffic is no longer one car copied 40 times: hatchbacks, vans, yellow taxis and pickups, each as solid as it looks.
 - **Snow looks right on street lights:** posts and benches no longer turn into glowing white bars in snow (only the tops get snow).
 - **You know where you are.** Free Drive shows the street and district above the minimap ("Pier Road · Harbour") and a short line about a district when you drive into it, in English and Spanish.

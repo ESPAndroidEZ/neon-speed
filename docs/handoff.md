@@ -6,8 +6,8 @@ Baton: claude
 Updated: 2026-11-20 (W4 music done; W1 built, waiting for owner OK; next W2).
 
 ## Next
-0. START HERE: `docs/master-plan.md` (status + evidence per item). Next for Claude: W5.7 deploy needs the owner's OK (bench + QA done); qa #13/#33/#34 fixed. W5.6 DONE (built by Claude; owner: no Qwen for this project) Qwen tasks 063-067, W5.7 bench + screenshot QA; qa #13 (neon-clear chroma) needs a bisect. Watch: city draw calls ~200-217 of 250 (LOW), `game/freeRoam.ts` 204 lines (new features in new modules).
-1. OWNER decisions/OKs: review `docs/online-protocol.md`; OK `scripts/apply-server-schema.sh` (lap boards) and `scripts/setup-server-lobby.sh` (lobby); OK a deploy (live is ab3824f, without lobby and Free Drive); send `docs/admin-request.md` (administrator adds `/ws/`); set `FEEDBACK_EMAIL`; decide jumps (2D physics) and give story input for city missions (W5.5 missions are blocked on it).
+0. START HERE: `docs/master-plan.md` (status + evidence per item). Next for Claude: DEPLOYED 2026-11-21 (live 2a6611b, lap-board tables applied, lobby service installed). Open: W5.5 missions and jumps (owner input), live board write test (owner OK). W5.6 DONE (built by Claude; owner: no Qwen for this project) Qwen tasks 063-067, W5.7 bench + screenshot QA; qa #13 (neon-clear chroma) needs a bisect. Watch: city draw calls ~200-217 of 250 (LOW), `game/freeRoam.ts` 204 lines (new features in new modules).
+1. OWNER: review `docs/online-protocol.md`; send `docs/admin-request.md` (administrator adds `/ws/`); set `FEEDBACK_EMAIL`; decide jumps (2D physics) and give story input for city missions (W5.5 missions are blocked on it).
 2. Owner playtests on real phones (Free Drive never ran on a phone or a real GPU); qa-report open rows (#10, #13, #18, #23-#30); repo visibility (owner).
 
 ## Done
@@ -142,6 +142,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-20 Claude: W5.7 bench (ALL PASS, worst 151/154 calls) + screenshot QA; fixed hill ground over roads, sidewalk wedges, Now playing overlap; deploy waits for the owner.
 - 2026-11-21 Claude: W5.6 built without Qwen (roof kit, street furniture, 8 signs, street names + district lines, traffic shapes); all tests 0 FAIL, roam-drive LOW 171 calls.
 - 2026-11-21 Claude: qa #13/#34 fixed in the visual check (capture waited a fixed time, now waits for the race), #33 snow posts fixed (side shading).
+- 2026-11-21 Claude (owner: deploy everything): deployed 2a6611b, applied lap-board schema (backup + restore test PASSED), installed the lobby service (active, local handshake 101; public /ws/ 404 until the administrator).
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
 | Round 2 item | Status |

@@ -429,7 +429,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/world/open
 - chunkGeo.ts (147) Share of buildings with a shop sign on the front, per district (the Strip is wall-to-wa... | fn chunkGeo; const triangles; iface Geo, ChunkGeo
 - chunkIndex.ts (37) Streaming cell size (m): the 6144 m world is 48 x 48 chunks. | fn chunkIndex; const CHUNK, chunkCount, cellOf, chunkKey
-- chunkMesh.ts (112) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; iface RoamMaterials
+- chunkMesh.ts (120) One shared material per chunk part (walls: one per district; a chunk uses its own): dra... | fn roamMaterials, chunkJob, disposeChunk; const SIDE_SHADE; iface RoamMaterials
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
 - furnitureGeo.ts (55) Street furniture as plain boxes appended to a chunk's ROOFS arrays (the dark material t... | fn furnitureGeo
 - groundCarve.ts (57) Ground height with the roads laid in (W5.7 fix: on the hills the 16 m ground grid bulge... | fn groundAt
