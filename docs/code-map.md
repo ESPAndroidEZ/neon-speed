@@ -400,9 +400,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - facadeVariants.ts (38) | const FACADE_VARIANTS, ROAD_VARIANTS; iface FacadeVariant, RoadVariant
 - graffiti.ts (53) A graffiti or mural painter: paints onto a transparent `w` x `h` canvas with `rnd` (a s... | fn makeGraffitiTexture; const GRAFFITI; type GraffitiPainter
 - graffitiC.ts (65) | const GRAFFITI_C
-- signs.ts (95) A shop sign design. Brands are FICTIONAL (docs/art-direction.md): never use a real comp... | fn makeSignAtlas, signGeometry; const SIGNS; iface SignSpec
+- signs.ts (100) A shop sign design. Brands are FICTIONAL (docs/art-direction.md): never use a real comp... | fn makeSignAtlas, signGeometry; const SIGNS; iface SignSpec
 - signsA.ts (12) | const SIGNS_A
 - signsB.ts (11) | const SIGNS_B
+- signsC.ts (13) Neon Harbor district signs (task 065, built by Claude): harbour, industrial, old town a... | const SIGNS_C
 - textures.ts (140) The four maps of a PBR-style facade sheet. One tile is 16 m x 16 m: 5 floors by 5 windo... | fn normalFrom, makeFacadeSheet; const N, tex; iface FacadeSheet; type FacadeKind
 - texturesProps.ts (72) A shopfront tile (one 6 m bay, ground floor): a dark frame, a big glass window whose in... | fn makeShopfrontTexture, makeContainerSheet
 ## src/world
@@ -411,7 +412,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - dock.ts (99) Dock strip: water and a chain rail on the left, container stacks flush with the right w... | fn crane, buildDock; iface Dock
 - envMap.ts (64) Procedural night-city environment baked once into a PMREM: a dusk gradient dome (deep b... | fn buildNeonEnvMap
 - facades.ts (141) Facade height per sample for the left (index 0) and right (index 1) side; 0 = no buildi... | fn buildFacades; iface Plaza, Facades
-- furniture.ts (164) Additive light pools under the lamps; weather raises their opacity when wet. | fn buildFurniture; iface Furniture
+- furniture.ts (168) Race maps use the shop designs before the Neon Harbor ones (one instanced mesh per desi... | fn buildFurniture; iface Furniture
 - kestrelBay.ts (31) "Kestrel Bay Streets": about 1.4 km of city street, 8.5 to 11 m wide. Clockwise from th... | const KESTREL_VERTICES, createKestrelBay, PLAZA
 - landmarks.ts (108) Per-track landmarks on top of a theme (instanced: one draw call per kind). Mountain Pas... | fn buildLandmarks
 - layers.ts (12) Render layer for things the rain mirror (world/roadMirror) skips: people and wheels. Th... | fn noReflect; const NO_REFLECT

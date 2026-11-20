@@ -1,5 +1,9 @@
 import { AdditiveBlending, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, DoubleSide, Group, InstancedMesh, LineBasicMaterial, LineSegments, MeshBasicMaterial, Object3D, PlaneGeometry, Points, PointsMaterial } from 'three';
 import { makeSignAtlas, SIGNS, signGeometry } from './city/signs';
+import { SIGNS_C } from './city/signsC';
+
+/** Race maps use the shop designs before the Neon Harbor ones (one instanced mesh per design = one draw call each). */
+const RACE_SIGNS = SIGNS.length - SIGNS_C.length;
 import { createRng } from '../core/rng';
 import { lateralPoint } from './ribbon';
 import type { Track } from './track';
@@ -94,11 +98,11 @@ export function buildFurniture(tr: Track, height: [Float32Array, Float32Array], 
   const signMat = new MeshBasicMaterial({ map: atlas, color: new Color(1.15, 1.15, 1.15) });
   const col = new Color();
   const signSpots: { x: number; y: number; z: number; yaw: number }[] = [];
-  const cells: InstancedMesh[] = SIGNS.map((_, c) => new InstancedMesh(signGeometry(c), signMat, Math.max(1, flat.filter((_f, k) => k % SIGNS.length === c).length)));
-  const fill = new Array<number>(SIGNS.length).fill(0);
+  const cells: InstancedMesh[] = SIGNS.slice(0, RACE_SIGNS).map((_, c) => new InstancedMesh(signGeometry(c), signMat, Math.max(1, flat.filter((_f, k) => k % RACE_SIGNS === c).length)));
+  const fill = new Array<number>(RACE_SIGNS).fill(0);
   const signColor: Color[] = [];
   flat.forEach((f, k) => {
-    const cell = k % SIGNS.length;
+    const cell = k % RACE_SIGNS;
     const s = tr.samples[f.i];
     const yaw = Math.atan2(s.tangent.x, s.tangent.z);
     lateralPoint(tr, f.i, f.side * (tr.wall[f.i] - (f.blade ? 0.7 : 0.08)), p);

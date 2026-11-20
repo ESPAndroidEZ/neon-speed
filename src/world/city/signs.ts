@@ -1,5 +1,6 @@
 import { SIGNS_A } from './signsA';
 import { SIGNS_B } from './signsB';
+import { SIGNS_C } from './signsC';
 import { BoxGeometry, CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
 /** A shop sign design. Brands are FICTIONAL (docs/art-direction.md): never use a real company name. */
@@ -26,6 +27,7 @@ export const SIGNS: readonly SignSpec[] = [
   { text: 'OCTO BAR', sub: 'LIVE DJ', color: '#c8f4ff', alt: '#ff2a9d', style: 'tube', icon: 'ring' },
   ...SIGNS_A,
   ...SIGNS_B,
+  ...SIGNS_C,
 ];
 
 const CELL_W = 256;
@@ -57,10 +59,13 @@ function paint(g: CanvasRenderingContext2D, s: SignSpec, ox: number, oy: number)
   if (s.style === 'bar') { g.fillStyle = s.alt; g.fillRect(12, CELL_H - 30, CELL_W - 24, 6); }
   g.fillStyle = s.style === 'solid' ? '#07080f' : s.color;
   g.strokeStyle = s.color;
-  g.font = `900 ${s.text.length > 9 ? 27 : 38}px system-ui, sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  if (s.style === 'tube') { g.lineWidth = 2.5; g.strokeText(s.text, CELL_W / 2 + (s.icon ? 14 : 0), 54); } else g.fillText(s.text, CELL_W / 2 + (s.icon ? 14 : 0), 54);
+  const left = s.icon ? 58 : 20, room = CELL_W - 20 - left; // between the icon and the frame
+  let px = s.text.length > 9 ? 27 : 38;
+  g.font = `900 ${px}px system-ui, sans-serif`;
+  while (px > 14 && g.measureText(s.text).width > room) { px -= 1; g.font = `900 ${px}px system-ui, sans-serif`; } // long words shrink to fit
+  if (s.style === 'tube') { g.lineWidth = 2.5; g.strokeText(s.text, left + room / 2, 54); } else g.fillText(s.text, left + room / 2, 54);
   g.font = '700 14px system-ui, sans-serif';
   g.shadowBlur = 6;
   g.fillStyle = s.style === 'solid' ? '#07080f' : s.alt;
