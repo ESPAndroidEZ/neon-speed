@@ -8,7 +8,8 @@ const PAINT = [0xff2a9d, 0x18d8ff, 0xffd27d, 0x7a5cff, 0x39ff88, 0xff6a3a, 0xe8e
 
 /** The car meet: 8 parked show cars (instanced, lamps on) and a pink ring on the ground. 3 draw calls, static. */
 export function meetGroup(m: CarMeet): { group: Group; dispose(): void } {
-  const s = carShapes(), body = new MeshStandardMaterial({ roughness: 0.3, metalness: 0.6 }), lamp = new MeshBasicMaterial({ vertexColors: true });
+  // satin paint: shinier paint caught the player's headlights and bloomed
+  const s = carShapes(), body = new MeshStandardMaterial({ roughness: 0.55, metalness: 0.25 }), lamp = new MeshBasicMaterial({ vertexColors: true, color: new Color(0.4, 0.4, 0.4) }); // parked: lamps dimmed, they face the player
   const cars = new InstancedMesh(s.body, body, m.slots.length), lamps = new InstancedMesh(s.lamps, lamp, m.slots.length);
   const o = new Object3D(), c = new Color();
   m.slots.forEach((p, i) => {
