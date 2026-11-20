@@ -79,6 +79,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - saveParse.ts (99) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
 - speedTraps.ts (32) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; iface SpeedTrap
+- streetName.ts (19) The name of the street an edge belongs to (Neon Harbor, task 066). On the grid, every b... | fn streetName
 - styleCombo.ts (76) What the combo saves (part of the reward snapshot). | class StyleCombo; const COMBO; iface ComboData
 - tipBag.ts (36) Shuffled bag: every item comes out once before any repeats, and the first item of a new... | class TipBag
 - viewport.ts (44) Keeps the game sized to the REAL visible viewport: ResizeObserver on the container, vis... | fn watchViewport; const isPortrait
@@ -135,6 +136,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - upgrades.ts (82) Performance upgrades. POWER STAGE 0-4 (owner, 2026-11-15) replaces engine/turbo/ECU/exh... | fn applyUpgrades, sanitizeUpgrades; const UPGRADES, UPGRADE_IDS, findUpgrade; iface UpgradeLevel, UpgradeCategory; type UpgradeId, Upgrades
 ## src/data/world
 - districtMap.ts (47) World square half size (m): the drivable area is 6144 m x 6144 m. | fn districtAt; const WORLD_HALF, CELL, isWater, DISTRICT_LOOK
+- districtText.ts (29) Neon Harbor place names (task 066, built by Claude). Street names are proper nouns and ... | const STREET_NAMES, ROAD_NAMES, DISTRICT_BLURB
 ## src/dev
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
 - demoInput.ts (29) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
@@ -191,7 +193,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
-- roamActivities.ts (102) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamActivities.ts (109) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
 - roamProgress.ts (65) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - saveGame.ts (67) Can this moment be saved? Only a race in progress (countdown or racing) that was set up... | fn canSave, captureGame, restoreGame
 - showroomCam.ts (44) Slow orbit around the car for the menu and garage. The car's screen position comes from... | class ShowroomCam
@@ -212,7 +214,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - es.ts (17) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
-- esContent.ts (15) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
+- esContent.ts (16) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
 - esContentA.ts (153) Spanish for long content, part A: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_A
 - esContentB.ts (131) Spanish for long content, part B: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_B
 - esContentC.ts (129) Spanish for long content, part C: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_C
@@ -221,6 +223,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentF.ts (17) Spanish for the story rewrite, keyed by the exact English text (see esContent.ts). | const ES_CONTENT_F
 - esContentG.ts (42) Spanish for the story rewrite: barks and radio, keyed by the exact English text (see es... | const ES_CONTENT_G
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
+- esContentI.ts (10) Spanish for the Neon Harbor district lines (src/data/world/districtText.ts). Street nam... | const ES_CONTENT_I
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
 - esGame.ts (64) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
@@ -353,6 +356,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roamHud.ts (32) Free Drive overlay: Respawn and Pause buttons (phones have no keyboard), the key hint, ... | fn roamHud; iface RoamHud
 - roamMap.ts (134) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamPause.ts (34) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
+- roamWhere.ts (64) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu

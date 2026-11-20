@@ -32,6 +32,8 @@ if (process.env.SHOT) await page.screenshot({ path: 'logs/city-race-offer.png' }
 const text = (await offer.textContent().catch(() => '')) ?? '';
 check('stopping in the ring offers the race', (await offer.isVisible()) && text.includes(race.name) && /2 laps/.test(text), text);
 
+const where = await page.locator('.rb-where').innerText().catch(() => '');
+check('the location line names the street and district (task 066)', /· Downtown/.test(where) && /Glass towers/.test(where), where.replace(/\n/g, ' / '));
 await page.keyboard.press('Enter');
 await page.waitForFunction((id) => window.__rbGame.state === 'RACING' && window.__rbGame.setup?.trackId === id, race.id, { timeout: 90000 }).catch(() => {});
 const started = await page.evaluate(() => { const g = window.__rbGame; return { state: g.state, track: g.setup?.trackId, def: g.d.world.def.id, len: g.d.world.track.length, rivals: g.rm.racers.length - 1, roam: g.roam === null }; });

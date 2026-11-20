@@ -12,6 +12,7 @@ import type { RoamContact } from '../physics/roamContact';
 import { speedText } from './speedUnit';
 import { t } from '../i18n';
 import { CityRaceSpots, RING } from './cityRaces';
+import { RoamWhere } from '../ui/roamWhere';
 
 /**
  * Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that follow). Built with the city,
@@ -38,6 +39,8 @@ export class RoamActivities {
   private lastZ = 0;
   /** City race start rings (W5.5). */
   readonly races: CityRaceSpots;
+  /** Street and district line (task 066). */
+  private readonly where: RoamWhere;
 
   constructor(g: RoadGraph, group: Group, hud: Hud, contact: RoamContact, carName: () => string) {
     this.hud = hud;
@@ -48,6 +51,8 @@ export class RoamActivities {
     this.run = new DriftRun(this.zones);
     const rings = zoneMesh(this.zones);
     this.races = new CityRaceSpots(g);
+    this.where = new RoamWhere(g, contact.roads);
+    this.disposers.push(() => this.where.dispose());
     const starts = zoneMesh(this.races.races.map((r) => ({ x: r.x, z: r.z, r: RING })), 0xffb020);
     group.add(cams, rings, starts);
     const meet = placeCarMeet(g, this.zones);
@@ -68,6 +73,7 @@ export class RoamActivities {
     this.lastZ = z;
     this.run.cancel();
     this.races.place(x, z);
+    this.where.reset();
   }
 
   step(car: CarController, dt: number): void {
@@ -76,6 +82,7 @@ export class RoamActivities {
     this.lastX = x;
     this.lastZ = z;
     this.races.step(x, z, car.state.speed);
+    this.where.update(dt, x, z);
     const ev = this.run.update(x, z, car.drift.bank + car.drift.chain);
     if (ev === 1) this.hud.popUp(t('roam.zoneIn'), '#18d8ff');
     else if (ev === 2) this.zoneDone(this.run.score);
