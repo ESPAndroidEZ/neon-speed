@@ -10,6 +10,7 @@ A 3D arcade street racer that runs in the browser (phone and PC), English and Sp
 - **Story:** Chapter 1 (4 races), Chapter 2 (6 races, a choice that changes the ending) and the new **Chapter 3 "Blood on the Wall"** (5 races, a final choice, two endings). Six short **cinematics** play at key moments and can be replayed from Crew.
 - **Modes:** story, free race, daily challenge, drift maps, online races (friends, room code), **manual gearbox** (with "perfect shift" nitro rewards).
 - **Controls:** keyboard, gamepad, phone (tilt, touch wheel, buttons). On a phone you can **move the buttons** (Settings > Controls) and the game is **landscape only**.
+- **Music:** 9 generative deep-house songs plus a synthwave track that shuffle and blend into each other by themselves (style Auto by default; Deep house or Synthwave only in Settings > Advanced > Sound). A small "Now playing" line shows each new song (can be turned off).
 - **Settings:** Basic and Advanced tabs, graphics Auto (adjusts to the device), subtitles off by default.
 - **Tutorial:** four short slides after choosing the language; it says the handbrake is overpowered.
 - **Feedback and support:** players can send you a message from Crew > Feedback & support, and a "Support the game" tab shows your IBAN (voluntary).
@@ -66,6 +67,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - The new Chapter 3 races have not been balanced (are they winnable with your starting cars?).
 - The live website is behind the code: it does not have the feedback form, Chapter 3, cinematics or incremental sync until the next deploy.
 - Real-device performance of the Auto graphics setting.
+- The new song transitions and the four new songs were checked by measurement (no clicks, same loudness), not by ear: listen to `logs/music/join-*.wav` and `logs/music/house-6..9-*.wav`, or just play for a few minutes.
 
 ## 7. How the documentation works (so it stays true)
 | File | Who reads it | What it holds |

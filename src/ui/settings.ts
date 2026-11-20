@@ -17,7 +17,8 @@ import { playerCodeRows } from './playerCode';
 import { openSupport } from './feedback';
 import { GEARBOX } from '../physics/gearbox';
 import { applyUiSizes } from './uiSizes';
-import { engineSoundRow, musicStyleRow, soundCredits, soundMixRow } from './soundSettings';
+import { engineSoundRow, musicStyleRow, nowPlayingRow, soundCredits, soundMixRow } from './soundSettings';
+import { setNowPlaying } from './nowPlaying';
 import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
 
 export interface SettingsDeps {
@@ -46,6 +47,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   d.audio.setMusicVolume(s.musicVolume);
   ENGINE_SOURCE.samples = s.engineSound !== 'synth';
   MUSIC_SOURCE.style = s.musicStyle;
+  setNowPlaying(s.nowPlaying);
   if (phoneDefaults(s)) d.store.commit();
   Object.assign(GRAPHICS, s.graphics);
   applyQuality(d.engine, s.quality, true);
@@ -181,7 +183,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   );
   const advanced = h('div', 'rb-settings');
   advanced.append(
-    panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), voice, soundCredits()]),
+    panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), nowPlayingRow(s, () => applySettings(d), () => d.store.commit()), voice, soundCredits()]),
     panel(t('set.secGame'), [subs, sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store), button(t('fb.open'), () => openSupport()), ...playerCodeRows()]),
     panel(t('set.secControls'), [...extra.filter((e) => e.dataset.adv), ...driving.advanced]),
     panel(t('set.graphics'), gfx.advanced),

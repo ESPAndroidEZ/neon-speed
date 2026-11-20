@@ -31,6 +31,12 @@ a.setPaint('350z', 0xff2a9d);
 const b = new SaveStore(kv, base, CARS);
 check('round trip restores everything', b.data.selected === '350z' && b.data.paint['350z'] === 0xff2a9d && b.data.bestLap.CLEAR === 58.2 && b.data.owned.length === 2 && b.data.cash === 500, '');
 
+check('music style defaults to auto, now playing on', base.settings.musicStyle === 'auto' && base.settings.nowPlaying === true, '');
+{
+  const m = parseSave(JSON.stringify({ ...base, settings: { ...base.settings, musicStyle: 'synth', nowPlaying: false } }), base, CARS).settings;
+  const bad = parseSave(JSON.stringify({ ...base, settings: { ...base.settings, musicStyle: 'polka' } }), base, CARS).settings;
+  check('music style + now playing saved; unknown style -> auto', m.musicStyle === 'synth' && m.nowPlaying === false && bad.musicStyle === 'auto', '');
+}
 check('corrupt JSON -> defaults', parseSave('{not json', base, CARS).cash === 2500, '');
 check('null -> defaults', parseSave(null, base, CARS).owned[0] === 'civic', '');
 const evil = parseSave(JSON.stringify({ cash: -5, owned: ['hacked', 'supra'], selected: 'civic', settings: { volume: 9, quality: 'turbo' }, bestLap: { CLEAR: 'x', RAIN: 3 } }), base, CARS);

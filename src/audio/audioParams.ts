@@ -27,8 +27,13 @@ export const MUSIC_CUE: { mood: 'garage' | null; speech: number } = { mood: null
 /** Engine sound source (Settings > Engine sound): the recorded loops (data/engineSounds) when a car has them, or always the synth. */
 export const ENGINE_SOURCE = { samples: true };
 
-/** Background music (Settings > Music style): deep house or synthwave. Bump `skip` to jump to the next house song; `song` = now playing. */
-export const MUSIC_SOURCE: { style: 'house' | 'synth'; skip: number; song: string } = { style: 'house', skip: 0, song: '' };
+/** Settings > Music style: auto = the house songs and the synthwave track shuffled together (default since 2026-11-20). */
+export type MusicStyle = 'auto' | 'house' | 'synth';
+/**
+ * Background music (audio/musicDirector): songs change by themselves. Bump `skip` to crossfade to the next song now;
+ * `song` = now playing; `onSong` is called once per song change (the Now playing line), never per frame.
+ */
+export const MUSIC_SOURCE: { style: MusicStyle; skip: number; song: string; onSong: ((name: string) => void) | null } = { style: 'auto', skip: 0, song: '', onSong: null };
 
 /**
  * Settings > Sound mix presets (engine and music slider values). Measured in a race (tests/lab/bus-levels.mjs): with

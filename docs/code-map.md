@@ -9,8 +9,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - personBake.ts (41) One material for every baked person: the part colours live in the vertices. | fn bakePerson
 ## src/audio
 - audioBus.ts (135) Web Audio plumbing: context, master volume/mute, buses for sfx and music, shared noise. | class AudioBus
-- audioManager.ts (206) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
-- audioParams.ts (41) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO, MUSIC_CUE, ENGINE_SOURCE, MUSIC_SOURCE, MIX_PRESETS; type AudioParams, SoundMix
+- audioManager.ts (201) Things the K panel can trigger without driving. | class AudioManager; type AudioTest
+- audioParams.ts (46) Live-tunable audio values (K panel). Defaults are deliberately strong so the turbo and ... | const AUDIO, MUSIC_CUE, ENGINE_SOURCE, MUSIC_SOURCE, MIX_PRESETS; type AudioParams, MusicStyle, SoundMix
 - bed.ts (56) Always-on ambience bed: a low city hum (mains and traffic rumble) and distant sea washi... | class AmbienceBed
 - countdownBeep.ts (51) Pure: which beep a banner change earns. A new digit ticks, GO! goes, anything else (or ... | fn beepFor; class CountdownBeeps; type BeepKind
 - engineDsp.ts (202) Engine sound synthesis, written as ONE self-contained class (no runtime imports, no mod... | class EngineDsp
@@ -18,12 +18,16 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - engineVoice.ts (105) One engine sound source. Implemented by the AudioWorklet synth and by the oscillator fa... | fn createWorkletVoice, createOscillatorVoice; iface EngineVoice
 - gameCues.ts (17) Menu blips, start-line beeps, lap/finish stings and reward pings. Returns the per-frame... | fn installGameCues
 - houseFx.ts (37) Shared effect sends of the house music: a reverb (decaying stereo noise impulse) and a ... | fn createHouseSends; iface HouseSends
-- houseMusic.ts (217) Generative deep house: the songs of houseSongs follow each other every SONG_BARS bars. ... | class HouseMusic
-- housePatterns.ts (80) Pure note logic for the generative deep house songs (no Web Audio), so it can be unit t... | fn houseSection, houseChord, houseBass, houseStab, housePluck, houseDrums, houseLayers; const HOUSE_STEPS, SONG_BARS, stepSeconds, swingOffset; iface HouseHit, HouseLayers
-- houseSongs.ts (60) The deep house songs (pure data). Each bar of `prog` is one chord; patterns loop over 1... | const HOUSE_SONGS; iface HouseSong
+- houseMusic.ts (84) Generative deep house, one song at a time (a deck of MusicDirector, which picks the son... | class HouseMusic
+- housePatterns.ts (83) Pure note logic for the generative deep house songs (no Web Audio), so it can be unit t... | fn houseSection, houseChord, houseBass, houseStab, housePluck, houseDrums, houseLayers; const HOUSE_STEPS, SONG_BARS, stepSeconds, swingOffset, OUTRO_BARS; iface HouseHit, HouseLayers
+- houseSongs.ts (88) The deep house songs (pure data). Each bar of `prog` is one chord; patterns loop over 1... | const HOUSE_SONGS; iface HouseSong
+- houseVoices.ts (175) The instruments of one deep house deck (HouseMusic schedules them): one step of the son... | class HouseVoices
 - launchRev.ts (32) Start-line rev (audio only). The car is locked during the 3-2-1, so the drivetrain stay... | class LaunchRev
-- music.ts (102) Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (spe... | class Music
+- music.ts (138) One synthwave "song" in the playlist: 40 bars at 108 BPM, about 89 s; it then hands ove... | class Music; const SYNTH_BARS, SYNTH_NAME
+- musicDeck.ts (60) One song player the MusicDirector can start, extend, sweep and fade (HouseMusic, Music). | class DeckOut; iface MusicDeck
+- musicDirector.ts (103) Playlist item of the synthwave track (house songs are their index in HOUSE_SONGS). | class MusicDirector; const SYNTH_ITEM, styleItems
 - musicPatterns.ts (72) Pure note logic for the generative synthwave track (no Web Audio), so it can be unit te... | fn chordTones, bassNote, arpNote, leadNote, drumHit, layers; const BPM, STEPS_PER_BAR, SECONDS_PER_STEP, midiToHz; iface DrumHit, Layers
+- playlist.ts (54) Shuffle bag for the background music (pure, no Web Audio). Every item plays once before... | class Playlist
 - raceCue.ts (74) Pure: the cue earned by the player's lap count / finished flag changing between two fra... | fn raceCue, cueNotes, playRaceCue, rewardCue; class RaceCues; type RaceCueKind
 - revTest.ts (54) Garage "Sound test": a simulated rev run for any car (no driving, no purchase). Hold = ... | class RevTest; const REV_TEST; iface RevSample
 - rivalEngines.ts (85) Engine sound of the nearest rivals, positioned in 3D with distance falloff and a manual... | class RivalEngines
@@ -66,7 +70,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rewards.ts (98) Racer fields the rewards read (structural, so tests can pass plain objects). | class RaceRewards; const REWARD; iface RewardRacer, RewardData; type RewardKind
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - save.ts (186) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
-- saveParse.ts (95) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- saveParse.ts (96) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
 - styleCombo.ts (76) What the combo saves (part of the reward snapshot). | class StyleCombo; const COMBO; iface ComboData
 - tipBag.ts (36) Shuffled bag: every item comes out once before any repeats, and the first item of a new... | class TipBag
@@ -315,6 +319,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - menuCss.ts (93) Base menu styles (docs/ui-style.md): dark glass panels, cyan hairlines, magenta for the... | const MENU_CSS
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
+- nowPlaying.ts (34) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
 - onlineMenu.ts (96) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
 - pauseMenu.ts (108) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
@@ -323,9 +328,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
-- settings.ts (203) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- settings.ts (205) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
 - settingsTabs.ts (24) Two panes with a tab bar on top: the few settings everyone needs, and the full list und... | fn settingsTabs
-- soundSettings.ts (97) Settings row: engine sound from the recorded loops or from the procedural synth. | fn engineSoundRow, soundMixRow, musicStyleRow, soundCredits
+- soundSettings.ts (111) Settings row: engine sound from the recorded loops or from the procedural synth. | fn engineSoundRow, soundMixRow, musicStyleRow, nowPlayingRow, soundCredits
 - statsCard.ts (29) Time raced as "2 h 05 min" or "14 min". | fn hoursMinutes, statsCard
 - storyMenu.ts (81) Story screen: chapters 1 to 3 with status, conditions and rivals. Only unlocked events ... | fn buildStoryMenu, buildEnding; iface StoryMenuDeps
 - subtitles.ts (94) Optional browser text-to-speech for DJ Switch. Silent when unsupported or turned off. | class Voice, Subtitles; const SUBTITLES; iface Caption

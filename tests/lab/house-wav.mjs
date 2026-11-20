@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync } from 'node:fs';
 mkdirSync('logs/music', { recursive: true });
 const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
-const N = 5, SECS = 14;
+const N = 12, SECS = 14;
 for (let k = Number(process.env.FROM ?? 0); k < N; k++) {
   const p = await b.newPage();
   await p.goto('http://localhost:5173/?probe');
@@ -17,8 +17,8 @@ for (let k = Number(process.env.FROM ?? 0); k < N; k++) {
     const noise = ctx.createBuffer(1, sr, sr); const nd = noise.getChannelData(0); for (let i = 0; i < sr; i++) nd[i] = Math.random() * 2 - 1;
     const music = ctx.createGain(); music.gain.value = 0.55 * 0.7; music.connect(ctx.destination);
     const m = new HouseMusic({ ctx, music, noise });
-    m.songIdx = (k + HOUSE_SONGS.length - 1) % HOUSE_SONGS.length; m.nextSong(0); // private fields: pick song k directly
-    for (let t = 0.05; t < secs - 0.3; t += 0.05) ctx.suspend(t).then(() => { m.update(true, ctx.currentTime < secs / 2 ? 0.3 : 0.95); ctx.resume(); });
+    m.begin(k, 0, 0);
+    for (let t = 0.05; t < secs - 0.3; t += 0.05) ctx.suspend(t).then(() => { m.update(ctx.currentTime < secs / 2 ? 0.3 : 0.95); ctx.resume(); });
     const buf = await ctx.startRendering();
     const L = buf.getChannelData(0), R = buf.getChannelData(1);
     let peak = 0, sq = 0; for (let i = sr * 3; i < L.length; i++) { peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); sq += L[i] * L[i]; }

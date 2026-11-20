@@ -1,4 +1,4 @@
-import { ENGINE_SOURCE, MIX_PRESETS, MUSIC_SOURCE, type SoundMix } from '../audio/audioParams';
+import { ENGINE_SOURCE, MIX_PRESETS, MUSIC_SOURCE, type MusicStyle, type SoundMix } from '../audio/audioParams';
 import { t } from '../i18n';
 import { button, h } from './uiKit';
 
@@ -44,32 +44,46 @@ export function soundMixRow(s: { mix: SoundMix; engineVolume: number; musicVolum
   return row;
 }
 
-/** Settings row: background music style, generative deep house or synthwave. */
-export function musicStyleRow(s: { musicStyle: 'house' | 'synth' }, commit: () => void): HTMLElement {
+/** Settings row: background music style (Auto = house + synthwave shuffled) and Next song as an extra (songs change by themselves). */
+export function musicStyleRow(s: { musicStyle: MusicStyle }, commit: () => void): HTMLElement {
   const row = h('div', 'rb-row', `<span class="rb-lbl">${t('set.musicStyle')}</span>`);
-  for (const v of ['house', 'synth'] as const) {
-    const b = button(t(v === 'house' ? 'set.musicHouse' : 'set.musicSynth'), () => {
+  const names = { auto: 'set.musicAuto', house: 'set.musicHouse', synth: 'set.musicSynth' } as const;
+  for (const v of ['auto', 'house', 'synth'] as const) {
+    const b = button(t(names[v]), () => {
       s.musicStyle = v;
       MUSIC_SOURCE.style = v;
       commit();
-      row.querySelectorAll('button').forEach((x) => x.classList.toggle('hot', x.dataset.v === v));
+      row.querySelectorAll('button[data-v]').forEach((x) => x.classList.toggle('hot', (x as HTMLElement).dataset.v === v));
+      window.setTimeout(label, 120);
     });
     b.dataset.v = v;
     b.classList.toggle('hot', s.musicStyle === v);
     b.style.minWidth = '90px';
     row.append(b);
   }
-  // skip to the next deep house song; the label shows what is playing
+  // optional: crossfade to the next song now; the label shows what is playing
   const skip = button('', () => {
-    MUSIC_SOURCE.style = s.musicStyle = 'house';
     MUSIC_SOURCE.skip++;
-    commit();
-    row.querySelectorAll('button[data-v]').forEach((x) => x.classList.toggle('hot', (x as HTMLElement).dataset.v === 'house'));
     window.setTimeout(label, 120);
   });
   const label = (): void => { skip.textContent = t('set.nextSong', { song: MUSIC_SOURCE.song || '-' }); };
   label();
   row.append(skip);
+  return row;
+}
+
+/** Settings row: the small "Now playing" line when a song changes. */
+export function nowPlayingRow(s: { nowPlaying: boolean }, apply: () => void, commit: () => void): HTMLElement {
+  const row = h('label', 'rb-row', `<span class="rb-lbl">${t('set.nowPlaying')}</span>`);
+  const box = h('input') as HTMLInputElement;
+  box.type = 'checkbox';
+  box.checked = s.nowPlaying;
+  box.addEventListener('change', () => {
+    s.nowPlaying = box.checked;
+    apply();
+    commit();
+  });
+  row.append(box);
   return row;
 }
 

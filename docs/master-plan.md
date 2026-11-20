@@ -1,6 +1,6 @@
 # Master plan (living file)
 
-The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20.
+The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4 DONE).
 
 Status values: TODO, DOING, BLOCKED (waiting for the owner or the server administrator), DONE (verified, with the evidence in the changelog).
 
@@ -13,15 +13,15 @@ Status values: TODO, DOING, BLOCKED (waiting for the owner or the server adminis
 After each workstream: `/checkpoint`. If the context window is over about 60 %, stop, run `/checkpoint`, and tell the owner to start a fresh session with the same prompt.
 
 ## W4. Music that changes by itself
-Today (2026-11-20): deep-house songs rotate every 48 bars (about 97 s) in a FIXED order after a random first song, with a hard cut at the start of the next song; the Synthwave style never rotates; "Next song" is a manual button.
+Before (2026-11-20): deep-house songs rotated every 48 bars in a FIXED order with a hard cut; Synthwave never rotated. DONE 2026-11-20: `audio/musicDirector.ts` (shuffle bag `audio/playlist.ts`, two house decks + the synthwave deck, filter sweep + crossfade), style Auto by default, Now playing line, 9 house songs.
 | # | Item | Status | Done when |
 |---|---|---|---|
-| W4.1 | Find out why the owner thinks it is manual (play 5 minutes in menu and in a race; check rotation also after pause/resume, tab hidden, language switch) and fix any real fault | TODO | a lab test plays 6 songs unattended with the mock audio context and every one starts |
-| W4.2 | Shuffle bag: every song plays once before any repeats, never the same song twice in a row; keep the manual button as an extra | TODO | unit test over 50 rotations |
-| W4.3 | Smooth transition: end each song with a short outro / filter sweep and crossfade into the next intro (no hard cut) | TODO | offline render shows no click at the join (`tests/lab/house-wav.mjs`) |
-| W4.4 | Make it automatic for every style: "Auto" playlist mixes the house songs and the synthwave track; Settings > Music style gets Auto (default) / Deep house / Synthwave | TODO | setting saved and applied, English and Spanish |
-| W4.5 | Optional tiny "Now playing: <song>" line when a song changes (off in Advanced if annoying) | TODO | no audio or frame cost |
-| W4.6 | Add 3-5 more generative songs (variety: tempo 110-128, different chord sets) | TODO | `tests/house-check.mts` passes for each |
+| W4.1 | Find out why the owner thinks it is manual (play 5 minutes in menu and in a race; check rotation also after pause/resume, tab hidden, language switch) and fix any real fault | DONE (rotation did work, but in fixed order with hard cuts and no synthwave; real fault fixed: a stalled frame fired every late step at once; synthwave was ~10 dB quieter, level-matched); evidence: `tests/music-auto-check.mts`: 8 songs in 12 unattended minutes, pause, 2 s stall, skip, styles | a lab test plays 6 songs unattended with the mock audio context and every one starts |
+| W4.2 | Shuffle bag: every song plays once before any repeats, never the same song twice in a row; keep the manual button as an extra | DONE; evidence: `tests/playlist-check.mts` | unit test over 50 rotations |
+| W4.3 | Smooth transition: end each song with a short outro / filter sweep and crossfade into the next intro (no hard cut) | DONE (2-bar drumless outro, 4-bar filter sweep, next song's intro overlaps the last 2 bars); evidence: `tests/lab/music-join.mjs` ALL PASS (3 joins incl. synthwave both ways, levels within 0.5 dB) | offline render shows no click at the join (`tests/lab/house-wav.mjs`) |
+| W4.4 | Make it automatic for every style: "Auto" playlist mixes the house songs and the synthwave track; Settings > Music style gets Auto (default) / Deep house / Synthwave | DONE (old saves that stored "house" keep Deep house, which also changes by itself now); evidence: `tests/save-check.mts`, i18n-check, screenshot ES | setting saved and applied, English and Spanish |
+| W4.5 | Optional tiny "Now playing: <song>" line when a song changes (off in Advanced if annoying) | DONE (Settings > Advanced > Sound toggle, on by default; called once per song via `MUSIC_SOURCE.onSong`); evidence: checked in a live page | no audio or frame cost |
+| W4.6 | Add 3-5 more generative songs (variety: tempo 110-128, different chord sets) | DONE (Glass Tower 112, Afterglow 126, Velvet Underpass 116, Last Exit 128; levels within 0.4 dB of the old songs, `tests/lab/house-wav.mjs`) | `tests/house-check.mts` passes for each |
 
 ## W1. Server settings and housekeeping (test server, owner approves anything that changes it)
 | # | Item | Status | Done when |

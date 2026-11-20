@@ -13,10 +13,13 @@ const posOf = (step: number): number => step % HOUSE_STEPS;
 /** Seconds a step starts late because of the swing. */
 export const swingOffset = (song: HouseSong, step: number): number => (step % 2 === 1 ? song.swing * stepSeconds(song) : 0);
 
-/** Arrangement: 2-bar intro without drums, a 4-bar breakdown in the middle, the full groove otherwise. */
-export function houseSection(step: number): 'intro' | 'break' | 'full' {
+/** Bars at the end of every song without kick and clap: the next song's drumless intro overlaps them (crossfade). */
+export const OUTRO_BARS = 2;
+
+/** Arrangement: 2-bar intro without drums, a 4-bar breakdown in the middle, a 2-bar drumless outro, the full groove otherwise. */
+export function houseSection(step: number): 'intro' | 'break' | 'outro' | 'full' {
   const b = Math.floor(step / HOUSE_STEPS) % SONG_BARS;
-  return b < 2 ? 'intro' : b >= 24 && b < 28 ? 'break' : 'full';
+  return b < 2 ? 'intro' : b >= SONG_BARS - OUTRO_BARS ? 'outro' : b >= 24 && b < 28 ? 'break' : 'full';
 }
 
 /** Pad chord for the bar (played on its first step). */
@@ -57,7 +60,7 @@ export function houseDrums(step: number): HouseHit {
   return {
     kick: on && p % 4 === 0,
     clap: on && (p === 4 || p === 12),
-    openHat: sec !== 'intro' && p % 4 === 2,
+    openHat: sec !== 'intro' && sec !== 'outro' && p % 4 === 2,
     hat: !on || p % 4 === 2 ? 0 : p % 2 === 1 ? 0.55 : 0.3,
     shaker: on && p % 2 === 1,
   };

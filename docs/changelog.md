@@ -3,6 +3,11 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-20
+- **Songs change by themselves.** You never need "Next song" again. The music shuffles (every song once before any repeats, never the same song twice in a row) and blends into the next one: the old song drops its drums and goes muffled while the new one fades in, so there is no hard cut. New default style **Auto** mixes the deep-house songs with the synthwave track (Settings > Advanced > Sound > Music style: Auto / Deep house / Synthwave). "Next song" is still there as an extra. If you had Deep house before, you keep Deep house, which now also changes by itself.
+- **Four new songs** (9 deep-house songs now): Glass Tower, Afterglow, Velvet Underpass, Last Exit, from 112 to 128 BPM. The synthwave track (now called "Neon Grid") was about 10 dB quieter than the house songs; it now plays at the same loudness.
+- **"Now playing" line.** A small line at the top shows the song name for 4 seconds when a song changes. Turn it off in Settings > Advanced > Sound.
+- Fixed: after a stutter (e.g. while a track loads) the music no longer plays a burst of late notes at once.
+- To listen to the song transitions without playing: `logs/music/join-*.wav` (made by `tests/lab/music-join.mjs`).
 - **Master plan and one prompt for everything.** `docs/master-plan.md` lists the five big jobs (songs that change by themselves, server settings, leaderboards, own online lobby, open-world city driving) with the status of each step; `docs/prompts/everything.md` is the prompt to paste into a new session and to resume later.
 - **Faster launches.** The game now downloads only what changed since last time (about 28 bytes when nothing did, instead of ~526 KB for a big save), and big saves are compressed both ways. The server part is already live; the browser part ships with the next deploy.
 - **Documentation system.** This changelog, the owner's guide, the online/Redis roadmap and a ready-made prompt for the next big job. Rule: docs are updated after every change, and every session ends with a checkpoint.

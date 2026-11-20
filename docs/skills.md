@@ -31,7 +31,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | Chapter 3 story | `data/story3.ts` + `storyLines3.ts` (+ ES in `i18n/esContentH.ts`), unlock logic `core/career.ts nextEvent3`, ending `ui/storyMenu.ts buildEnding(3)`, forced manual gearbox `StoryEvent.manual` -> `physics/gearbox.ts forced` set in `game/inputSetup.ts` |
 | story events, dialogue | `data/story1.ts`, `story2*.ts`, `storyLines*.ts`, canon in `docs/story.md`, flow `game/story.ts`, rules `core/career.ts` |
 | cars, upgrades, prices | `data/cars.ts`, `carReal.ts` (real specs + power stages), `upgrades.ts`, `core/save.ts buyUpgrade` |
-| engine / music / turbo sound | `audio/engineSamples.ts` (recorded loops, `samplePitch`), `data/engineSounds.ts` (`tune {trim,tone}` per car), `audio/engineVoice.ts` (synth), `audio/house*.ts` |
+| engine / music / turbo sound | `audio/engineSamples.ts` (recorded loops, `samplePitch`), `data/engineSounds.ts` (`tune {trim,tone}` per car), `audio/engineVoice.ts` (synth). Music: `audio/musicDirector.ts` (playlist, styles, crossfade timing) -> decks `houseMusic.ts` (+`houseVoices.ts`, songs in `houseSongs.ts`, arrangement in `housePatterns.ts`) and `music.ts` (synthwave); shuffle `playlist.ts`; style/skip/now playing in `MUSIC_SOURCE` (`audioParams.ts`). Add a song: entry in `houseSongs.ts`, `npx tsx tests/house-check.mts` |
 | lights, bloom, glare, neon | `render/lookConfig.ts`, `core/grade.ts`, `core/looks.ts`, `fx/finalFx.ts` (streak pass), `fx/headlights.ts`, `world/carLights.ts`, emissive strengths in `world/tunnelBridge.ts props.ts landmarks.ts` |
 | menus / garage / tuning | `ui/menu.ts`, `ui/garage.ts` (+`garageLook`), `ui/tuneMenu.ts`, `ui/menuCss.ts` (all menu CSS) |
 | phone orientation, launch gas | `ui/rotateHint.ts` (landscape card + lock), `ui/touchControls.ts` (`starting`, `startgas` pedal), `game/inputSetup.ts` |
@@ -70,6 +70,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 - Typed i18n: `t(\`how.t${i}\`)` fails to compile; index a `as const` array instead.
 - `Game.startRace` mutates `setup.meta` (raceId): do not reuse a meta object between races.
 - Visual look bugs: bright HDR emissive (multiplier > 2) on long meshes washes out through bloom; keep strips near 1.2-1.6.
+- Labs that `import()` source files inside the dev page: Vite adds `?t=<edit time>` to imports of files edited after the server started, so a bare `/src/x.ts` import can be a SECOND module instance (separate globals such as `MUSIC_SOURCE`). Import the URL from `performance.getEntriesByType('resource')` (see `tests/lab/music-join.mjs`).
 - `tests/save-roundtrip.mts` guards the rule "a restored race runs identically": new per-race state must be in the snapshot.
 
 ## 8. Open work (see handoff for the live list)

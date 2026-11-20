@@ -57,4 +57,32 @@ export const HOUSE_SONGS: readonly HouseSong[] = [
     stab: [3, 10], stabOdd: [6, 14],
     pluck: [79, _, _, 82, _, _, 84, _, 82, _, _, _, 79, _, 77, _, 75, _, _, 77, _, _, 79, _, _, _, 82, _, _, _, _, _],
   },
+  { // Bbm9 Gbmaj9 Ebm9 Fsus, slow and deep, soft keys
+    name: 'Glass Tower', bpm: 112, swing: 0.14, kickHz: 45, stabWave: 'triangle',
+    prog: [{ root: 34, voicing: [61, 65, 68, 72] }, { root: 30, voicing: [58, 61, 65, 68] }, { root: 39, voicing: [54, 58, 61, 65] }, { root: 29, voicing: [58, 60, 63, 65] }],
+    bass: [[2, 0, 2], [6, 0, 1], [7, 7, 1], [10, 0, 2], [14, 12, 1]],
+    stab: [3, 11], stabOdd: [7],
+    pluck: [70, _, _, 73, _, _, 75, _, _, _, 77, _, _, _, 75, _, 73, _, _, _, 70, _, _, 68, _, _, 70, _, _, _, _, _],
+  },
+  { // Gm9 Ebmaj9 Bbmaj9 Fsus, straight and driving
+    name: 'Afterglow', bpm: 126, swing: 0.08, kickHz: 50, stabWave: 'sawtooth',
+    prog: [{ root: 31, voicing: [58, 62, 65, 69] }, { root: 39, voicing: [55, 58, 62, 65] }, { root: 34, voicing: [62, 65, 69, 72] }, { root: 29, voicing: [58, 60, 65, 67] }],
+    bass: [[2, 0, 1], [3, 0, 1], [6, 12, 1], [10, 0, 1], [11, 7, 1], [14, 0, 2]],
+    stab: [2, 10], stabOdd: [6, 14],
+    pluck: [79, _, 82, _, 81, _, _, 77, _, _, 74, _, _, _, _, _, 77, _, 79, _, _, _, 74, _, 77, _, _, _, 70, _, _, _],
+  },
+  { // Em9 Cmaj9 Am11 Bm7, lazy swing, organ
+    name: 'Velvet Underpass', bpm: 116, swing: 0.22, kickHz: 43, stabWave: 'square',
+    prog: [{ root: 28, voicing: [55, 59, 62, 66] }, { root: 36, voicing: [52, 55, 59, 62] }, { root: 33, voicing: [60, 62, 64, 67] }, { root: 35, voicing: [54, 57, 59, 62] }],
+    bass: [[3, 0, 1], [6, 0, 2], [9, 12, 1], [10, 0, 1], [14, 7, 2]],
+    stab: [6, 14], stabOdd: [3],
+    pluck: [_, _, 76, _, _, 79, _, 81, _, _, _, _, 83, _, 81, _, _, _, 79, _, _, _, 76, _, _, _, 74, _, 76, _, _, _],
+  },
+  { // Cm11 Abmaj7 Fm9 Gsus, fast peak-time
+    name: 'Last Exit', bpm: 128, swing: 0.06, kickHz: 49, stabWave: 'sawtooth',
+    prog: [{ root: 36, voicing: [58, 63, 65, 67] }, { root: 32, voicing: [60, 63, 67, 68] }, { root: 29, voicing: [56, 60, 63, 67] }, { root: 31, voicing: [60, 62, 65, 67] }],
+    bass: [[2, 0, 1], [6, 0, 1], [7, 12, 1], [10, 0, 1], [14, 0, 1], [15, 12, 1]],
+    stab: [3, 7, 11], stabOdd: [],
+    pluck: [84, _, _, 82, _, _, 79, _, _, _, 75, _, 77, _, _, _, 79, _, _, 82, _, _, 84, _, _, _, 87, _, 84, _, _, _],
+  },
 ];

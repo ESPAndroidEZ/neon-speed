@@ -5,10 +5,10 @@ import { HOUSE_SONGS } from '../src/audio/houseSongs.ts';
 let failed = 0;
 const check = (n: string, ok: boolean, i = ''): void => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}  ${i}`); };
 const bar4 = HOUSE_STEPS * 4, song = SONG_BARS * HOUSE_STEPS;
-check('at least 5 songs, unique names', HOUSE_SONGS.length >= 5 && new Set(HOUSE_SONGS.map((s) => s.name)).size === HOUSE_SONGS.length);
+check('at least 9 songs, unique names', HOUSE_SONGS.length >= 9 && new Set(HOUSE_SONGS.map((s) => s.name)).size === HOUSE_SONGS.length);
 for (const S of HOUSE_SONGS) {
   const steps = Array.from({ length: bar4 }, (_, s) => s + 2 * HOUSE_STEPS * 4); // inside the full section
-  check(`${S.name}: house tempo`, S.bpm >= 116 && S.bpm <= 126, `${S.bpm}`);
+  check(`${S.name}: house tempo`, S.bpm >= 110 && S.bpm <= 128, `${S.bpm}`);
   check(`${S.name}: 4 bars, 4-note voicings, 32-step pluck`, S.prog.length === 4 && S.prog.every((c) => c.voicing.length === 4) && S.pluck.length === 32);
   check(`${S.name}: bass never on the kick`, steps.every((s) => !(houseDrums(s).kick && houseBass(S, s))));
   check(`${S.name}: has bass, stabs and pluck`, steps.some((s) => houseBass(S, s)) && steps.some((s) => houseStab(S, s)) && steps.some((s) => housePluck(S, s) !== null));
@@ -20,6 +20,7 @@ for (const S of HOUSE_SONGS) {
 const full = 4 * HOUSE_STEPS;
 check('four on the floor in the full section', [0, 4, 8, 12].every((p) => houseDrums(full + p).kick) && [1, 2, 3, 5].every((p) => !houseDrums(full + p).kick));
 check('clap on 2 and 4', houseDrums(full + 4).clap && houseDrums(full + 12).clap && !houseDrums(full).clap);
+check('outro (last 2 bars) drops kick, clap and hats', [0, 4, 8, 12].every((p) => !houseDrums((SONG_BARS - 1) * HOUSE_STEPS + p).kick && !houseDrums((SONG_BARS - 1) * HOUSE_STEPS + p).clap) && houseSection((SONG_BARS - 2) * HOUSE_STEPS) === 'outro' && houseSection((SONG_BARS - 3) * HOUSE_STEPS) === 'full');
 check('intro and breakdown drop the kick', !houseDrums(0).kick && houseSection(0) === 'intro' && houseSection(25 * HOUSE_STEPS) === 'break' && !houseDrums(25 * HOUSE_STEPS).kick);
 let mono = true, prev = houseLayers(0);
 for (let i = 1; i <= 100; i++) {

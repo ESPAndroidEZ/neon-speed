@@ -1,46 +1,82 @@
 import type { AudioBus } from './audioBus';
 import { arpNote, bassNote, chordTones, drumHit, layers, leadNote, midiToHz, SECONDS_PER_STEP, STEPS_PER_BAR } from './musicPatterns';
+import { DeckOut, type MusicDeck } from './musicDeck';
 
 const LOOKAHEAD = 0.18;
+/** One synthwave "song" in the playlist: 40 bars at 108 BPM, about 89 s; it then hands over or plays on. */
+export const SYNTH_BARS = 40;
+const SONG_STEPS = SYNTH_BARS * STEPS_PER_BAR;
+export const SYNTH_NAME = 'Neon Grid';
+/** Level match with the house songs (measured offline, tests/lab/music-join.mjs: synthwave was ~10 dB quieter). */
+const SYNTH_TRIM = 3;
 
-/** Generative synthwave. Notes come from musicPatterns; layers fade in with intensity (speed). */
-export class Music {
+/** Generative synthwave (a deck of MusicDirector). Notes come from musicPatterns; layers fade in with intensity (speed). */
+export class Music implements MusicDeck {
   private readonly bus: AudioBus;
   private step = 0;
+  private endStep = SONG_STEPS;
   private next = 0;
   private started = false;
+  private on = false;
   private intensity = 0;
   private readonly lp: BiquadFilterNode;
   private readonly out: GainNode;
+  private readonly deck: DeckOut;
 
   constructor(bus: AudioBus) {
     this.bus = bus;
+    this.deck = new DeckOut(bus.ctx, bus.music);
     this.lp = bus.ctx.createBiquadFilter();
     this.lp.type = 'lowpass';
     this.lp.Q.value = 3;
     this.out = bus.ctx.createGain();
-    this.out.gain.value = 0;
-    this.lp.connect(this.out).connect(bus.music);
+    this.out.gain.value = SYNTH_TRIM;
+    this.lp.connect(this.out).connect(this.deck.input);
   }
 
-  /** Call every frame. `playing` fades the music in/out; `intensity` 0..1. */
-  update(playing: boolean, intensity: number): void {
+  get active(): boolean { return this.on; }
+  get name(): string { return SYNTH_NAME; }
+  barSeconds(): number { return SECONDS_PER_STEP * STEPS_PER_BAR; }
+
+  begin(_item: number, fromBar: number, fadeSecs: number): void {
+    this.step = fromBar * STEPS_PER_BAR;
+    this.endStep = SONG_STEPS;
+    this.on = true;
+    this.started = false;
+    this.deck.open(fadeSecs);
+  }
+
+  end(secs: number): void {
+    this.deck.close(secs);
+    this.endStep = Math.min(this.endStep, this.step + Math.ceil(secs / SECONDS_PER_STEP));
+  }
+
+  sweep(secs: number): void { this.deck.sweep(secs); }
+  extend(): void { this.endStep += SONG_STEPS; this.deck.open(0.5); }
+
+  secondsLeft(): number {
+    if (!this.on) return 0;
+    return Math.max(0, (this.endStep - this.step) * SECONDS_PER_STEP + (this.started ? this.next - this.bus.ctx.currentTime : 0));
+  }
+
+  update(intensity: number): void {
     const ctx = this.bus.ctx;
     this.intensity += (intensity - this.intensity) * 0.04;
-    this.out.gain.setTargetAtTime(playing ? 1 : 0, ctx.currentTime, 0.6);
-    this.lp.frequency.setTargetAtTime(layers(this.intensity).cutoff + 800, ctx.currentTime, 0.2);
-    if (!playing || ctx.state !== 'running') {
+    if (!this.on || ctx.state !== 'running') {
       this.started = false;
       return;
     }
+    this.lp.frequency.setTargetAtTime(layers(this.intensity).cutoff + 800, ctx.currentTime, 0.2);
     if (!this.started) {
       this.started = true;
       this.next = ctx.currentTime + 0.1;
     }
-    while (this.next < ctx.currentTime + LOOKAHEAD) {
+    while (this.next < ctx.currentTime - 0.02 && this.step < this.endStep) { this.step++; this.next += SECONDS_PER_STEP; } // stalled frame
+    while (this.next < ctx.currentTime + LOOKAHEAD && this.step < this.endStep) {
       this.play(this.step++, this.next);
       this.next += SECONDS_PER_STEP;
     }
+    if (this.step >= this.endStep) this.on = false;
   }
 
   private play(step: number, t: number): void {
@@ -80,7 +116,7 @@ export class Music {
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.4, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-    o.connect(g).connect(this.bus.music);
+    o.connect(g).connect(this.out);
     o.start(t);
     o.stop(t + 0.22);
   }
@@ -95,7 +131,7 @@ export class Music {
     const g = ctx.createGain();
     g.gain.setValueAtTime(level, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    s.connect(f).connect(g).connect(this.bus.music);
+    s.connect(f).connect(g).connect(this.out);
     s.start(t);
     s.stop(t + dur + 0.02);
   }
