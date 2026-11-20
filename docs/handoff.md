@@ -82,7 +82,7 @@ Rounds 2 and 3: graphics pass, particles, weather physics levels, turbo + proced
 See docs/fable-notes.md (unfinished checks, weak spots, decisions to confirm).
 
 ## Qwen queue (unattended: `scripts/qwen-queue.sh <numbers>`; one task file per number in `docs/tasks/`; Qwen runs through Hermes)
-Tasks 058-062 written (lighting/post, street props, asphalt+puddles, garage shell, HUD/menu layout; 020-024 were taken), NOT started: `setsid nohup scripts/qwen-queue.sh 058 059 060 061 062 > logs/qwen/queue.out 2>&1 &`, watch `tail -f logs/qwen/summary.txt`. Hooks Qwen edits: src/render/lookConfig.ts, src/ui/garageConfig.ts. Check helper: scripts/with-dev.sh.
+Tasks 063-067 written 2026-11-20 for W5.6 (roof kit, street furniture placement, 8 harbour signs, street names + district blurbs EN/ES, traffic shapes), NOT started (Qwen server was down and `hermes` not on PATH this session): `scripts/start-qwen.sh`, then `setsid nohup scripts/qwen-queue.sh 063 064 065 066 067 > logs/qwen/queue.log 2>&1 &`; review each with /review-qwen; Claude wires them afterwards (roofKit into chunkGeo roofs, furniture into an instanced view, variants within the draw-call budget). Tasks 058-062 written (lighting/post, street props, asphalt+puddles, garage shell, HUD/menu layout; 020-024 were taken), NOT started: `setsid nohup scripts/qwen-queue.sh 058 059 060 061 062 > logs/qwen/queue.out 2>&1 &`, watch `tail -f logs/qwen/summary.txt`. Hooks Qwen edits: src/render/lookConfig.ts, src/ui/garageConfig.ts. Check helper: scripts/with-dev.sh.
 Models merged: 046-050 (350Z, RX-7 old style, Evo, Supra, 350Z rework). 051 rx7 / 052 civic CANCELLED (owner: no more visual work on existing cars). RUNNING (fresh queue, `QWEN_TIMEOUT=50m`): 053 golf IN PROGRESS, then 054 e61, 055 m3 (Supra template). None finished yet.
 Content kit, one file per task, see docs/tasks/000-readme.md. Order: 020-021 archetypes, 022-024 graffiti, 025-026 signs, 027 facade variants, 028-029 rims, 030-033 parts, 034-035 vinyls, 036-040 props, 016-017 tram/yard props, 041 parts catalog, 042 dyno graph, 043 loadout list, 044 tests, 018-019 AI/dialogue tests.
 Done: 012 radio2, 013 tips2, 014 barks (merged and wired). Logs: `logs/qwen/<task>.log`, `logs/qwen/summary.txt` (DONE / EMPTY / FAILED / TIMEOUT).
@@ -136,6 +136,7 @@ None. Contract changes logged: session 5: `Track` gained `heights` and `raceSamp
 - 2026-11-20 Claude: W5.5 save: Free Drive progress (records, meet visit, spot, seen cells) in the versioned save, resumes where you left; 1453 PASS; checkpoint.
 
 - 2026-11-20 Claude: W5.5 city races done (GPS loop -> temporary circuit, start rings, offer, cash via claimRace, back to Free Drive); city-race-check + lab ALL PASS; missions blocked on owner story input.
+- 2026-11-20 Claude: W5.6 Qwen tasks 063-067 written (not run: Qwen server down); blocked on starting Qwen.
 ## Graphics audit (round 3, step 3)
 `public/models/` holds no GLBs yet: every car runs on the procedural fallback (console lines `[models] <id>: ...` and a garage badge say so; the garage shows "Put <id>.glb in public/models/"). The GLB path itself was tested with a synthetic GLB in round 1 and its normalisation and material upgrade have unit tests (`tests/model-check`, `tests/graphics-check`); it has NOT been seen with a real Tripo mesh.
 | Round 2 item | Status |
