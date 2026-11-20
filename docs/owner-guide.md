@@ -1,5 +1,7 @@
 # Neon Speed: owner's guide
 
+Last updated: 2026-11-20 (city races, Free Drive checked in every district, hill road fix).
+
 For Carlos. Plain language, no code reading needed. Updated at every checkpoint (last: 2026-11-20, after W2 lap boards, W3 lobby and Free Drive W5.1-W5.4: city, looks, traffic, maps, speed cameras). The technical version for Claude and Qwen is `docs/skills.md`; the list of changes by date is `docs/changelog.md`.
 
 ## 1. What the game is today

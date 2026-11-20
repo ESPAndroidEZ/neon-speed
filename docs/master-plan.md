@@ -1,6 +1,6 @@
 # Master plan (living file)
 
-The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4, W5.1-W5.3 DONE; W1 housekeeping installed; W2 + W3 built, waiting for owner/administrator OKs; W5.4 DONE except jumps; W5.5 save + city races done, missions blocked on story input).
+The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-20 (W4, W5.1-W5.3 DONE; W1 housekeeping installed; W2 + W3 built, waiting for owner/administrator OKs; W5.4 DONE except jumps; W5.5 save + city races done, missions blocked on story input; W5.6 tasks written, blocked on Qwen; W5.7 bench + QA done, deploy waits for the owner).
 
 Status values: TODO, DOING, BLOCKED (waiting for the owner or the server administrator), DONE (verified, with the evidence in the changelog).
 
