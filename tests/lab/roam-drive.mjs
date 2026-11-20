@@ -32,7 +32,7 @@ await page.evaluate(() => {
 const sample = () => page.evaluate(() => {
   const g = window.__rbGame, st = g.rm.player.car.state, info = g.d.engine.renderer.info;
   const city = g.d.engine.scene.getObjectByName('neon-harbor');
-  return { state: g.state, x: st.position.x, z: st.position.z, speed: st.speed, calls: window.__roam.calls, tris: window.__roam.tris, chunks: city ? city.children.filter((c) => c.name.startsWith('chunk')).length : 0, traffic: city?.getObjectByName('traffic')?.children[0]?.count ?? 0, cityMeshes: city ? city.children.reduce((a, c) => a + c.children.length, 0) : 0, geos: info.memory.geometries, textures: info.memory.textures, heap: performance.memory?.usedJSHeapSize ?? 0 };
+  return { state: g.state, x: st.position.x, z: st.position.z, speed: st.speed, calls: window.__roam.calls, tris: window.__roam.tris, chunks: city ? city.children.filter((c) => c.name.startsWith('chunk')).length : 0, traffic: (city?.getObjectByName('traffic')?.children ?? []).slice(0, 5).reduce((a, m) => a + (m.count ?? 0), 0), /* 5 body meshes, one per shape (task 067) */ cityMeshes: city ? city.children.reduce((a, c) => a + c.children.length, 0) : 0, geos: info.memory.geometries, textures: info.memory.textures, heap: performance.memory?.usedJSHeapSize ?? 0 };
 });
 const samples = [];
 let stuck = 0, respawns = 0, dist = 0, last = await sample();

@@ -6,6 +6,7 @@ import type { RoamTraffic } from './roamTraffic';
 import { CELL, isWater } from '../data/world/districtMap';
 import { heightAt, slopeAlong } from '../world/roads/height';
 import { RoadIndex, createRoadHit } from '../world/roads/roadIndex';
+import { trafficSize } from './trafficSize';
 import { GridHash } from '../world/roads/spatial';
 
 const HALF_W = 0.92, HALF_L = 2.1; // car half width / length (same as TrackContact)
@@ -139,7 +140,7 @@ export class RoamContact {
     }
   }
 
-  /** Traffic cars as 1.8 m x 4.4 m boxes (same test as buildings). */
+  /** Traffic cars as boxes of their shape's size (physics/trafficSize; same test as buildings). */
   private cars(cx: number, cz: number): void {
     const t = this.traffic;
     if (!t) return;
@@ -148,7 +149,7 @@ export class RoamContact {
       if (dx * dx + dz * dz > 9) continue;
       const fx = Math.sin(t.h[i]), fz = Math.cos(t.h[i]);
       const lz = dx * fx + dz * fz, lx = dx * fz - dz * fx;
-      const ox = 0.9 - Math.abs(lx), oz = 2.2 - Math.abs(lz);
+      const sz = trafficSize(t.agents[i].variant), ox = sz[0] / 2 - Math.abs(lx), oz = sz[1] / 2 - Math.abs(lz);
       if (ox <= 0 || oz <= 0) continue;
       const before = this.pen;
       if (ox < oz) this.set(ox, fz * Math.sign(lx), -fx * Math.sign(lx), cx, cz);

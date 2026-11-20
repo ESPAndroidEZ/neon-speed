@@ -281,11 +281,12 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
 ## src/physics
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
-- roamContact.ts (167) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
+- roamContact.ts (168) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
 - roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
 - roamTraffic.ts (216) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
 - surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - trackContact.ts (128) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
+- trafficSize.ts (6) Body size per traffic vehicle shape (task 067): [width, length] in metres, indexed by `... | const TRAFFIC_SIZE, trafficSize
 ## src/physics/v2
 - arcade.ts (68) v2 arcade layer (plan section 4), on top of the physics and never inside the force code... | fn steerV2, driveTrim, yawAssist, rearHold, carry
 - v2Params.ts (92) Diff codes (numbers, no enum): 0 open, 1 helical, 2 viscous, 3 clutch, 4 active. Layout... | fn buildV2, createV2; iface V2Car
@@ -438,7 +439,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roofKit.ts (90) Roof clutter for Neon Harbor buildings (task 063, built by Claude): AC units, water tan... | fn roofDetails
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
 - streetFurniture.ts (75) Street furniture along Neon Harbor's sidewalks (task 063-067 set, built by Claude): bin... | fn placeFurniture; const FURNITURE_KINDS, FURN_STRIDE; type FurnitureKind
-- trafficView.ts (95) Body paints of the traffic cars (muted, so the player's car stands out). | fn carShapes; class TrafficView
+- trafficShapes.ts (54) Traffic vehicle shapes for Neon Harbor (task 067, built by Claude): saloon, hatch, van,... | fn trafficShape; const TRAFFIC_VARIANTS; iface TrafficShape; type TrafficVariant
+- trafficView.ts (122) Body paints of the traffic cars (muted, so the player's car stands out). | fn carShapes; class TrafficView
 - trapView.ts (25) Speed cameras as one static mesh (one draw call): a dark post at the kerb with a glowin... | fn trapMesh
 - zoneView.ts (23) Drift zones as glowing rings on the ground: every zone in one mesh (one draw call). | fn zoneMesh
 ## src/world
