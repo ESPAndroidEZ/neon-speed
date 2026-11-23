@@ -164,6 +164,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     d.hud.setBanner('');
     d.hud.update(game.telemetry);
     ui?.update(city.streamer.live.size, city.streamer.pending);
+    ui?.tokens(city.acts.tokens.count, city.acts.tokens.tokens.length);
   };
 
   engine.onFrame(() => { if (active && game.state !== 'FREEROAM') leave(); }); // left through the menu: free the city

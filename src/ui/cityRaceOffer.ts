@@ -9,16 +9,13 @@ export interface CityRaceOffer { show(name: string, info: string): void; hide():
  */
 export function cityRaceOffer(start: () => void): CityRaceOffer {
   const root = h('div', 'rb-panel rb-city-offer');
-  root.style.cssText = 'position:fixed;top:calc(max(10px,env(safe-area-inset-top)) + 52px);left:50%;transform:translateX(-50%);z-index:12;display:none;align-items:center;gap:12px;padding:10px 14px;max-width:calc(100vw - 32px);font:600 14px system-ui,sans-serif;color:#ffe2a8;border:1px solid #ffb02088';
   const text = h('div', '');
   const title = h('div', '');
-  title.style.cssText = 'font-weight:900;font-size:15px;color:#ffd27d';
+  title.className = 'rb-ot';
   const sub = h('div', 'rb-sub');
   text.append(title, sub);
   const go = button(t('city.race'), () => { if (on) start(); }, 'hot');
-  go.style.cssText += ';min-width:0;padding:8px 16px';
   const key = h('span', 'rb-sub', t('city.key'));
-  key.style.opacity = '.7';
   root.append(text, go, key);
   document.body.appendChild(root);
   let on = false;
