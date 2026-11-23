@@ -1,14 +1,14 @@
 import { t } from '../i18n';
 import { h } from './uiKit';
-import { injectRoamCss, ICON_PAUSE, ICON_RESPAWN } from './roamCss';
+import { injectRoamCss, ICON_MAP, ICON_PAUSE, ICON_RESPAWN } from './roamCss';
 
 export interface RoamHud { show(): void; hide(): void; update(live: number, pending: number): void; tokens(n: number, all: number): void }
 
 /**
  * Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboard), the neon-token count, and
- * while the city streams in a "building the city" line. Keys while shown: R respawn, Esc pause / resume.
+ * while the city streams in a "building the city" line. Keys while shown: R respawn, M map, Esc pause / resume.
  */
-export function roamHud(a: { respawn: () => void; pause: () => void }): RoamHud {
+export function roamHud(a: { respawn: () => void; pause: () => void; map: () => void }): RoamHud {
   injectRoamCss();
   const root = h('div', 'rb-roam');
   const icon = (svg: string, label: string, fn: () => void): HTMLButtonElement => {
@@ -23,12 +23,13 @@ export function roamHud(a: { respawn: () => void; pause: () => void }): RoamHud 
   const num = document.createElement('span');
   tok.append(dia, num);
   const status = h('span', 'rb-st');
-  root.append(icon(ICON_RESPAWN, t('roam.respawn'), a.respawn), icon(ICON_PAUSE, t('roam.pause'), a.pause), tok, status);
+  root.append(icon(ICON_RESPAWN, t('roam.respawn'), a.respawn), icon(ICON_MAP, t('roam.mapBtn'), a.map), icon(ICON_PAUSE, t('roam.pause'), a.pause), tok, status);
   document.body.appendChild(root);
   let on = false;
   window.addEventListener('keydown', (e) => {
     if (!on || e.repeat) return;
     if (e.code === 'KeyR') a.respawn();
+    else if (e.code === 'KeyM') a.map();
     else if (e.code === 'Escape') a.pause(); // toggles: the pause menu closes itself on Esc too
   });
   return {

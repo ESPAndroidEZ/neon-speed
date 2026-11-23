@@ -4,6 +4,7 @@ import type { SaveStore } from '../core/save';
 import type { Hud } from '../ui/hud';
 import type { Game } from './game';
 import type { Footprint, RoadGraph } from '../types/world';
+import { roamMarkers } from './roamMarkers';
 import { RaceManager } from '../core/raceManager';
 import { findCar } from '../data/cars';
 import { applyBuild } from '../data/carBuild';
@@ -47,6 +48,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   let city: City | null = null;
   let ui: RoamHud | null = null;
   let menu: RoamPause | null = null;
+  let mapFromDrive = false; // the M key / map button opened the map over the drive (Back resumes), not from the pause menu
   let active = false;
   let shownWeather: Weather | null = null;
   const cars = new Float32Array(2 * 41);
@@ -66,8 +68,9 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const peds = new RoamPeds(g, 30), pedView = new PedView(30);
     contact.traffic = traffic;
     group.add(trafficView.group, pedView.mesh);
-    const map = roamMap(g, ci, contact.roads, () => menu?.open());
+    const map = roamMap(g, ci, contact.roads, () => { if (mapFromDrive) { mapFromDrive = false; game.paused = false; } else menu?.open(); });
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
+    map.setMarkers(roamMarkers(acts));
     const missions = new RoamMissions(g, acts, d.store, () => map);
     return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
   };
@@ -199,7 +202,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.views.update(0, 0);
       game.syncView(true);
       active = true;
-      ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused) });
+      ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused), map: () => { if (game.paused || !city) return; mapFromDrive = true; game.paused = true; city.map.open(); } });
       menu ??= roamPause({ map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
       city.map.show(true);
