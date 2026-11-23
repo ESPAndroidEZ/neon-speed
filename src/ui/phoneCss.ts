@@ -8,7 +8,9 @@ export const PHONE_CSS = `
 .rb-sw{position:relative}.rb-sw::after{content:'';position:absolute;inset:-8px}
 .rb-lang .rb-btn,.rb-langrow .rb-btn{min-height:44px}
 @media (max-height:480px) and (orientation:landscape){
-  .rb-garage-layer{align-items:flex-start;justify-content:flex-start;padding-top:max(var(--sp-2),var(--safe-t));padding-bottom:max(var(--sp-2),var(--safe-b))}
+  .rb-garage-layer{align-items:flex-start!important;justify-content:center!important;padding:max(var(--sp-2),var(--safe-t)) 0 max(var(--sp-2),var(--safe-b)) max(var(--sp-3),var(--safe-l))!important}
+  .rb-garage .rb-blurb,.rb-garage .rb-note{display:none}
+  .rb-gact{gap:var(--sp-1)}.rb-gact .rb-btn{min-width:0;flex:1 1 0;padding:var(--sp-2) var(--sp-2);letter-spacing:1px;font-size:.8em}
   .rb-garage-layer>.rb-garage{width:min(330px,42vw)!important;max-height:calc(100dvh - 16px)!important;margin:0;padding:var(--sp-2) var(--sp-3);text-align:left!important}
   .rb-pause{display:grid!important;grid-template-columns:1fr 1fr;align-content:center;gap:var(--sp-2) var(--sp-3);padding-left:max(24px,18vw);padding-right:max(24px,18vw)}
   .rb-pause>h2,.rb-pause>.rb-sub,.rb-pause>.rb-row,.rb-pause>section{grid-column:1/3;margin:0}

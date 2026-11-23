@@ -25,3 +25,13 @@ body.rb-roaming .rb-where{display:block}.rb-where{display:none}
 `;
 export const ICON_RESPAWN = '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
 export const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>';
+
+let injected = false;
+/** Add ROAM_CSS to the page once (the offer card and the HUD both need it, whichever is built first). */
+export function injectRoamCss(): void {
+  if (injected) return;
+  injected = true;
+  const style = document.createElement('style');
+  style.textContent = ROAM_CSS;
+  document.head.appendChild(style);
+}

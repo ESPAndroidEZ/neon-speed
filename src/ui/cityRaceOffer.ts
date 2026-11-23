@@ -1,3 +1,4 @@
+import { injectRoamCss } from './roamCss';
 import { t, tx } from '../i18n';
 import { button, h } from './uiKit';
 
@@ -8,6 +9,7 @@ export interface CityRaceOffer { show(name: string, info: string): void; hide():
  * Race button for phones, Enter on a keyboard. `start` is called once per tap or key press.
  */
 export function cityRaceOffer(start: () => void): CityRaceOffer {
+  injectRoamCss();
   const root = h('div', 'rb-panel rb-city-offer');
   const text = h('div', '');
   const title = h('div', '');

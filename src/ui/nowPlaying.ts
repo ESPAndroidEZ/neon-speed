@@ -15,7 +15,7 @@ function show(name: string): void {
     el = document.createElement('div');
     el.className = 'rb-np';
     el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'position:fixed;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:4px 12px;'
+    el.style.cssText = 'position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));padding:4px 12px;'
       + 'border-radius:999px;background:#0a0f1ccc;border:1px solid #18d8ff55;color:#cfefff;font:600 12px/1.3 system-ui,sans-serif;'
       + 'letter-spacing:.03em;white-space:nowrap;pointer-events:none;z-index:55;opacity:0;transition:opacity .5s ease';
     document.body.appendChild(el);

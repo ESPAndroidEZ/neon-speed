@@ -1,6 +1,6 @@
 import { t } from '../i18n';
 import { h } from './uiKit';
-import { ROAM_CSS, ICON_PAUSE, ICON_RESPAWN } from './roamCss';
+import { injectRoamCss, ICON_PAUSE, ICON_RESPAWN } from './roamCss';
 
 export interface RoamHud { show(): void; hide(): void; update(live: number, pending: number): void; tokens(n: number, all: number): void }
 
@@ -9,9 +9,7 @@ export interface RoamHud { show(): void; hide(): void; update(live: number, pend
  * while the city streams in a "building the city" line. Keys while shown: R respawn, Esc pause / resume.
  */
 export function roamHud(a: { respawn: () => void; pause: () => void }): RoamHud {
-  const style = document.createElement('style');
-  style.textContent = ROAM_CSS;
-  document.head.appendChild(style);
+  injectRoamCss();
   const root = h('div', 'rb-roam');
   const icon = (svg: string, label: string, fn: () => void): HTMLButtonElement => {
     const b = h('button', 'rb-ib') as HTMLButtonElement;
