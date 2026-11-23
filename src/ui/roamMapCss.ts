@@ -4,7 +4,7 @@ export const MAP_CSS = `
 .rb-fmap canvas{width:min(100vw - 300px,92vh);height:min(100vw - 300px,92vh);max-width:92vh;border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--glow-cyan);touch-action:none;cursor:crosshair;background:#0b0f18}
 .rb-fmap .rb-side{display:flex;flex-direction:column;gap:var(--sp-2);width:230px;max-height:100%;overflow:auto}
 .rb-fmap .rb-side h2{margin:0;font-size:var(--fs-lg)}
-.rb-fmap .rb-side .rb-btn{min-height:44px;margin:0}
+.rb-fmap .rb-side .rb-btn{min-height:44px;margin:0;min-width:0;width:100%}
 .rb-fmap .rb-key{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-2);align-items:center;font-size:var(--fs-sm);color:var(--text-dim)}
 .rb-fmap .rb-key i{width:12px;height:12px;border-radius:50%;display:block}
 @media (max-aspect-ratio:1/1){.rb-fmap{flex-direction:column!important}.rb-fmap canvas{width:min(94vw,56vh);height:min(94vw,56vh)}.rb-fmap .rb-side{width:min(94vw,420px)}}

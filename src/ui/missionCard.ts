@@ -26,16 +26,17 @@ export function missionCard(accept: () => void): MissionCard {
     if (body.textContent !== b) body.textContent = b;
     go.style.display = showGo ? '' : 'none';
     root.style.display = 'flex';
+    document.body.classList.add('rb-mission');
   };
   return {
-    offer(name, brief) { offering = true; set(name, `${brief} ${t('mission.key')}`, true); },
+    offer(name, brief) { offering = true; set(name, matchMedia('(pointer:coarse)').matches ? brief : `${brief} ${t('mission.key')}`, true); },
     active(name, left, metres) {
       offering = false;
       const s = Math.max(0, Math.ceil(left));
       set(name, `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${metres >= 1000 ? (metres / 1000).toFixed(1) + ' km' : Math.round(metres / 10) * 10 + ' m'}`, false);
     },
-    result(text2, good) { offering = false; set(good ? t('mission.done') : t('mission.failed'), text2, false); clearTimeout(timer); timer = window.setTimeout(() => { if (!offering) root.style.display = 'none'; }, 4000); },
-    hide() { offering = false; root.style.display = 'none'; },
+    result(text2, good) { offering = false; set(good ? t('mission.done') : t('mission.failed'), text2, false); clearTimeout(timer); timer = window.setTimeout(() => { if (!offering) root.style.display = 'none'; document.body.classList.remove('rb-mission'); }, 4000); },
+    hide() { offering = false; root.style.display = 'none'; document.body.classList.remove('rb-mission'); },
     get offering() { return offering; },
   };
 }

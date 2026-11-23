@@ -65,8 +65,8 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
     const k = SIZE / vs;
     const X = (v: number): number => (bx(v) - sx) * k, Z = (v: number): number => (bz(v) - sz) * k;
     cx.drawImage(base, sx, sz, vs, vs, 0, 0, SIZE, SIZE);
-    cx.font = '600 22px system-ui,sans-serif'; cx.textAlign = 'center'; cx.fillStyle = '#e8f6ff66';
-    for (const d of labels) cx.fillText(t(`district.${d.id}` as 'district.bay').toUpperCase(), X(d.x), Z(d.z));
+    cx.font = '600 22px system-ui,sans-serif'; cx.textAlign = 'center'; 
+    for (const d of labels) { const n = t(`district.${d.id}` as 'district.bay').toUpperCase(); cx.strokeStyle = '#05060dcc'; cx.lineWidth = 5; cx.strokeText(n, X(d.x), Z(d.z)); cx.fillStyle = '#e8f6ffcc'; cx.fillText(n, X(d.x), Z(d.z)); }
     if (s.route) {
       cx.strokeStyle = '#18d8ff'; cx.lineWidth = 6; cx.lineCap = 'round';
       for (const id of s.route.edges) { const e = g.edges[id]; cx.beginPath(); for (let i = 0; i < e.cum.length; i++) (i ? cx.lineTo : cx.moveTo).call(cx, X(e.pts[i * 2]), Z(e.pts[i * 2 + 1])); cx.stroke(); }
@@ -102,13 +102,13 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
   let isOpen = false;
   function close(): void {
     if (!isOpen) return;
-    isOpen = false; layer.style.display = 'none'; clearInterval(timer);
+    isOpen = false; layer.style.display = 'none'; clearInterval(timer); document.body.classList.remove('rb-fdover');
     window.removeEventListener('keydown', onKey, true);
     onClose();
   }
   return {
     get isOpen() { return isOpen; },
-    open: () => { isOpen = true; layer.style.display = 'flex'; draw(); timer = window.setInterval(draw, 125); window.addEventListener('keydown', onKey, true); },
+    open: () => { isOpen = true; layer.style.display = 'flex'; document.body.classList.add('rb-fdover'); draw(); timer = window.setInterval(draw, 125); window.addEventListener('keydown', onKey, true); },
     close,
   };
 }
