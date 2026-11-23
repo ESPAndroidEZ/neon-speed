@@ -2,6 +2,7 @@ import type { SaveStore } from '../core/save';
 import type { RoamSave } from '../types/world';
 import type { RoamActivities } from './roamActivities';
 import { emptyRoam } from '../core/roamSaveParse';
+import { TOKEN_REWARDS } from '../core/tokens';
 
 const CELL = 128, SAVE_EVERY = 30;
 
@@ -28,8 +29,24 @@ export class RoamProgress {
       if (kind === 'trap') acts.trapBest.set(Number(id), v);
       else if (kind === 'zone') acts.zoneBest.set(Number(id), v);
     }
+    acts.restoreTokens(r.hands.filter((h) => h.startsWith('t')).map((h) => Number(h.slice(1))));
+    acts.onToken = (id, count) => this.token(id, count);
     acts.onRecord = (key, value) => { this.roam().best[key] = Math.round(value * 10) / 10; this.store.commit(); };
     acts.onVisit = (id) => { const v = this.roam().visited; if (!v.includes(id)) { v.push(id); this.store.commit(); } };
+  }
+
+  /** A token was picked up: save it, and pay a milestone once (cash is added here; the milestone is remembered in `visited`). */
+  private token(id: number, count: number): number {
+    const r = this.roam();
+    if (!r.hands.includes(`t${id}`)) r.hands.push(`t${id}`);
+    let cash = 0;
+    for (const m of TOKEN_REWARDS) {
+      const key = `tok${m.n}`;
+      if (count >= m.n && !r.visited.includes(key)) { r.visited.push(key); cash += m.cash; }
+    }
+    this.store.data.cash += cash;
+    this.store.commit();
+    return cash;
   }
 
   /** Where the last Free Drive ended (null on the first one). */

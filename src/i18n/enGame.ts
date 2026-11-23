@@ -55,6 +55,7 @@ export const EN_GAME = {
   'roam.pause': 'Pause', 'roam.travel': 'Fast travel', 'district.downtown': 'Downtown', 'district.harbour': 'Harbour', 'district.oldtown': 'Old Town', 'district.strip': 'The Strip', 'district.hills': 'The Hills', 'district.industrial': 'Industrial', 'district.bay': 'The Bay',
   'roam.map': 'Map', 'roam.mapHint': 'Tap a place to set a waypoint: the GPS shows the way on the minimap.', 'roam.clear': 'Clear route', 'roam.arrived': 'You have arrived',
   'roam.trap': 'Speed trap: {v}', 'roam.trapBest': 'Speed trap: {v} · new best!',
+  'roam.token': 'Neon token {n}/{all}', 'roam.tokenPay': 'Neon token {n}/{all} · bonus ${cash}',
   'roam.zoneIn': 'Drift zone: show what you have!', 'roam.zoneOut': 'Drift zone: {n} points', 'roam.zoneBest': 'Drift zone: {n} points · new best!',
   'roam.meet': 'Car meet: the crew checks out your {car}',
   'city.offer': 'Street race: {name}', 'city.info': '{laps} laps · {km} km · {n} rivals', 'city.best': 'best {time}', 'city.race': 'Race', 'city.key': 'Enter',

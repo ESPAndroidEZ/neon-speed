@@ -82,6 +82,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - streetName.ts (19) The name of the street an edge belongs to (Neon Harbor, task 066). On the grid, every b... | fn streetName
 - styleCombo.ts (76) What the combo saves (part of the reward snapshot). | class StyleCombo; const COMBO; iface ComboData
 - tipBag.ts (36) Shuffled bag: every item comes out once before any repeats, and the first item of a new... | class TipBag
+- tokens.ts (69) A neon token floats above the street (x, z, y metres above the ground). | fn placeTokens; class TokenWatch; const CORE_DISTRICTS, TOKEN_R, TOKEN_REWARDS, TOKEN_COUNT; iface Token
 - viewport.ts (44) Keeps the game sized to the REAL visible viewport: ResizeObserver on the container, vis... | fn watchViewport; const isPortrait
 - wakeLock.ts (50) Screen wake lock while a race runs, so the phone does not dim mid-race. `set(true)` req... | class WakeLock
 ## src/data
@@ -193,8 +194,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
-- roamActivities.ts (109) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
-- roamProgress.ts (65) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
+- roamActivities.ts (138) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamProgress.ts (82) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - saveGame.ts (67) Can this moment be saved? Only a race in progress (countdown or racing) that was set up... | fn canSave, captureGame, restoreGame
 - showroomCam.ts (44) Slow orbit around the car for the menu and garage. The car's screen position comes from... | class ShowroomCam
 - speedUnit.ts (53) Speed display unit (km/h or mph). Display only: physics stays in m/s. Own localStorage ... | fn parseUnit, getUnit, setUnit, loadUnit, toUnit, unitLabel, speedText; const UNITS_KEY; type SpeedUnit
@@ -208,7 +209,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - en.ts (22) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (73) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
-- enGame.ts (62) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
+- enGame.ts (63) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
@@ -225,7 +226,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
 - esContentI.ts (10) Spanish for the Neon Harbor district lines (src/data/world/districtText.ts). Street nam... | const ES_CONTENT_I
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
-- esGame.ts (64) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
+- esGame.ts (65) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
@@ -440,6 +441,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roofKit.ts (90) Roof clutter for Neon Harbor buildings (task 063, built by Claude): AC units, water tan... | fn roofDetails
 - streamer.ts (90) Time-sliced chunk streaming (pure: no three, no DOM). Chunks within `live` cells of the... | class Streamer; iface ChunkJob
 - streetFurniture.ts (75) Street furniture along Neon Harbor's sidewalks (task 063-067 set, built by Claude): bin... | fn placeFurniture; const FURNITURE_KINDS, FURN_STRIDE; type FurnitureKind
+- tokenView.ts (25) Neon tokens as glowing diamonds: all of them in one instanced mesh (one draw call); a c... | fn tokenMesh
 - trafficShapes.ts (54) Traffic vehicle shapes for Neon Harbor (task 067, built by Claude): saloon, hatch, van,... | fn trafficShape; const TRAFFIC_VARIANTS; iface TrafficShape; type TrafficVariant
 - trafficView.ts (122) Body paints of the traffic cars (muted, so the player's car stands out). | fn carShapes; class TrafficView
 - trapView.ts (25) Speed cameras as one static mesh (one draw call): a dark post at the kerb with a glowin... | fn trapMesh

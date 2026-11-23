@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-23
+- **Neon tokens in Free Drive (a point to the city).** 50 glowing diamonds float over streets in downtown, the strip, old town and the harbour. Drive through them: a pop-up counts them, 10 / 25 / 50 tokens pay $1,000 / $2,500 / $6,000 once. Collected tokens are saved.
 - **Hitting traffic now does something.** A car you hit is shoved along the crash, spins, rests for a moment and then drives back into its lane (no snapping). Sparks, shake and sound were already there. Free Drive only; race handling is unchanged.
 
 ## 2026-11-21

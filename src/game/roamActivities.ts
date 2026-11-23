@@ -13,6 +13,8 @@ import { speedText } from './speedUnit';
 import { t } from '../i18n';
 import { CityRaceSpots, RING } from './cityRaces';
 import { RoamWhere } from '../ui/roamWhere';
+import { placeTokens, TokenWatch, TOKEN_COUNT } from '../core/tokens';
+import { tokenMesh } from '../world/open/tokenView';
 
 /**
  * Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that follow). Built with the city,
@@ -32,6 +34,12 @@ export class RoamActivities {
   /** Set by RoamProgress: a new best (key `trap:<id>` / `zone:<id>`) and a first visit (place id) are saved. */
   onRecord: (key: string, value: number) => void = () => {};
   onVisit: (id: string) => void = () => {};
+  /** Neon tokens (owner playtest: a point to drive around). `onToken(id, count)` saves and returns the cash paid (0 = none). */
+  tokens: TokenWatch;
+  onToken: (id: number, count: number) => number = () => 0;
+  private tokenView: ReturnType<typeof tokenMesh>;
+  private readonly group: Group;
+  private clock = 0;
   private meet: MeetWatch | null = null;
   /** Where the car meet is (null when the harbour has no spot for it). */
   readonly meetSpot: { x: number; z: number; r: number } | null;
@@ -44,6 +52,10 @@ export class RoamActivities {
 
   constructor(g: RoadGraph, group: Group, hud: Hud, contact: RoamContact, carName: () => string) {
     this.hud = hud;
+    this.group = group;
+    this.tokens = new TokenWatch(placeTokens(g));
+    this.tokenView = tokenMesh(this.tokens.tokens, this.tokens.got);
+    group.add(this.tokenView.mesh);
     this.carName = carName;
     this.traps = placeSpeedTraps(g);
     const cams = trapMesh(this.traps);
@@ -64,7 +76,16 @@ export class RoamActivities {
       this.meet = new MeetWatch(meet);
       contact.parked = Float32Array.from(meet.slots.flatMap((s) => [s.x, s.z, s.h]));
     }
-    this.disposers.push(() => { for (const m of [cams, rings, starts]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
+    this.disposers.push(() => { for (const m of [cams, rings, starts, this.tokenView.mesh]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
+  }
+
+  /** Tokens collected in earlier drives (ids from the save). */
+  restoreTokens(ids: readonly number[]): void {
+    this.group.remove(this.tokenView.mesh);
+    this.tokenView.mesh.dispose();
+    this.tokens = new TokenWatch(this.tokens.tokens, ids);
+    this.tokenView = tokenMesh(this.tokens.tokens, this.tokens.got);
+    this.group.add(this.tokenView.mesh);
   }
 
   /** After a teleport (enter, fast travel, respawn): the jump is not a pass through anything. */
@@ -82,6 +103,14 @@ export class RoamActivities {
     this.lastX = x;
     this.lastZ = z;
     this.races.step(x, z, car.state.speed);
+    this.clock += dt;
+    this.tokenView.pulse(this.clock);
+    const tk = this.tokens.step(x, z);
+    if (tk >= 0) {
+      this.tokenView.hide(tk);
+      const cash = this.onToken(tk, this.tokens.count);
+      this.hud.popUp(cash > 0 ? t('roam.tokenPay', { n: this.tokens.count, all: TOKEN_COUNT, cash: cash.toLocaleString() }) : t('roam.token', { n: this.tokens.count, all: TOKEN_COUNT }), cash > 0 ? '#ffd27d' : '#18d8ff');
+    }
     this.where.update(dt, x, z);
     const ev = this.run.update(x, z, car.drift.bank + car.drift.chain);
     if (ev === 1) this.hud.popUp(t('roam.zoneIn'), '#18d8ff');

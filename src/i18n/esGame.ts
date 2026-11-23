@@ -57,6 +57,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'roam.pause': 'Pausa', 'roam.travel': 'Viaje rápido', 'district.downtown': 'Centro', 'district.harbour': 'Puerto', 'district.oldtown': 'Casco Antiguo', 'district.strip': 'La Avenida', 'district.hills': 'Las Colinas', 'district.industrial': 'Zona Industrial', 'district.bay': 'La Bahía',
   'roam.map': 'Mapa', 'roam.mapHint': 'Toca un lugar para marcar el destino: el GPS te guía en el minimapa.', 'roam.clear': 'Quitar ruta', 'roam.arrived': 'Has llegado',
   'roam.trap': 'Radar: {v}', 'roam.trapBest': 'Radar: {v} · ¡nuevo récord!',
+  'roam.token': 'Ficha de neón {n}/{all}', 'roam.tokenPay': 'Ficha de neón {n}/{all} · bonus {cash} $',
   'roam.zoneIn': 'Zona de derrape: ¡a ver qué sabes hacer!', 'roam.zoneOut': 'Zona de derrape: {n} puntos', 'roam.zoneBest': 'Zona de derrape: {n} puntos · ¡nuevo récord!',
   'roam.meet': 'Quedada: la peña se fija en tu {car}',
   'city.offer': 'Carrera callejera: {name}', 'city.info': '{laps} vueltas · {km} km · {n} rivales', 'city.best': 'récord {time}', 'city.race': 'Correr', 'city.key': 'Intro',
