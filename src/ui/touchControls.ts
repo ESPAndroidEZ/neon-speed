@@ -16,6 +16,8 @@ export interface TouchControls extends InputSource {
   setEditing(on: boolean, layout?: Layout, onMoved?: () => void): void;
   /** True from the grid until GO: tilt auto-gas is off and a GAS pedal shows, so the launch can be timed (set by game/inputSetup). */
   starting: boolean;
+  /** True while tilt steering with automatic gas is the active scheme (the launch is then assisted). */
+  autoGas: boolean;
   /** Current layer (the editor measures the pedals from it). */
   readonly layer: HTMLElement;
   /** Speed for the digital-steering ramp of the Buttons scheme. */
@@ -34,7 +36,7 @@ const ARROW_R = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="current
  * - buttons: LEFT two steering arrows (ramped like the keyboard), RIGHT GAS + BRAKE, nitro/handbrake above the arrows.
  * Every button tracks its own pointer id, so any mix of fingers works.
  */
-export function createTouchControls(container: HTMLElement, opts?: { onReset?: () => void; onPause?: () => void }): TouchControls {
+export function createTouchControls(container: HTMLElement, opts?: { onReset?: () => void; onPause?: () => void; onGasMode?: () => void }): TouchControls {
   const isTouch = matchMedia('(pointer: coarse)').matches;
   let gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
   let stick = 0, left = false, right = false, auto = false, lastT = 0, editing = false, shiftUp = false, shiftDown = false;
@@ -132,6 +134,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
         place(hb(), p.autoGas ? { right: `calc(${S.r} + ${S.u} + 26px)`, bottom: `calc(${S.b} + ${S.u} * 0.45)` } : { right: col, bottom: `calc(${S.b} + ${S.u} + 24px)` }),
         place(pause, { right: p.autoGas ? `calc(${S.r} + ${S.u} / 2 - 22px)` : `calc(${S.r} + ${S.u} * 0.52 - 22px)`, bottom: `calc(${S.b} + ${S.u} * ${p.autoGas ? 1 : 1.55} + 30px)`, top: 'auto' }),
         place(reset, { left: S.l }),
+        place(tag(holdButton('sm gm', `<span style="font-size:11px;font-weight:800">${p.autoGas ? 'AUTO' : 'MAN'}</span>`, () => opts?.onGasMode?.()), 'pause'), { left: `calc(${S.l} + 56px)` }),
       );
       layer.append(gasPedal);
     } else {
@@ -163,6 +166,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
   const api: TouchControls = {
     speedKph: 0,
     starting: false,
+    get autoGas(): boolean { return auto; },
     sample(out: CarInput): CarInput {
       const on = isTouch && visible;
       const now = performance.now();

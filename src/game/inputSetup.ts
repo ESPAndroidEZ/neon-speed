@@ -37,7 +37,7 @@ export interface Controls {
 /** All input devices in one place. `pause` and `reset` are what the pad's Start and Y and the touch buttons do. */
 export function createControls(demo: string | null, actions: { pause: () => void; reset: () => void }, kv: Storage | null): Controls {
   installNoSelect();
-  const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause });
+  const touch = createTouchControls(document.body, { onReset: actions.reset, onPause: actions.pause, onGasMode: () => { prefs.data.autoGas = !prefs.data.autoGas; prefs.commit(); touch.setScheme(prefs.data); } });
   const bindings = new KeyBindings(kv);
   const keys = new KeyboardInput(bindings);
   const pad = new GamepadInput({ onPause: actions.pause, onReset: actions.reset });
@@ -70,6 +70,7 @@ export function createControls(demo: string | null, actions: { pause: () => void
       const padMenu = new PadMenu(); // gamepad drives the menus (not while racing: A is the handbrake)
       engine.onFrame((_a, dt) => {
         padMenu.update(dt, game.paused || game.state !== 'RACING');
+        game.rm.launch.assist = touch.autoGas;
         touch.starting = game.state === 'RACING' && game.rm.phase !== 'RACING'; // grid + 3-2-1: manual gas for the launch
         const eid = game.setup?.meta?.eventId ?? null; // a story event can force the manual gearbox
         if (eid !== forcedFor) { forcedFor = eid; GEARBOX.forced = eid !== null && findAnyEvent(eid).manual === true; }

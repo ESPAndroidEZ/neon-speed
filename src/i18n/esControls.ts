@@ -70,6 +70,7 @@ export const ES_CONTROLS: Record<keyof typeof EN_CONTROLS, string> = {
   'pad.handSub': 'DE MANO',
   'pad.drag': 'ARRASTRA PARA GIRAR',
   'pad.pause': 'Pausa',
+  'pad.gasMode': 'Gas: automático o manual',
   'pad.reset': 'Reiniciar coche',
   'rotate.title': 'Gira el móvil de lado', 'rotate.hint': 'Neon Speed se juega en horizontal. Gira el móvil para continuar.',
 } as const;

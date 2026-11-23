@@ -1,4 +1,5 @@
 // Launch timing at the countdown: a perfect launch is clearly faster off the line, an over-revved one slower.
+import { LaunchControl } from '../src/core/launch.ts';
 import { RaceManager } from '../src/core/raceManager.ts';
 import { createDefaultTuning } from '../src/physics/carTuning.ts';
 import { createKestrelBay } from '../src/world/kestrelBay.ts';
@@ -29,5 +30,15 @@ check('held from 3 = EARLY (over-revved)', early.result === 'EARLY', early.resul
 check('no press = NONE', none.result === 'NONE', none.result);
 check('perfect > good > none > early off the line', perfect.speed > good.speed && good.speed > none.speed && none.speed > early.speed,
   `${perfect.speed.toFixed(1)} / ${good.speed.toFixed(1)} / ${none.speed.toFixed(1)} / ${early.speed.toFixed(1)} m/s after 1.5 s`);
+// tilt + auto gas: a missed or early start is assisted to GOOD, a timed one stays PERFECT
+{
+  const l = new LaunchControl(); l.assist = true;
+  l.go(); const none = l.result;
+  l.reset(); l.assist = true; for (let i = 0; i < 180; i++) l.countdownStep(1 / 60, 1); l.go(); const early = l.result;
+  l.reset(); l.assist = true; for (let i = 0; i < 20; i++) l.countdownStep(1 / 60, 1); l.go(); const perfect = l.result;
+  const ok = none === 'GOOD' && early === 'GOOD' && perfect === 'PERFECT';
+  console.log(`${ok ? 'PASS' : 'FAIL'}  launch assist (${none}/${early}/${perfect})`);
+  if (!ok) failed++;
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

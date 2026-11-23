@@ -68,6 +68,7 @@ export const EN_CONTROLS = {
   'pad.handSub': 'BRAKE',
   'pad.drag': 'DRAG TO STEER',
   'pad.pause': 'Pause',
+  'pad.gasMode': 'Gas: auto or manual',
   'pad.reset': 'Reset car',
   'rotate.title': 'Turn your phone sideways', 'rotate.hint': 'Neon Speed is played in landscape. Rotate your phone to continue.',
 } as const;

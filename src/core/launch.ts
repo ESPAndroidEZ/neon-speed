@@ -21,6 +21,8 @@ export class LaunchControl {
   timer = 0;
   /** Set once at GO (the HUD shows a pop-up and clears it). */
   announce: LaunchResult | null = null;
+  /** Phone tilt with automatic gas: nobody can time the pedal, so a missed or early start still counts as GOOD. */
+  assist = false;
 
   reset(): void {
     this.held = 0;
@@ -38,6 +40,7 @@ export class LaunchControl {
   go(): void {
     const h = this.held;
     this.result = h <= 0 ? 'NONE' : h <= 0.6 ? 'PERFECT' : h <= 1.2 ? 'GOOD' : 'EARLY';
+    if (this.assist && (this.result === 'NONE' || this.result === 'EARLY')) this.result = 'GOOD';
     this.timer = PUSH[this.result][0];
     this.announce = this.result === 'NONE' ? null : this.result;
   }
