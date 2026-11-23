@@ -22,7 +22,7 @@ export const ES_GAME: Record<keyof typeof EN_GAME, string> = {
   'style.clean': 'limpio', 'style.aggressive': 'agresivo', 'style.blocker': 'bloqueador', 'style.drifter': 'derrapador', 'style.late-braker': 'frenador tardío',
   'story.passed': 'superado', 'story.next': 'siguiente', 'story.locked': 'bloqueado', 'story.noRivals': 'Sin rivales: puntúas tú solo',
   'story.oneRun': 'una pasada', 'story.laps': '{n} vueltas', 'story.only': 'solo {car}', 'story.vs': 'contra {rivals}',
-  'story.chapter': 'Capítulo {n}', 'story.chapterTitle': 'Capítulo {n} · {title}', 'story.needCh2': 'Termina el capítulo 2 (y mira su final) para desbloquear el capítulo 3.', 'story.needCh1': 'Termina el Capítulo 1 para abrirlo.',
+  'story.chapter': 'Capítulo {n}', 'story.chapterTitle': 'Capítulo {n} · {title}', 'story.needCh2': 'Termina el capítulo 2 (y mira su final) para desbloquear el capítulo 3.', 'story.needCh3': 'Termina el capítulo 3 (y mira su final) para desbloquear el capítulo 4.', 'story.needCh1': 'Termina el Capítulo 1 para abrirlo.',
   'story.complete': 'Historia completada. Repite cualquier evento.', 'story.chapterDone': 'Capítulo {n} completado',
   'story.bonus': 'Bonus de historia + ${n}', 'story.unlocked': 'Desbloqueado: {car}',
   'story.continue': 'Continuar', 'story.retry': 'Reintentar', 'story.chapterMenu': 'Menú del capítulo',

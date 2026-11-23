@@ -32,6 +32,7 @@ export const LOOKS: Record<string, Look> = {
   rook: { name: 'Rook', skin: 0xd0a07a, hair: 0x2c2a26, hairStyle: 'short', outfit: 0x2f6a3a, accent: 0x9aa4b2, accessory: 'scar', build: 'average', height: 1.78 },
   nova: { name: 'Nova', skin: 0xc58b66, hair: 0xff4fa3, hairStyle: 'long', outfit: 0x2a1a3a, accent: 0xff4fa3, accessory: 'shades', build: 'slim', height: 1.7 },
   brick: { name: 'Brick', skin: 0x8a5a3c, hair: 0x1a1410, hairStyle: 'short', outfit: 0xc77b1a, accent: 0x20242c, accessory: 'beanie', build: 'heavy', height: 1.94 },
+  adeyemi: { name: 'Madame Adeyemi', skin: 0x8a5a3c, hair: 0x1a1410, hairStyle: 'bun', outfit: 0x1a1a22, accent: 0xe6b84a, accessory: 'earring', build: 'average', height: 1.74 },
   calloway: { name: 'Calloway', skin: 0xe8c4a0, hair: 0xd8c690, hairStyle: 'slick', outfit: 0xdfe6f2, accent: 0x18d8ff, accessory: 'shades', build: 'slim', height: 1.86 },
 };
 

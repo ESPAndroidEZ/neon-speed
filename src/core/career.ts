@@ -1,6 +1,7 @@
 import { EVENTS, type ChoiceOption, type Line, type StoryEvent } from '../data/story';
 import { ALL_EVENTS } from '../data/story2';
 import { EVENTS_3 } from '../data/story3';
+import { EVENTS_4 } from '../data/story4';
 import type { SaveData } from './save';
 import { t } from '../i18n';
 
@@ -37,6 +38,14 @@ export function nextEvent3(c: CareerState): StoryEvent | null {
   return EVENTS_3.find((e) => !c.completed.includes(e.id)) ?? null;
 }
 
+/** Chapter 4 opens once the Chapter 3 ending has been shown (flag c3Seen). */
+export const chapter4Open = (c: CareerState): boolean => chapter3Complete(c) && !!c.flags.c3Seen;
+export const chapter4Complete = (c: CareerState): boolean => EVENTS_4.every((e) => c.completed.includes(e.id));
+export function nextEvent4(c: CareerState): StoryEvent | null {
+  if (!chapter4Open(c)) return null;
+  return EVENTS_4.find((e) => !c.completed.includes(e.id)) ?? null;
+}
+
 export const chapter3Open = (c: CareerState): boolean => storyComplete(c) && c.epilogueSeen;
 export const chapter3Complete = (c: CareerState): boolean => EVENTS_3.every((e) => c.completed.includes(e.id));
 
@@ -57,7 +66,7 @@ export function applyChoice(c: CareerState, opt: ChoiceOption): ChoiceOption['re
 }
 
 /** An event is playable if it is already passed (replay) or it is the next one. */
-export const isUnlocked = (c: CareerState, id: string): boolean => c.completed.includes(id) || nextEvent(c)?.id === id || nextEvent3(c)?.id === id;
+export const isUnlocked = (c: CareerState, id: string): boolean => c.completed.includes(id) || nextEvent(c)?.id === id || nextEvent3(c)?.id === id || nextEvent4(c)?.id === id;
 
 export interface EventOutcome {
   passed: boolean;

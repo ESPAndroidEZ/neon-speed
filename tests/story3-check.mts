@@ -21,8 +21,8 @@ const mk = (): SaveStore => {
 const sets = (e: (typeof EVENTS_3)[number]): Line[][] => [e.before, e.afterWin, e.afterLose, ...(e.loseAlt ?? [])];
 const lines = (e: (typeof EVENTS_3)[number]): Line[] => [...sets(e).flat(), ...e.before.flatMap((l) => l.choice?.options.flatMap((o) => o.reply) ?? [])];
 
-check('chapter 3 has five events and the base story is untouched', EVENTS_3.length === 5 && ALL_EVENTS.length === 10 && eventsOf(3).length === 5 && EVERY_EVENT.length === 15, `${EVENTS_3.map((e) => e.id).join(',')}`);
-check('ids are unique and chapter 3', new Set(EVERY_EVENT.map((e) => e.id)).size === 15 && EVENTS_3.every((e) => e.chapter === 3));
+check('chapter 3 has five events and the base story is untouched', EVENTS_3.length === 5 && ALL_EVENTS.length === 10 && eventsOf(3).length === 5 && EVERY_EVENT.length === 19, `${EVENTS_3.map((e) => e.id).join(',')}`);
+check('ids are unique and chapter 3', new Set(EVERY_EVENT.map((e) => e.id)).size === 19 && EVENTS_3.every((e) => e.chapter === 3));
 check('every map exists, drift events sit on drift maps', EVENTS_3.every((e) => { const t = TRACKS.find((x) => x.id === e.trackId); return !!t && (e.kind === 'drift') === (t.type === 'drift'); }), EVENTS_3.map((e) => e.trackId).join(','));
 check('every drift target is the map\'s own target (reachable on that map)', EVENTS_3.filter((e) => e.kind === 'drift').every((e) => e.driftTarget === TRACKS.find((x) => x.id === e.trackId)?.driftTarget));
 const rivalIds = new Set(RIVALS.map((r) => r.id));

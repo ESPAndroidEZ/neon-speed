@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-23
+- **Chapter 4 "Neon Harbor" is in the game.** Four events on four different maps (container yard in rain, crane drift, cliff road in rain, the Neon Strip), a new character (Madame Adeyemi, the Broker) with a portrait, Pixel as the harbour boss, a Spanish translation and an end card. It unlocks after the Chapter 3 ending. Dev build, not deployed (the deploy failed: the Teleport proxy timed out from this network).
 - **Phone screens fixed (first batch).** On a phone held sideways the garage is now a narrow panel on the left with the car free on the right and the buttons pinned at the bottom; the pause menu fits in two columns; small buttons got bigger tap areas; the "Now playing" line no longer covers titles. The Free Drive street card, race offer and pause were also reworked. A full list of what is still open is in `docs/ui-story.md`.
 - **Story plan for chapters 4 and 5** written in `docs/story.md` (new characters Pip, Wren and Madame Adeyemi); not in the game yet.
 - **Free Drive jobs.** Driving into downtown, the harbour, old town or the Strip can offer a timed job (press G or tap Go): get a parcel to the meet, reach the drift pad, a speed camera or a token before the clock runs out. The map shows the route; success pays $1,200-2,000 once. Jobs are plain data (`data/world/missions.ts`), more can be added without code.

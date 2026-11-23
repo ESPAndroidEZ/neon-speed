@@ -1,10 +1,11 @@
-import { chapter3Open, isUnlocked, type CareerState } from '../core/career';
+import { chapter3Open, chapter4Open, isUnlocked, type CareerState } from '../core/career';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
 import { findRival } from '../data/rivals';
 import { CHAPTER, ENDING, type StoryEvent } from '../data/story';
 import { CHAPTER_2, EPILOGUE, EVERY_EVENT, eventsOf } from '../data/story2';
 import { CHAPTER_3, EPILOGUE_3 } from '../data/story3';
+import { CHAPTER_4, EPILOGUE_4 } from '../data/story4';
 import { findTrackDef } from '../data/tracks';
 import { button, h } from './uiKit';
 import { ICONS } from './icons';
@@ -45,7 +46,7 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
   root.style.padding = 'max(20px,4vh) 16px';
   const career = d.store.data.career;
   let n = 0;
-  for (const [ch, title, tag] of [[1, CHAPTER.title, CHAPTER.tagline], [2, CHAPTER_2.title, CHAPTER_2.tagline], [3, CHAPTER_3.title, CHAPTER_3.tagline]] as const) {
+  for (const [ch, title, tag] of [[1, CHAPTER.title, CHAPTER.tagline], [2, CHAPTER_2.title, CHAPTER_2.tagline], [3, CHAPTER_3.title, CHAPTER_3.tagline], [4, CHAPTER_4.title, CHAPTER_4.tagline]] as const) {
     const events = eventsOf(ch);
     if (ch === 2 && !career.completed.includes('finale')) {
       root.append(h('div', 'rb-sub', t('story.chapterTitle', { n: 2, title: tx(title) })), h('div', 'rb-sub', t('story.needCh1')));
@@ -53,6 +54,10 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
     }
     if (ch === 3 && !chapter3Open(career)) {
       root.append(h('div', 'rb-sub', t('story.chapterTitle', { n: 3, title: tx(title) })), h('div', 'rb-sub', t('story.needCh2')));
+      break;
+    }
+    if (ch === 4 && !chapter4Open(career)) {
+      root.append(h('div', 'rb-sub', t('story.chapterTitle', { n: 4, title: tx(title) })), h('div', 'rb-sub', t('story.needCh3')));
       break;
     }
     root.append(h('div', 'rb-sub', t('story.chapter', { n: ch })), h('h2', 'rb-title', tx(title).toUpperCase()), h('div', 'rb-sub', tx(tag)));
@@ -69,7 +74,7 @@ export function buildStoryMenu(d: StoryMenuDeps): HTMLElement {
 /** End-of-chapter card: chapter 1 opens chapter 2; chapter 2 follows the choice made at the Council. */
 export function buildEnding(career: CareerState, chapter: number, onMenu: () => void): HTMLElement {
   const root = h('div', 'rb-layer dim');
-  const card = chapter === 3 ? EPILOGUE_3[career.flags.deal ? 'deal' : 'public'] : chapter === 2 ? EPILOGUE[career.flags.sponsor ? 'sponsor' : 'open'] : ENDING;
+  const card = chapter === 4 ? EPILOGUE_4 : chapter === 3 ? EPILOGUE_3[career.flags.deal ? 'deal' : 'public'] : chapter === 2 ? EPILOGUE[career.flags.sponsor ? 'sponsor' : 'open'] : ENDING;
   root.append(h('div', 'rb-sub', t('story.chapterDone', { n: chapter })), h('h1', 'rb-title', tx(card.title).toUpperCase()), h('div', '', tx(card.text)));
   const credits = 'credits' in card ? (card.credits as string[]) : [];
   if (credits.length) {

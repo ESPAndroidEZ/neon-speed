@@ -3,7 +3,7 @@ import { EVENTS } from './story1';
 
 export { EVENTS };
 
-export type Speaker = 'switch' | 'mara' | 'dante' | 'rookie' | 'vex' | 'jinx' | 'tank' | 'cain' | 'narrator' | 'nova' | 'brick' | 'calloway' | 'pixel' | 'lola' | 'rook';
+export type Speaker = 'switch' | 'mara' | 'dante' | 'rookie' | 'vex' | 'jinx' | 'tank' | 'cain' | 'narrator' | 'nova' | 'brick' | 'calloway' | 'pixel' | 'lola' | 'rook' | 'adeyemi';
 
 export type Mood = 'neutral' | 'smirk' | 'angry' | 'worried';
 
@@ -50,6 +50,7 @@ export const SPEAKERS: Record<Speaker, { name: string; color: number }> = {
   pixel: { name: 'Pixel', color: 0x6cf2ff },
   lola: { name: 'Lola', color: 0xff7aa8 },
   rook: { name: 'Rook', color: 0x9aa4b2 },
+  adeyemi: { name: 'Madame Adeyemi', color: 0xe6b84a },
 };
 
 export interface StoryEvent {

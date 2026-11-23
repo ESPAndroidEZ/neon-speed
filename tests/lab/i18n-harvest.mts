@@ -5,6 +5,7 @@ import { CREW, PREVIOUSLY, TIPS } from '../../src/data/lore';
 import { CHAPTER, ENDING, EVENTS, OPENING_CAPTIONS } from '../../src/data/story';
 import { ALL_EVENTS, CHAPTER_2, EPILOGUE, EVERY_EVENT } from '../../src/data/story2';
 import { CHAPTER_3, EPILOGUE_3 } from '../../src/data/story3';
+import { CHAPTER_4, EPILOGUE_4 } from '../../src/data/story4';
 import { CUTSCENES } from '../../src/data/cutsceneAll';
 import { ADVICE } from '../../src/data/upgradeAdvice';
 import { UPGRADES } from '../../src/data/upgrades';
@@ -38,7 +39,7 @@ export function harvest(): string[] {
   list(TIPS);
   list(CITY_TEXT);
   list(Object.values(DISTRICT_BLURB));
-  walk([PREVIOUSLY, CREW, CHAPTER, ENDING, EVENTS, ALL_EVENTS, EVERY_EVENT, CHAPTER_2, EPILOGUE, CHAPTER_3, EPILOGUE_3, Object.values(CUTSCENES)], out);
+  walk([PREVIOUSLY, CREW, CHAPTER, ENDING, EVENTS, ALL_EVENTS, EVERY_EVENT, CHAPTER_2, EPILOGUE, CHAPTER_3, EPILOGUE_3, CHAPTER_4, EPILOGUE_4, Object.values(CUTSCENES)], out);
   for (const c of OPENING_CAPTIONS) out.add(c.text);
   for (const a of Object.values(ADVICE)) out.add(a);
   for (const u of UPGRADES) { out.add(u.name); for (const l of u.levels) out.add(l.name); }

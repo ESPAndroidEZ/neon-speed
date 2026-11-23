@@ -1,4 +1,4 @@
-import { applyChoice, chapter3Complete, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
+import { applyChoice, chapter3Complete, chapter4Complete, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
@@ -175,6 +175,10 @@ export class StoryController {
         d.store.data.career.flags.c3Seen = true;
         d.store.commit();
         this.cutThen(`ch3-end-${d.store.data.career.flags.deal ? 'deal' : 'public'}`, () => d.showEnding(3));
+      } else if (ev.chapter === 4 && chapter4Complete(d.store.data.career) && !d.store.data.career.flags.c4Seen) {
+        d.store.data.career.flags.c4Seen = true;
+        d.store.commit();
+        d.showEnding(4);
       } else if (isDone(d.store.data.career) && !d.store.data.career.endingSeen) {
         d.store.data.career.endingSeen = true;
         d.store.commit();
