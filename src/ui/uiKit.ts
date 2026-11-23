@@ -1,15 +1,19 @@
 import { THEME_CSS } from './theme';
 import { MENU_CSS } from './menuCss';
 import { PHONE_CSS } from './phoneCss';
+import { POLISH_CSS } from './polishCss';
 import { getLang } from '../i18n';
 
 let injected = false;
+
+/** Marks a main-menu button as a featured mode (cyan, one step below the magenta primary). */
+export const feat = (b: HTMLButtonElement): HTMLButtonElement => { b.classList.add('feat'); return b; };
 
 export function injectCss(): void {
   if (injected) return;
   injected = true;
   const s = document.createElement('style');
-  s.textContent = THEME_CSS + MENU_CSS + PHONE_CSS;
+  s.textContent = THEME_CSS + MENU_CSS + PHONE_CSS + POLISH_CSS;
   document.head.appendChild(s);
 }
 

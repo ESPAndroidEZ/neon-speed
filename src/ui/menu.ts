@@ -20,7 +20,7 @@ import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
 import { dailyButton } from './dailyButton'; import { freeDriveButton } from './freeDriveButton';
 import type { TrackDef } from '../data/tracks';
-import { button, h, injectCss, lapText, money, wordmark } from './uiKit';
+import { button, feat, h, injectCss, lapText, money, wordmark } from './uiKit';
 import { onInstallChange } from '../core/install';
 import { onLangChange, t } from '../i18n';
 import { installButton } from './installButton';
@@ -139,7 +139,7 @@ export class Menu {
       c.title = describe(latest.snap);
       stack.append(c);
     }
-    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), button(t('menu.freeRace'), () => this.maps()), freeDriveButton(), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), feat(button(t('menu.freeRace'), () => this.maps())), feat(freeDriveButton()), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
     const install = installButton();
     if (install) stack.append(install);
     el.append(stack, langCorner()); // after the stack so the menu's first focus stays on the first menu button
