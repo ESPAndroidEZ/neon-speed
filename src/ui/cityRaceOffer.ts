@@ -23,8 +23,8 @@ export function cityRaceOffer(start: () => void): CityRaceOffer {
     if (on && !e.repeat && (e.code === 'Enter' || e.code === 'NumpadEnter')) { e.preventDefault(); start(); }
   });
   return {
-    show: (name, info) => { title.textContent = t('city.offer', { name: tx(name) }); sub.textContent = info; on = true; root.style.display = 'flex'; },
-    hide: () => { if (!on) return; on = false; root.style.display = 'none'; },
+    show: (name, info) => { title.textContent = t('city.offer', { name: tx(name) }); sub.textContent = info; on = true; root.style.display = 'flex'; document.body.classList.add('rb-offer'); },
+    hide: () => { if (!on) return; on = false; root.style.display = 'none'; document.body.classList.remove('rb-offer'); },
     get shown() { return on; },
   };
 }

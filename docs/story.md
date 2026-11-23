@@ -130,3 +130,42 @@ Six short cutscenes (16-22 s each) play in the showroom around the player's car,
   for a sponsor dinner, with DJ Switch calling it live from the esplanade. Dante's people watch from the casino terrace.
 Both are free-race maps now; story events can point at them through `StoryEvent.trackId` (`mountain`, `coast`).
 
+
+## Season 2 arc: the city opens (design 2026-11-23, extends chapters 1-3, nothing restarted)
+Free Drive in Neon Harbor (docs/open-world.md) is the same city as the story: Kestrel Bay's harbour metropolis. Chapters 1-3 stay as shipped. This arc adds a **prologue**, **Chapters 4 and 5** and an **epilogue** that send the story out of the showroom and into the districts. Tone: night, neon, loyalty, rivalry; PG; crashes are cars, not people.
+
+### Cast additions (the existing cast stays: Rookie, Mara, Dante, Switch/Cain, Jinx, Tank, Vex, Pixel, Lola, Rook, Nova, Brick, Calloway)
+| Name | Role | Look (people system) | Voice / personality | Recurring spot |
+|---|---|---|---|---|
+| **Pip Okoro** | Navigator. Teenage map nerd who reads the city's one-way streets like code; becomes the GPS voice in missions | small, hoodie, headset, tablet | fast, funny, nervous before big races, never wrong about a street | the passenger seat; Mara's garage roof |
+| **Wren** | Mysterious veteran. Drove with Cain twelve years ago; silent in public, speaks in short warnings | long coat, white-grey hair, driving gloves | dry, tired, kind underneath; never says the whole truth at once | the Old Town plaza at night; the Mountain Pass lookout |
+| **Madame Adeyemi ("the Broker")** | Fixer. Hands out the city jobs (the Free Drive missions); sells to anyone | tailored coat, gold earring, phone always ringing | polite, transactional, "everything has a price and a deadline" | the Strip, under the biggest sign |
+| **Pixel (grows)** | Street rookie from Chapter 1 who becomes a real rival, one level stronger each chapter | cap, mismatched gloves | cocky then respectful: "Teach me the line" | wherever the Loop races start |
+Bios for the Crew screen are written in `docs/story.md` here and surfaced in-game by the existing Crew screen (a separate Characters codex screen is NOT built; see the round report).
+
+### Prologue: "Before the Wall" (cutscene, ~20 s, no race)
+Twelve years ago, dusk, the docks. Young Cain and Wren (in the passenger seat) test the Civic; Cain jokes that the street remembers. A phone call (Dante, young, polite) ends the scene. Switch narrates over the black: "Everyone remembers the crash. Nobody remembers the phone call."
+
+### Chapter 4: "Neon Harbor" (the city is the map)
+Tagline: *The whole city is the track.* Opens after the Chapter 3 epilogue. Goal: win the **city jobs** that Madame Adeyemi controls: Redline pays her to keep the Rookie off the streets. Escalation: each district's job board unlocks the next district.
+1. *Downtown*: Pip joins as navigator (tutorial of GPS, speed traps). Job: courier to the car meet. Rival: Pixel (level 2).
+2. *The Strip*: Adeyemi's first offer, and a ring race against Nova's crew (or Vex's, by the Chapter 2 flag). Speed-trap bonus ladder.
+3. *Old Town*: Wren appears at the plaza and gives the Rookie half a map of the night of the crash. Twist: the cut brake line was a copy: someone staged it to look like Calloway's father's work.
+4. *Harbour*: the drift pads; Dante's men are buying the cranes. Drift job (Serpent Drift rules), Brick's help or Tank's muscle by flag.
+5. *Boss race, The Hills*: the skyline run against **Dante's champion driver** (a Redline pro, ruthless, uses a black-and-gold Supra). Win = Wren trusts you with the second half of the map. Unlocks: Evo upgrades stage 4.
+Cutscenes: opening (Broker's neon sign), after the boss race (Wren on the rooftop above Old Town). Rewards: cash per job, M3 stage kit, Free Drive district unlocks.
+
+### Chapter 5: "The Bay Bridge" (the long night)
+Tagline: *One bridge. One truth.* Goal: reach the lighthouse archive and prove who staged the crash before Dante buys the Wall at dawn.
+1. *Industrial*: top-speed run on the runway (speed-trap record), Pip finds the archive key.
+2. *Mountain exit*: Mountain Pass night race with Wren riding along (he calls corners like Cain did).
+3. *Coast exit*: Coast Run vs Calloway, now an ally if `public` was chosen in Chapter 3, still a rival if `deal`.
+4. *Time trial across the Bay Bridge* in the weather of the player's choice (the story flag picks it).
+5. *Showdown, Harbor Loop at dawn*: Dante himself, then Cain's lap (Cain drives the last mile of the Loop with the Rookie's car; the twist that **Wren staged the crash** to stop Dante's buyout of the Wall twelve years ago and let Cain "die" safely). Two outcomes by the Chapter 3 flags (`public`: the Wall stays open; `deal`: Redline black-and-gold livery, bitter ending).
+Rewards: Legend rivals, all districts open.
+
+### Epilogue: "What the Street Remembers"
+Dawn over the bridge. Pip reads the final route aloud; Mara repaints the Red Hand Wall; Switch signs off: "Every street remembers who bled for it. Now it remembers you." Final card sets up the free-roam endgame (jobs and tokens stay).
+
+### Status of this arc
+Design only. Built so far in code: the Free Drive jobs (`data/world/missions.ts`, 5 reach jobs), tokens, city races. The chapter 4/5 events, cutscenes, codex screen and recap card are NOT built yet (they need `data/story4.ts` + `storyLines4.ts` + `esContentI` Spanish strings and tests; see docs/ui-story.md for the round status).

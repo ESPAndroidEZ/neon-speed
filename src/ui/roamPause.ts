@@ -8,7 +8,7 @@ export interface RoamPause { open(): void; close(): void; readonly isOpen: boole
 
 /** Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respawn, back to the menu. */
 export function roamPause(a: { map: () => void; resume: () => void; travel: (d: DistrictId) => void; respawn: () => void; exit: () => void; photo: PhotoSource }): RoamPause {
-  const root = h('div', 'rb-layer dim');
+  const root = h('div', 'rb-layer dim rb-roampause');
   root.style.cssText += ';display:none;overflow:auto;z-index:30';
   let on = false;
   const close = (): void => { on = false; root.style.display = 'none'; };
