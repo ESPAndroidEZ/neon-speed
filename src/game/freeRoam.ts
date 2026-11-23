@@ -28,13 +28,14 @@ import { LOOK_CONFIG } from '../render/lookConfig';
 import type { Weather } from '../types/game';
 import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
+import { RoamMissions } from './roamMissions';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
 /** Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, and a teleport. */
 export interface RoamLab { spots(): { zone: { x: number; z: number; r: number } | null; trap: { x: number; z: number; tx: number; tz: number } | null; meet: { x: number; z: number; r: number } | null }; placeAt(x: number, z: number, h: number, speed?: number): void }
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; progress: RoamProgress; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; missions: RoamMissions; progress: RoamProgress; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
@@ -67,7 +68,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     group.add(trafficView.group, pedView.mesh);
     const map = roamMap(g, ci, contact.roads, () => menu?.open());
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
-    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
+    const missions = new RoamMissions(g, acts, d.store, () => map);
+    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -142,6 +144,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.peds.step(dt, cars[0], cars[1], cars, t.agents.length + 1);
     c.update(r.car);
     city.acts.step(r.car, dt);
+    city.missions.step(dt, r.car.state.position.x, r.car.state.position.z);
     const tc = r.contact; // the race contact is idle here: mirror what the city reports, for sparks, shake and sound
     tc.impact = c.impact; tc.scrape = c.scrape; tc.offroad = c.offroad; tc.groundY = c.groundY; tc.pitch = c.pitch;
     tc.contact.x = c.contact.x; tc.contact.z = c.contact.z;

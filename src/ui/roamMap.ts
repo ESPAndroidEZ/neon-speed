@@ -11,7 +11,7 @@ import { button, h, toast } from './uiKit';
 const VIEW = 640; // metres across the minimap
 const ROAD_COL: Readonly<Record<string, string>> = { highway: '#8fa8d8', bridge: '#8fa8d8', avenue: '#cfd6e6', runway: '#5a6070' };
 
-export interface RoamMap { update(dt: number, x: number, z: number, heading: number, traffic: RoamTraffic): void; open(): void; closeFull(): void; show(on: boolean): void; readonly route: Route | null }
+export interface RoamMap { update(dt: number, x: number, z: number, heading: number, traffic: RoamTraffic): void; open(): void; closeFull(): void; show(on: boolean): void; waypoint(x: number, z: number): void; clearWaypoint(): void; readonly route: Route | null }
 
 /** Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS route on both, re-routed when you stray). */
 export function roamMap(g: RoadGraph, chunks: readonly ChunkInfo[], roads: RoadIndex, onClose: () => void): RoamMap {
@@ -111,6 +111,8 @@ export function roamMap(g: RoadGraph, chunks: readonly ChunkInfo[], roads: RoadI
 
   return {
     get route() { return route; },
+    waypoint: (x, z) => { wx = x; wz = z; plan(); },
+    clearWaypoint: () => setRoute(null),
     show: (on) => { mini.style.display = on ? 'block' : 'none'; if (!on) layer.style.display = 'none'; },
     open: () => { drawBig(); layer.style.display = 'flex'; },
     closeFull: () => { layer.style.display = 'none'; },

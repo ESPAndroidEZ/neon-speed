@@ -63,6 +63,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - leaderboard.ts (105) Online lap boards (server/api/scores.php). A board is one map + weather (with the weath... | class Leaderboard; const LB_QUEUE_KEY, boardKey, dailyKey; iface LbEntry, LbRow, LbBoard, LbStore; type LbResult
 - looks.ts (45) Look presets (docs/art-direction.md). A look multiplies the weather grade: exposure, bl... | fn setLook; const LOOKS, LOOK_IDS, look; iface Look; type LookId
 - math.ts (31) Easing: maps t in [0, 1] to eased progress in [0, 1]. | const TAU, clamp, lerp, smoothstep, damp, wrapAngle, linear, easeInCubic, easeOutCubic, easeInOutSine, easeInOutCubic; type Ease
+- missions.ts (69) Where a mission wants you: resolved from a place name by the game (null = place not ava... | class MissionRunner; const MISSION_R; type Resolve, MissionEvent
 - modelList.ts (9) GLB files found in public/models at build time (vite.config `define`); null in dev and ... | const modelPresent
 - perfTier.ts (58) What the first-run detection reads (structural, so tests can pass plain values). | fn guessTier, deviceHints, firstRunTier; iface DeviceHints
 - pwa.ts (49) Registers the offline service worker in production browsers (not inside the Capacitor s... | fn registerServiceWorker, showUpdatePrompt
@@ -138,6 +139,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/data/world
 - districtMap.ts (47) World square half size (m): the drivable area is 6144 m x 6144 m. | fn districtAt; const WORLD_HALF, CELL, isWater, DISTRICT_LOOK
 - districtText.ts (29) Neon Harbor place names (task 066, built by Claude). Street names are proper nouns and ... | const STREET_NAMES, ROAD_NAMES, DISTRICT_BLURB
+- missions.ts (16) Free Drive missions as data (docs/open-world.md): add one here and it runs, no engine c... | const MISSIONS
 ## src/dev
 - audioTestPanel.ts (103) THROWAWAY dev panel (key K): trigger the sounds without driving and tune the values live. | class AudioTestPanel
 - demoInput.ts (29) Dev only (`?demo`): drives itself in swinging slides so effects can be checked without ... | class DemoInput
@@ -170,7 +172,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - freeDriveSetup.ts (19) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeRace.ts (44) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
-- freeRoam.ts (204) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
+- freeRoam.ts (208) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
 - game.ts (219) Race orchestrator: GameState machine, race manager, car views, cameras, HUD. | class Game
 - gameTypes.ts (35) Which map (src/data/tracks); Kestrel Bay when omitted. | iface RaceSetup, GameDeps
 - gapLogic.ts (34) Time gaps to the nearest racer ahead of and behind the player. Display only; allocation... | fn newGaps, computeGaps; iface Gaps
@@ -195,6 +197,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
 - roamActivities.ts (138) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamMissions.ts (70) Free Drive missions (data in data/world/missions.ts, logic in core/missions.ts): an off... | class RoamMissions
 - roamProgress.ts (82) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - saveGame.ts (67) Can this moment be saved? Only a race in progress (countdown or racing) that was set up... | fn canSave, captureGame, restoreGame
 - showroomCam.ts (44) Slow orbit around the car for the menu and garage. The car's screen position comes from... | class ShowroomCam
@@ -209,7 +212,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - en.ts (22) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (73) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
-- enGame.ts (63) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
+- enGame.ts (69) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
@@ -226,7 +229,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentH.ts (128) Spanish for Chapter 3 (data/story3.ts, storyLines3.ts), keyed by the exact English text. | const ES_CONTENT_H
 - esContentI.ts (10) Spanish for the Neon Harbor district lines (src/data/world/districtText.ts). Street nam... | const ES_CONTENT_I
 - esControls.ts (75) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
-- esGame.ts (65) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
+- esGame.ts (71) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
@@ -311,7 +314,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - bootLoader.ts (30) The loading screen from index.html (#boot): the bar shows the car models arriving (GLBs... | fn runBootLoader
 - calm.ts (25) Calm HUD (accessibility): stops flashing, pulsing and flickering UI. A root attribute p... | fn applyCalm; const calmEffective
 - carNav.ts (49) Car-picker navigation: Left/Right (and A/D) keys and a horizontal swipe on `root` call | fn carNav, navButton
-- cityRaceOffer.ts (33) The race offer in Free Drive (W5.5): a small card under the top bar when the car stops ... | fn cityRaceOffer; iface CityRaceOffer
+- cityRaceOffer.ts (30) The race offer in Free Drive (W5.5): a small card under the top bar when the car stops ... | fn cityRaceOffer; iface CityRaceOffer
 - coach.ts (78) private mode or bad data: start fresh | fn attachCoach
 - colorSafe.ts (17) Colour-blind safe HUD: the good/bad pair (green/red) becomes blue/orange through the th... | fn applyColorSafe; const SAFE_GOOD, SAFE_BAD
 - comboHud.ts (47) Style combo on the HUD: "x3 STYLE 1,240" with a draining timer bar while a chain runs, ... | fn installComboHud
@@ -348,6 +351,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - menu.ts (219) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
 - menuCss.ts (93) Base menu styles (docs/ui-style.md): dark glass panels, cyan hairlines, magenta for the... | const MENU_CSS
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
+- missionCard.ts (41) Mission card (menu style): an offer with Go (button or G key), then the clock and dista... | fn missionCard; iface MissionCard
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
 - nowPlaying.ts (37) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
 - onlineMenu.ts (97) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
@@ -356,10 +360,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - playerCode.ts (30) Settings rows for server saving: the player code (copy it, or type another to load that... | fn playerCodeRows
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- roamHud.ts (32) Free Drive overlay: Respawn and Pause buttons (phones have no keyboard), the key hint, ... | fn roamHud; iface RoamHud
-- roamMap.ts (134) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
+- roamCss.ts (21) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | const ROAM_CSS, ICON_RESPAWN, ICON_PAUSE
+- roamHud.ts (42) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
+- roamMap.ts (136) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamPause.ts (34) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
-- roamWhere.ts (64) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
+- roamWhere.ts (60) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu

@@ -3,6 +3,8 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-23
+- **Free Drive jobs.** Driving into downtown, the harbour, old town or the Strip can offer a timed job (press G or tap Go): get a parcel to the meet, reach the drift pad, a speed camera or a token before the clock runs out. The map shows the route; success pays $1,200-2,000 once. Jobs are plain data (`data/world/missions.ts`), more can be added without code.
+- **Free Drive screen restyled** in the menu look: round icon buttons (respawn, pause) with the token count on top, cleaner street line and race offer card.
 - **Neon tokens in Free Drive (a point to the city).** 50 glowing diamonds float over streets in downtown, the strip, old town and the harbour. Drive through them: a pop-up counts them, 10 / 25 / 50 tokens pay $1,000 / $2,500 / $6,000 once. Collected tokens are saved.
 - **Hitting traffic now does something.** A car you hit is shoved along the crash, spins, rests for a moment and then drives back into its lane (no snapping). Sparks, shake and sound were already there. Free Drive only; race handling is unchanged.
 
