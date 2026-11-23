@@ -42,7 +42,7 @@ export class PauseMenu {
 
   show(): void {
     this.close();
-    const el = h('div', 'rb-layer dim');
+    const el = h('div', 'rb-layer dim rb-pause');
     el.style.zIndex = '40';
     el.append(h('h2', 'rb-title', t('pause.title')));
     if (this.status) el.append(h('div', 'rb-sub', this.status));

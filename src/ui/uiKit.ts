@@ -1,5 +1,6 @@
 import { THEME_CSS } from './theme';
 import { MENU_CSS } from './menuCss';
+import { PHONE_CSS } from './phoneCss';
 import { getLang } from '../i18n';
 
 let injected = false;
@@ -8,7 +9,7 @@ export function injectCss(): void {
   if (injected) return;
   injected = true;
   const s = document.createElement('style');
-  s.textContent = THEME_CSS + MENU_CSS;
+  s.textContent = THEME_CSS + MENU_CSS + PHONE_CSS;
   document.head.appendChild(s);
 }
 

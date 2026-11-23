@@ -33,7 +33,7 @@ onLangChange(() => { langAt = performance.now(); });
 
 /** Car select with live stat bars, paint, underglow, buying, and GLB yaw calibration. */
 export function buildGarage(d: GarageDeps): HTMLElement {
-  const root = h('div', 'rb-layer');
+  const root = h('div', 'rb-layer rb-garage-layer');
   // desktop: panel on the left, car on the right; narrow screens: bottom sheet
   const wide = garageLayout(window.innerWidth) === 'side';
   root.style.justifyContent = wide ? 'center' : 'flex-end';
@@ -149,7 +149,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     if (lookOpen) panel.append(lookRows(d.store, c.id, owned, (l) => d.visual()?.setAppearance?.(l, paintOf(c)), () => d.preview(c, paintOf(c), glowOf(c))));
     const cal = calibration(c);
     if (cal) panel.append(cal);
-    const row = h('div', 'rb-row');
+    const row = h('div', 'rb-row rb-gact');
     row.style.flexWrap = 'nowrap';
     row.append(navButton('prev', goPrev));
     if (owned) {

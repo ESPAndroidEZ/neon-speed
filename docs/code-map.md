@@ -353,14 +353,15 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - missionCard.ts (41) Mission card (menu style): an offer with Go (button or G key), then the clock and dista... | fn missionCard; iface MissionCard
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
-- nowPlaying.ts (37) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
+- nowPlaying.ts (34) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
 - onlineMenu.ts (97) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
 - pauseMenu.ts (108) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
+- phoneCss.ts (17) Phone fixes from the UI audit (docs/ui-story.md): short landscape screens get a narrow ... | const PHONE_CSS
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
 - playerCode.ts (30) Settings rows for server saving: the player code (copy it, or type another to load that... | fn playerCodeRows
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- roamCss.ts (21) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | const ROAM_CSS, ICON_RESPAWN, ICON_PAUSE
+- roamCss.ts (27) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | const ROAM_CSS, ICON_RESPAWN, ICON_PAUSE
 - roamHud.ts (42) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
 - roamMap.ts (136) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamPause.ts (34) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
@@ -385,7 +386,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - trackTop.ts (33) Board shown on a map card: clear weather, the selected car's tier. Null for drift maps ... | fn trackBoardKey, topLine, fillTrackTops
 - tuneMenu.ts (128) Marks an unchanged stat in the upgrade preview so its segment can be dropped in any lan... | fn buildTuneMenu
 - tuneTip.ts (12) One line for the results screen after a lost race: an upgrade the player can buy now an... | fn tuneTip
-- uiKit.ts (42) The NEON SPEED title treatment (styles in ui/theme). | fn injectCss, wordmark, h, button, toast; const money, lapText
+- uiKit.ts (43) The NEON SPEED title treatment (styles in ui/theme). | fn injectCss, wordmark, h, button, toast; const money, lapText
 - uiSizes.ts (14) Scale for the S / M / L size settings (subtitle box, minimap). | fn applyUiSizes; const SIZE_SCALE
 - unitsRow.ts (18) Settings row: show speeds in km/h or mph. | fn unitsRow
 - versus.ts (92) The versus screen before a race: your portrait, car and stats against the strongest riv... | fn showVersus
