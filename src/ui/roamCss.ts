@@ -23,10 +23,10 @@ body.rb-offer .rb-where{display:none!important}
 body.rb-roaming #hud .info,body.rb-roaming #hud .lights,body.rb-roaming #minimap,body.rb-roaming #hud .tl small{display:none!important}
 body.rb-roaming .rb-where{display:block}.rb-where{display:none}
 /* Free Drive pause: three columns on short screens (only while open: .on), scrolls if still too tall */
-@media (max-height:480px){.rb-roampause.on{display:grid!important;grid-template-columns:repeat(3,1fr);align-content:start;gap:var(--sp-2) var(--sp-3);width:min(600px,96vw);margin:0 auto;padding:max(var(--sp-3),var(--safe-t)) 0 var(--sp-3);overflow:auto}.rb-roampause>h2,.rb-roampause>section{grid-column:1/4}.rb-roampause>h2{margin:0}.rb-roampause .rb-btn{min-width:0;width:100%;min-height:44px}.rb-roampause .rb-panel{padding:var(--sp-2);width:auto!important}.rb-roampause .rb-panel h3{margin:0 0 var(--sp-1)}}
-body.rb-fdover .rb-where,body.rb-fdover .rb-roam-mini,body.rb-fdover .rb-mission,body.rb-fdover .rb-roam,body.rb-fdover .rb-city-offer{display:none!important}
+@media (max-height:480px){.rb-roampause.on{display:grid!important;grid-template-columns:repeat(3,1fr);align-content:start;gap:var(--sp-2) var(--sp-3);width:min(600px,96vw);margin:0 auto;padding:max(var(--sp-3),var(--safe-t)) 0 var(--sp-3);overflow:auto}.rb-roampause>h2,.rb-roampause>section{grid-column:1/4}.rb-roampause>h2{margin:0}.rb-roampause .rb-btn{min-width:0;width:100%;min-height:44px}.rb-roampause .rb-panel{padding:var(--sp-2);width:auto!important}.rb-roampause .rb-panel h3{display:none}.rb-roampause .rb-panel .rb-row{display:grid!important;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}.rb-roampause .rb-panel .rb-btn{padding:var(--sp-2) var(--sp-1)}}
+body.rb-fdover .rb-where,body.rb-fdover .rb-roam-mini,body.rb-fdover .rb-mission,body.rb-fdover .rb-roam,body.rb-fdover .rb-city-offer,body.rb-fdover #hud,body.rb-fdover .rb-fullscreen{display:none!important}
 body.rb-roaming .rb-tc .sm:not(.gm){display:none}
-body.rb-mission .rb-where{display:none!important}body.rb-mission .rb-city-offer{top:calc(max(var(--sp-3),var(--safe-t)) + 124px)}
+body.rb-has-mission .rb-where{display:none!important}body.rb-has-mission .rb-city-offer{top:calc(max(var(--sp-3),var(--safe-t)) + 124px)}
 .rb-mission{left:50%!important;transform:translateX(-50%);max-width:min(440px,calc(100vw - 260px))}
 
 .rb-roam-mini{position:fixed;left:max(12px,var(--safe-l));bottom:max(12px,var(--safe-b));width:150px;height:150px;border-radius:50%;z-index:11;display:none;box-shadow:0 0 0 2px #18d8ff55,0 0 18px #0008}
