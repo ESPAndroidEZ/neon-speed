@@ -34,6 +34,7 @@ export class RoamContact {
   /** Parked cars (x, z, heading triples): solid like traffic, never move. */
   parked: Float32Array = new Float32Array(0);
   private hitCar = -1;
+  private hitSide = 1;
   readonly roads: RoadIndex;
   private readonly graph: RoadGraph;
   private readonly fs: readonly Footprint[];
@@ -76,6 +77,7 @@ export class RoamContact {
     const sh = Math.sin(st.heading), ch = Math.cos(st.heading);
     this.pen = 0;
     this.hitCar = -1;
+    const pvx = st.velocity.x, pvz = st.velocity.z;
     for (let k = 0; k < POINTS.length; k++) {
       const cx = x + ch * POINTS[k][0] + sh * POINTS[k][1];
       const cz = z - sh * POINTS[k][0] + ch * POINTS[k][1];
@@ -86,7 +88,7 @@ export class RoamContact {
       this.parkedCars(cx, cz);
     }
     if (this.pen > 0) wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this);
-    if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar);
+    if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar, pvx, pvz, this.hitSide);
   }
 
   private set(pen: number, nx: number, nz: number, px: number, pz: number): void {
@@ -154,7 +156,7 @@ export class RoamContact {
       const before = this.pen;
       if (ox < oz) this.set(ox, fz * Math.sign(lx), -fx * Math.sign(lx), cx, cz);
       else this.set(oz, fx * Math.sign(lz), fz * Math.sign(lz), cx, cz);
-      if (this.pen > before) this.hitCar = i;
+      if (this.pen > before) { this.hitCar = i; this.hitSide = Math.sign(lx * lz) || 1; }
     }
   }
 

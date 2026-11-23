@@ -281,11 +281,12 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
 ## src/physics
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
-- roamContact.ts (168) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
+- roamContact.ts (170) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
 - roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
-- roamTraffic.ts (216) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
+- roamTraffic.ts (219) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
 - surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - trackContact.ts (128) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
+- trafficKnock.ts (56) Knock-on for city traffic (owner playtest 2026-11-21 #11): a car the player hits is sho... | class TrafficKnock
 - trafficSize.ts (6) Body size per traffic vehicle shape (task 067): [width, length] in metres, indexed by `... | const TRAFFIC_SIZE, trafficSize
 ## src/physics/v2
 - arcade.ts (68) v2 arcade layer (plan section 4), on top of the physics and never inside the force code... | fn steerV2, driveTrim, yawAssist, rearHold, carry

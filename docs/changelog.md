@@ -2,6 +2,9 @@
 
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
+## 2026-11-23
+- **Hitting traffic now does something.** A car you hit is shoved along the crash, spins, rests for a moment and then drives back into its lane (no snapping). Sparks, shake and sound were already there. Free Drive only; race handling is unchanged.
+
 ## 2026-11-21
 - **Live on the website.** Free Drive in Neon Harbor, city races, the new details and all fixes are now on notcarlos.mosidealus.nl. The online lap boards are switched on (empty until people race). Our own online lobby is running on the server; players reach it as soon as the administrator adds one web-server line (until then online races use the old peer-to-peer method, as before).
 - **Neon Harbor looks lived-in.** Roofs have air-conditioning units, water tanks and antennas; sidewalks have benches, bins, fire hydrants and bus shelters; eight new shop signs (fish market, sailor bar, 24 h diner, tyre shop, bakery, tattoo, karaoke...), and long shop names no longer run off their signs. Traffic is no longer one car copied 40 times: hatchbacks, vans, yellow taxis and pickups, each as solid as it looks.

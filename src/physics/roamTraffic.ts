@@ -1,5 +1,6 @@
 import type { RoadGraph, TrafficAgent } from '../types/world';
 import { createRng } from '../core/rng';
+import { TrafficKnock } from './trafficKnock';
 
 /** Traffic lights: each axis gets green, then yellow, then the other axis (s). */
 export const LIGHT_GREEN = 12, LIGHT_YELLOW = 3, LIGHT_CYCLE = 2 * (LIGHT_GREEN + LIGHT_YELLOW);
@@ -41,6 +42,7 @@ export class RoamTraffic {
   readonly z: Float32Array;
   readonly h: Float32Array;
   private readonly stall: Float32Array;
+  readonly knock: TrafficKnock; // shove and spin of cars the player hit
   /** Per car, the decision taken when its light turned yellow: 0 none, 1 go, 2 stop (kept until green or the next street). */
   private readonly yellow: Int8Array;
   private readonly g: RoadGraph;
@@ -53,6 +55,7 @@ export class RoamTraffic {
     this.g = g;
     this.rnd = createRng(seed);
     this.x = new Float32Array(count); this.z = new Float32Array(count); this.h = new Float32Array(count); this.stall = new Float32Array(count);
+    this.knock = new TrafficKnock(count);
     this.yellow = new Int8Array(count);
     for (let i = 0; i < count; i++) this.agents.push({ edge: 0, lane: 0, dir: 1, s: 0, speed: 0, variant: i % 8, role: 'civil' });
   }
@@ -65,9 +68,8 @@ export class RoamTraffic {
   }
 
   /** Stop car i for a few seconds (the player hit it). */
-  bump(i: number): void {
-    this.agents[i].speed = 0;
-    this.stall[i] = 3;
+  bump(i: number, vx = 0, vz = 0, side = 1): void {
+    this.agents[i].speed = 0; this.stall[i] = 3; this.knock.hit(i, vx, vz, side);
   }
 
   step(dt: number, px: number, pz: number, grip: number): void {
@@ -75,6 +77,7 @@ export class RoamTraffic {
     const g = this.g;
     for (let i = 0; i < this.agents.length; i++) {
       const a = this.agents[i], e = g.edges[a.edge];
+      if (this.knock.active(i)) this.knock.step(i, dt, this.stall[i]);
       if (Math.hypot(this.x[i] - px, this.z[i] - pz) > DESPAWN_R) { if (Math.hypot(px - this.nx, pz - this.nz) > 120) this.collectNear(px, pz); this.respawn(i); continue; }
       if (this.stall[i] > 0) { this.stall[i] -= dt; continue; }
       let want = Math.min(e.limit, this.cornerLimit(e, a.s, a.dir, grip));
@@ -104,7 +107,7 @@ export class RoamTraffic {
 
   /** Fill x, z, h from edge, lane and s. */
   poses(): void {
-    for (let i = 0; i < this.agents.length; i++) this.pose(i);
+    for (let i = 0; i < this.agents.length; i++) { this.pose(i); this.knock.add(i, this.x, this.z, this.h); }
   }
 
   private pose(i: number): void {
@@ -206,7 +209,7 @@ export class RoamTraffic {
       a.lane = Math.floor(this.rnd() * Math.max(1, e.lanes / 2));
       a.s = na.radius + 25 + this.rnd() * Math.max(0, e.length - na.radius - nb.radius - 50); // never just before a stop line: room to brake
       a.speed = Math.min(e.limit * 0.6, TURN_SPEED);
-      this.stall[i] = 0;
+      this.stall[i] = 0; this.knock.clear(i);
       this.pose(i);
       let clear = true;
       for (let j = 0; j < this.agents.length && clear; j++) if (j !== i && Math.hypot(this.x[j] - this.x[i], this.z[j] - this.z[i]) < 15) clear = false;
