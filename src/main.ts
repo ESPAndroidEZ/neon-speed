@@ -12,7 +12,7 @@ import { CARS, findCar } from './data/cars';
 import { buildField, competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
-import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats'; import { Knockout } from './core/knockout'; import { attachKnockoutFeedback } from './game/knockoutFeedback';
+import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats'; import { Knockout } from './core/knockout'; import { attachKnockoutFeedback } from './game/knockoutFeedback'; import { attachMenuLook } from './game/menuLook';
 import { Juice } from './fx/juice';
 import { attachRaceFeedback } from './game/raceFeedback'; import { wireFreeDrive } from './game/freeDriveSetup';
 import { Game } from './game/game';
@@ -86,7 +86,7 @@ const results = new ResultsScreen(document.body, { onAgain: () => game.restart()
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);
-attachRaceFeedback(engine, game, hud); attachKnockoutFeedback(engine, game, hud); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
+attachRaceFeedback(engine, game, hud); attachKnockoutFeedback(engine, game, hud); attachMenuLook(engine, game); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);

@@ -68,7 +68,7 @@ export class Engine implements Disposable {
   private readonly updates = new Set<FixedUpdate>();
   private readonly frames = new Set<FrameCallback>();
   private readonly unwatch: () => void;
-  private baseBloomStrength: number;
+  /** The bloom strength before the per-frame kick (read by game/menuLook). */ baseBloomStrength: number;
   private bloomKick = 0;
   fpsCap = 0; // frame cap, 0 = the display's rate
   /** Smoothed milliseconds of work per frame (update + render submit), read by AutoQuality. */
