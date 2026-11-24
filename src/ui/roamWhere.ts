@@ -29,6 +29,7 @@ export class RoamWhere {
     this.el.className = 'rb-where';
     this.line = document.createElement('div');
     this.line.className = 'rb-wl';
+    this.line.style.display = 'none';
     const name = document.createElement('div');
     this.el.append(name, this.line);
     document.body.appendChild(this.el);
@@ -39,7 +40,7 @@ export class RoamWhere {
 
   update(dt: number, x: number, z: number): void {
     this.t += dt;
-    if (this.blurbT > 0 && (this.blurbT -= dt) <= 0) this.line.style.opacity = '0';
+    if (this.blurbT > 0 && (this.blurbT -= dt) <= 0) this.line.style.display = 'none'; // the pill shrinks back to the street line
     if (this.t < EVERY) return;
     this.t = 0;
     this.roads.nearestAny(x, z, this.hit);
@@ -51,7 +52,7 @@ export class RoamWhere {
     if (e.district !== this.district) {
       this.district = e.district;
       this.line.textContent = tx(DISTRICT_BLURB[e.district]);
-      this.line.style.opacity = '1';
+      this.line.style.display = ''; this.line.style.opacity = '1';
       this.blurbT = BLURB_SECS;
     }
   }
