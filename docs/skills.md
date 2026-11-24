@@ -38,6 +38,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | race fly-by, setting | `camera/shots.ts createFlybyShots`, `RaceSetup.flyby`, `settings.raceIntro` (`ui/toggleRow.ts`); test `flyby-check` |
 | Free Drive time of day | `world/open/timeOfDay.ts` (dusk/dawn/day over the night look), `districtFog(..., tod.fog)`, pause menu button; test `tod-check` |
 | police (heat, cops, busted, escape) | `core/police.ts` (rules), `physics/roamPolice.ts` (cars, A*), `game/roamHeat.ts`, `world/open/policeView.ts`, `ui/heatHud.ts`, cop boxes in `physics/roamContact.ts`; triggers: camera flash >= 200 km/h (`RoamActivities.caught`), hard traffic crash; test `police-check` |
+| city circuits in Free Race | `ui/trackSelect.ts` (button builds them on demand from `game/cityRaces.ts cityRaces()`), results go through `CITY_HOOK` (`game/cityRaceLaunch.ts`) |
 | speed goals at the cameras | `core/speedTraps.ts` (`TRAP_TIERS` 150/200/250), `RoamActivities.caught` |
 | story events, dialogue | `data/story1.ts`, `story2*.ts`, `storyLines*.ts`, canon in `docs/story.md`, flow `game/story.ts`, rules `core/career.ts` |
 | cars, upgrades, prices | `data/cars.ts`, `carReal.ts` (real specs + power stages), `upgrades.ts`, `core/save.ts buyUpgrade` |

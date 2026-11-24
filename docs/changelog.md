@@ -11,6 +11,7 @@ Updated at every checkpoint. One short section per working day or session. Techn
   - **Rival duels** (Maps > Rival duels): one rival, one map; the first win takes their car (in their paint) and a prize. **Knockout** (pick it next to Time trial): the last car is out every lap.
   - **Police chase** in Free Drive: a speed camera flash at 200 km/h or a hard crash into traffic gives a star, up to three cops chase you; stay close and slow and you are busted (fine), get away and you escape (cash and REP). **Speed goals** at the cameras pay REP at 150, 200, 250 km/h.
   - **Looks and feel.** Short fly-by before each race (Settings can turn it off); Free Drive time of day (Night, Dusk, Dawn, Day in the pause menu); the chase camera no longer zooms in during a long handbrake slide; six more deep-house songs (15 now); tilt steering with automatic gas now gets an assisted launch and has an AUTO/MAN gas button.
+  - **More tracks:** the six city circuits (one loop per Neon Harbor district) are in Free Race (Maps > City circuits). The cash line on the results screen counts up.
   - Not built: jumps (the physics are 2D), reverse/night map variants, district radio, menu 3D hero, results podium.
 - **Deployed** (live at https://notcarlos.mosidealus.nl): Chapter 4, the new Free Drive map and screens, tilt gas fixes, GUI polish.
 - **New plan `docs/nfs-vision.md`**: how to make it feel like a real NFS game (story places you drive to, more modes, reputation and classes, looks, feel, build order).
