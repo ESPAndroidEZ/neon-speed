@@ -1,6 +1,7 @@
 import type { LbBoard } from '../core/leaderboard';
 import type { SaveStore } from '../core/save';
 import type { TrackDef } from '../data/tracks';
+import { isCityTrack } from '../core/cityRace';
 import { boardKey } from '../core/leaderboard';
 import { CARS } from '../data/cars';
 import { carTier } from '../data/rivals';
@@ -12,7 +13,7 @@ const lap = (ms: number): string => `${Math.floor(ms / 60000)}:${((ms % 60000) /
 /** Board shown on a map card: clear weather, the selected car's tier. Null for drift maps (scored by points). */
 export function trackBoardKey(def: TrackDef, store: SaveStore): string | null {
   const car = CARS.find((c) => c.id === store.data.selected);
-  return def.type === 'drift' || !car ? null : boardKey(def.id, 'CLEAR', store.data.settings.weatherPhysics, carTier(car));
+  return def.type === 'drift' || !car || isCityTrack(def.id) ? null : boardKey(def.id, 'CLEAR', store.data.settings.weatherPhysics, carTier(car));
 }
 
 /** "Online top 3: 1. Nia 0:58.31 · 2. ..." as plain text (names are player input: always set with textContent). */

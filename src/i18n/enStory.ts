@@ -11,6 +11,7 @@ export const EN_STORY = {
   'tod.night': 'Time: Night', 'tod.dusk': 'Time: Dusk', 'tod.dawn': 'Time: Dawn', 'tod.day': 'Time: Day',
   'roam.trapGoal': 'SPEED GOAL: {v}!',
   'heat.wanted': 'WANTED', 'heat.up': 'HEAT {n}', 'heat.busted': 'BUSTED! Fine: {fine}', 'heat.escaped': 'ESCAPED! +{cash}, +{rep} REP',
+  'maps.city': 'City circuits (6 more maps)', 'maps.cityLoading': 'Building the city…',
   'rep.lv': 'LV {n}', 'rep.tip': 'REP {into} / {need} to the next level', 'rep.max': 'Top level reached', 'rep.gain': '+{n} REP', 'rep.up': 'LEVEL {n}!',
   'rep.upNote': 'Level {n}: +{cash}', 'garage.repLock': 'Reach level {n}',
 } as const;

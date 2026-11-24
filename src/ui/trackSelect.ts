@@ -3,6 +3,7 @@ import type { SaveStore } from '../core/save';
 import { buildTrack, TRACKS, type TrackDef } from '../data/tracks';
 import type { Weather } from '../types/game';
 import { button, h, lapText } from './uiKit';
+import { cityRaces } from '../game/cityRaces';
 import { driftMedal, driftTimes, medalFor, medalTimes, type Medal } from '../core/medals';
 import { t, tx } from '../i18n';
 
@@ -74,7 +75,7 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
   root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px';
   root.append(h('h2', 'rb-title', t('maps.title')));
   const row = h('div', 'rb-row');
-  for (const def of TRACKS) {
+  const makeCard = (def: TrackDef): HTMLElement => {
     const tr = buildTrack(def);
     const km = (tr.raceSamples * tr.spacing) / 1000;
     const climb = Math.max(...tr.heights) - Math.min(...tr.heights);
@@ -107,9 +108,16 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
       card.append(top);
     }
     card.addEventListener('click', () => d.onPick(def));
-    row.append(card);
-  }
-  root.append(row, ...(d.onDuels ? [button(t('duel.open'), d.onDuels)] : []), button(t('common.back'), d.onBack));
+    return card;
+  };
+  for (const def of TRACKS) row.append(makeCard(def));
+  // the six city circuits (one loop per district of Neon Harbor) are built on demand: the road network takes a moment to generate
+  const city = button(t('maps.city'), () => {
+    city.disabled = true;
+    city.textContent = t('maps.cityLoading');
+    window.setTimeout(() => { for (const r of cityRaces()) row.append(makeCard(r.def)); city.remove(); fillTrackTops(root); }, 40);
+  });
+  root.append(row, city, ...(d.onDuels ? [button(t('duel.open'), d.onDuels)] : []), button(t('common.back'), d.onBack));
   fillTrackTops(root); // online top 3 per map, filled in when the server answers
   return root;
 }

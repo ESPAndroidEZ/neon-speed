@@ -11,6 +11,7 @@ export const ES_STORY = {
   'tod.night': 'Hora: Noche', 'tod.dusk': 'Hora: Atardecer', 'tod.dawn': 'Hora: Amanecer', 'tod.day': 'Hora: Día',
   'roam.trapGoal': '¡OBJETIVO DE VELOCIDAD: {v}!',
   'heat.wanted': 'BUSCADO', 'heat.up': 'ALERTA {n}', 'heat.busted': '¡ARRESTADO! Multa: {fine}', 'heat.escaped': '¡ESCAPASTE! +{cash}, +{rep} REP',
+  'maps.city': 'Circuitos de la ciudad (6 mapas más)', 'maps.cityLoading': 'Construyendo la ciudad…',
   'rep.lv': 'NV {n}', 'rep.tip': 'REP {into} / {need} para el siguiente nivel', 'rep.max': 'Nivel máximo alcanzado', 'rep.gain': '+{n} REP', 'rep.up': '¡NIVEL {n}!',
   'rep.upNote': 'Nivel {n}: +{cash}', 'garage.repLock': 'Llega al nivel {n}',
 } as const;
