@@ -2,7 +2,7 @@ import type { Group } from 'three';
 import type { RoadGraph } from '../types/world';
 import type { CarController } from '../physics/carController';
 import type { Hud } from '../ui/hud';
-import { crossed, placeSpeedTraps, type SpeedTrap } from '../core/speedTraps';
+import { crossed, placeSpeedTraps, trapTier, TRAP_TIERS, TRAP_TIER_REP, type SpeedTrap } from '../core/speedTraps';
 import { trapMesh } from '../world/open/trapView';
 import { DriftRun, placeDriftZones, type DriftZone } from '../core/driftZones';
 import { zoneMesh } from '../world/open/zoneView';
@@ -146,7 +146,7 @@ export class RoamActivities {
 
   private caught(id: number, kmh: number): void {
     const best = this.trapBest.get(id) ?? 0;
-    if (kmh > best) { this.trapBest.set(id, kmh); this.onRecord(`trap:${id}`, kmh); this.award(REP_FD.trap); }
+    if (kmh > best) { this.trapBest.set(id, kmh); this.onRecord(`trap:${id}`, kmh); this.award(REP_FD.trap); const was = trapTier(best), now = trapTier(kmh); if (now > was) { this.award(TRAP_TIER_REP[now - 1]); this.hud.popUp(t('roam.trapGoal', { v: speedText(TRAP_TIERS[now - 1]) }), '#ff3aa6'); } }
     this.hud.popUp(t(kmh > best && best > 0 ? 'roam.trapBest' : 'roam.trap', { v: speedText(kmh) }), kmh > best ? '#ffd27d' : '#8fd8ff');
   }
 }

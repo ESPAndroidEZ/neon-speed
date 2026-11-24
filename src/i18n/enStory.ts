@@ -9,6 +9,7 @@ export const EN_STORY = {
   'menu.knockout': 'Knockout', 'ko.rule': 'KNOCKOUT: the last car is out every lap', 'ko.out': '{name} is out!', 'ko.you': 'You are out!',
   'set.raceIntro': 'Short fly-by before each race',
   'tod.night': 'Time: Night', 'tod.dusk': 'Time: Dusk', 'tod.dawn': 'Time: Dawn', 'tod.day': 'Time: Day',
+  'roam.trapGoal': 'SPEED GOAL: {v}!',
   'rep.lv': 'LV {n}', 'rep.tip': 'REP {into} / {need} to the next level', 'rep.max': 'Top level reached', 'rep.gain': '+{n} REP', 'rep.up': 'LEVEL {n}!',
   'rep.upNote': 'Level {n}: +{cash}', 'garage.repLock': 'Reach level {n}',
 } as const;

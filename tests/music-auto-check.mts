@@ -1,5 +1,5 @@
 // @ts-nocheck
-// W4.1: the music changes by itself. Drives MusicDirector with the mock AudioContext for 12 unattended minutes
+// W4.1: the music changes by itself. Drives MusicDirector with the mock AudioContext for 32 unattended minutes (a whole shuffle bag)
 // (Auto style): every song starts and plays notes, no song twice in a row, songs change every 80-110 s; also a 30 s pause
 // (suspended context), a 2 s stalled frame (no burst of late notes), Next song, and the Synthwave-only style.
 import { mockAudio } from './lab/mockAudio.mts';
@@ -28,9 +28,10 @@ const frames = (secs, dt = 1 / 60) => {
 frames(300);
 ctx.state = 'suspended'; frames(30); ctx.state = 'running'; // pause / tab hidden: the platform suspends the context
 frames(420);
+frames(1200); // a full shuffle bag is 15 house songs and the synthwave track: about 25 minutes
 const names = starts.map((s) => s.name);
 console.log('  songs:', names.join(' > '));
-check('6+ songs played unattended in 12 minutes', starts.length >= 7, `${starts.length} starts`);
+check('6+ songs played unattended in 32 minutes', starts.length >= 7, `${starts.length} starts`);
 check('never the same song twice in a row', names.every((n, i) => i === 0 || n !== names[i - 1]));
 check('Auto plays house and synthwave', names.includes('Neon Grid') && names.some((n) => n !== 'Neon Grid'));
 const gaps = starts.slice(1).map((s, i) => s.t - starts[i].t);

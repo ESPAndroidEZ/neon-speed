@@ -64,6 +64,8 @@ export class ChaseCam implements CameraRig {
   private shakeT = 0;
   private slideAmp = 0;
   private slipFilt = 0;
+  /** Speed fraction for the zoom: it follows speed up quickly but eases down slowly, so a long handbrake slide does not pull the camera in (owner 2026-11-21). */
+  private spFilt = 0;
   /** Per-aspect framing (portrait pulls back and widens, ultrawide caps the horizontal view). */
   private readonly frame: Framing = { fov: 60, dist: 1, height: 1, lookAhead: 0 };
 
@@ -106,7 +108,9 @@ export class ChaseCam implements CameraRig {
     const car = this.car;
     if (!car) return;
     const t = this.tuning;
-    const sp = smoothstep(0, t.fullSpeed, Math.abs(car.speed));
+    const sp0 = smoothstep(0, t.fullSpeed, Math.abs(car.speed));
+    this.spFilt = this.ready ? damp(this.spFilt, sp0, sp0 > this.spFilt ? 3 : 0.45, frameDt) : sp0;
+    const sp = this.spFilt;
     // camera yaw follows a filtered slip: a dead zone ignores wheelspin wag, and a low-pass removes oscillation
     const raw = clamp(car.slipAngle, -1.1, 1.1);
     this.slipFilt = damp(this.slipFilt, Math.sign(raw) * Math.max(0, Math.abs(raw) - 0.1), 4, frameDt);

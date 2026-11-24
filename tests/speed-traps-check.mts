@@ -2,7 +2,7 @@
  * a car driving through is caught once (either direction); passing beside the road or parallel to it is not. */
 import { generateRoads } from '../src/world/roads/generate.ts';
 import { RoadIndex, createRoadHit } from '../src/world/roads/roadIndex.ts';
-import { placeSpeedTraps, crossed } from '../src/core/speedTraps.ts';
+import { placeSpeedTraps, crossed, trapTier, TRAP_TIERS, TRAP_TIER_REP } from '../src/core/speedTraps.ts';
 
 let failed = 0;
 const check = (n: string, ok: boolean, i = ''): void => { if (!ok) failed++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${n}${i ? `  (${i})` : ''}`); };
@@ -21,5 +21,6 @@ check('the other way too', crossed(t, t.x + t.tx * 5, t.z + t.tz * 5, t.x - t.tx
 const off = t.half + 3; // beside the road
 check('passing beside the road is not caught', !crossed(t, t.x + t.tz * off - t.tx * 5, t.z - t.tx * off - t.tz * 5, t.x + t.tz * off + t.tx * 5, t.z - t.tx * off + t.tz * 5));
 check('driving across the road at the trap line is not a pass', !crossed(t, t.x + t.tz * 6, t.z - t.tx * 6, t.x - t.tz * 6, t.z + t.tx * 6));
+check('speed goals: 150, 200 and 250 km/h, each pays more', trapTier(100) === 0 && trapTier(150) === 1 && trapTier(199) === 1 && trapTier(200) === 2 && trapTier(250) === 3 && trapTier(400) === 3 && TRAP_TIERS.length === 3 && TRAP_TIER_REP[0] < TRAP_TIER_REP[1] && TRAP_TIER_REP[1] < TRAP_TIER_REP[2]);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

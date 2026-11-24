@@ -30,3 +30,10 @@ export function crossed(t: SpeedTrap, x0: number, z0: number, x1: number, z1: nu
   const k = a0 / (a0 - a1), cx = x0 + (x1 - x0) * k, cz = z0 + (z1 - z0) * k;
   return Math.abs((cx - t.x) * t.tz - (cz - t.z) * t.tx) <= t.half;
 }
+
+/** Speed goals at every camera (km/h): the first time you pass each one the camera pays REP. Gold is 250. */
+export const TRAP_TIERS: readonly number[] = [150, 200, 250];
+export const TRAP_TIER_REP: readonly number[] = [20, 40, 80];
+
+/** How many goals a speed reaches (0..3). */
+export const trapTier = (kmh: number): number => TRAP_TIERS.filter((v) => kmh >= v).length;

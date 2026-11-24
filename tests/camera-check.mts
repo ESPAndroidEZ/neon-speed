@@ -123,5 +123,24 @@ check('nitro kick is smooth (no jitter)', n.pos < POS_MAX && n.fov < FOV_MAX, `f
   check('an impact shakes it and the shake dies out', spread(1, 0, true) > 0.05, `${spread(1, 0, true).toFixed(3)} m`);
   check('Off removes all shake, Low is gentler than Normal', spread(0, 0.9, true) < 1e-6 && spread(0.5, 0.9, true) < spread(1, 0.9, true), '');
 }
+
+// owner 2026-11-21: a long handbrake slide must not pull the camera in. The zoom follows speed up quickly and down slowly.
+{
+  const cam = new PerspectiveCamera(60, 16 / 9, 0.1, 500);
+  const chase = new Cam(cam);
+  const car = { position: { x: 0, y: 0, z: 0 }, heading: 0, speed: 45, slipAngle: 0 } as unknown as CarState;
+  chase.setTarget(car);
+  for (let i = 0; i < 240; i++) chase.step(1 / 60);
+  const far = chase.pose.fov, fast = chase.pose.position.length();
+  (car as { speed: number }).speed = 8; // the handbrake scrubs the speed away
+  for (let i = 0; i < 60; i++) chase.step(1 / 60); // one second later
+  const dFov = far - chase.pose.fov;
+  check('one second into a speed loss the view has hardly zoomed in (under a third of the way)', dFov < (far - 60) * 0.34, `${dFov.toFixed(1)} of ${(far - 60).toFixed(1)} deg`);
+  for (let i = 0; i < 360; i++) chase.step(1 / 60);
+  check('it still settles to the slow-speed view afterwards', chase.pose.fov < far - (far - 60) * 0.7 && chase.pose.position.length() < fast, `${chase.pose.fov.toFixed(1)} deg`);
+  (car as { speed: number }).speed = 45;
+  for (let i = 0; i < 60; i++) chase.step(1 / 60);
+  check('and it opens up again quickly when the car speeds up', chase.pose.fov > far - 6, `${chase.pose.fov.toFixed(1)} vs ${far.toFixed(1)}`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
