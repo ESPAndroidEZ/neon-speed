@@ -22,6 +22,7 @@ export const POLISH_CSS = `
 }
 @media (min-width:1500px) and (min-height:800px){.rb-layer{zoom:1.25}}
 @media (min-width:1900px) and (min-height:1000px){.rb-layer{zoom:1.5}}
+@media (min-height:640px){.rb-main .rb-logo{margin-top:clamp(40px,8vh,84px)}}
 /* REP level and cash in one header (docs/nfs-vision.md section 3) */
 .rb-hdr{position:fixed;right:max(18px,env(safe-area-inset-right),2.5vw);top:max(14px,env(safe-area-inset-top),2vh);z-index:31;display:flex;gap:8px;align-items:center;max-width:90vw}
 .rb-hdr .rb-cash{position:static;right:auto;top:auto}

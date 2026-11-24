@@ -53,7 +53,7 @@ export class ResultsScreen {
       <div style="font-size:clamp(30px,6vw,46px);font-style:italic;color:${color}">${head}</div>${verdict}
       <table style="width:100%;margin:14px 0;border-collapse:collapse;line-height:1.8">${rows}</table>
       <div>${t('res.bestLap')} <b>${Number.isFinite(r.bestLap) ? fmt(r.bestLap) : '--'}</b> &nbsp; ${t('res.drift')} <b>${r.driftScore}</b></div>${splits}${st}
-      <div style="font-size:30px;margin:10px 0 ${split ? '2px' : '10px'};color:var(--green)">+ $${r.cash.toLocaleString()}</div>${split}${notes}<div id="rs-lb" style="font-size:.8em;opacity:.8;color:#8fd8ff;min-height:1.2em"></div>
+      <div id="rs-cash" style="font-size:30px;margin:10px 0 ${split ? '2px' : '10px'};color:var(--green)">+ $${r.cash.toLocaleString()}</div>${split}${notes}<div id="rs-lb" style="font-size:.8em;opacity:.8;color:#8fd8ff;min-height:1.2em"></div>
       <div id="rs-btns" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"></div></div>`;
     injectCss();
     const touch = isPhone();
@@ -74,6 +74,7 @@ export class ResultsScreen {
     const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:reduce)').matches;
     this.root.style.animation = calm ? 'none' : 'rb-fade .7s var(--ease) 1.2s both'; // the car rolls out first, then the results fade in
     this.root.style.display = 'flex';
+    countUp(this.root.querySelector('#rs-cash'), r.cash, calm);
   }
 
   hide(): void {
@@ -83,4 +84,19 @@ export class ResultsScreen {
   get visible(): boolean {
     return this.root.style.display === 'flex';
   }
+}
+
+/** The cash line counts up from nothing once the results have faded in (about 0.9 s); reduced motion and small prizes show the number at once. */
+function countUp(el: Element | null, cash: number, calm: boolean): void {
+  if (!el || calm || cash < 50 || typeof requestAnimationFrame !== 'function') return;
+  let start = 0;
+  const show = (n: number): void => { el.textContent = '+ $' + n.toLocaleString(); };
+  const tick = (now: number): void => {
+    if (!start) start = now;
+    const k = Math.min(1, Math.max(0, (now - start - 1200) / 900)); // after the fade-in delay
+    show(Math.round(cash * (1 - (1 - k) ** 3)));
+    if (k < 1 && el.isConnected) requestAnimationFrame(tick);
+  };
+  show(0);
+  requestAnimationFrame(tick);
 }
