@@ -18,3 +18,4 @@ Start with the file for your role. Everything is kept up to date at every checkp
 - `tasks/`: Qwen task files. `inbox/`: owner notes. Other files (`art-direction.md`, `ui-style.md`, `mobile.md`, `release.md`, `perf.md`, `audio-*.md`, `car-data.md`): topic references.
 
 **The rule:** after every change, update the affected documents in the same step; end every session with `/checkpoint`.
+- `nfs-vision.md`: plan to make it feel like a real NFS game (story places in the city, modes, progression, looks, order of work).

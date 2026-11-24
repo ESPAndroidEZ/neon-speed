@@ -2,6 +2,10 @@
 
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
+## 2026-11-24
+- **Deployed** (live at https://notcarlos.mosidealus.nl): Chapter 4, the new Free Drive map and screens, tilt gas fixes, GUI polish.
+- **New plan `docs/nfs-vision.md`**: how to make it feel like a real NFS game (story places you drive to, more modes, reputation and classes, looks, feel, build order).
+
 ## 2026-11-23
 - **Chapter 4 "Neon Harbor" is in the game.** Four events on four different maps (container yard in rain, crane drift, cliff road in rain, the Neon Strip), a new character (Madame Adeyemi, the Broker) with a portrait, Pixel as the harbour boss, a Spanish translation and an end card. It unlocks after the Chapter 3 ending. Dev build, not deployed (the deploy failed: the Teleport proxy timed out from this network).
 - **Phone screens fixed (first batch).** On a phone held sideways the garage is now a narrow panel on the left with the car free on the right and the buttons pinned at the bottom; the pause menu fits in two columns; small buttons got bigger tap areas; the "Now playing" line no longer covers titles. The Free Drive street card, race offer and pause were also reworked. A full list of what is still open is in `docs/ui-story.md`.
