@@ -69,13 +69,14 @@ export class RoamPolice {
 
   step(dt: number, px: number, pz: number, pSpeed: number): void {
     const g = this.g;
-    let goal = -1;
+    let goal = -1, budget = 1; // at most one route search per step: three cops never replan in the same frame
     for (let i = 0; i < this.count; i++) {
       if (this.stall[i] > 0) { this.stall[i] -= dt; this.speed[i] = 0; continue; }
       const e = g.edges[this.edge[i]], dir = this.dir[i];
       const toEnd = dir > 0 ? e.length - this.s[i] : this.s[i];
       const far = g.nodes[dir > 0 ? e.b : e.a];
-      if ((this.replan[i] -= dt) <= 0) {
+      if ((this.replan[i] -= dt) <= 0 && budget > 0) {
+        budget--;
         this.replan[i] = REPLAN + this.rnd() * 0.4;
         if (goal < 0) goal = nearestNode(g, px, pz);
         const r = goal >= 0 && goal !== far.id ? findRoute(g, far.id, goal) : null;
@@ -110,7 +111,7 @@ export class RoamPolice {
     this.edge[i] = pick;
     this.s[i] = e.length / 2;
     this.dir[i] = e.oneWay ? 1 : Math.hypot(e.pts[e.pts.length - 2] - px, e.pts[e.pts.length - 1] - pz) < Math.hypot(e.pts[0] - px, e.pts[1] - pz) ? 1 : -1; // toward the player
-    this.speed[i] = 8; this.stall[i] = 0; this.replan[i] = 0; this.path[i] = [];
+    this.speed[i] = 8; this.stall[i] = 0; this.replan[i] = i * 0.45; this.path[i] = [];
     this.pose(i);
   }
 

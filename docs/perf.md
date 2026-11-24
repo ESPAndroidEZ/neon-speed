@@ -101,3 +101,10 @@ HIGH (same run before the ground fix, tier verified through the save): worst 154
 - Rain/snow on Low cost ~1.8x clear in SwiftShader with the same draw calls: fill (wet road, puddles, streaks). Profile
   on a real GPU before cutting anything.
 - Engine loops as WAV: Opus/AAC would cut ~2 MB, but needs a per-browser format check (iOS).
+
+## 2026-11-24 additions to Free Drive (counted, NOT benched: rerun `tests/lab/roam-bench.mjs` before the next deploy)
+- Story places: 3 draw calls (rings, wall bands, beams; instances packed so locked places cost nothing) plus one person (17 meshes) and one marker, only while within 170 m of the next place. A subagent measured 154 draw calls on desktop and 168 on a phone-size viewport with them (budget LOW 250).
+- Neon tokens 1 call (earlier). Police: 15 draw calls, only while cops are out (three cars x five boxes); route search (A*) at most one per step and about one per second per cop.
+- Time of day recolours uniforms and light colours only (no extra draw calls); the fly-by is the existing cinematic camera.
+- Knockout hides eliminated cars (fewer draw calls, not more).
+
