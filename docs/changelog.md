@@ -3,6 +3,15 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-24
+- **The NFS round (dev build, not deployed yet).** The plan in `docs/nfs-vision.md` is built:
+  - **Story places in the city.** Every story event waits at a glowing ring in its district (pink beam, a person standing on the corner with a floating diamond). Drive in slowly, the card shows who it is (portrait, role, a one-line introduction the first time) and Start/Enter begins the event; after it you are back in the city. Entering Free Drive gives a phone call from the next person and sets your GPS. The full map shows story stars (pink = next, green = done, grey = locked).
+  - **Chapter 4 and Chapter 5, prologue, recaps.** Five more races/drifts on five maps in Chapter 5 ("The Bay Bridge": Wren rides along and calls the corners, the coast keys, the bridge in rain turning to snow, dawn on the Loop); prologue "Before the Wall" plays before Chapter 4; "Previously" cards before each new chapter; two endings that follow your Chapter 3 choice; Spanish for all of it. New people: Madame Adeyemi (the Broker) and Wren, with portraits and Crew entries.
+  - **REP level.** Races, story, Free Drive finds and medals earn REP; each level pays cash. Cars in the garage need a level (Golf 2, 350Z 3, RX-7 4, E61 5, M3 7, Evo 9, Supra 11). The level shows next to your cash.
+  - **Time Attack medals** (bronze, silver, gold per map and weather; drift maps by score), paid once.
+  - **Rival duels** (Maps > Rival duels): one rival, one map; the first win takes their car (in their paint) and a prize. **Knockout** (pick it next to Time trial): the last car is out every lap.
+  - **Police chase** in Free Drive: a speed camera flash at 200 km/h or a hard crash into traffic gives a star, up to three cops chase you; stay close and slow and you are busted (fine), get away and you escape (cash and REP). **Speed goals** at the cameras pay REP at 150, 200, 250 km/h.
+  - **Looks and feel.** Short fly-by before each race (Settings can turn it off); Free Drive time of day (Night, Dusk, Dawn, Day in the pause menu); the chase camera no longer zooms in during a long handbrake slide; six more deep-house songs (15 now); tilt steering with automatic gas now gets an assisted launch and has an AUTO/MAN gas button.
+  - Not built: jumps (the physics are 2D), reverse/night map variants, district radio, menu 3D hero, results podium.
 - **Deployed** (live at https://notcarlos.mosidealus.nl): Chapter 4, the new Free Drive map and screens, tilt gas fixes, GUI polish.
 - **New plan `docs/nfs-vision.md`**: how to make it feel like a real NFS game (story places you drive to, more modes, reputation and classes, looks, feel, build order).
 

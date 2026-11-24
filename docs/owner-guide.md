@@ -69,6 +69,7 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - **Teleport login** expires; the player code is a secret; Ansible manages the nginx config (do not edit it).
 
 ## 6. What is NOT verified (honest list)
+- 2026-11-24 round (story places, Chapters 4-5, REP, medals, duels, Knockout, police, time of day, fly-by): built and covered by unit tests plus screenshot reviews on a software renderer; NOT tried on a real phone or a real GPU. Things to try by hand: drive into a pink ring in Free Drive and start the event, finish it and see that you return to the city; cause heat with a camera flash above 200 km/h and get busted and escape; cycle the time of day; start a Knockout race; challenge a rival in Rival duels; check the REP bar and a locked car in the garage; play with tilt steering and automatic gas.
 - Never played on a real iPhone or Android phone by anyone but you and friends: landscape lock, tilt, the button editor and long-press behaviour are only tested in an emulator.
 - The engine sound changes (less shrill) were never heard.
 - The new Chapter 3 races have not been balanced (are they winnable with your starting cars?).
