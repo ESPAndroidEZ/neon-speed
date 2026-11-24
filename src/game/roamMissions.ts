@@ -1,5 +1,6 @@
 import type { RoadGraph, DistrictId } from '../types/world';
 import type { SaveStore } from '../core/save';
+import { REP_FD } from '../core/rep';
 import { MissionRunner, type Resolve } from '../core/missions';
 import { MISSIONS } from '../data/world/missions';
 import { missionCard, type MissionCard } from '../ui/missionCard';
@@ -16,12 +17,13 @@ export class RoamMissions {
   private readonly run: MissionRunner;
   private readonly card: MissionCard;
   private readonly store: SaveStore;
+  private readonly acts: RoamActivities;
   private readonly map: () => RoamMap;
   private name = '';
   private lastDistrict: DistrictId = 'downtown';
 
   constructor(g: RoadGraph, acts: RoamActivities, store: SaveStore, map: () => RoamMap) {
-    this.store = store; this.map = map;
+    this.store = store; this.map = map; this.acts = acts;
     const resolve: Resolve = (poi) => {
       const [kind, arg] = poi.split(':');
       if (kind === 'meet') return acts.meetSpot;
@@ -60,6 +62,7 @@ export class RoamMissions {
       this.store.data.cash += was.reward.cash;
       this.store.commit();
       this.card.result(t('mission.paid', { cash: was.reward.cash.toLocaleString() }), true);
+      this.acts.award(REP_FD.mission);
     } else if (ev === 'fail') { this.map().clearWaypoint(); this.card.result(t('mission.late'), false); }
     else if (this.run.state === 'active') this.card.active(this.name, this.run.left, Math.hypot(x - this.run.tx, z - this.run.tz));
     else if (this.run.state === 'idle' && this.card.offering) this.card.hide();

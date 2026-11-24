@@ -40,6 +40,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
     const b = j.bestLap as Record<string, unknown>;
     for (const w of WEATHERS) out.bestLap[w] = typeof b[w] === 'number' && (b[w] as number) > 5 ? (b[w] as number) : null;
   }
+  if (typeof j.rep === 'number' && Number.isFinite(j.rep) && j.rep > 0) out.rep = Math.min(1e7, Math.round(j.rep));
   const roam = parseRoam(j.roam); // Free Drive progress, every field checked
   if (roam) out.roam = roam;
   if (typeof j.trackBest === 'object' && j.trackBest !== null) {

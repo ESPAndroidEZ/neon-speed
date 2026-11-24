@@ -43,6 +43,8 @@ export interface SaveData {
   paid?: string[];
   /** Free Drive progress (Neon Harbor): position, records, visited places. Absent until the first Free Drive. */
   roam?: RoamSave;
+  /** Reputation points (core/rep): races, story and Free Drive add to it. Absent = 0. */
+  rep?: number;
 }
 
 /** Minimal storage shape so tests can pass an in-memory object. localStorage satisfies it. */
@@ -72,6 +74,7 @@ export const defaultSave = (starterId: string, starterPaint: number): SaveData =
 
 export { parseSave } from './saveParse';
 import { parseSave } from './saveParse';
+import { carLevel, levelCash, repLevel } from './rep';
 
 /** Save game state with explicit commit(); tolerant of missing or blocked storage. */
 export class SaveStore {
@@ -103,9 +106,19 @@ export class SaveStore {
     return this.data.owned.includes(id);
   }
 
-  /** Spend cash on a car. False if already owned or too poor. */
+  /** Add REP; a level reached pays cash. Returns the new level and how many levels were gained. */
+  addRep(n: number): { level: number; up: number } {
+    const before = repLevel(this.data.rep ?? 0);
+    this.data.rep = Math.max(0, Math.round((this.data.rep ?? 0) + n));
+    const level = repLevel(this.data.rep);
+    for (let l = before + 1; l <= level; l++) this.data.cash += levelCash(l);
+    this.commit();
+    return { level, up: level - before };
+  }
+
+  /** Spend cash on a car. False if already owned, too poor or below the car's REP level. */
   buy(id: string, price: number): boolean {
-    if (this.owns(id) || this.data.cash < price) return false;
+    if (this.owns(id) || this.data.cash < price || repLevel(this.data.rep ?? 0) < carLevel(id)) return false;
     this.data.cash -= price;
     this.data.owned.push(id);
     this.commit();

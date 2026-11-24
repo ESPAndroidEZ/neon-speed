@@ -15,6 +15,7 @@ import { CityRaceSpots, RING } from './cityRaces';
 import { RoamWhere } from '../ui/roamWhere';
 import { placeTokens, TokenWatch, TOKEN_COUNT } from '../core/tokens';
 import { tokenMesh } from '../world/open/tokenView';
+import { REP_FD } from '../core/rep';
 
 /**
  * Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that follow). Built with the city,
@@ -34,6 +35,8 @@ export class RoamActivities {
   /** Set by RoamProgress: a new best (key `trap:<id>` / `zone:<id>`) and a first visit (place id) are saved. */
   onRecord: (key: string, value: number) => void = () => {};
   onVisit: (id: string) => void = () => {};
+  /** Set by RoamProgress: adds REP to the save and says how far it went. */
+  onRep: (n: number) => { level: number; up: number } = () => ({ level: 1, up: 0 });
   /** After a teleport (enter, fast travel, respawn): the story places wait until the car has left their rings. */
   onPlace: (x: number, z: number) => void = () => {};
   /** Neon tokens (owner playtest: a point to drive around). `onToken(id, count)` saves and returns the cash paid (0 = none). */
@@ -81,6 +84,12 @@ export class RoamActivities {
     this.disposers.push(() => { for (const m of [cams, rings, starts, this.tokenView.mesh]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
   }
 
+  /** REP for a find; a level reached pops up. */
+  award(n: number): void {
+    const r = this.onRep(n);
+    if (r.up > 0) this.hud.popUp(t('rep.up', { n: r.level }), '#ff3aa6');
+  }
+
   /** Tokens collected in earlier drives (ids from the save). */
   restoreTokens(ids: readonly number[]): void {
     this.group.remove(this.tokenView.mesh);
@@ -112,6 +121,7 @@ export class RoamActivities {
     if (tk >= 0) {
       this.tokenView.hide(tk);
       const cash = this.onToken(tk, this.tokens.count);
+      this.award(REP_FD.token);
       this.hud.popUp(cash > 0 ? t('roam.tokenPay', { n: this.tokens.count, all: TOKEN_COUNT, cash: cash.toLocaleString() }) : t('roam.token', { n: this.tokens.count, all: TOKEN_COUNT }), cash > 0 ? '#ffd27d' : '#18d8ff');
     }
     this.where.update(dt, x, z);
@@ -125,6 +135,7 @@ export class RoamActivities {
   private zoneDone(score: number): void {
     const id = this.run.last;
     const best = this.zoneBest.get(id) ?? 0;
+    if (score > 0) this.award(Math.min(REP_FD.zoneMax, Math.round(score / 150)));
     if (score > best) { this.zoneBest.set(id, score); this.onRecord(`zone:${id}`, score); }
     this.hud.popUp(t(score > best && best > 0 ? 'roam.zoneBest' : 'roam.zoneOut', { n: score.toLocaleString() }), score > best ? '#ffd27d' : '#8fd8ff');
   }
@@ -135,7 +146,7 @@ export class RoamActivities {
 
   private caught(id: number, kmh: number): void {
     const best = this.trapBest.get(id) ?? 0;
-    if (kmh > best) { this.trapBest.set(id, kmh); this.onRecord(`trap:${id}`, kmh); }
+    if (kmh > best) { this.trapBest.set(id, kmh); this.onRecord(`trap:${id}`, kmh); this.award(REP_FD.trap); }
     this.hud.popUp(t(kmh > best && best > 0 ? 'roam.trapBest' : 'roam.trap', { v: speedText(kmh) }), kmh > best ? '#ffd27d' : '#8fd8ff');
   }
 }

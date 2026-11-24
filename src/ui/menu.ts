@@ -20,7 +20,8 @@ import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
 import { dailyButton } from './dailyButton'; import { freeDriveButton } from './freeDriveButton';
 import type { TrackDef } from '../data/tracks';
-import { button, feat, h, injectCss, lapText, money, wordmark } from './uiKit';
+import { menuHeader } from './repChip';
+import { button, feat, h, injectCss, lapText, wordmark } from './uiKit';
 import { onInstallChange } from '../core/install';
 import { onLangChange, t } from '../i18n';
 import { installButton } from './installButton';
@@ -102,10 +103,7 @@ export class Menu {
     this.layer = el;
     this.screen = s;
     document.body.appendChild(el);
-    if (s !== 'title') {
-      this.cash = h('div', 'rb-cash', money(this.d.store.data.cash));
-      document.body.appendChild(this.cash);
-    }
+    if (s !== 'title') document.body.appendChild((this.cash = menuHeader(this.d.store)));
     el.querySelector('button')?.focus({ preventScroll: true });
   }
 

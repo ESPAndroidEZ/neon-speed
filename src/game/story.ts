@@ -15,6 +15,7 @@ import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { Cast } from './cast';
 import { chapterEnd } from './chapterEnd';
 import { playRecap } from './recap';
+import { repNote } from './repAward';
 import type { Game } from './game';
 import { t } from '../i18n';
 
@@ -137,15 +138,12 @@ export class StoryController {
   finish(r: RaceResult): ResultsExtra | void {
     const d = this.d;
     const ev = this.current;
-    if (!d.store.claimRace(d.game.setup?.meta?.raceId)) r.cash = 0; // already paid (a save of this finish was reloaded)
-    if (!ev) {
-      d.store.recordRace(r.cash, r.bestLap, d.game.weather);
-      return;
-    }
+    const paid = d.store.claimRace(d.game.setup?.meta?.raceId); if (!paid) r.cash = 0; // already paid (a save of this finish was reloaded)
+    if (!ev) { d.store.recordRace(r.cash, r.bestLap, d.game.weather); if (paid) r.note = [r.note, repNote(d.store, r, false)].filter(Boolean).join(' · '); return; } // free race and city races
     if (ev.kind === 'drift') r.cash = driftCash(r.driftScore);
     const outcome = evaluate(ev, r.position, r.driftScore);
     d.store.recordRace(r.cash, r.bestLap, ev.weatherChange ? ev.weatherChange.to : ev.weather);
-    const notes: string[] = [];
+    const notes: string[] = paid ? [repNote(d.store, r, true, outcome.passed)] : [];
     if (outcome.passed) {
       const got = completeEvent(d.store.data, ev);
       d.store.commit();

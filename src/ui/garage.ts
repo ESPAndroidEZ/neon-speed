@@ -10,6 +10,7 @@ import { clamp01, hex, soundTest, statsOf } from './garageParts';
 import { button, h, money } from './uiKit';
 import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
+import { carLevel, repLevel } from '../core/rep';
 import { speedText } from '../game/speedUnit';
 
 export interface GarageDeps {
@@ -158,7 +159,8 @@ export function buildGarage(d: GarageDeps): HTMLElement {
       b.style.minWidth = '100px';
       row.append(b);
     } else {
-      const buy = button(t('garage.buy', { price: money(c.price) }), () => {
+      const need = carLevel(c.id), locked = repLevel(d.store.data.rep ?? 0) < need;
+      const buy = button(locked ? t('garage.repLock', { n: need }) : t('garage.buy', { price: money(c.price) }), () => {
         if (d.store.buy(c.id, c.price)) {
           d.store.setPaint(c.id, paintOf(c));
           d.store.setGlow(c.id, glowOf(c));
@@ -167,7 +169,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
         refreshCash();
         render();
       }, 'hot');
-      buy.disabled = d.store.data.cash < c.price;
+      buy.disabled = locked || d.store.data.cash < c.price;
       buy.style.minWidth = '100px';
       buy.style.padding = '8px 6px';
       row.append(buy);

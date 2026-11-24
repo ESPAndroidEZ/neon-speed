@@ -23,6 +23,8 @@ check('first lap is a record', a.data.bestLap.CLEAR === 61.5, '');
 check('slower lap is not a record', !a.recordRace(0, 70, 'CLEAR') && a.data.bestLap.CLEAR === 61.5, '');
 check('faster lap is a record', a.recordRace(0, 58.2, 'CLEAR') && a.data.bestLap.CLEAR === 58.2, '');
 check('rain record is separate', a.data.bestLap.RAIN === null, '');
+check('buy 350Z needs REP level 3 even with the cash', !a.buy('350z', 12000) && a.data.cash === 12500 && !a.owns('350z'), '');
+a.data.rep = 200;
 check('buy 350Z now works and charges', a.buy('350z', 12000) && a.data.cash === 500 && a.owns('350z'), `${a.data.cash}`);
 check('cannot buy twice', !a.buy('350z', 12000) && a.data.cash === 500, '');
 a.select('350z');

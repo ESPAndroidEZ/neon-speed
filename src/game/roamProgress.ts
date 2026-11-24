@@ -3,6 +3,7 @@ import type { RoamSave } from '../types/world';
 import type { RoamActivities } from './roamActivities';
 import { emptyRoam } from '../core/roamSaveParse';
 import { TOKEN_REWARDS } from '../core/tokens';
+import { REP_FD } from '../core/rep';
 
 const CELL = 128, SAVE_EVERY = 30;
 
@@ -32,7 +33,8 @@ export class RoamProgress {
     acts.restoreTokens(r.hands.filter((h) => h.startsWith('t')).map((h) => Number(h.slice(1))));
     acts.onToken = (id, count) => this.token(id, count);
     acts.onRecord = (key, value) => { this.roam().best[key] = Math.round(value * 10) / 10; this.store.commit(); };
-    acts.onVisit = (id) => { const v = this.roam().visited; if (!v.includes(id)) { v.push(id); this.store.commit(); } };
+    acts.onRep = (n) => this.store.addRep(n);
+    acts.onVisit = (id) => { const v = this.roam().visited; if (!v.includes(id)) { v.push(id); this.store.commit(); if (id === 'meet') acts.award(REP_FD.meet); } };
   }
 
   /** A token was picked up: save it, and pay a milestone once (cash is added here; the milestone is remembered in `visited`). */
