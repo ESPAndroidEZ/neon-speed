@@ -13,11 +13,11 @@ export const POLISH_CSS = `
 .rb-tabbar{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,var(--panel-solid) 75%,#0a0d1c00);padding-bottom:var(--sp-2)}
 @media (pointer:coarse){.rb-btn,.rb-chip,.rb-tabbar button{min-height:44px}.rb-up .u-n{min-height:32px;line-height:32px}input[type=range]{min-height:44px}}
 @media (max-height:480px) and (orientation:landscape){
-  .rb-layer .rb-row:has(>.rb-card.rb-pick){flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;flex:none;justify-content:flex-start;width:100%;max-width:100vw;padding:var(--sp-2) max(var(--sp-4),var(--safe-l));-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .rb-layer .rb-row:has(>.rb-card.rb-pick){flex-wrap:nowrap;align-items:stretch;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;flex:none;justify-content:flex-start;width:100%;max-width:100vw;padding:var(--sp-2) max(var(--sp-4),var(--safe-l));-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .rb-layer .rb-row:has(>.rb-card.rb-pick)::-webkit-scrollbar{display:none}
   .rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card{flex:0 0 min(250px,64vw);scroll-snap-align:center;margin:0;padding:var(--sp-2) var(--sp-3);font-size:.92em}
   .rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card img,.rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card canvas{max-height:64px;width:auto;max-width:100%}
-  .rb-layer .rb-row:has(>.rb-card:not(.rb-pick)){flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;justify-content:flex-start;width:100%;padding:var(--sp-2) max(var(--sp-4),var(--safe-l))}
+  .rb-layer .rb-row:has(>.rb-card:not(.rb-pick)){flex-wrap:nowrap;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;justify-content:flex-start;width:100%;padding:var(--sp-2) max(var(--sp-4),var(--safe-l))}
   .rb-layer .rb-row:has(>.rb-card:not(.rb-pick))>.rb-card{flex:0 0 min(250px,64vw);scroll-snap-align:center;margin:0}
 }
 @media (min-width:1500px) and (min-height:800px){.rb-layer{zoom:1.25}}
