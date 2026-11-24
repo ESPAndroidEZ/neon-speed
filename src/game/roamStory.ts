@@ -1,7 +1,6 @@
-import type { Group } from 'three';
+import { Mesh, MeshBasicMaterial, OctahedronGeometry, type Group } from 'three';
 import type { RoadGraph } from '../types/world';
 import type { SaveStore } from '../core/save';
-import type { Hud } from '../ui/hud';
 import type { RoamMap } from '../ui/roamMap';
 import type { RoamActivities } from './roamActivities';
 import { greeter, PIN_R, pinStates, placeStoryPins, type PinState, type StoryPin } from '../core/storyPins';
@@ -33,26 +32,27 @@ export class RoamStory {
   private readonly g: RoadGraph;
   private readonly group: Group;
   private readonly store: SaveStore;
-  private readonly hud: Hud;
   private readonly map: RoamMap;
   private readonly view: PinView;
   private readonly call: StoryCall;
   private figure: Character | null = null;
   private figureAt = -1;
+  private readonly marker = new Mesh(new OctahedronGeometry(0.3, 0), new MeshBasicMaterial({ color: 0xff3aa6 }));
   private inside = -1;
   private armed = false;
   private announce = false;
   private clock = 0;
 
-  constructor(g: RoadGraph, group: Group, store: SaveStore, acts: RoamActivities, map: RoamMap, hud: Hud) {
-    this.g = g; this.group = group; this.store = store; this.map = map; this.hud = hud;
+  constructor(g: RoadGraph, group: Group, store: SaveStore, acts: RoamActivities, map: RoamMap) {
+    this.g = g; this.group = group; this.store = store; this.map = map;
     const avoid = [...acts.races.races, ...acts.zones, ...(acts.meetSpot ? [acts.meetSpot] : [])];
     this.pins = placeStoryPins(g, STORY_PLACES, avoid);
     this.states = new Uint8Array(this.pins.length);
     this.labels = this.pins.map(() => '');
     this.view = pinView(this.pins);
     this.call = storyCall();
-    group.add(this.view.group);
+    group.add(this.view.group, this.marker);
+    this.marker.visible = false;
     acts.onPlace = (x, z) => this.place(x, z);
   }
 
@@ -92,8 +92,8 @@ export class RoamStory {
     this.view.pulse(this.clock);
     if (this.figure) {
       const p = this.pins[this.figureAt], near = Math.hypot(p.x - x, p.z - z) < SEE;
-      this.figure.group.visible = near;
-      if (near) this.figure.update(dt);
+      this.figure.group.visible = this.marker.visible = near;
+      if (near) { this.figure.update(dt); this.marker.position.set(this.figure.group.position.x, this.figure.group.position.y + 2.9 + 0.15 * Math.sin(this.clock * 3), this.figure.group.position.z); this.marker.rotation.y = this.clock * 2; }
     }
     if (this.announce) { this.announce = false; this.tell(); }
   }
@@ -103,6 +103,7 @@ export class RoamStory {
     this.setFigure(-1);
     this.view.dispose();
     this.call.dispose();
+    this.marker.removeFromParent(); this.marker.geometry.dispose(); (this.marker.material as MeshBasicMaterial).dispose();
   }
 
   /** The next place: a phone call from the person there, a toast, and the GPS set when no route is active. */
@@ -111,8 +112,7 @@ export class RoamStory {
     if (i < 0) return;
     const pin = this.pins[i], ev = findAnyEvent(pin.event), who = whoAt(pin.event), place = tx(placeOf(pin.event)?.place ?? '');
     const name = CREW.find((c) => c.id === who)?.name ?? '';
-    this.hud.popUp(t('pin.next', { name: tx(ev.title) }), '#ff8ccc');
-    this.call.show(who, name, t('pin.call', { place }));
+    this.call.show(who, name, t('pin.call', { place, event: tx(ev.title) }));
     if (!this.map.route) this.map.waypoint(pin.x, pin.z);
   }
 
@@ -124,7 +124,7 @@ export class RoamStory {
   /** The person waiting at the next place stands on the corner between the first two roads of the junction, facing the ring. */
   private setFigure(i: number): void {
     if (i === this.figureAt) return;
-    if (this.figure) { this.group.remove(this.figure.group); this.figure.dispose(); this.figure = null; }
+    if (this.figure) { this.group.remove(this.figure.group); this.figure.dispose(); this.figure = null; this.marker.visible = false; }
     this.figureAt = i;
     if (i < 0) return;
     const pin = this.pins[i], n = this.g.nodes[pin.node];
@@ -140,6 +140,7 @@ export class RoamStory {
     c.group.position.set(x, heightAt(x, z), z);
     c.group.rotation.y = Math.atan2(-bx, -bz);
     c.setPose('lean');
+    c.group.scale.setScalar(1.3); // readable from a distance
     c.group.visible = false;
     this.group.add(c.group);
     this.figure = c;

@@ -38,10 +38,11 @@ body.rb-fdover .rb-heat{display:none!important}
 .rb-story-offer .rb-st-k{color:#ff8ccc;letter-spacing:2px;font-size:11px}.rb-story-offer .rb-ot{color:#fff}
 .rb-story-offer .rb-st-w{text-transform:none;letter-spacing:.5px;font-size:12.5px}
 .rb-story-offer .rb-st-i{font-weight:500;font-size:12.5px;color:var(--text-dim);max-width:36ch;margin-top:2px}
-.rb-call{position:fixed;top:calc(max(var(--sp-3),var(--safe-t)) + 56px);left:50%;transform:translateX(-50%);z-index:12;display:none;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-2);max-width:calc(100vw - 32px);background:var(--panel);border:1px solid #ff3aa688;border-radius:999px;box-shadow:0 8px 24px #000a;font:600 14px var(--font);animation:rb-in var(--dur-slow) var(--ease) backwards}
+.rb-call{position:fixed;top:calc(max(var(--sp-3),var(--safe-t)) + 56px);left:50%;transform:translateX(-50%);z-index:12;display:none;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-2);max-width:calc(100vw - 32px);background:var(--panel);border:1px solid #ff3aa688;border-radius:999px;box-shadow:0 8px 24px #000a;font:600 14px var(--font);animation:rb-callin var(--dur-slow) var(--ease) backwards}
+@keyframes rb-callin{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%)}}
 .rb-call canvas{width:44px;height:44px;border-radius:50%;border:2px solid #ff3aa6;background:#0b0f18}.rb-call .rb-ot{font-weight:900;color:#fff}.rb-call .rb-sub{text-transform:none;letter-spacing:.3px;font-size:13px}
 body.rb-calling .rb-where,body.rb-offer .rb-call,body.rb-has-mission .rb-call{display:none!important}
-@media (max-height:480px){.rb-story-offer .rb-pt canvas{width:44px;height:44px}.rb-story-offer .rb-st-i{display:none}.rb-story-offer{max-width:min(470px,calc(100vw - 150px))}.rb-call{top:calc(max(var(--sp-2),var(--safe-t)) + 52px);max-width:min(460px,calc(100vw - 150px))}}
+@media (max-height:480px){.rb-story-offer .rb-pt canvas{width:44px;height:44px}.rb-story-offer .rb-st-i{display:none}.rb-story-offer{max-width:min(470px,calc(100vw - 150px))}.rb-call{top:calc(max(var(--sp-2),var(--safe-t)) + 64px);max-width:min(460px,calc(100vw - 150px))}}
 body.rb-has-mission .rb-where{display:none!important}body.rb-has-mission .rb-city-offer{top:calc(max(var(--sp-3),var(--safe-t)) + 124px)}
 .rb-mission{left:50%!important;transform:translateX(-50%);max-width:min(440px,calc(100vw - 260px))}
 

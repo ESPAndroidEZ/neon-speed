@@ -71,21 +71,21 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
     const k = SIZE / vs;
     const X = (v: number): number => (bx(v) - sx) * k, Z = (v: number): number => (bz(v) - sz) * k;
     cx.drawImage(base, sx, sz, vs, vs, 0, 0, SIZE, SIZE);
-    cx.font = '600 22px system-ui,sans-serif'; cx.textAlign = 'center'; 
+    cx.font = '600 28px system-ui,sans-serif'; cx.textAlign = 'center'; 
     for (const d of labels) { const n = t(`district.${d.id}` as 'district.bay').toUpperCase(); cx.strokeStyle = '#05060dcc'; cx.lineWidth = 5; cx.strokeText(n, X(d.x), Z(d.z)); cx.fillStyle = '#e8f6ffcc'; cx.fillText(n, X(d.x), Z(d.z)); }
     if (s.route) {
       cx.strokeStyle = '#18d8ff'; cx.lineWidth = 6; cx.lineCap = 'round';
       for (const id of s.route.edges) { const e = g.edges[id]; cx.beginPath(); for (let i = 0; i < e.cum.length; i++) (i ? cx.lineTo : cx.moveTo).call(cx, X(e.pts[i * 2]), Z(e.pts[i * 2 + 1])); cx.stroke(); }
     }
+    if (s.route) { cx.fillStyle = '#ff2a9d'; cx.strokeStyle = '#fff'; cx.lineWidth = 3; cx.beginPath(); cx.arc(X(s.wx), Z(s.wz), 13, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
     for (const m of s.markers()) {
       const x = X(m.x), z = Z(m.z);
       if (x < 0 || z < 0 || x > SIZE || z > SIZE) continue;
       cx.fillStyle = MK[m.k]; cx.strokeStyle = '#05060d'; cx.lineWidth = 2;
       if (m.k === 'story') star(x, z, 17);
       else { cx.beginPath(); cx.arc(x, z, m.k === 'token' || m.k === 'storyLock' ? 6 : m.k === 'storyDone' ? 8 : 10, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
-      if (m.label) { cx.font = '700 22px system-ui,sans-serif'; cx.textAlign = 'center'; cx.lineWidth = 5; cx.strokeStyle = '#05060dcc'; cx.strokeText(m.label, x, z - 24); cx.fillStyle = '#ffd1ea'; cx.fillText(m.label, x, z - 24); }
+      if (m.label) { cx.font = '700 34px system-ui,sans-serif'; cx.textAlign = 'center'; cx.lineWidth = 7; cx.strokeStyle = '#05060dcc'; const lx = Math.min(SIZE - 8 - cx.measureText(m.label).width / 2, Math.max(8 + cx.measureText(m.label).width / 2, x)); cx.strokeText(m.label, lx, z - 26); cx.fillStyle = '#ffd1ea'; cx.fillText(m.label, lx, z - 26); }
     }
-    if (s.route) { cx.fillStyle = '#ff2a9d'; cx.strokeStyle = '#fff'; cx.lineWidth = 3; cx.beginPath(); cx.arc(X(s.wx), Z(s.wz), 13, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
     cx.save(); cx.translate(X(s.px), Z(s.pz)); cx.rotate(s.ph); // heading 0 = +Z = up; a clockwise turn (+h) points right
     cx.fillStyle = '#fff'; cx.strokeStyle = '#05060d'; cx.lineWidth = 3;
     cx.beginPath(); cx.moveTo(0, -17); cx.lineTo(11, 12); cx.lineTo(0, 6); cx.lineTo(-11, 12); cx.closePath(); cx.fill(); cx.stroke();

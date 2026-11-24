@@ -8,5 +8,5 @@ export const MAP_CSS = `
 .rb-fmap .rb-key{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-2);align-items:center;font-size:var(--fs-sm);color:var(--text-dim)}
 .rb-fmap .rb-key i{width:12px;height:12px;border-radius:50%;display:block}
 @media (max-aspect-ratio:1/1){.rb-fmap{flex-direction:column!important}.rb-fmap canvas{width:min(94vw,56vh);height:min(94vw,56vh)}.rb-fmap .rb-side{width:min(94vw,420px)}}
-@media (max-height:480px){.rb-fmap{gap:var(--sp-3)}.rb-fmap canvas{width:min(100vw - 230px,88vh);height:min(100vw - 230px,88vh)}.rb-fmap .rb-side{width:200px}.rb-fmap .rb-key{display:none}.rb-fmap .rb-side .rb-sub{display:none}}
+@media (max-height:480px){.rb-fmap{gap:var(--sp-3)}.rb-fmap canvas{width:min(100vw - 230px,88vh);height:min(100vw - 230px,88vh)}.rb-fmap .rb-side{width:200px}.rb-fmap .rb-key>*:nth-child(n+7){display:none}.rb-fmap .rb-side .rb-sub{display:none}}
 `;

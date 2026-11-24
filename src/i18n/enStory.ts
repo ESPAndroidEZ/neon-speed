@@ -1,7 +1,7 @@
 /** Story places in Free Drive (docs/nfs-vision.md): English UI strings. */
 export const EN_STORY = {
   'pin.kicker': 'Story · Chapter {n}', 'pin.start': 'Start', 'pin.replay': 'Replay', 'pin.new': 'New face',
-  'pin.next': 'Next story: {name}', 'pin.call': 'Meet me at {place}. I set your GPS.',
+  'pin.next': 'Next story: {name}', 'pin.call': 'Meet me at {place}: {event}. I set your GPS.',
   'map.story': 'Story', 'map.storyDone': 'Story (replay)', 'map.storyLock': 'Story (locked)',
   'story.backCity': 'Back to the city',
   'medal.gold': 'GOLD medal! +{cash}, +{rep} REP', 'medal.silver': 'SILVER medal! +{cash}, +{rep} REP', 'medal.bronze': 'BRONZE medal! +{cash}, +{rep} REP', 'maps.medals': 'Medals (dry): {g} · {s} · {b}', 'maps.medalsDrift': 'Medals: {g} · {s} · {b} points',
