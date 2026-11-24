@@ -20,7 +20,7 @@ export const EN_GAME = {
   'style.clean': 'clean', 'style.aggressive': 'aggressive', 'style.blocker': 'blocker', 'style.drifter': 'drifter', 'style.late-braker': 'late braker',
   'story.passed': 'passed', 'story.next': 'next', 'story.locked': 'locked', 'story.noRivals': 'No rivals: score alone',
   'story.oneRun': 'one run', 'story.laps': '{n} laps', 'story.only': '{car} only', 'story.vs': 'vs {rivals}',
-  'story.chapter': 'Chapter {n}', 'story.chapterTitle': 'Chapter {n} · {title}', 'story.needCh2': 'Finish Chapter 2 (and watch its ending) to unlock Chapter 3.', 'story.needCh3': 'Finish Chapter 3 (and watch its ending) to unlock Chapter 4.', 'story.needCh1': 'Finish Chapter 1 to open it.',
+  'story.chapter': 'Chapter {n}', 'story.chapterTitle': 'Chapter {n} · {title}', 'story.needCh2': 'Finish Chapter 2 (and watch its ending) to unlock Chapter 3.', 'story.needCh3': 'Finish Chapter 3 (and watch its ending) to unlock Chapter 4.', 'story.needCh4': 'Finish Chapter 4 (and watch its ending) to unlock Chapter 5.', 'story.needCh1': 'Finish Chapter 1 to open it.',
   'story.complete': 'Story complete. Replay any event.', 'story.chapterDone': 'Chapter {n} complete',
   'story.bonus': 'Story bonus + ${n}', 'story.unlocked': 'Unlocked: {car}',
   'story.continue': 'Continue', 'story.retry': 'Retry', 'story.chapterMenu': 'Chapter menu',

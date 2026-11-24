@@ -1,4 +1,4 @@
-import { completeEvent, nextEvent, nextEvent3, nextEvent4 } from '../src/core/career.ts';
+import { completeEvent, nextEvent, nextEvent3, nextEvent4, nextEvent5 } from '../src/core/career.ts';
 import { defaultSave, SaveStore, type KeyValueStore } from '../src/core/save.ts';
 import { CARS } from '../src/data/cars.ts';
 import { CREW } from '../src/data/lore.ts';
@@ -45,8 +45,9 @@ const s = mk();
 const st = new Uint8Array(pins.length);
 pinStates(s.data.career, pins, st);
 check('a new career has only the first place lit', st.filter((x) => x === 1).length === 1 && st[0] === 1 && st.filter((x) => x === 2).length === 0);
+const next = (c: typeof s.data.career) => nextEvent(c) ?? nextEvent3(c) ?? nextEvent4(c) ?? nextEvent5(c);
 let ok = true, steps = 0;
-for (let e = nextEvent(s.data.career) ?? nextEvent3(s.data.career) ?? nextEvent4(s.data.career); e && steps < 40; e = nextEvent(s.data.career) ?? nextEvent3(s.data.career) ?? nextEvent4(s.data.career)) {
+for (let e = next(s.data.career); e && steps < 40; e = next(s.data.career)) {
   pinStates(s.data.career, pins, st);
   const lit = pins.filter((_, i) => st[i] === 1);
   ok &&= lit.length === 1 && lit[0].event === e.id;
@@ -54,6 +55,7 @@ for (let e = nextEvent(s.data.career) ?? nextEvent3(s.data.career) ?? nextEvent4
   steps++;
   if (e.id === 'c2-final') s.data.career.epilogueSeen = true;
   if (e.id === 'c3-final') s.data.career.flags.c3Seen = true;
+  if (e.id === 'c4-broker') s.data.career.flags.c4Seen = true;
 }
 pinStates(s.data.career, pins, st);
 check('the lit place is always the next event; at the end everything is done', ok && steps === EVERY_EVENT.length && st.every((x) => x === 2), `${steps} events`);

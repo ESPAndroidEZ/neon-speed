@@ -6,7 +6,7 @@ export const CHAPTER_4 = { id: 4, title: "Neon Harbor", tagline: "The docks are 
 
 export const EVENTS_4: StoryEvent[] = [
   {
-    id: 'c4-yard', chapter: 4, trackId: 'maze', title: "The Yard Crew", blurb: "Pixel runs the harbour now. Race the container yard in the rain. Top two.",
+    id: 'c4-yard', cutBefore: 'prologue', chapter: 4, trackId: 'maze', title: "The Yard Crew", blurb: "Pixel runs the harbour now. Race the container yard in the rain. Top two.",
     kind: 'race', weather: 'RAIN', laps: 3, rivals: ['pixel', 'lola', 'jinx'], skillScale: 1, needPosition: 2, bonus: 10000, unlocks: [],
     card: "Wet steel, tight stacks.",
     before: YARD_BEFORE, afterWin: YARD_WIN, afterLose: YARD_LOSE, loseAlt: [YARD_LOSE_2, YARD_LOSE_3],

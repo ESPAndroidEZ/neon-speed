@@ -27,6 +27,11 @@ export const STORY_PLACES: readonly StoryPlace[] = [
   { event: 'c4-cranes', district: 'harbour', place: 'Crane Row' },
   { event: 'c4-cliff', district: 'hills', place: 'Cliff Lodge' },
   { event: 'c4-broker', district: 'strip', place: "Broker's Tower" },
+  { event: 'c5-key', district: 'oldtown', place: 'The Old Archive' },
+  { event: 'c5-wren', district: 'hills', place: 'Mountain Lookout', who: 'wren' },
+  { event: 'c5-coast', district: 'industrial', place: 'Coast Gate' },
+  { event: 'c5-bridge', district: 'harbour', place: 'Bay Bridge Approach' },
+  { event: 'c5-dawn', district: 'downtown', place: 'Harbor Loop Start', who: 'dante' },
 ];
 
 /** Every place name, for the Spanish check (tests/lab/i18n-harvest). */

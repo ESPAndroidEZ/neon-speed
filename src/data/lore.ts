@@ -42,6 +42,7 @@ export const CREW: CrewEntry[] = [
   { id: 'lola', name: 'Lola', role: 'Dock runner', color: 0xff7aa8, bio: 'Grew up on the quays. She knows every puddle, every loose plate and which crane light is broken.', truth: 'Saw a man in a grey coat under Cain’s car at Quay 9 when she was ten. She kept it secret for twelve years.' },
   { id: 'rook', name: 'Rook', role: 'Ex-Redline driver', color: 0x9aa4b2, bio: 'Left Redline Holdings on bad terms and keeps one eye on the black and gold RX-7 at all times.' },
   { id: 'adeyemi', name: 'Madame Adeyemi', role: 'The Broker', color: 0xe6b84a, gate: 'c3Seen', bio: 'Buys what people love and keeps it quiet. Polite, patient, and the newest owner of the harbour.' },
+  { id: 'wren', name: 'Wren', role: 'Veteran driver', color: 0xb8c4d6, gate: 'c4Seen', bio: 'Drove beside Cain twelve years ago and has spoken to almost nobody since. Short sentences, long memory, and a coat that has seen every night of the Loop.' },
   { id: 'vex', name: 'Vex', role: '350Z, drifter', color: 0x7a2fd6, bio: 'Lives sideways. Redline pays for the tyres, and Vex pretends not to notice the leash.' },
 ];
 

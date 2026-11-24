@@ -36,14 +36,15 @@ check('actors face their target (forward is sin h, cos h)', Math.abs(yawToward([
 
 // the real data
 const all = Object.values(CUTSCENES);
-check('there are six cutscenes with unique ids and short flag keys', all.length === 6 && new Set(all.map((c) => c.id)).size === 6 && all.every((c) => CUTSCENES[c.id] === c && cutsceneFlag(c.id).length < 30), all.map((c) => c.id).join(','));
+check('there are eleven cutscenes with unique ids and short flag keys', all.length === 11 && new Set(all.map((c) => c.id)).size === 11 && all.every((c) => CUTSCENES[c.id] === c && cutsceneFlag(c.id).length < 30), all.map((c) => c.id).join(','));
 check('each runs 12 to 40 seconds with at least 3 takes', all.every((c) => { const d = cutDuration(c.shots); return d >= 12 && d <= 40 && c.shots.length >= 3 && c.shots.every((s) => s.dur > 0); }), all.map((c) => cutDuration(c.shots)).join(','));
 check('every caption sits inside the cutscene, has a known speaker and does not overlap another', all.every((c) => { const d = cutDuration(c.shots); const ls = [...c.lines].sort((a, b) => a.at - b.at); return ls.every((l, i) => l.at >= 0 && l.at + l.dur <= d + 0.01 && l.dur >= 1.2 && (l.who === 'narrator' || !!SPEAKERS[l.who as keyof typeof SPEAKERS]) && l.text.length < 200 && (i === 0 || ls[i - 1].at + ls[i - 1].dur <= l.at + 0.01)); }));
 check('actors are real characters, stand near the car and are never inside it', all.every((c) => c.actors.length >= 1 && c.actors.every((a) => !!SPEAKERS[a.id as keyof typeof SPEAKERS] && Math.hypot(...a.at) <= 12 && Math.hypot(...a.at) >= 2.2)));
 check('cameras stay close to the stage and above the floor', all.every((c) => { for (let t = 0; t <= cutDuration(c.shots); t += 0.25) { sampleCut(c.shots, t, out); if (Math.hypot(out.px, out.pz) > 18 || out.py < 0.3 || out.py > 8) return false; } return true; }));
 check('every cutscene with a card has both texts; flags used are real', all.every((c) => !c.card || (c.card.kicker.length > 2 && c.card.title.length > 2)) && all.every((c) => !c.if || ['public', 'deal'].includes(c.if)));
 const used = EVERY_EVENT.filter((e) => e.cutBefore);
-check('events point at cutscenes that exist: Redline Rising, the Council, the Lighthouse, the Final Loop', used.map((e) => e.id).join() === 'c2-redline,c2-final,c3-lighthouse,c3-final' && used.every((e) => !!CUTSCENES[e.cutBefore!]), used.map((e) => e.cutBefore).join(','));
+check('events point at cutscenes that exist: Redline Rising, the Council, the Lighthouse, the Final Loop, the prologue, Chapter 5 opening and showdown', used.map((e) => e.id).join() === 'c2-redline,c2-final,c3-lighthouse,c3-final,c4-yard,c5-key,c5-dawn' && used.every((e) => !!CUTSCENES[e.cutBefore!]), used.map((e) => e.cutBefore).join(','));
 check('both Chapter 3 epilogue cutscenes exist and are exclusive', CUTSCENES['ch3-end-public']?.if === 'public' && CUTSCENES['ch3-end-deal']?.if === 'deal');
+check('both Chapter 5 epilogue cutscenes exist and are exclusive', CUTSCENES['ch5-end-public']?.if === 'public' && CUTSCENES['ch5-end-deal']?.if === 'deal');
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

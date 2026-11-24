@@ -1,4 +1,4 @@
-import { applyChoice, chapter3Complete, chapter4Complete, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
+import { applyChoice, completeEvent, driftCash, evaluate, isDone, playable, storyComplete, type CareerState } from '../core/career';
 import type { RaceResult } from '../core/raceManager';
 import type { SaveStore } from '../core/save';
 import { findCar } from '../data/cars';
@@ -13,6 +13,8 @@ import type { TitleCards } from '../ui/titleCards';
 import { PREVIOUSLY } from '../data/lore';
 import type { ResultsExtra, ResultsScreen } from '../ui/results';
 import type { Cast } from './cast';
+import { chapterEnd } from './chapterEnd';
+import { playRecap } from './recap';
 import type { Game } from './game';
 import { t } from '../i18n';
 
@@ -99,7 +101,7 @@ export class StoryController {
       else this.launch(ev, first);
     };
     if (first) go();
-    else this.cutThen(ev.cutBefore, go);
+    else playRecap(ev, d.store, d.cards, () => this.cutThen(ev.cutBefore, go));
   }
 
   /** Play a cutscene once (story flag `cs:<id>`), with the showroom car on stage; then `done`. Unknown, seen or flag-blocked cutscenes just continue. */
@@ -168,20 +170,18 @@ export class StoryController {
     const lines = won ? ev.afterWin : sets[n % sets.length];
     if (won) this.tries.delete(ev.id);
     else this.tries.set(ev.id, n + 1);
+    const end = (): ReturnType<typeof chapterEnd> => chapterEnd(ev, d.store.data.career);
     const play = (): void => d.dialogue.play(playable(lines, this.view(ev)), () => {
       if (!won) this.launch(ev, false);
       else if (storyComplete(d.store.data.career) && !d.store.data.career.epilogueSeen) {
         d.store.data.career.epilogueSeen = true;
         d.store.commit();
         d.showEnding(2);
-      } else if (ev.chapter === 3 && chapter3Complete(d.store.data.career) && !d.store.data.career.flags.c3Seen) {
-        d.store.data.career.flags.c3Seen = true;
+      } else if (end()) {
+        const e = end() as NonNullable<ReturnType<typeof end>>;
+        d.store.data.career.flags[e.flag] = true;
         d.store.commit();
-        this.cutThen(`ch3-end-${d.store.data.career.flags.deal ? 'deal' : 'public'}`, () => d.showEnding(3));
-      } else if (ev.chapter === 4 && chapter4Complete(d.store.data.career) && !d.store.data.career.flags.c4Seen) {
-        d.store.data.career.flags.c4Seen = true;
-        d.store.commit();
-        d.showEnding(4);
+        this.cutThen(e.cut, () => d.showEnding(e.chapter));
       } else if (isDone(d.store.data.career) && !d.store.data.career.endingSeen) {
         d.store.data.career.endingSeen = true;
         d.store.commit();

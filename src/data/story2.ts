@@ -3,6 +3,7 @@ import { EVENTS_2A } from './story2a';
 import { EVENTS_2B } from './story2b';
 import { EVENTS_3 } from './story3';
 import { EVENTS_4 } from './story4';
+import { EVENTS_5 } from './story5';
 
 export const CHAPTER_2 = { id: 2, title: 'Redline Rising', tagline: 'Four districts. Four votes. One street.' };
 
@@ -10,7 +11,7 @@ export const CHAPTER_2 = { id: 2, title: 'Redline Rising', tagline: 'Four distri
 export const ALL_EVENTS: readonly StoryEvent[] = [...EVENTS, ...EVENTS_2A, ...EVENTS_2B];
 
 /** Chapter 3 follows the Chapter 2 epilogue (career.nextEvent3); everything the saves and menus can refer to is here. */
-export const EVERY_EVENT: readonly StoryEvent[] = [...ALL_EVENTS, ...EVENTS_3, ...EVENTS_4];
+export const EVERY_EVENT: readonly StoryEvent[] = [...ALL_EVENTS, ...EVENTS_3, ...EVENTS_4, ...EVENTS_5];
 
 export const eventsOf = (chapter: number): StoryEvent[] => EVERY_EVENT.filter((e) => (e.chapter ?? 1) === chapter);
 
