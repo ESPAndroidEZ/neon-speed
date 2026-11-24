@@ -96,7 +96,7 @@ export class RoamPolice {
   private place(i: number, px: number, pz: number): void {
     const g = this.g;
     let pick = -1;
-    for (const [lo, hi] of [[150, 280], [80, 420]]) {
+    for (const [lo, hi] of [[120, 230], [80, 420]]) {
       const ok: number[] = [];
       for (const e of g.edges) {
         if (e.kind === 'runway' || e.tunnel) continue;

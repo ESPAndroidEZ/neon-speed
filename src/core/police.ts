@@ -26,23 +26,26 @@ export class Heat {
   /** 0..1, 1 = busted. */
   bust = 0;
   private calm = 0;
+  /** A cop has been near once: only then does getting away count (cops start out of sight and need time to arrive). */
+  private engaged = false;
 
   /** More heat (max 3); true when the level went up. */
   raise(n = 1): boolean {
     const was = this.level;
     this.level = Math.min(MAX_HEAT, this.level + n);
-    if (was === 0) { this.bust = 0; this.calm = 0; }
+    if (was === 0) { this.bust = 0; this.calm = 0; this.engaged = false; }
     return this.level > was;
   }
 
-  reset(): void { this.level = 0; this.bust = 0; this.calm = 0; }
+  reset(): void { this.level = 0; this.bust = 0; this.calm = 0; this.engaged = false; }
 
   /** Every step: your speed and the distance to the nearest cop (Infinity when none). */
   step(dt: number, speed: number, nearest: number): HeatEvent {
     if (this.level === 0) return 'none';
     if (nearest < BUST_R && speed < BUST_SPEED) this.bust = Math.min(1, this.bust + dt / BUST_TIME);
     else this.bust = Math.max(0, this.bust - dt / (BUST_TIME * 1.5));
-    this.calm = nearest > ESCAPE_R ? this.calm + dt : 0;
+    if (nearest <= ESCAPE_R) { this.engaged = true; this.calm = 0; }
+    else if (this.engaged) this.calm += dt;
     if (this.bust >= 1) { this.reset(); return 'busted'; }
     if (this.calm >= ESCAPE_TIME) { this.reset(); return 'escaped'; }
     return 'none';

@@ -12,6 +12,7 @@ check('quiet at the start and nothing happens', h.level === 0 && h.step(1, 0, 5)
 check('stars go up to three and the cop count follows', h.raise() && h.level === 1 && h.raise() && h.raise() && !h.raise() && h.level === MAX_HEAT && copsFor(h.level) === 3 && copsFor(0) === 0 && copsFor(9) === 3);
 h.reset();
 h.raise();
+h.step(0.1, 5, 100); // a cop arrives: only then does getting away count
 let ev = 'none';
 for (let t = 0; t < BUST_TIME - 0.2; t += 0.1) ev = h.step(0.1, 5, BUST_R - 1);
 check('a close cop and a slow car fill the meter, not yet busted', ev === 'none' && h.bust > 0.9 && h.level === 1, h.bust.toFixed(2));
@@ -27,8 +28,13 @@ for (let t = 0; t < ESCAPE_TIME - 0.3; t += 0.1) ev = h.step(0.1, 40, ESCAPE_R +
 check('clear of every cop for a while is an ESCAPE, but not before', ev === 'none');
 for (let t = 0; t < 1; t += 0.1) { const e = h.step(0.1, 40, ESCAPE_R + 20); if (e !== 'none') ev = e; }
 check('escaped', ev === 'escaped' && h.level === 0);
-h.raise(); h.step(0.1, 40, ESCAPE_R + 20); h.step(0.1, 40, 50); // a cop catches up: the calm timer starts again
+h.raise(); h.step(0.1, 40, 100); h.step(0.1, 40, ESCAPE_R + 20); h.step(0.1, 40, 50); // a cop catches up: the calm timer starts again
 check('a cop that comes back restarts the escape timer', (() => { let e = 'none'; for (let t = 0; t < ESCAPE_TIME - 1; t += 0.1) e = h.step(0.1, 40, ESCAPE_R + 20); return e === 'none'; })());
+const fresh = new Heat();
+fresh.raise();
+let early = 'none';
+for (let t = 0; t < 30; t += 0.1) { const e = fresh.step(0.1, 40, 250); if (e !== 'none') early = e; }
+check('cops that have not arrived yet cannot be escaped (they start out of sight)', early === 'none' && fresh.level === 1);
 check('fines are 6 % between 250 and 3000, prizes grow with the heat', fineFor(1000) === 250 && fineFor(20000) === 1200 && fineFor(1e6) === 3000 && escapeCash(3) > escapeCash(1) && escapeRep(3) > escapeRep(1));
 
 // the cars on the real city
