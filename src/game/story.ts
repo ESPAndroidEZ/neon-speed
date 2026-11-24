@@ -40,6 +40,8 @@ export class StoryController {
   private readonly d: StoryDeps;
   /** Failed attempts per event this session: repeated failures get different lines. */
   private readonly tries = new Map<string, number>();
+  /** Set when the event was started from a story place in Free Drive: leaving the event goes back to the city, not to the chapter list. */
+  private returnTo: (() => void) | null = null;
 
   constructor(d: StoryDeps) {
     this.d = d;
@@ -78,9 +80,10 @@ export class StoryController {
   }
 
   /** Begin a chapter event: cutscene dialogue first, then the race. */
-  start(ev: StoryEvent): void {
+  start(ev: StoryEvent, returnTo?: () => void): void {
     const d = this.d;
     this.current = ev;
+    this.returnTo = returnTo ?? null;
     d.hideMenu();
     const save = d.store.data;
     const first = !save.career.seenIntro && save.career.completed.length === 0 && ev.id === EVENTS[0].id;
@@ -153,7 +156,7 @@ export class StoryController {
       notes,
       buttons: outcome.passed
         ? [{ label: t('story.continue'), hot: true, action: () => this.after(ev, true) }]
-        : [{ label: t('story.retry'), hot: true, action: () => this.after(ev, false) }, { label: t('story.chapterMenu'), action: () => this.leave() }],
+        : [{ label: t('story.retry'), hot: true, action: () => this.after(ev, false) }, { label: t(this.returnTo ? 'story.backCity' : 'story.chapterMenu'), action: () => this.leave() }],
     };
   }
 
@@ -197,6 +200,9 @@ export class StoryController {
   private leave(): void {
     this.current = null;
     this.d.results.hide();
+    const back = this.returnTo;
+    this.returnTo = null;
+    if (back) return back(); // started from a story place in the city: back to it
     const c = this.d.store.data;
     const car = findCar(c.selected);
     this.d.game.showroom(car, c.paint[car.id] ?? car.color, c.glow[car.id]);
@@ -207,5 +213,6 @@ export class StoryController {
   /** Free race / menu: no event in progress. */
   endStory(): void {
     this.current = null;
+    this.returnTo = null;
   }
 }

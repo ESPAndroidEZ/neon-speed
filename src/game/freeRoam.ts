@@ -30,13 +30,14 @@ import type { Weather } from '../types/game';
 import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
 import { RoamMissions } from './roamMissions';
+import { RoamStory } from './roamStory';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
 /** Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, and a teleport. */
-export interface RoamLab { spots(): { zone: { x: number; z: number; r: number } | null; trap: { x: number; z: number; tx: number; tz: number } | null; meet: { x: number; z: number; r: number } | null }; placeAt(x: number, z: number, h: number, speed?: number): void }
+export interface RoamLab { spots(): { zone: { x: number; z: number; r: number } | null; trap: { x: number; z: number; tx: number; tz: number } | null; meet: { x: number; z: number; r: number } | null; pins: readonly { event: string; x: number; z: number }[] }; placeAt(x: number, z: number, h: number, speed?: number): void }
 
-interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; missions: RoamMissions; progress: RoamProgress; dispose(): void }
+interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: Streamer<Group>; group: Group; mats: RoamMaterials; traffic: RoamTraffic; trafficView: TrafficView; peds: RoamPeds; pedView: PedView; map: RoamMap; acts: RoamActivities; missions: RoamMissions; story: RoamStory; progress: RoamProgress; dispose(): void }
 
 /**
  * Free Drive in Neon Harbor (GameState FREEROAM, docs/open-world.md): the player's garage car on the open city, chunks
@@ -70,9 +71,10 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     group.add(trafficView.group, pedView.mesh);
     const map = roamMap(g, ci, contact.roads, () => { if (mapFromDrive) { mapFromDrive = false; game.paused = false; } else menu?.open(); });
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
-    map.setMarkers(roamMarkers(acts));
+    const story = new RoamStory(g, group, d.store, acts, map, d.hud);
+    map.setMarkers(roamMarkers(acts, story));
     const missions = new RoamMissions(g, acts, d.store, () => map);
-    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
+    return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, story, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); story.dispose(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
   };
 
   /** Onto the nearest road centre line, facing along it (the way closer to the car's heading), stopped. */
@@ -147,7 +149,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.peds.step(dt, cars[0], cars[1], cars, t.agents.length + 1);
     c.update(r.car);
     city.acts.step(r.car, dt);
-    city.missions.step(dt, r.car.state.position.x, r.car.state.position.z);
+    city.missions.step(dt, r.car.state.position.x, r.car.state.position.z); city.story.step(r.car.state.position.x, r.car.state.position.z, r.car.state.speed);
     const tc = r.contact; // the race contact is idle here: mirror what the city reports, for sparks, shake and sound
     tc.impact = c.impact; tc.scrape = c.scrape; tc.offroad = c.offroad; tc.groundY = c.groundY; tc.pitch = c.pitch;
     tc.contact.x = c.contact.x; tc.contact.z = c.contact.z;
@@ -161,7 +163,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.streamer.update(cellOf(city.g, s.position.x), cellOf(city.g, s.position.z));
     city.trafficView.update(city.traffic, s.position.x, s.position.z);
     city.pedView.update(city.peds);
-    city.map.update(dt, s.position.x, s.position.z, s.heading, city.traffic);
+    city.map.update(dt, s.position.x, s.position.z, s.heading, city.traffic); city.story.frame(dt, s.position.x, s.position.z);
     city.progress.update(dt, s.position.x, s.position.z, s.heading);
     game.chase.update(dt);
     if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); }
@@ -178,7 +180,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   return {
     travel,
     routeLength: () => city?.map.route?.length ?? 0, // labs: the GPS route (m), 0 = none
-    lab: { spots: () => ({ zone: city?.acts.zones[0] ?? null, trap: city?.acts.traps[0] ?? null, meet: city?.acts.meetSpot ?? null }), placeAt: (x, z, h, v = 0) => { const c = game.rm.player.car; c.reset(x, z, h); prime(); c.nudge(0, 0, Math.sin(h) * v, Math.cos(h) * v, 0); } },
+    lab: { spots: () => ({ zone: city?.acts.zones[0] ?? null, trap: city?.acts.traps[0] ?? null, meet: city?.acts.meetSpot ?? null, pins: city?.story.pins ?? [] }), placeAt: (x, z, h, v = 0) => { const c = game.rm.player.car; c.reset(x, z, h); prime(); c.nudge(0, 0, Math.sin(h) * v, Math.cos(h) * v, 0); } },
     enter: () => {
       city ??= build();
       const store = d.store, spec = findCar(store.data.selected);
@@ -206,6 +208,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       menu ??= roamPause({ map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
       city.map.show(true);
+      city.story.enter();
     },
   };
 }

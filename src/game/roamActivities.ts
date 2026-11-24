@@ -34,6 +34,8 @@ export class RoamActivities {
   /** Set by RoamProgress: a new best (key `trap:<id>` / `zone:<id>`) and a first visit (place id) are saved. */
   onRecord: (key: string, value: number) => void = () => {};
   onVisit: (id: string) => void = () => {};
+  /** After a teleport (enter, fast travel, respawn): the story places wait until the car has left their rings. */
+  onPlace: (x: number, z: number) => void = () => {};
   /** Neon tokens (owner playtest: a point to drive around). `onToken(id, count)` saves and returns the cash paid (0 = none). */
   tokens: TokenWatch;
   onToken: (id: number, count: number) => number = () => 0;
@@ -94,6 +96,7 @@ export class RoamActivities {
     this.lastZ = z;
     this.run.cancel();
     this.races.place(x, z);
+    this.onPlace(x, z);
     this.where.reset();
   }
 

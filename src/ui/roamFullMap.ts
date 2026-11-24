@@ -6,14 +6,14 @@ import { t } from '../i18n';
 import { button, h } from './uiKit';
 import { injectRoamCss } from './roamCss';
 
-export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job';
-export interface Marker { x: number; z: number; k: MarkerKind }
+export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job' | 'story' | 'storyDone' | 'storyLock';
+export interface Marker { x: number; z: number; k: MarkerKind; label?: string }
 /** What the minimap owns and the full map reads. */
 export interface MapState { px: number; pz: number; ph: number; wx: number; wz: number; route: Route | null; markers: () => readonly Marker[] }
 
 export const ROAD_COL: Readonly<Record<string, string>> = { highway: '#8fa8d8', bridge: '#8fa8d8', avenue: '#cfd6e6', runway: '#5a6070' };
-const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#ff2a9d', token: '#18d8ff', job: '#ffffff' };
-const KEYS: MarkerKind[] = ['race', 'zone', 'trap', 'meet', 'token'];
+export const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#b46bff', token: '#18d8ff', job: '#ffffff', story: '#ff3aa6', storyDone: '#3ddc97', storyLock: '#6a7286' };
+const KEYS: MarkerKind[] = ['story', 'storyDone', 'storyLock', 'race', 'zone', 'trap', 'meet', 'token'];
 const SIZE = 1024, BASE = 2048;
 
 export interface FullMap { open(): void; close(): void; readonly isOpen: boolean }
@@ -57,6 +57,12 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
     return DISTRICTS.filter((d) => acc.has(d)).map((id) => { const v = acc.get(id) as [number, number, number]; return { id, x: v[0] / v[2], z: v[1] / v[2] }; });
   };
 
+  const star = (x: number, z: number, r: number): void => {
+    cx.beginPath();
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, d = i % 2 ? r * 0.45 : r; (i ? cx.lineTo : cx.moveTo).call(cx, x + Math.cos(a) * d, z + Math.sin(a) * d); }
+    cx.closePath(); cx.fill(); cx.stroke();
+  };
+
   const draw = (): void => {
     base ??= drawBase();
     labels ??= centroids();
@@ -75,7 +81,9 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
       const x = X(m.x), z = Z(m.z);
       if (x < 0 || z < 0 || x > SIZE || z > SIZE) continue;
       cx.fillStyle = MK[m.k]; cx.strokeStyle = '#05060d'; cx.lineWidth = 2;
-      cx.beginPath(); cx.arc(x, z, m.k === 'token' ? 6 : 10, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      if (m.k === 'story') star(x, z, 17);
+      else { cx.beginPath(); cx.arc(x, z, m.k === 'token' || m.k === 'storyLock' ? 6 : m.k === 'storyDone' ? 8 : 10, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
+      if (m.label) { cx.font = '700 22px system-ui,sans-serif'; cx.textAlign = 'center'; cx.lineWidth = 5; cx.strokeStyle = '#05060dcc'; cx.strokeText(m.label, x, z - 24); cx.fillStyle = '#ffd1ea'; cx.fillText(m.label, x, z - 24); }
     }
     if (s.route) { cx.fillStyle = '#ff2a9d'; cx.strokeStyle = '#fff'; cx.lineWidth = 3; cx.beginPath(); cx.arc(X(s.wx), Z(s.wz), 13, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
     cx.save(); cx.translate(X(s.px), Z(s.pz)); cx.rotate(s.ph); // heading 0 = +Z = up; a clockwise turn (+h) points right

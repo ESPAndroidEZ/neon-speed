@@ -40,6 +40,7 @@ export function buildCrewMenu(store: SaveStore, onBack: () => void): HTMLElement
   const grid = h('div', 'rb-row');
   grid.style.alignItems = 'stretch';
   for (const c of CREW) {
+    if (c.gate && !career.flags[c.gate]) continue;
     const card = h('div', 'rb-card');
     card.style.cssText += `;cursor:default;width:min(270px,88vw);text-align:left;border-color:${hex(c.color)}66`;
     const bio = tx(career.epilogueSeen && c.truth ? c.truth : career.endingSeen && c.revealed ? c.revealed : c.bio);

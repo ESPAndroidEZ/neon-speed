@@ -6,7 +6,7 @@ import { cellOf, chunkCount } from '../world/open/chunkIndex';
 import { findRoute, nearestNode, type Route } from '../core/route';
 import { t } from '../i18n';
 import { toast } from './uiKit';
-import { fullMap, ROAD_COL, type MapState, type Marker } from './roamFullMap';
+import { fullMap, MK, ROAD_COL, type MapState, type Marker } from './roamFullMap';
 import { injectRoamCss } from './roamCss';
 
 const VIEW = 640; // metres across the minimap
@@ -61,7 +61,7 @@ export function roamMap(g: RoadGraph, chunks: readonly ChunkInfo[], roads: RoadI
     mc.fillStyle = '#ffffffaa';
     for (let i = 0; i < traffic.agents.length; i++) mc.fillRect(traffic.x[i] - 3, traffic.z[i] - 3, 6, 6);
     const near = (m: Marker): boolean => Math.abs(m.x - px) < VIEW / 2 && Math.abs(m.z - pz) < VIEW / 2;
-    for (const m of st.markers()) if (m.k !== 'token' && near(m)) { mc.fillStyle = m.k === 'trap' ? '#ff5470' : m.k === 'zone' ? '#7dff9a' : '#ffd27d'; mc.beginPath(); mc.arc(m.x, m.z, 16, 0, Math.PI * 2); mc.fill(); }
+    for (const m of st.markers()) if (m.k !== 'token' && m.k !== 'storyLock' && near(m)) { mc.fillStyle = MK[m.k]; mc.beginPath(); mc.arc(m.x, m.z, m.k === 'story' ? 24 : 16, 0, Math.PI * 2); mc.fill(); }
     if (route) { mc.fillStyle = '#ff2a9d'; mc.beginPath(); mc.arc(wx, wz, 16, 0, Math.PI * 2); mc.fill(); }
     mc.restore();
     mc.fillStyle = '#e8f6ffcc'; mc.font = `700 ${11 * dpr}px system-ui`; mc.textAlign = 'center'; // N marker: where north is
