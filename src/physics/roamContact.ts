@@ -33,7 +33,12 @@ export class RoamContact {
   traffic: RoamTraffic | null = null;
   /** Parked cars (x, z, heading triples): solid like traffic, never move. */
   parked: Float32Array = new Float32Array(0);
-  private hitCar = -1;
+  /** Police cars (x, z, heading triples, see RoamPolice.boxes): solid like traffic; `onCop` is told which one was hit. */
+  police: Float32Array = new Float32Array(0);
+  onCop: ((i: number) => void) | null = null;
+  /** The traffic car the last step hit (-1 none), for the police heat. */
+  hitCar = -1;
+  private hitCop = -1;
   private hitSide = 1;
   readonly roads: RoadIndex;
   private readonly graph: RoadGraph;
@@ -76,7 +81,7 @@ export class RoamContact {
     st.position.y = this.groundY;
     const sh = Math.sin(st.heading), ch = Math.cos(st.heading);
     this.pen = 0;
-    this.hitCar = -1;
+    this.hitCar = -1; this.hitCop = -1;
     const pvx = st.velocity.x, pvz = st.velocity.z;
     for (let k = 0; k < POINTS.length; k++) {
       const cx = x + ch * POINTS[k][0] + sh * POINTS[k][1];
@@ -85,10 +90,12 @@ export class RoamContact {
       this.water(cx, cz);
       this.border(cx, cz);
       this.cars(cx, cz);
-      this.parkedCars(cx, cz);
+      this.boxes(this.parked, cx, cz, false);
+      this.boxes(this.police, cx, cz, true);
     }
     if (this.pen > 0) wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this);
     if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar, pvx, pvz, this.hitSide);
+    if (this.hitCop >= 0 && this.impact > 2) this.onCop?.(this.hitCop);
   }
 
   private set(pen: number, nx: number, nz: number, px: number, pz: number): void {
@@ -129,16 +136,18 @@ export class RoamContact {
     if (d < this.wb && !isWater(lx, lz)) { this.wb = d; this.wnx = ux; this.wnz = uz; }
   }
 
-  private parkedCars(cx: number, cz: number): void {
-    const p = this.parked;
+  /** Parked cars and police cars: solid boxes from (x, z, heading) triples. */
+  private boxes(p: Float32Array, cx: number, cz: number, cop: boolean): void {
     for (let i = 0; i + 2 < p.length; i += 3) {
       const dx = cx - p[i], dz = cz - p[i + 1];
       if (dx * dx + dz * dz > 9) continue;
       const fx = Math.sin(p[i + 2]), fz = Math.cos(p[i + 2]);
       const lz = dx * fx + dz * fz, lx = dx * fz - dz * fx, ox = 0.9 - Math.abs(lx), oz = 2.2 - Math.abs(lz);
       if (ox <= 0 || oz <= 0) continue;
+      const before = this.pen;
       if (ox < oz) this.set(ox, fz * Math.sign(lx), -fx * Math.sign(lx), cx, cz);
       else this.set(oz, fx * Math.sign(lz), fz * Math.sign(lz), cx, cz);
+      if (cop && this.pen > before) this.hitCop = i / 3;
     }
   }
 

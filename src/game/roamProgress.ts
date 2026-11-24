@@ -34,6 +34,7 @@ export class RoamProgress {
     acts.onToken = (id, count) => this.token(id, count);
     acts.onRecord = (key, value) => { this.roam().best[key] = Math.round(value * 10) / 10; this.store.commit(); };
     acts.onRep = (n) => this.store.addRep(n);
+    acts.onCash = (n) => { this.store.data.cash = Math.max(0, this.store.data.cash + n); if (n) this.store.commit(); return this.store.data.cash; };
     acts.onVisit = (id) => { const v = this.roam().visited; if (!v.includes(id)) { v.push(id); this.store.commit(); if (id === 'meet') acts.award(REP_FD.meet); } };
   }
 

@@ -26,6 +26,12 @@ body.rb-roaming .rb-where{display:block}.rb-where{display:none}
 @media (max-height:480px){.rb-roampause.on{display:grid!important;grid-template-columns:repeat(3,1fr);align-content:start;gap:var(--sp-2) var(--sp-3);width:min(600px,96vw);margin:0 auto;padding:max(var(--sp-3),var(--safe-t)) 0 var(--sp-3);overflow:auto}.rb-roampause>h2,.rb-roampause>section{grid-column:1/4}.rb-roampause>h2{margin:0}.rb-roampause .rb-btn{min-width:0;width:100%;min-height:44px}.rb-roampause .rb-panel{padding:var(--sp-2);width:auto!important}.rb-roampause .rb-panel h3{display:none}.rb-roampause .rb-panel .rb-row{display:grid!important;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}.rb-roampause .rb-panel .rb-btn{padding:var(--sp-2) var(--sp-1)}}
 body.rb-fdover .rb-where,body.rb-fdover .rb-roam-mini,body.rb-fdover .rb-mission,body.rb-fdover .rb-roam,body.rb-fdover .rb-city-offer,body.rb-fdover .rb-call,body.rb-fdover #hud,body.rb-fdover .rb-fullscreen{display:none!important}
 body.rb-roaming .rb-tc .sm:not(.gm){display:none}
+/* police heat: the wanted stars and the busted meter */
+.rb-heat{position:fixed;left:max(12px,var(--safe-l));top:max(12px,var(--safe-t));z-index:12;display:none;padding:var(--sp-1) var(--sp-3);background:var(--panel);border:1px solid #ff4d6d99;border-radius:var(--radius);box-shadow:0 6px 18px #000a;animation:rb-siren 0.6s steps(2) infinite}
+.rb-heat .rb-hl{font:900 11px var(--font);letter-spacing:3px;color:#ff8da1}.rb-stars{display:flex;gap:2px}.rb-stars svg{width:22px;height:22px;fill:#ffffff22;stroke:#ffffff44;stroke-width:1}.rb-stars svg.on{fill:#ffd24d;stroke:#fff2b0}
+.rb-bust{height:5px;margin-top:4px;border-radius:3px;background:#ffffff1c;overflow:hidden}.rb-bust u{display:block;height:100%;background:linear-gradient(90deg,#2a6bff,#ff2030)}
+@keyframes rb-siren{0%{box-shadow:0 6px 18px #000a,0 0 14px #ff203088}100%{box-shadow:0 6px 18px #000a,0 0 14px #2a6bff88}}
+body.rb-fdover .rb-heat{display:none!important}
 /* story place offer and phone call (docs/nfs-vision.md item 1) */
 .rb-story-offer{border-color:#ff3aa699;box-shadow:0 8px 24px #000a,0 0 18px #ff3aa633;color:var(--text)}
 .rb-story-offer .rb-pt{flex:none;line-height:0}.rb-story-offer .rb-pt canvas{width:56px;height:56px;border-radius:50%;border:2px solid #ff3aa6;background:#0b0f18}

@@ -126,7 +126,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   const leave = (): void => {
     active = false;
-    city?.progress.save(); // the last spot from the frame updates
+    city?.progress.save(); city?.acts.heat.leave(); city?.missions.stop(); // the last spot from the frame updates; leaving ends the chase and the job
     game.roam = null;
     city?.streamer.clear();
     if (city) engine.scene.remove(city.group);
