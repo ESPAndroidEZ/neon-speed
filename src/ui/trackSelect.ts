@@ -3,8 +3,12 @@ import type { SaveStore } from '../core/save';
 import { buildTrack, TRACKS, type TrackDef } from '../data/tracks';
 import type { Weather } from '../types/game';
 import { button, h, lapText } from './uiKit';
+import { driftMedal, driftTimes, medalFor, medalTimes, type Medal } from '../core/medals';
 import { t, tx } from '../i18n';
 
+const MEDAL_COLOR: Record<Medal, string> = { gold: '#ffd27d', silver: '#cfd6e6', bronze: '#d98a4a' };
+const dot = (m: Medal | null): string => (m ? ` <span style="color:${MEDAL_COLOR[m]}">●</span>` : '');
+const mmss = (s: number): string => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const WEATHER_ICON: Record<Weather, string> = { CLEAR: '☀', RAIN: '☂', SNOW: '❄' };
 
 /** Draw the road outline of a map (north up) on a small canvas; the start line is the white bar, a sprint's finish the pink one. */
@@ -74,8 +78,10 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     const climb = Math.max(...tr.heights) - Math.min(...tr.heights);
     const best = d.store.data.trackBest;
     const times = def.type === 'drift'
-      ? t('maps.bestScore', { score: `<b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b>`, target: def.driftTarget?.toLocaleString() ?? '--' })
-      : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${t(`weather.${w}`).toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}`).join(' · ');
+      ? t('maps.bestScore', { score: `<b>${best[`${def.id}:drift`]?.toLocaleString() ?? '--'}</b>${dot(driftMedal(def.driftTarget, best[`${def.id}:drift`]))}`, target: def.driftTarget?.toLocaleString() ?? '--' })
+      : (['CLEAR', 'RAIN', 'SNOW'] as Weather[]).map((w) => `${t(`weather.${w}`).toLowerCase()} ${lapText(best[`${def.id}:${w}`] ?? null)}${dot(medalFor(def.id, w, best[`${def.id}:${w}`]))}`).join(' · ');
+    const mt = def.type === 'drift' ? driftTimes(def.driftTarget ?? 0) : medalTimes(def.id, 'CLEAR');
+    const medals = mt ? t(def.type === 'drift' ? 'maps.medalsDrift' : 'maps.medals', def.type === 'drift' ? { g: `<span style="color:${MEDAL_COLOR.gold}">${mt.gold.toLocaleString()}</span>`, s: `<span style="color:${MEDAL_COLOR.silver}">${mt.silver.toLocaleString()}</span>`, b: `<span style="color:${MEDAL_COLOR.bronze}">${mt.bronze.toLocaleString()}</span>` } : { g: `<span style="color:${MEDAL_COLOR.gold}">${mmss(mt.gold)}</span>`, s: `<span style="color:${MEDAL_COLOR.silver}">${mmss(mt.silver)}</span>`, b: `<span style="color:${MEDAL_COLOR.bronze}">${mmss(mt.bronze)}</span>` }) : '';
     const card = h('div', 'rb-card rb-pick');
     card.style.cssText += ';width:min(300px,86vw);text-align:left';
     card.tabIndex = 0;
@@ -90,7 +96,7 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
       <div class="rb-sub">${t(`maps.type.${def.type}`)} · ${def.type === 'sprint' ? t('story.oneRun') : t('story.laps', { n: def.laps })} · ${km.toFixed(1)} km${climb > 1 ? ` · ${t('maps.climb', { m: climb.toFixed(0) })}` : ''}</div>
       <div style="opacity:.85;margin:6px 0;font-size:14px;line-height:1.35">${tx(def.blurb)}</div>
       <div style="font-size:13px;opacity:.9">${t('maps.suits')} ${def.recommendedWeather.map((w) => `${WEATHER_ICON[w]} ${t(`weather.${w}`).toLowerCase()}`).join(' · ')}</div>
-      <div style="font-size:12px;opacity:.75;margin-top:4px">${times}</div>`));
+      <div style="font-size:12px;opacity:.75;margin-top:4px">${times}</div>${medals ? `<div style="font-size:12px;opacity:.85;margin-top:2px">${medals}</div>` : ''}`));
     const key = trackBoardKey(def, d.store);
     if (key) {
       const top = h('div', '');
