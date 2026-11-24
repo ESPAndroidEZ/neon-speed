@@ -59,14 +59,15 @@ const target = new Color(), mix = new Color();
  * District mood while driving: the fog colour and thickness ease toward the district under the camera, on top of the
  * weather's own fog (same 0.55 tint as races). No allocation per frame.
  */
-export function districtFog(scene: Scene, x: number, z: number, w: Weather, dt: number, lookFogK: number): void {
+export function districtFog(scene: Scene, x: number, z: number, w: Weather, dt: number, lookFogK: number, tod?: { color: Color; w: number; k: number }): void {
   const fog = scene.fog;
   if (!(fog instanceof FogExp2)) return;
   const d = DISTRICT_LOOK[districtAt(x, z)], p = WEATHER[w];
   target.setHex(p.fogColor).lerp(mix.setHex(d.fog), 0.55);
+  if (tod && tod.w > 0) target.lerp(tod.color, tod.w); // time of day (Free Drive dusk, dawn, day)
   const k = 1 - Math.exp(-dt * 0.8); // ~1.2 s to settle
   fog.color.lerp(target, k);
-  const want = p.fogDensity * (d.fogDensity / 0.0022) * lookFogK;
+  const want = p.fogDensity * (d.fogDensity / 0.0022) * lookFogK * (tod ? tod.k : 1);
   fog.density += (want - fog.density) * k;
   if (scene.background instanceof Color) scene.background.copy(fog.color);
 }

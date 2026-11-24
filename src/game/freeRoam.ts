@@ -1,4 +1,5 @@
 import { Group } from 'three';
+import { t, type StringKey } from '../i18n';
 import type { Engine } from '../core/engine';
 import type { SaveStore } from '../core/save';
 import type { Hud } from '../ui/hud';
@@ -31,6 +32,7 @@ import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
 import { RoamMissions } from './roamMissions';
 import { RoamStory } from './roamStory';
+import { TimeOfDay } from '../world/open/timeOfDay';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
 
@@ -47,6 +49,7 @@ interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: 
 export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number; lab: RoamLab } {
   const { engine, game } = d;
   let city: City | null = null;
+  const tod = new TimeOfDay(engine.scene, d.store);
   let ui: RoamHud | null = null;
   let menu: RoamPause | null = null;
   let mapFromDrive = false; // the M key / map button opened the map over the drive (Back resumes), not from the pause menu
@@ -132,7 +135,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     ui?.hide();
     menu?.close();
     city?.map.show(false);
-    shownWeather = null;
+    shownWeather = null; tod.reset();
     game.setWeather(game.weather); // the race map's fog and look again
   };
 
@@ -166,8 +169,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.map.update(dt, s.position.x, s.position.z, s.heading, city.traffic); city.story.frame(dt, s.position.x, s.position.z);
     city.progress.update(dt, s.position.x, s.position.z, s.heading);
     game.chase.update(dt);
-    if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); }
-    districtFog(engine.scene, s.position.x, s.position.z, game.weather, dt, look.fogK * LOOK_CONFIG.fog.densityScale);
+    if (game.weather !== shownWeather) { shownWeather = game.weather; weatherSurfaces(city.mats, game.weather); tod.rebase(); }
+    districtFog(engine.scene, s.position.x, s.position.z, game.weather, dt, look.fogK * LOOK_CONFIG.fog.densityScale, tod.fog); tod.update(dt);
     game.rm.player.car.fillTelemetry(game.telemetry);
     d.hud.setBanner('');
     d.hud.update(game.telemetry);
@@ -205,7 +208,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.syncView(true);
       active = true;
       ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused), map: () => { if (game.paused || !city) return; mapFromDrive = true; game.paused = true; city.map.open(); } });
-      menu ??= roamPause({ map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
+      menu ??= roamPause({ time: { label: () => t(`tod.${tod.tod}` as StringKey), cycle: () => { tod.cycle(); if (tod.tod === 'night') game.setWeather(game.weather); } }, map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
       city.map.show(true);
       city.story.enter();

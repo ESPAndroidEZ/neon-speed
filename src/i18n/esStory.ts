@@ -8,6 +8,7 @@ export const ES_STORY = {
   'duel.open': 'Duelos de rivales', 'duel.title': 'DUELOS DE RIVALES', 'duel.hint': 'Un rival, un mapa. Gana para quedarte con su coche y el premio.', 'duel.lock': 'Llega al nivel {n}', 'duel.done': 'Derrotado', 'duel.prize': 'Primera victoria: {cash} y su coche', 'duel.won': '¡Duelo ganado a {name}! +{cash}', 'duel.car': 'Ganaste su {car}',
   'menu.knockout': 'Eliminación', 'ko.rule': 'ELIMINACIÓN: el último coche queda fuera en cada vuelta', 'ko.out': '¡{name} queda fuera!', 'ko.you': '¡Quedas fuera!',
   'set.raceIntro': 'Pequeño paseo de cámara antes de cada carrera',
+  'tod.night': 'Hora: Noche', 'tod.dusk': 'Hora: Atardecer', 'tod.dawn': 'Hora: Amanecer', 'tod.day': 'Hora: Día',
   'rep.lv': 'NV {n}', 'rep.tip': 'REP {into} / {need} para el siguiente nivel', 'rep.max': 'Nivel máximo alcanzado', 'rep.gain': '+{n} REP', 'rep.up': '¡NIVEL {n}!',
   'rep.upNote': 'Nivel {n}: +{cash}', 'garage.repLock': 'Llega al nivel {n}',
 } as const;
