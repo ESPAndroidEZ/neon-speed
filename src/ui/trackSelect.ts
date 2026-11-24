@@ -64,6 +64,8 @@ export interface TrackSelectDeps {
   store: SaveStore;
   onPick: (def: TrackDef) => void;
   onBack: () => void;
+  /** Rival duels screen (the button shows when given). */
+  onDuels?: () => void;
 }
 
 /** Choose a map: outline, event type, length, best times and the weather it suits. */
@@ -107,7 +109,7 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     card.addEventListener('click', () => d.onPick(def));
     row.append(card);
   }
-  root.append(row, button(t('common.back'), d.onBack));
+  root.append(row, ...(d.onDuels ? [button(t('duel.open'), d.onDuels)] : []), button(t('common.back'), d.onBack));
   fillTrackTops(root); // online top 3 per map, filled in when the server answers
   return root;
 }

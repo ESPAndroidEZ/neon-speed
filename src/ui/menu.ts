@@ -4,7 +4,6 @@ import type { Engine } from '../core/engine';
 import type { AudioBus } from '../audio/audioBus';
 import { findCar, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
-import { WEATHER } from '../physics/weather';
 import type { Weather } from '../types/game';
 import type { CarVisual } from '../world/proceduralCar';
 import type { StoryEvent } from '../data/story';
@@ -18,10 +17,12 @@ import { buildGarage } from './garage';
 import { buildSettings } from './settings';
 import { buildTuneMenu } from './tuneMenu';
 import { buildTrackSelect } from './trackSelect';
+import { buildWeatherPick } from './weatherPick';
+import { buildDuelMenu } from './duelMenu';
 import { dailyButton } from './dailyButton'; import { freeDriveButton } from './freeDriveButton';
 import type { TrackDef } from '../data/tracks';
 import { menuHeader } from './repChip';
-import { button, feat, h, injectCss, lapText, wordmark } from './uiKit';
+import { button, feat, h, injectCss, wordmark } from './uiKit';
 import { onInstallChange } from '../core/install';
 import { onLangChange, t } from '../i18n';
 import { installButton } from './installButton';
@@ -47,7 +48,7 @@ export interface MenuDeps {
   /** Hook for when a GLB replaces the procedural body. */
   onSwap: (fn: (() => void) | null) => void;
   /** Launch a free race in this weather against `rivals` opponents (0 = time trial). */
-  startRace: (w: Weather, rivals: number, trackId: string) => void;
+  startRace: (w: Weather, rivals: number, trackId: string, duel?: string) => void;
   slots: SaveSlots;
   /** Re-read the saved driving preferences (assists, sensitivity, gamepad). */
   onDriving?: () => void;
@@ -169,36 +170,15 @@ export class Menu {
   }
 
   maps(): void {
-    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main() }), 'other', 'main', () => this.maps());
+    this.mount(buildTrackSelect({ store: this.d.store, onPick: (def) => this.weather(def), onBack: () => this.main(), onDuels: () => this.duels() }), 'other', 'main', () => this.maps());
+  }
+
+  duels(): void {
+    this.mount(buildDuelMenu({ store: this.d.store, start: (du) => this.d.startRace(du.weather, 1, du.trackId, du.rival), onBack: () => this.maps() }), 'other', 'main', () => this.duels());
   }
 
   weather(def: TrackDef): void {
-    const el = h('div', 'rb-layer dim');
-    el.append(h('h2', 'rb-title', def.name.toUpperCase()));
-    const riv = h('div', 'rb-row');
-    const setRivals = (n: number): void => {
-      this.rivals = n;
-      riv.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.n === String(n)));
-    };
-    for (const [n, label] of [[0, 'menu.timeTrial'], [3, 'menu.rivals3'], [5, 'menu.rivals5']] as const) {
-      const b = button(t(label), () => setRivals(n));
-      b.dataset.n = String(n);
-      b.style.minWidth = '130px';
-      riv.append(b);
-    }
-    if (def.type === 'circuit') el.append(riv);
-    setRivals(this.rivals);
-    const row = h('div', 'rb-row');
-    for (const w of ['CLEAR', 'RAIN', 'SNOW'] as Weather[]) {
-      const card = h('div', 'rb-card rb-pick', `<div style="font-size:26px;font-weight:900">${t(`weather.${w}`)}</div><div style="opacity:.8;margin:6px 0">${t(`weather.${w}.blurb`)}</div><div class="rb-sub">${t('menu.grip', { n: Math.round(WEATHER[w].grip * 100) })}<br>${t('menu.best')} ${lapText(this.d.store.data.trackBest[`${def.id}:${w}`] ?? null)}</div>`);
-      card.addEventListener('click', () => this.d.startRace(w, def.type === 'circuit' ? this.rivals : 0, def.id));
-      card.tabIndex = 0;
-      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') card.click(); });
-      if (def.recommendedWeather.includes(w)) card.style.borderColor = '#ff2a9d';
-      row.append(card);
-    }
-    el.append(row, h('div', 'rb-sub', t('menu.pink')), button(t('common.back'), () => this.maps()));
-    this.mount(el, 'other', 'main', () => this.weather(def));
+    this.mount(buildWeatherPick({ def, store: this.d.store, rivals: this.rivals, pick: (n) => { this.rivals = n; }, start: (w, n, id) => this.d.startRace(w, n, id), onBack: () => this.maps() }), 'other', 'main', () => this.weather(def));
   }
 
   garage(): void {

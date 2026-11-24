@@ -9,7 +9,7 @@ import { installAutoTier } from './ui/autoTier';
 import { installGuard, watchContextLoss } from './core/guard';
 import { defaultSave, SaveStore } from './core/save';
 import { CARS, findCar } from './data/cars';
-import { competitiveField } from './data/rivals';
+import { buildField, competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
 import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats';
@@ -110,11 +110,11 @@ if (q.get('look')) {
 void world.applyPropModels();
 
 if (import.meta.env.DEV) void import('./dev/devPanels').then((m) => m.installDevPanels(audio, game, tuning, engine));
-const launchFree = (w: Weather, rivals: number, trackId: string): void => {
+const launchFree = (w: Weather, rivals: number, trackId: string, duel?: string): void => {
   const def = findTrackDef(q.get('track') ?? trackId);
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
-  const field = competitiveField(rivals, car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades
+  const field = duel ? buildField([duel], 1, w !== 'CLEAR') : competitiveField(rivals, car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades; a duel is the named rival
   game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({
@@ -130,9 +130,9 @@ menu = new Menu({
   onSwap: (fn) => {
     game.views.onSwap = fn ? () => fn() : null;
   },
-  startRace: (w, n, trackId) => {
+  startRace: (w, n, trackId, duel) => {
     menu.hide();
-    launchFree(w, n, trackId);
+    launchFree(w, n, trackId, duel);
   },
   startEvent: (ev) => story.start(ev),
   slots,

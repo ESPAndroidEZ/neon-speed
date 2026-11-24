@@ -16,6 +16,7 @@ import type { Cast } from './cast';
 import { chapterEnd } from './chapterEnd';
 import { playRecap } from './recap';
 import { repNote } from './repAward';
+import { freeFinish } from './freeFinish';
 import type { Game } from './game';
 import { t } from '../i18n';
 
@@ -139,7 +140,7 @@ export class StoryController {
     const d = this.d;
     const ev = this.current;
     const paid = d.store.claimRace(d.game.setup?.meta?.raceId); if (!paid) r.cash = 0; // already paid (a save of this finish was reloaded)
-    if (!ev) { d.store.recordRace(r.cash, r.bestLap, d.game.weather); if (paid) r.note = [r.note, repNote(d.store, r, false)].filter(Boolean).join(' · '); return; } // free race and city races
+    if (!ev) return freeFinish(d.store, d.game.setup?.meta?.rivalIds ?? [], d.game.weather, r, paid); // free race, rival duel, city race
     if (ev.kind === 'drift') r.cash = driftCash(r.driftScore);
     const outcome = evaluate(ev, r.position, r.driftScore);
     d.store.recordRace(r.cash, r.bestLap, ev.weatherChange ? ev.weatherChange.to : ev.weather);

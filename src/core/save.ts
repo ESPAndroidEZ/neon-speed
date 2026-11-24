@@ -106,6 +106,15 @@ export class SaveStore {
     return this.data.owned.includes(id);
   }
 
+  /** A car handed out (rival duel prize): owned at once, in the given paint. */
+  grantCar(id: string, paint: number, glow?: number): void {
+    if (this.owns(id)) return;
+    this.data.owned.push(id);
+    this.data.paint[id] = paint;
+    if (glow !== undefined) this.data.glow[id] = glow;
+    this.commit();
+  }
+
   /** Add REP; a level reached pays cash. Returns the new level and how many levels were gained. */
   addRep(n: number): { level: number; up: number } {
     const before = repLevel(this.data.rep ?? 0);
