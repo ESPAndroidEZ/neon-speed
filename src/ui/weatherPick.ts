@@ -16,7 +16,7 @@ export function buildWeatherPick(d: { def: TrackDef; store: SaveStore; rivals: n
     rivals = n; pick(n);
     riv.querySelectorAll('button').forEach((b) => b.classList.toggle('hot', b.dataset.n === String(n)));
   };
-  for (const [n, label] of [[0, 'menu.timeTrial'], [3, 'menu.rivals3'], [5, 'menu.rivals5']] as const) {
+  for (const [n, label] of [[0, 'menu.timeTrial'], [3, 'menu.rivals3'], [5, 'menu.rivals5'], [-5, 'menu.knockout']] as const) {
     const b = button(t(label), () => setRivals(n));
     b.dataset.n = String(n);
     b.style.minWidth = '130px';

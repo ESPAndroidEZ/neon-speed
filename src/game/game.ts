@@ -81,7 +81,7 @@ export class Game {
     this.d.results.hide();
     this.views.clear();
     this.d.world.load(findTrackDef(s.trackId ?? 'kestrel'));
-    this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles, this.d.world.surfaces);
+    this.rm = new RaceManager(this.d.world.track, s.laps, this.d.world.obstacles, this.d.world.surfaces, s.knockout);
     applyTuning(this.d.tuning, s.car.tuning);
     applyBuild(this.d.tuning, s.car.id);
     this.rm.addRacer('player', 'You', this.d.tuning, null, true);

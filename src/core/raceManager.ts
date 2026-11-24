@@ -15,6 +15,7 @@ import { restoreRace, snapshotRace } from './raceSnapshot';
 import { LaunchControl } from './launch';
 import { RaceRewards } from './rewards';
 import { buildResult, positionOf, type RaceResult, type Racer } from './raceResult';
+import { Knockout } from './knockout';
 
 export type { RaceResult, Racer };
 
@@ -42,6 +43,8 @@ export class RaceManager {
   /** Cumulative closing speed of the latest car-car or wall hit this step, for juice and audio. */
   carImpact = 0;
   result: RaceResult | null = null;
+  /** Knockout mode (core/knockout) when the race is one. */
+  readonly knockout: Knockout | null;
   finishCount = 0;
   private readonly states: CarState[] = [];
   private readonly view: AIWorldView;
@@ -50,10 +53,10 @@ export class RaceManager {
   private readonly surfaces: SurfaceMap | null;
   private playerIdx = 0;
 
-  constructor(track: Track, totalLaps = 3, obstacles: ObstacleField | null = null, surfaces: SurfaceMap | null = null) {
+  constructor(track: Track, totalLaps = 3, obstacles: ObstacleField | null = null, surfaces: SurfaceMap | null = null, knockout = false) {
     this.track = track;
-    this.obstacles = obstacles;
-    this.surfaces = surfaces;
+    this.obstacles = obstacles; this.surfaces = surfaces;
+    this.knockout = knockout ? new Knockout() : null;
     this.totalLaps = totalLaps;
     this.view = { track: track.samples, racers: this.states, playerIndex: 0, grip: 1 };
   }
@@ -101,12 +104,7 @@ export class RaceManager {
       r.contact.place(r.car, idx, slot % 2 === 0 ? -2.6 : 2.6);
       r.laps.reset(idx);
       r.progress = r.laps.total;
-      r.stuck = 0;
-      r.finished = false;
-      r.finishTime = 0;
-      r.finishRank = 0;
-      r.lapStart = 0; r.bestLap = Infinity;
-      r.lapTimes.length = 0;
+      r.stuck = 0; r.finished = false; r.out = false; r.finishTime = 0; r.finishRank = 0; r.lapStart = 0; r.bestLap = Infinity; r.lapTimes.length = 0;
     });
     this.phase = 'GRID';
     this.countdown = COUNTDOWN_SECONDS;
@@ -115,6 +113,7 @@ export class RaceManager {
     this.raceTime = 0;
     this.finishCount = 0;
     this.result = null;
+    this.knockout?.reset();
   }
 
   /** Start the 3-2-1 countdown. */
@@ -193,6 +192,7 @@ export class RaceManager {
         r.finishRank = ++this.finishCount;
       }
     }
+    this.knockout?.update(this.racers, this.totalLaps);
     if (this.player.finished && this.phase === 'RACING') {
       this.phase = 'FINISHED';
       this.result = buildResult(this.racers, this.player, this.totalLaps);

@@ -9,6 +9,7 @@ export function resolveField(racers: readonly Racer[]): number {
   let impact = 0;
   for (let i = 0; i < racers.length; i++)
     for (let j = i + 1; j < racers.length; j++) {
+      if (racers[i].out || racers[j].out) continue; // knocked out: a ghost
       const hard = (racers[i].isPlayer || racers[j].isPlayer) && !racers[i].remote && !racers[j].remote;
       const c = resolveCarPair(racers[i].car, racers[j].car, hard ? 1 : RIVAL_BUMP);
       if (hard) impact = Math.max(impact, c);

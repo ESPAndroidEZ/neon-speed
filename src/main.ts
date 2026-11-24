@@ -12,7 +12,7 @@ import { CARS, findCar } from './data/cars';
 import { buildField, competitiveField } from './data/rivals';
 import { findTrackDef } from './data/tracks';
 import { AI_SETTING } from './physics/aiDifficulty';
-import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats';
+import { finishFreeRace } from './game/freeRace'; import { recordRace } from './game/driverStats'; import { Knockout } from './core/knockout'; import { attachKnockoutFeedback } from './game/knockoutFeedback';
 import { Juice } from './fx/juice';
 import { attachRaceFeedback } from './game/raceFeedback'; import { wireFreeDrive } from './game/freeDriveSetup';
 import { Game } from './game/game';
@@ -86,7 +86,7 @@ const results = new ResultsScreen(document.body, { onAgain: () => game.restart()
 const game = new Game({ engine, world, hud, results, input: controls.input, tuning });
 controls.attach(engine, game);
 const juice = new Juice(engine, game);
-attachRaceFeedback(engine, game, hud); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
+attachRaceFeedback(engine, game, hud); attachKnockoutFeedback(engine, game, hud); installComboHud(engine, game, hud); // corner guide + launch pop-ups, style combo
 const cast = new Cast(engine.scene);
 engine.onFrame((_a, dt) => cast.update(game, dt));
 const audio = new AudioManager(game);
@@ -111,11 +111,11 @@ void world.applyPropModels();
 
 if (import.meta.env.DEV) void import('./dev/devPanels').then((m) => m.installDevPanels(audio, game, tuning, engine));
 const launchFree = (w: Weather, rivals: number, trackId: string, duel?: string): void => {
-  const def = findTrackDef(q.get('track') ?? trackId);
+  const def = findTrackDef(q.get('track') ?? trackId), ko = rivals < 0; // a negative rival count is Knockout
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
-  const field = duel ? buildField([duel], 1, w !== 'CLEAR') : competitiveField(rivals, car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades; a duel is the named rival
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: def.laps, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
+  const field = duel ? buildField([duel], 1, w !== 'CLEAR') : competitiveField(Math.abs(rivals), car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades; a duel is the named rival
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: ko ? Knockout.laps(field.length + 1) : def.laps, knockout: ko, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game, hud,
@@ -182,7 +182,7 @@ function loadSlot(id: import('./core/gameSave').SlotId): void {
 if (slots.corrupt) toast(t('main.corrupt'));
 const fs = installPlatform({ engine, game, pause, audioCtx: audio.bus.ctx, toMenu: () => { pause.saveAndQuit(); leaveToMenu(); } });
 game.onFinish = (r) => {
-  const free = story.current ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
+  const free = story.current || game.rm.knockout ? undefined : finishFreeRace(store, findTrackDef(game.setup?.trackId ?? 'kestrel'), game.weather, r, () => game.restart(), leaveToMenu);
   const extra = story.finish(r) ?? free;
   world.setHandprints(store.data.career.completed.length); recordRace(r); announceAchievements(r, game, store.data.selected);
   return extra;

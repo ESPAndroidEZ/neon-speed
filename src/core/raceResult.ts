@@ -24,6 +24,8 @@ export interface Racer {
   stuck: number;
   /** Furthest progress (samples) reached so far: a rival that stops gaining ground is put back on the road. */
   progress: number;
+  /** Knocked out (Knockout mode): finished, ranked behind everyone still in, no time, no collisions. */
+  out?: boolean;
   /** Another player's car in an online race (driven over the network): soft bumps only, lag would make crashes unfair. */
   remote?: boolean;
 }
@@ -48,7 +50,7 @@ export function positionOf(racers: readonly Racer[], r: Racer): number {
   let p = 1;
   for (const o of racers) {
     if (o === r) continue;
-    if (r.finished && o.finished ? o.finishRank < r.finishRank : o.finished || (!r.finished && o.laps.progress > r.laps.progress)) p++;
+    if (!!o.out !== !!r.out ? !!r.out : r.finished && o.finished ? o.finishRank < r.finishRank : o.finished || (!r.finished && o.laps.progress > r.laps.progress)) p++;
   }
   return p;
 }
@@ -58,7 +60,7 @@ export function buildResult(racers: readonly Racer[], p: Racer, totalLaps: numbe
   const drift = p.car.drift.bank + p.car.drift.chain;
   const base = PAYOUT[Math.min(position - 1, PAYOUT.length - 1)];
   const rows = racers
-    .map((r) => ({ name: r.name, position: positionOf(racers, r), time: r.finished ? r.finishTime : null, isPlayer: r.isPlayer }))
+    .map((r) => ({ name: r.name, position: positionOf(racers, r), time: r.finished && !r.out ? r.finishTime : null, isPlayer: r.isPlayer }))
     .sort((a, b) => a.position - b.position);
   return {
     position,
