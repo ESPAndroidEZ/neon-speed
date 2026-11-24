@@ -9,7 +9,7 @@ interface Preset { top: number; horizon: number; stars: number; moon: number; fo
 const P: Record<Exclude<Tod, 'night'>, Preset> = {
   dusk: { top: 0x2a2a70, horizon: 0xff7a3d, stars: 0.2, moon: 0.25, fog: 0xb4604f, fogW: 0.55, fogK: 0.9, hemiSky: 0xa8708f, hemiGround: 0x2a1a26, hemiK: 1.15, sun: 0xff9a5a, sunK: 1.1 },
   dawn: { top: 0x39508f, horizon: 0xffb0a0, stars: 0.1, moon: 0.1, fog: 0xd8a3a8, fogW: 0.55, fogK: 0.85, hemiSky: 0xb0a0c8, hemiGround: 0x2a2630, hemiK: 1.25, sun: 0xffc4a0, sunK: 1.2 },
-  day: { top: 0x4f9bff, horizon: 0xcde6ff, stars: 0, moon: 0, fog: 0xb8d4ee, fogW: 0.85, fogK: 0.55, hemiSky: 0xcfe3ff, hemiGround: 0x607080, hemiK: 1.7, sun: 0xfff2dc, sunK: 1.9 },
+  day: { top: 0x4f9bff, horizon: 0xcde6ff, stars: 0, moon: 0, fog: 0xb8d4ee, fogW: 0.75, fogK: 0.6, hemiSky: 0xcfe3ff, hemiGround: 0x607080, hemiK: 1.3, sun: 0xfff2dc, sunK: 1.35 },
 };
 
 const mix = new Color();

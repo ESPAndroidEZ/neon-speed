@@ -21,7 +21,7 @@ for (let i = 0; i < 120; i++) tod.update(1 / 60);
 check('night changes nothing', hemi.intensity === 2.3 && mat.uniforms.stars.value === 1 && tod.fog.w === 0 && tod.fog.k === 1);
 tod.set('day');
 for (let i = 0; i < 300; i++) tod.update(1 / 60);
-check('day brightens the lights and empties the sky of stars', hemi.intensity > 2.3 * 1.5 && moon.intensity > 0.7 * 1.5 && mat.uniforms.stars.value < 0.05 && mat.uniforms.moon.value < 0.05);
+check('day brightens the lights and empties the sky of stars', hemi.intensity > 2.3 * 1.2 && moon.intensity > 0.7 * 1.2 && mat.uniforms.stars.value < 0.05 && mat.uniforms.moon.value < 0.05);
 check('day paints a blue sky', (mat.uniforms.top.value as Color).b > (mat.uniforms.top.value as Color).r && (mat.uniforms.horizon.value as Color).getHex() !== 0x302040);
 check('day thins and lightens the fog', tod.fog.w > 0.7 && tod.fog.k < 0.7 && tod.fog.color.getHex() === 0xb8d4ee, `w ${tod.fog.w.toFixed(2)} k ${tod.fog.k.toFixed(2)}`);
 tod.set('dusk');

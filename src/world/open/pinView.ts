@@ -27,6 +27,7 @@ export function pinView(pins: readonly StoryPin[]): PinView {
   const beamMat = new MeshBasicMaterial({ color: HOT, vertexColors: true, transparent: true, opacity: 0.6, blending: AdditiveBlending, depthWrite: false, side: 2 });
   const wallMat = beamMat.clone();
   wallMat.opacity = 0.7;
+  wallMat.color.set(0xffffff); // the colour comes per instance (pink for the next place, green for a finished one)
   const rings = new InstancedMesh(ringGeo, ringMat, n), beams = new InstancedMesh(beamGeo, beamMat, n), walls = new InstancedMesh(wallGeo, wallMat, n);
   for (const m of [rings, beams, walls]) { m.frustumCulled = false; m.renderOrder = 3; }
   rings.name = 'story-rings'; beams.name = 'story-beams'; walls.name = 'story-walls';
@@ -46,13 +47,14 @@ export function pinView(pins: readonly StoryPin[]): PinView {
       for (let i = 0; i < pins.length; i++) {
         if (!states[i]) continue;
         put(rings, r, i, 1, 0.1); put(walls, r, i, 1, 0.1);
-        rings.setColorAt(r, states[i] === 2 ? DONE : HOT);
+        rings.setColorAt(r, states[i] === 2 ? DONE : HOT); walls.setColorAt(r, states[i] === 2 ? DONE : HOT);
         r++;
         if (states[i] === 1) put(beams, b++, i, 1, 0.1);
       }
       rings.count = walls.count = r; beams.count = b;
       rings.instanceMatrix.needsUpdate = walls.instanceMatrix.needsUpdate = beams.instanceMatrix.needsUpdate = true;
       if (rings.instanceColor) rings.instanceColor.needsUpdate = true;
+      if (walls.instanceColor) walls.instanceColor.needsUpdate = true;
     },
     pulse(t) { ringMat.opacity = 0.6 + 0.25 * Math.sin(t * 3); beamMat.opacity = 0.5 + 0.2 * Math.sin(t * 2.2); wallMat.opacity = 0.55 + 0.2 * Math.sin(t * 3); },
     dispose() { group.removeFromParent(); ringGeo.dispose(); beamGeo.dispose(); wallGeo.dispose(); ringMat.dispose(); beamMat.dispose(); wallMat.dispose(); rings.dispose(); beams.dispose(); walls.dispose(); },

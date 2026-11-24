@@ -17,8 +17,6 @@ export const POLISH_CSS = `
   .rb-layer .rb-row:has(>.rb-card.rb-pick)::-webkit-scrollbar{display:none}
   .rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card{flex:0 0 min(250px,64vw);scroll-snap-align:center;margin:0;padding:var(--sp-2) var(--sp-3);font-size:.92em}
   .rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card img,.rb-layer .rb-row:has(>.rb-card.rb-pick)>.rb-card canvas{max-height:64px;width:auto;max-width:100%}
-  .rb-layer .rb-row:has(>.rb-card:not(.rb-pick)){flex-wrap:nowrap;align-items:stretch;overflow-x:auto;scroll-snap-type:x mandatory;justify-content:flex-start;width:100%;padding:var(--sp-2) max(var(--sp-4),var(--safe-l))}
-  .rb-layer .rb-row:has(>.rb-card:not(.rb-pick))>.rb-card{flex:0 0 min(250px,64vw);scroll-snap-align:center;margin:0}
 }
 @media (min-width:1500px) and (min-height:800px){.rb-layer{zoom:1.25}}
 @media (min-width:1900px) and (min-height:1000px){.rb-layer{zoom:1.5}}
@@ -29,5 +27,5 @@ export const POLISH_CSS = `
 .rb-rep{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:#05060dcc;border:1px solid #ff3aa655;box-shadow:0 0 16px #ff3aa622;font:800 clamp(13px,1.6vw,18px) var(--font);color:#ffd1ea;white-space:nowrap}
 .rb-rep i{display:block;width:clamp(44px,6vw,76px);height:6px;border-radius:3px;background:#ffffff22;overflow:hidden}
 .rb-rep u{display:block;height:100%;background:linear-gradient(90deg,#ff3aa6,#ffb347);border-radius:3px}
-@media (max-height:480px){.rb-rep i{display:none}}
+@media (max-height:480px){.rb-rep i{width:28px}}
 `;

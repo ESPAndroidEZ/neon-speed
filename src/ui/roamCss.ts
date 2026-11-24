@@ -32,6 +32,7 @@ body.rb-roaming .rb-tc .sm:not(.gm){display:none}
 .rb-bust{height:5px;margin-top:4px;border-radius:3px;background:#ffffff1c;overflow:hidden}.rb-bust u{display:block;height:100%;background:linear-gradient(90deg,#2a6bff,#ff2030)}
 @keyframes rb-siren{0%{box-shadow:0 6px 18px #000a,0 0 14px #ff203088}100%{box-shadow:0 6px 18px #000a,0 0 14px #2a6bff88}}
 body.rb-fdover .rb-heat{display:none!important}
+body.rb-roaming .rb-pop{z-index:40!important} /* WANTED, BUSTED and ESCAPED must show over the call and job cards */
 /* story place offer and phone call (docs/nfs-vision.md item 1) */
 .rb-story-offer{border-color:#ff3aa699;box-shadow:0 8px 24px #000a,0 0 18px #ff3aa633;color:var(--text)}
 .rb-story-offer .rb-pt{flex:none;line-height:0}.rb-story-offer .rb-pt canvas{width:56px;height:56px;border-radius:50%;border:2px solid #ff3aa6;background:#0b0f18}
