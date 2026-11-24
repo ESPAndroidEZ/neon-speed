@@ -115,7 +115,7 @@ const launchFree = (w: Weather, rivals: number, trackId: string, duel?: string):
   story.endStory();
   const car = findCar(q.get('car') ?? store.data.selected);
   const field = duel ? buildField([duel], 1, w !== 'CLEAR') : competitiveField(Math.abs(rivals), car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades; a duel is the named rival
-  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: ko ? Knockout.laps(field.length + 1) : def.laps, knockout: ko, trackId: def.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
+  game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: ko ? Knockout.laps(field.length + 1) : def.laps, knockout: ko, trackId: def.id, cinematic: false, flyby: store.data.settings.raceIntro, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
 };
 menu = new Menu({
   store, audio: audio.bus, engine, voice, auto, game, hud,

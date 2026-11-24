@@ -129,7 +129,7 @@ export class StoryController {
       d.store.commit();
     }
     d.game.startRace({
-      car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, trackId: ev.trackId, cinematic,
+      car, paint: save.paint[car.id] ?? car.color, glow: save.glow[car.id], weather: ev.weather, laps: ev.laps, trackId: ev.trackId, cinematic, flyby: !cinematic && save.settings.raceIntro,
       weatherChange: ev.weatherChange, agents: buildField(rivals, ev.skillScale, ev.weather !== 'CLEAR'),
       meta: { rivalIds: rivals, skillScale: ev.skillScale, wet: ev.weather !== 'CLEAR', eventId: ev.id, level: AI_SETTING.level },
     });

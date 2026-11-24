@@ -13,6 +13,7 @@ import { t } from '../i18n';
 import { langRow } from './langRow';
 import { settingsTabs } from './settingsTabs';
 import { SUBTITLES } from './subtitles';
+import { toggleRow } from './toggleRow';
 import { playerCodeRows } from './playerCode';
 import { openSupport } from './feedback';
 import { GEARBOX } from '../physics/gearbox';
@@ -184,7 +185,7 @@ export function buildSettings(d: SettingsDeps): HTMLElement {
   const advanced = h('div', 'rb-settings');
   advanced.append(
     panel(t('set.secAudio'), [engVol, sfxVol, musVol, engineSoundRow(s, () => d.store.commit()), musicStyleRow(s, () => d.store.commit()), nowPlayingRow(s, () => applySettings(d), () => d.store.commit()), voice, soundCredits()]),
-    panel(t('set.secGame'), [subs, sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store), button(t('fb.open'), () => openSupport()), ...playerCodeRows()]),
+    panel(t('set.secGame'), [subs, toggleRow(d.store, 'raceIntro', 'set.raceIntro'), sizeRow('ctl.subSize', 'subtitleSize'), sizeRow('ctl.mapSize', 'minimapSize'), unlockAll(d.store), button(t('fb.open'), () => openSupport()), ...playerCodeRows()]),
     panel(t('set.secControls'), [...extra.filter((e) => e.dataset.adv), ...driving.advanced]),
     panel(t('set.graphics'), gfx.advanced),
   );

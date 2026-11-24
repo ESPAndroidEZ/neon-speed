@@ -97,3 +97,9 @@ export function createIntroShots(): CameraShot[] {
     },
   ];
 }
+
+/** The short fly-by before a race (about 3.4 s, any key skips it): a low sweep across the nose, then the crane up behind the car into the chase view. */
+export function createFlybyShots(): CameraShot[] {
+  const all = createIntroShots();
+  return [{ ...all[0], duration: 1.7 }, { ...all[3], duration: 1.7 }];
+}

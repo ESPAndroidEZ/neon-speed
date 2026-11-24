@@ -19,6 +19,8 @@ export interface RaceSetup {
   laps: number;
   /** Knockout: the last car is out at the end of every lap (core/knockout); `laps` is then one less than the field. */
   knockout?: boolean;
+  /** A short grid fly-by first (camera/shots createFlybyShots); not on a restart. */
+  flyby?: boolean;
   /** Play the intro cinematic first (otherwise straight to the countdown). */
   cinematic: boolean;
   /** What is needed to rebuild this race from a save. */

@@ -81,6 +81,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   out.settings.rumble = s.rumble !== false;
   out.settings.calmUi = s.calmUi === true;
   out.settings.subtitles = s.subtitles === true;
+  out.settings.raceIntro = s.raceIntro !== false;
   out.settings.gearbox = s.gearbox === 'manual' ? 'manual' : 'auto';
   out.settings.colorSafe = s.colorSafe === true;
   if (s.look === 'neon' || s.look === 'dusk' || s.look === 'grit') out.settings.look = s.look;

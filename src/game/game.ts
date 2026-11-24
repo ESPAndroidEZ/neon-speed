@@ -1,7 +1,7 @@
 import { aiTuning } from '../data/rivals';
 import { ChaseCam } from '../camera/chaseCam';
 import { CinematicCam } from '../camera/cinematicCam';
-import { createIntroShots } from '../camera/shots';
+import { createFlybyShots, createIntroShots } from '../camera/shots';
 import { RaceManager, type RaceResult, type Racer } from '../core/raceManager';
 import type { CarSpec } from '../data/cars';
 import { applyTuning } from '../physics/carTuning';
@@ -98,16 +98,16 @@ export class Game {
     this.syncView();
     this.chase.setTarget(this.view);
     this.telemetry.redlineRpm = this.d.tuning.redlineRpm;
-    if (s.cinematic) {
+    if (s.cinematic || s.flyby) {
       this.state = 'CINEMATIC';
-      this.intro = new CinematicCam({ camera: this.d.engine.camera, subject: this.views.views[0].holder, shots: createIntroShots(), handover: () => this.chase.pose });
+      this.intro = new CinematicCam({ camera: this.d.engine.camera, subject: this.views.views[0].holder, shots: s.cinematic ? createIntroShots() : createFlybyShots(), handover: () => this.chase.pose });
       this.intro.onShotChange = () => this.d.engine.kickBloom(0.7);
       this.intro.onComplete = () => {
         this.onIntroEnd?.();
         this.goRacing();
       };
       this.intro.start();
-      this.onIntroStart?.();
+      if (s.cinematic) this.onIntroStart?.(); // the opening captions belong to the story intro, not the fly-by
     } else {
       this.goRacing();
     }
@@ -128,7 +128,7 @@ export class Game {
   }
 
   restart(): void {
-    if (this.setup) this.startRace({ ...this.setup, cinematic: false });
+    if (this.setup) this.startRace({ ...this.setup, cinematic: false, flyby: false });
   }
 
   fastForward(seconds: number): void {

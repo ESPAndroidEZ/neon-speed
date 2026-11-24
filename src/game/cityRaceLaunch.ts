@@ -26,7 +26,7 @@ export function installCityRaces(d: { engine: Engine; game: Game; store: SaveSto
     offered = null;
     const car = findCar(store.data.selected), w = game.weather;
     const field = competitiveField(RIVALS, car, store.data.upgrades[car.id] ?? {}); // same tier, full skill, your upgrades
-    game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: r.def.laps, trackId: r.id, cinematic: false, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
+    game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: r.def.laps, trackId: r.id, cinematic: false, flyby: store.data.settings.raceIntro, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
   };
   const offer = cityRaceOffer(() => { if (offered && game.state === 'FREEROAM' && !game.paused) start(offered); });
 
