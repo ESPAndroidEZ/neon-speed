@@ -1,5 +1,17 @@
 # Neon Speed: "feels like a real NFS game" plan (2026-11-24)
 
+## Status (2026-11-24, after the build round)
+| Item | State |
+|---|---|
+| 1 Story places in the city (rings, beam, person, call card, offer card with portrait and introduction, return to the city, map stars) | BUILT (`roamStory`, tests `story-pins-check`) |
+| 2 Modes: Time Attack medals | BUILT; Knockout BUILT; Rival duels BUILT; Speed goals BUILT; Police chase BUILT; reverse/night variants SKIPPED (tracks tie to ids, palettes, lap boards); Drift Attack = the drift maps in Free Race (medals by score) |
+| 3 Progression: REP level, car gate, level-up cash, REP bar | BUILT; class badges D-S already exist in tuning (PR); daily/weekly goals and collections beyond tokens NOT built |
+| 4 Look: fly-by BUILT; time of day BUILT; menu 3D hero, results podium, photo filters NOT built |
+| 5 Feel: handbrake camera zoom soft BUILT; tilt launch assist + AUTO/MAN gas button BUILT; near-miss slow-mo, nitro streaks NOT built |
+| 6 Content: chapters 4 and 5, prologue, recaps, six more songs BUILT; district radio NOT built; jumps blocked |
+
+(The plan text below is the original brief; nothing in it was removed.)
+
 Owner brief: make it look and play like a real Need-for-Speed-style game. Play the story by driving to places in the
 city, more modes on more tracks, visual and play polish. "Just needs to be quite good." This is a plan, ordered by
 value per effort, built on what exists (Free Drive city Neon Harbor, 9 maps, 4 story chapters, tokens, missions,
