@@ -48,7 +48,7 @@ export class RoamContact {
   private hitSide = 1;
   readonly roads: RoadIndex;
   private readonly graph: RoadGraph;
-  private readonly fs: readonly Footprint[];
+  readonly fs: readonly Footprint[];
   private readonly hash: GridHash;
   private readonly hit = createRoadHit();
   private wb = 0; private wnx = 0; private wnz = 0;

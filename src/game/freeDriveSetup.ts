@@ -21,7 +21,7 @@ export function wireFreeDrive(d: { engine: Engine; game: Game; hud: Hud; store: 
   const roam = installFreeRoam(d);
   const city = installCityRaces({ engine: d.engine, game: d.game, store: d.store, hideResults: d.hideResults, enterRoam: () => roam.enter(), toMenu: d.toMenu }); // W5.5 city races
   installStoryPins({ engine: d.engine, game: d.game, store: d.store, story: d.story, hideResults: d.hideResults, enterRoam: () => roam.enter() }); // story places in the city
-  installFlow({ engine: d.engine, game: d.game, hud: d.hud, store: d.store, shop: (k, back) => d.shop(k, () => { d.hideMenu(); back(); }), enterRoam: () => roam.enter(), startRace: city.start }); // challengers, shops
+  installFlow({ engine: d.engine, game: d.game, hud: d.hud, store: d.store, shop: (k, back) => d.shop(k, () => { d.hideMenu(); back(); }), enterRoam: () => roam.enter(), goTo: roam.goTo }); // challengers (in-city outrun), shops
   setEvents({ list: () => cityRaces(), start: (r) => { d.hideMenu(); city.start(r); }, driveTo: (r) => { d.hideMenu(); roam.enter(); roam.travel(r.district); roam.goTo(r.x, r.z); } }); // street events screen
   roamDev = { ...roam, travel: (dd) => roam.travel(dd, true), city }; // dev flags and labs (visual check, bench) may visit locked districts
   setFreeDrive(() => { d.hideMenu(); roam.enter(); }); // from the main menu: nothing else is running

@@ -1,5 +1,5 @@
 import { InstancedMesh, Matrix4, MeshBasicMaterial, OctahedronGeometry, type Group } from 'three';
-import type { DistrictId, RoadGraph } from '../types/world';
+import type { DistrictId, Footprint, RoadGraph } from '../types/world';
 import { DISTRICTS } from '../types/world';
 import type { CarController } from '../physics/carController';
 import type { RoamTraffic } from '../physics/roamTraffic';
@@ -26,6 +26,8 @@ export const FLOW_HOOK = {
   shop: (_s: Shop | null): void => {},
   /** A challenger is beside the car (slot index, where), or nobody (-1). */
   challenge: (_slot: number, _x: number, _z: number): void => {},
+  /** Every fixed step after the flow (the in-city outrun lives in game/roamOutrun.ts); true while a race runs (no offers). */
+  tick: (_car: CarController, _dt: number, _flow: RoamFlow): boolean => false,
 };
 
 /**
@@ -42,16 +44,20 @@ export class RoamFlow {
   private readonly marks: InstancedMesh;
   private readonly m = new Matrix4();
   private readonly ring: ReturnType<typeof zoneMesh>;
-  private readonly traffic: RoamTraffic | null;
+  readonly traffic: RoamTraffic | null;
+  /** The city's road graph and building footprints (the in-city outrun drives on them). */
+  readonly g: RoadGraph;
+  readonly fs: readonly Footprint[];
   private readonly busy: () => boolean;
   private shopIn = -1;
   private armed = false;
   private near = -1;
   private clock = 0;
   private lockCool = 0;
+  private racing = false;
 
-  constructor(g: RoadGraph, group: Group, traffic: RoamTraffic | null, avoid: readonly { x: number; z: number }[], busy: () => boolean) {
-    this.traffic = traffic;
+  constructor(g: RoadGraph, fs: readonly Footprint[], group: Group, traffic: RoamTraffic | null, avoid: readonly { x: number; z: number }[], busy: () => boolean) {
+    this.traffic = traffic; this.g = g; this.fs = fs;
     this.busy = busy;
     this.shops = placeShops(g, avoid);
     this.centres = districtCentres(g);
@@ -104,11 +110,12 @@ export class RoamFlow {
         const cx = tr.x[i], cz = tr.z[i];
         this.m.makeRotationY(this.clock * 2);
         this.m.setPosition(cx, heightAt(cx, cz) + 3.4 + Math.sin(this.clock * 3 + k) * 0.25, cz);
-        if (Math.hypot(cx - x, cz - z) < NEAR && !this.busy()) close = k;
+        if (Math.hypot(cx - x, cz - z) < NEAR && !this.busy() && !this.racing) close = k;
       } else this.m.makeScale(0, 0, 0);
       this.marks.setMatrixAt(k, this.m);
     }
     this.marks.instanceMatrix.needsUpdate = true;
+    this.racing = FLOW_HOOK.tick(car, dt, this);
     if (close !== this.near) { this.near = close; FLOW_HOOK.challenge(close, close >= 0 && tr ? tr.x[CHALLENGERS[close]] : 0, close >= 0 && tr ? tr.z[CHALLENGERS[close]] : 0); }
   }
 

@@ -5,6 +5,7 @@ import type { Hud } from '../ui/hud';
 import type { ShopKind } from '../core/shops';
 import type { CityRace } from '../core/cityRace';
 import { FLOW_HOOK } from './roamFlow';
+import { installOutrun } from './roamOutrun';
 import { cityGraph } from './cityRaces';
 import { planOutrun } from '../core/cityEvents';
 import { repLevel } from '../core/rep';
@@ -33,9 +34,10 @@ export function outrunNear(x: number, z: number): CityRace | null {
  * comes back to the same spot), and the challenger card (flash lights = an outrun against that one rival on a race map
  * built from the GPS). One call from freeDriveSetup.
  */
-export function installFlow(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; shop: (k: ShopKind, back: () => void) => void; enterRoam: () => void; startRace: (r: CityRace, field: FieldEntry[]) => void }): void {
+export function installFlow(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; shop: (k: ShopKind, back: () => void) => void; enterRoam: () => void; goTo: (x: number, z: number) => void }): void {
   const { game, store } = d;
-  let shop: ShopKind | null = null, rival: FieldEntry | null = null, at = { x: 0, z: 0 };
+  let shop: ShopKind | null = null, rival: FieldEntry | null = null, at = { x: 0, z: 0 }, slot = 0;
+  const run = installOutrun({ game, store, hud: d.hud, goTo: d.goTo });
   const can = (): boolean => game.state === 'FREEROAM' && !game.paused;
   FLOW_HOOK.level = () => repLevel(store.data.rep ?? 0);
   FLOW_HOOK.done = (k) => store.data.roam?.visited.includes(k) ?? false;
@@ -54,17 +56,15 @@ export function installFlow(d: { engine: Engine; game: Game; hud: Hud; store: Sa
 
   const chCard = roamOffer('KeyH', () => {
     if (!rival || !can()) return;
-    const r = outrunNear(at.x, at.z);
-    if (!r) { d.hud.popUp(t('ch.none'), '#ff5470'); return; }
     chCard.hide();
     d.hud.popUp(t('ch.flash'), '#fff6c8');
-    d.startRace(r, [rival]);
+    run.start(rival, slot, at.x, at.z); // the race happens here in the streets (game/roamOutrun)
   }, 'rb-ch-offer');
   FLOW_HOOK.challenge = (k, x, z) => {
     if (k < 0) { chCard.hide(); return; }
     const car = findCar(store.data.selected);
     rival = competitiveField(1, car, store.data.upgrades[car.id] ?? {})[0]; // a car of your tier, your upgrade levels, full skill
-    at = { x, z };
+    at = { x, z }; slot = k;
     chCard.show(t('ch.title', { name: rival.agent.name }), t('ch.info', { car: rival.car.name }), t('ch.flash'), t('ch.key'));
   };
   d.engine.onFrame(() => { if (game.state !== 'FREEROAM') { if (shopCard.shown) shopCard.hide(); if (chCard.shown) chCard.hide(); } });

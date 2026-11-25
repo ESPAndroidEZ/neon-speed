@@ -184,7 +184,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   return {
     travel,
-    routeLength: () => city?.map.route?.length ?? 0, goTo: (x, z) => city?.map.waypoint(x, z), // labs: the GPS route (m), 0 = none; goTo: set the GPS (street events)
+    routeLength: () => city?.map.route?.length ?? 0, goTo: (x, z) => (Number.isNaN(x) ? city?.map.clearWaypoint() : city?.map.waypoint(x, z)), // labs: the GPS route (m), 0 = none; goTo: set the GPS (street events)
     lab: { spots: () => ({ zone: city?.acts.zones[0] ?? null, trap: city?.acts.traps[0] ?? null, meet: city?.acts.meetSpot ?? null, pins: city?.story.pins ?? [] }), placeAt: (x, z, h, v = 0) => { const c = game.rm.player.car; c.reset(x, z, h); prime(); c.nudge(0, 0, Math.sin(h) * v, Math.cos(h) * v, 0); }, wanted: () => city?.acts.heat.wanted(), tod: (k) => { tod.set(k); if (k === 'night') game.setWeather(game.weather); } },
     enter: () => {
       city ??= build();

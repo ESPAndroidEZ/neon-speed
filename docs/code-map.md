@@ -41,7 +41,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/camera
 - aspectFrame.ts (52) Reference shape the chase camera was tuned on. | fn framing; const REF_ASPECT, horizontalFov; iface Framing
 - cameraStyle.ts (15) Street camera: stays closer and lower at speed, follows the heading a little faster, bi... | fn chaseStyle; const STREET_CAM
-- chaseCam.ts (164) Fraction of the slip angle the camera yaw follows. | fn createChaseTuning; class ChaseCam; iface ChaseTuning
+- chaseCam.ts (175) Fraction of the slip angle the camera yaw follows. | fn createChaseTuning; class ChaseCam; iface ChaseTuning
 - cinematicCam.ts (195) Engine's camera. The cinematic rig and the chase rig share it. | class CinematicCam; iface CinematicOptions
 - shotSampler.ts (44) Working pose: a CameraPose plus roll (radians). | fn buildCurves, samplePath, addShake; const makePose, copyPose; iface Pose
 - shots.ts (105) Circular orbit around the subject. `angle` 0 = in front of the nose; increasing angle s... | fn createIntroShots, createFlybyShots; iface OrbitPath, SplinePath, CameraShot; type Pair, ShotPath
@@ -217,17 +217,18 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - posCue.ts (32) Detects a real change of the player's race position (display only). | class PosCue
 - raceFeedback.ts (99) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
 - raceStats.ts (43) Per-race driving stats for the results screen (display only: reads the game, never feed... | class RaceStats; const raceStats
-- racerViews.ts (103) Interpolated world pose, valid after update(). | fn rivalPlate; class RacerViews; iface RacerView
+- racerViews.ts (112) Interpolated world pose, valid after update(). | fn rivalPlate; class RacerViews; iface RacerView
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - recap.ts (13) "Previously..." cards before the first event of a season chapter: once per save, skippa... | fn playRecap
 - repAward.ts (16) REP for a finished race (story events pay half as much again; a failed story event a th... | fn repNote
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
 - roamActivities.ts (169) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
-- roamFlow.ts (125) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
+- roamFlow.ts (132) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
 - roamHeat.ts (103) Free Drive police (docs/nfs-vision.md section 2): a speed camera flash at 200 km/h or a... | class RoamHeat
 - roamMarkers.ts (38) The full map's markers (race rings, drift zones, speed cameras, car meet, tokens not ye... | fn roamMarkers
 - roamMissions.ts (73) Free Drive missions (data in data/world/missions.ts, logic in core/missions.ts): an off... | class RoamMissions
+- roamOutrun.ts (108) Outrun rules (docs/research-open-world.md): first to the finish, or pull this far clear... | fn installOutrun; const OUTRUN
 - roamProgress.ts (85) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - roamStory.ts (155) Between the city (RoamStory.step) and the launcher (game/storyPinLaunch.ts): which ring... | class RoamStory; const STORY_HOOK, whoAt
 - roamStuck.ts (22) Free Drive stuck detector (pure): the car is stuck when it is on the gas but not moving... | class RoamStuck
@@ -250,7 +251,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enMenu.ts (94) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - enStory.ts (18) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
-- enStreet.ts (16) Underground round (docs/underground-plan.md): challengers, shops, locked areas, city ev... | const EN_STREET
+- enStreet.ts (17) Underground round (docs/underground-plan.md): challengers, shops, locked areas, city ev... | const EN_STREET
 - es.ts (21) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
 - esContent.ts (20) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
@@ -273,7 +274,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esMenu.ts (96) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
 - esStory.ts (18) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
-- esStreet.ts (16) Underground round: Spanish UI strings (same keys as enStreet.ts). | const ES_STREET
+- esStreet.ts (17) Underground round: Spanish UI strings (same keys as enStreet.ts). | const ES_STREET
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
 - langPrefs.ts (27) The slice of the save store the language needs (no dependency on core/save). | fn initLang, chooseLang
 ## src/input
@@ -312,12 +313,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - carSnapshot.ts (36) JSON-safe copy of everything a car controller (and its drivetrain and drift scorer) rem... | fn snapshotCar, restoreCar
 - carStats.ts (46) 0-100 km/h, seconds. | fn measureCar; iface CarStats
 - carTuning.ts (145) Every number here is live-tunable from the in-game panel (backtick key). | fn createDefaultTuning, applyTuning; const GEAR_RATIOS, gearRatio, REVERSE_RATIO; iface CarTuning
+- cityDriver.ts (94) A rival that races through the open city (in-city outrun, docs/research-open-world.md):... | fn cityPath, progressIndex, nearestIndex; class CityDriver; iface CityPath
 - driftScorer.ts (46) Chain scoring: points grow with speed x angle x chain time; banked after a calm spell, ... | class DriftScorer
 - driveEvents.ts (54) Event types pushed by the drivetrain. | class EventReader, EventChannel; const EV_UPSHIFT, EV_DOWNSHIFT, EV_LIFT, EV_CUT, EV_BACKFIRE
 - drivetrain.ts (152) Engine, automatic 6-speed gearbox, reverse and nitro. Outputs one drive force at the wh... | class Drivetrain
 - drivingStyle.ts (49) Driving style (setting `drivingStyle`). CLASSIC = the approved handling, bit for bit (n... | fn streetTuning, applyStyle; const DRIVING_STYLES, STYLE, STREET_FEEL; type DrivingStyle
 - dyno.ts (30) Newton metres at the crank (with full boost on turbo cars). | fn dynoCurve; iface DynoCurve
 - gearbox.ts (4) Gearbox choice (Settings > Gearbox). The player's drivetrain follows it; rivals always ... | const GEARBOX, manualNow
+- idm.ts (15) Intelligent Driver Model (Treiber et al. 2000; values close to the common game / resear... | fn idmAccel; const IDM
 ## src/physics/legacy
 - driveSplit.ts (43) Per-axle drive result (reused object, written every step: no allocation). | fn splitDrive; const createDriveOut, layoutOf; iface DriveOut; type Layout
 - legacyStep.ts (93) Snow only (dry and rain are untouched): tyres dig in lengthwise, so drive traction uses... | fn stepLegacy; const SNOW_FEEL
@@ -326,8 +329,9 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - steering.ts (16) Front wheel angle: less lock at speed (steering assist shrinks it further, PRO keeps mo... | fn steerAngle
 - tire.ts (8) Pacejka-style lateral tyre force. Rises with slip angle, peaks, then eases off to | fn tireLateral
 ## src/physics
+- obbHit.ts (35) Box against box on the ground plane (separating axis test): the car's box (centre, head... | fn obbHit; iface ObbOut
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
-- roamContact.ts (179) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
+- roamContact.ts (218) Share of a hit's impulse the player takes: a wall or a building takes none of it, a tra... | class RoamContact
 - roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
 - roamPolice.ts (159) Police cars on the road graph (pure, fixed pool): each cop drives along the quickest ro... | class RoamPolice; const COPS
 - roamTraffic.ts (219) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
@@ -341,7 +345,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - v2Step.ts (130) Cornering stiffness grows slower than load: a more heavily loaded axle needs more slip ... | fn stepV2
 - v2Tyre.ts (32) v2 tyres, pure arithmetic (no allocation). Load sensitivity: mu = mu0 * (1 - k * (Fz / ... | fn axleCaps, diffCap; const CAP, lateralCurve
 ## src/physics
-- wallHit.ts (48) What a wall contact reports back (TrackContact and RoamContact both expose these). | fn wallHit; iface WallReport
+- wallHit.ts (49) What a wall contact reports back (TrackContact and RoamContact both expose these). | fn wallHit; iface WallReport
 - weather.ts (8) Starting values; tune live. Grip multiplies tyres AND brakes. | const WEATHER
 - weatherLevels.ts (61) Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. | fn fillEnv; const LEVELS, gripFor, envFor; iface PhysicsEnv; type PhysicsLevel
 ## src/render
@@ -402,6 +406,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
 - nowPlaying.ts (34) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
 - onlineMenu.ts (97) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
+- outrunHud.ts (35) The in-city outrun's bar under the Free Drive top bar: rival name, metres to the finish... | fn outrunHud; iface OutrunHud
 - pauseMenu.ts (108) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - phoneCss.ts (19) Phone fixes from the UI audit (docs/ui-story.md): short landscape screens get a narrow ... | const PHONE_CSS
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource

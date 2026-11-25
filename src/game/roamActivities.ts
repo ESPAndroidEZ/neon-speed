@@ -91,7 +91,7 @@ export class RoamActivities {
       this.meet = new MeetWatch(meet);
       contact.parked = Float32Array.from(meet.slots.flatMap((s) => [s.x, s.z, s.h]));
     }
-    this.flow = new RoamFlow(g, group, contact.traffic ?? null, [...this.races.races, ...this.zones, ...(meet ? [meet] : [])], () => this.heat.heat.level > 0);
+    this.flow = new RoamFlow(g, contact.fs, group, contact.traffic ?? null, [...this.races.races, ...this.zones, ...(meet ? [meet] : [])], () => this.heat.heat.level > 0);
     this.disposers.push(() => this.flow.dispose());
     this.disposers.push(() => { for (const m of [cams, rings, starts, this.tokenView.mesh]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
   }

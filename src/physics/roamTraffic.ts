@@ -67,6 +67,7 @@ export class RoamTraffic {
   }
 
   /** Stop car i for a few seconds (the player hit it). */
+  release(i: number): void { this.respawn(i); this.pose(i); } // a challenger that starts racing leaves the street (reappears out of sight)
   bump(i: number, vx = 0, vz = 0, side = 1): void { this.agents[i].speed = 0; this.stall[i] = 3; this.knock.hit(i, vx, vz, side); }
 
   step(dt: number, px: number, pz: number, grip: number): void {

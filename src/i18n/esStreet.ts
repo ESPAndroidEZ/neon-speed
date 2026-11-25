@@ -12,5 +12,6 @@ export const ES_STREET = {
   'ev.info.sprint': '{km} km hasta la meta · {n} rivales', 'ev.info.drift': '{laps} vueltas · {target} puntos para ganar', 'ev.info.drag': '{km} km de recta · {n} rival · cambio manual: cambia al llegar al corte', 'ev.info.run': '{km} km · {n} rival',
   'shop.preview': 'vista previa, cómpralo para quedártelo', 'shop.buyGlow': 'Comprar kit de neón · {price}', 'shop.buyVinyl': 'Comprar este vinilo · {price}', 'shop.noCash': 'Necesitas {price}', 'shop.owned': 'tuyo',
   'ev.title': 'Eventos callejeros', 'ev.hint': 'Corre ya o ve conduciendo en Conducción libre. Los rivales (rombos rosas) esperan en el tráfico.', 'ev.drive': 'Ir conduciendo', 'ev.best': 'mejor {v}', 'ev.new': 'sin correr', 'ev.target': 'objetivo {n}',
+  'run.hud': '{name} · faltan {km} km · {lead} m', 'run.go': '¡YA!', 'run.won': 'Has ganado a {name}: +{cash} $', 'run.lost': '{name} se ha escapado',
   'ev.circuit': 'Circuito', 'ev.sprint': 'Sprint', 'ev.drift': 'Derrape', 'ev.run': 'Persecución', 'ev.drag': 'Aceleración',
 } as const;

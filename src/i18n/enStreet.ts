@@ -12,5 +12,6 @@ export const EN_STREET = {
   'ev.info.sprint': '{km} km to the finish · {n} rivals', 'ev.info.drift': '{laps} laps · score {target} to win', 'ev.info.drag': '{km} km straight · {n} rival · manual gears: shift at the redline', 'ev.info.run': '{km} km · {n} rival',
   'shop.preview': 'preview, buy to keep', 'shop.buyGlow': 'Buy underglow kit · {price}', 'shop.buyVinyl': 'Buy this vinyl · {price}', 'shop.noCash': 'Needs {price}', 'shop.owned': 'owned',
   'ev.title': 'Street events', 'ev.hint': 'Race now, or drive there in Free Drive. Challengers (pink diamonds) wait in the city traffic.', 'ev.drive': 'Drive there', 'ev.best': 'best {v}', 'ev.new': 'not raced yet', 'ev.target': 'target {n}',
+  'run.hud': '{name} · {km} km to go · {lead} m', 'run.go': 'GO!', 'run.won': 'You beat {name}: +${cash}', 'run.lost': '{name} got away',
   'ev.circuit': 'Circuit', 'ev.sprint': 'Sprint', 'ev.drift': 'Drift', 'ev.run': 'Outrun', 'ev.drag': 'Drag',
 } as const;

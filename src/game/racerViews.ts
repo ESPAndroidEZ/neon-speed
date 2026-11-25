@@ -68,6 +68,15 @@ export class RacerViews {
     this.onSwap?.(v);
   }
 
+  /** Take one car off the scene (the in-city outrun's rival when the race ends). */
+  remove(racer: Racer): void {
+    const i = this.views.findIndex((v) => v.racer === racer);
+    if (i < 0) return;
+    this.scene.remove(this.views[i].holder);
+    disposeVisual(this.views[i].holder);
+    this.views.splice(i, 1);
+  }
+
   clear(): void {
     for (const v of this.views) {
       this.scene.remove(v.holder);
