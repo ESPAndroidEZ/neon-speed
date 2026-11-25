@@ -3,6 +3,14 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-25
+- **Street life in Neon Harbor (Underground round, stages 2-4).**
+  - **Challengers**: some traffic cars carry a pink spinning diamond. Pull up beside one and flash your lights (H, or the button) to race them one on one to the far side of a street loop.
+  - **Shops in the city**: a Garage and a Paint shop in Downtown, a Parts shop at the Harbour. Stop in the teal ring and go in; Back brings you to the same street.
+  - **Areas open with REP**: Downtown and the Harbour from the start, the Strip at level 2, Old Town 3, Industrial 4, the Hills 6, the Bay 8. A district your story is sending you to is always open. The map shows the level on each closed district.
+  - **More events from the city**: a street sprint and a drift run in every district, and a drag race on the old runway (one rival, manual gears: shift at the redline). The map has a letter on each event (C circuit, S sprint, D drift, » drag, ! challenger, G/T/P shops) and a full legend.
+  - **Street events** in the main menu: every city event by type; race it now or drive there with the GPS set.
+  - **Paint shop items**: the underglow kit ($1,200) and each vinyl design ($600) are bought once per car; you can preview them first. If you already picked an underglow colour or had a vinyl on a car, you keep it for free. Without the kit your car now has no underglow (it used to get a blue one for free). Three new vinyls: Skyline, Split fade, Pinstripe.
+  - District completion % now counts events won and shops visited too.
 - **Driving style setting (Underground round, stage 1).** Settings > Basic > Driving style: Classic (default, exactly as before) or Street: grippier, tighter turns at street speeds, the 350Z and RX-7 slide easier on the gas, nitro about 40 % stronger and longer with more blur, quicker keyboard/touch steering, a closer camera. Rivals are not affected. Measured in `docs/feel.md`.
 - **Free Drive fixes and a better open world (dev build, not deployed yet).**
   - **Stuck car**: on the gas but not moving for 4 s shows "Stuck? Press the respawn button"; after 9 s (water counts double) the car is put back on the road by itself.

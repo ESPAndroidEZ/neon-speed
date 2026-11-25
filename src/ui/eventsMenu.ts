@@ -25,7 +25,7 @@ export function openEvents(store: SaveStore): void {
   if (!deps) return;
   const d = deps, level = repLevel(store.data.rep ?? 0), all = d.list();
   const root = h('div', 'rb-layer dim rb-events');
-  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px;z-index:30';
+  root.style.cssText += ';overflow:auto;justify-content:flex-start;padding:max(16px,3vh) 16px;z-index:40;background:#05060df2'; // over the menu header and its buttons
   const bar = h('div', 'rb-tabbar'), grid = h('div', 'rb-row');
   grid.style.cssText += ';align-items:stretch;justify-content:center';
   const close = (): void => { root.remove(); window.removeEventListener('keydown', onKey, true); };

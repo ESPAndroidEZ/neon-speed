@@ -48,6 +48,9 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | phone orientation, launch gas | `ui/rotateHint.ts` (landscape card + lock), `ui/touchControls.ts` (`starting`, `startgas` pedal), `game/inputSetup.ts` |
 | tutorial, subtitles | `ui/howToPlay.ts` (once, key `rb-howto`), `ui/subtitles.ts` (`SUBTITLES.on`, default off) |
 | driving style Classic / Street | `physics/drivingStyle.ts` (STREET_FEEL, applied in `data/carBuild.ts applyBuild`, player only), `camera/cameraStyle.ts`, `input/steerRamp.ts STREET_RAMP` (only ramps built with `styled = true`), `fx/juice.ts` blur; labs `tests/lab/feel*.mts`; test `driving-style-check`; numbers `docs/feel.md` |
+| challengers, shops, REP areas (Free Drive) | `game/roamFlow.ts` (RoamFlow in RoamActivities, `FLOW_HOOK`), `game/flowLaunch.ts`, `core/areaLocks.ts`, `core/shops.ts`, cards `ui/roamOffer.ts`, `ui/roamToast.ts`; test `world-flow-check` |
+| city event types (sprint, drift, drag, outrun) | `core/cityRace.ts` kinds, `core/cityEvents.ts` (ids rebuild maps), `core/cityDrag.ts`, `game/cityRaces.ts findCityEvent`, `game/cityRaceLaunch.ts` (rivals per kind); map letters `ui/roamFullMap.ts GLYPH`; Street events screen `ui/eventsMenu.ts`; test `city-events-check`, lab `tests/lab/city-drift.mts` |
+| paint shop items (underglow kit, vinyls) | `core/shopItems.ts` (`SaveData.bought`), `ui/glowShop.ts`, `ui/garageLook.ts`, new vinyls `world/vinylC.ts`; test `paint-shop-check` |
 | server saving (player code, sync) | `core/serverSync.ts`, `boot.ts`, `ui/playerCode.ts`, `server/api/storage.php`, `server/db/*`, section 6 |
 
 ## 4. Playbooks
@@ -82,6 +85,9 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 - Git: push after every block. This machine has no global git identity: commit with `git -c user.name=Carlos -c user.email=<owner email from earlier commits> commit`. Commit messages end with the Co-Authored-By line. Qwen branches `qwen/<task>` merge only through `/review-qwen`.
 
 ## 7. Known gotchas (cost me time once)
+- Dev `?roam=<district>` and `roamDev.travel` bypass the REP area lock (`travel(d, true)`); the player's fast travel does not.
+- The HUD pop-up sits under the Free Drive job card on phones: use `ui/roamToast.ts` for messages that must be read there.
+- Labs can drive city maps: `tests/lab/laps.mts` resolves ids through `findTrackDef` (imports `game/cityRaces`), and returns `driftPts`.
 - CSS `hidden` is overridden by `display:grid/flex`: add `[hidden]{display:none!important}` (see `.rb-tabs`).
 - Individual CSS `translate` / `scale` are used on touch buttons so the press `transform` still works.
 - Typed i18n: `t(\`how.t${i}\`)` fails to compile; index a `as const` array instead.

@@ -135,6 +135,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     const toggle = small(t(lookOpen ? 'garage.appearanceOpen' : 'garage.appearance'), () => {
       lookOpen = !lookOpen;
       render();
+      if (lookOpen) panel.scrollBy({ top: panel.clientHeight * 0.55, behavior: 'smooth' }); // the sticky action bar must not hide the first look rows
     });
     toggle.style.width = '100%';
     panel.append(toggle);

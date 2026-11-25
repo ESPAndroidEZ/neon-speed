@@ -6,6 +6,7 @@ import { RIM_IDS } from '../world/rims';
 import { VINYL_IDS } from '../world/vinylLayer';
 import { button, h, money } from './uiKit';
 import { buyItem, ownsItem, VINYL_PRICE } from '../core/shopItems';
+import { paintCash } from './glowShop';
 import { t, tx } from '../i18n';
 import type { StringKey } from '../i18n';
 
@@ -83,7 +84,7 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
     const k = l.vinyl.kind;
     if (!k || has(k) || !owned) return;
     const short = store.data.cash < VINYL_PRICE;
-    const b = button(t(short ? 'shop.noCash' : 'shop.buyVinyl', { price: money(VINYL_PRICE) }), () => { if (buyItem(store, carId, `vinyl:${k}`)) { ownedKind = k; commit(); refreshBuy(); } }, short ? '' : 'hot');
+    const b = button(t(short ? 'shop.noCash' : 'shop.buyVinyl', { price: money(VINYL_PRICE) }), () => { if (buyItem(store, carId, `vinyl:${k}`)) { ownedKind = k; commit(); refreshBuy(); paintCash(store); root.querySelectorAll('button').forEach((x) => { if (x.textContent === `${lookName(k)} $`) x.textContent = lookName(k); }); } }, short ? '' : 'hot');
     b.disabled = short;
     buyBox.append(b, h('span', 'rb-sub', t('shop.preview')));
   };

@@ -53,6 +53,14 @@ Stage 1 -> /checkpoint -> Stage 2 -> /checkpoint -> Stage 3 -> /checkpoint -> St
 
 ## Progress
 - [x] Stage 1 Driving style (2026-11-25: docs/feel.md, tests/driving-style-check.mts)
-- [ ] Stage 2 World flow
-- [ ] Stage 3 Event types
-- [ ] Stage 4 Menus and customisation
+- [x] Stage 2 World flow (2026-11-25: challengers + outrun, shops as rings, REP areas, map icons + legend, district % counts events and shops; tests/world-flow-check.mts)
+- [x] Stage 3 Event types (2026-11-25: sprint and drift rings per district, runway drag with manual gears, outrun from challengers; tests/city-events-check.mts)
+- [x] Stage 4 Menus and customisation (2026-11-25: underglow kit + vinyls bought per car, 3 new vinyls, paint shop opens the look panel, Street events screen; tests/paint-shop-check.mts)
+
+## What was built (2026-11-25) and how it fits
+- Stage 1: see docs/feel.md.
+- Stage 2: `game/roamFlow.ts` (RoamFlow inside RoamActivities: challenger slots 5/18/31 of the traffic pool with a pink marker, shop rings, `AreaGuard` turning the car back at a locked border, `FLOW_HOOK`), `game/flowLaunch.ts` (shop and challenger cards, `markVisit`, `outrunNear`), `core/areaLocks.ts` (AREA_REP downtown/harbour 1, strip 2, oldtown 3, industrial 4, hills 6, bay 8; the district of the next story place is always open), `core/shops.ts`, `ui/roamOffer.ts`, `ui/roamToast.ts`, map kinds + letters in `ui/roamFullMap.ts` (GLYPH), markers in `game/roamMarkers.ts`, `game/districtDone.ts` (+ events won `win:<id>`, shops `shop:<kind>` in `roam.visited`).
+- Stage 3: `core/cityRace.ts` kinds (circuit, sprint = loop with `sprintEnd` 0.56, drift with target 1.2 pts/m, run = outrun), `core/cityEvents.ts` (placement, `planCityEvent` rebuilds any id: `city-<d>`, `city-sprint-<d>`, `city-drift-<d>`, `city-run-<node>`, `city-drag-<d>`), `core/cityDrag.ts` (1 km straight), `game/cityRaces.ts` (`cityGraph`, `findCityEvent`, resolver), rivals per kind in `game/cityRaceLaunch.ts`, drag forces the manual gearbox in `game/inputSetup.ts`. Lab `tests/lab/city-drift.mts`.
+- Stage 4: `core/shopItems.ts` (`glow` $1,200, `vinyl:<id>` $600, `SaveData.bought`), `ui/glowShop.ts`, vinyl buy row in `ui/garageLook.ts` (working copy: previews never reach the save), `world/vinylC.ts` (skyline, split-fade, pinstripe), the player's car has no underglow without the kit (`RacerViews.add`), `ui/eventsMenu.ts` (main menu > Street events).
+- QA (2026-11-25, Playwright 844x390, two passes): fixed the phone map legend (two columns, all labels), the locked-area message (a toast over the job card), the shop card's double ENTER, the garage cash pill after a purchase, the vinyl chip price tag after buying, the Street events overlay (opaque, over the header), the look panel scrolling clear of the sticky action bar; dev `?roam=<district>` and labs skip the REP lock (the visual check had silently stayed in Downtown). Open: a real challenger was never met by the QA bot (traffic respawns far after a teleport; the offer and race were triggered directly), the sprint minimap shows the whole loop.
+- Not built: police-free outrun "lead by 300 m" rule (an outrun is a one-rival sprint), challenger collision with the kinematic marker (they are normal traffic until the race), per-kind ring colours (one ring mesh for draw-call budget).

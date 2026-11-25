@@ -1,6 +1,6 @@
 # Master plan (living file)
 
-The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-25 (U round: docs/underground-plan.md, U1 Driving style DONE, U2-U4 TODO; before that: all of W5 DONE except missions/jumps (owner input); deployed 2a6611b, lap-board tables applied, lobby installed; waiting: administrator /ws/, owner FEEDBACK_EMAIL, phone test W1.6, live board write test); W5.7 bench + QA done, deploy waits for the owner).
+The single list of big jobs. The prompt `docs/prompts/everything.md` points here: a new session reads this file and continues with the first item that is not DONE. Update the status of every item at every checkpoint (the checkpoint skill does it). Last updated: 2026-11-25 (U round: docs/underground-plan.md, U1-U4 DONE, real-phone playtest open; before that: all of W5 DONE except missions/jumps (owner input); deployed 2a6611b, lap-board tables applied, lobby installed; waiting: administrator /ws/, owner FEEDBACK_EMAIL, phone test W1.6, live board write test); W5.7 bench + QA done, deploy waits for the owner).
 
 Status values: TODO, DOING, BLOCKED (waiting for the owner or the server administrator), DONE (verified, with the evidence in the changelog).
 
@@ -70,6 +70,6 @@ Hard limits for the whole workstream: physics stays 2D (X/Z), fixed 1/60 steps, 
 | Item | Status | Done when |
 |---|---|---|
 | U1 Driving style Classic/Street | DONE 2026-11-25 | tests/driving-style-check ALL PASS, docs/feel.md |
-| U2 World flow (challengers, map icons, shops, REP areas) | TODO | |
-| U3 Event types from the city | TODO | |
-| U4 Menus and customisation | TODO | |
+| U2 World flow (challengers, map icons, shops, REP areas) | DONE 2026-11-25 | tests/world-flow-check, QA screenshots |
+| U3 Event types from the city | DONE 2026-11-25 | tests/city-events-check |
+| U4 Menus and customisation | DONE 2026-11-25 | tests/paint-shop-check |

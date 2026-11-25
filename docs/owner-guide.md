@@ -14,6 +14,7 @@ A 3D arcade street racer that runs in the browser (phone and PC), English and Sp
 - **Controls:** keyboard, gamepad, phone (tilt, touch wheel, buttons). On a phone you can **move the buttons** (Settings > Controls) and the game is **landscape only**.
 - **Music:** 9 generative deep-house songs plus a synthwave track that shuffle and blend into each other by themselves (style Auto by default; Deep house or Synthwave only in Settings > Advanced > Sound). A small "Now playing" line shows each new song (can be turned off).
 - **Driving style** (Settings > Basic, 2026-11-25): **Classic** (default, the handling you approved, unchanged) or **Street** (more grip, sharper turn-in, about 40 % stronger nitro with a stronger edge blur and FOV kick, quicker key steering, a closer camera at speed). Numbers in `docs/feel.md`.
+- **Neon Harbor street life** (2026-11-25): challenger cars (flash your lights to race), shops as places (Garage, Parts, Paint), districts that open with REP, street sprints, drift runs and a runway drag from rings in the city, a Street events screen in the main menu, and paid paint-shop items (underglow kit, vinyls). Plan and file list: `docs/underground-plan.md`.
 - **Settings:** Basic and Advanced tabs, graphics Auto (adjusts to the device), subtitles off by default.
 - **Tutorial:** four short slides after choosing the language; it says the handbrake is overpowered.
 - **Online lap boards (live since 2026-11-21, empty until people race):** your best lap per map, weather and car class goes to an online board (top 10, your rank, a daily-challenge board). The map screen shows the top 3, the results show "#3 of 41". Times are checked for plausibility (speed, length, checkpoints in order), not verified, and say so. Races driven offline are sent later. Beginner assists and drift maps are left out. It starts working once you OK `scripts/apply-server-schema.sh` (it adds three tables, after a backup).
@@ -64,6 +65,8 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 
 - 2026-11-25: Street style only changes YOUR car (rivals keep their own tuning); turbo, rain/snow grip and the handbrake carry/hold are untouched. Restore point: git tag `driving-backup-2026-11-25`.
 
+- 2026-11-25: underglow is now a paid kit per car (old choices kept free); areas open at REP levels (Strip 2, Old Town 3, Industrial 4, Hills 6, Bay 8); the story always opens the district it needs.
+
 ## 5. Security and housekeeping to know about
 - **Backups (installed 2026-11-20):** the database is dumped every night at 03:30 (14 days kept, `/var/backups/neonspeed`). The first backup was restored into a scratch database and every table matched (`neonspeed-restore-test` PASSED). Our MySQL log rotates weekly.
 - **Old firewall rules:** the server firewall still allows ports 3306, 4567, 4568 and 4444 from anywhere (they belonged to the old Galera cluster). Nothing listens on them now. Recommended to remove them; ask whoever manages the server, since the firewall may be managed by Ansible.
@@ -90,6 +93,8 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 - The new song transitions and the four new songs were checked by measurement (no clicks, same loudness), not by ear: listen to `logs/music/join-*.wav` and `logs/music/house-6..9-*.wav`, or just play for a few minutes.
 
 - Street driving style: tuned with bots and lab numbers only; nobody has driven it by hand on a phone or PC yet.
+
+- Underground round (challengers, shops, locked areas, city sprint/drift/drag, Street events, paint shop): checked by unit tests, bots and headless screenshots only; not played by a person on a phone. Drift targets (about 1.2 points per metre) are set from bots that do not try to drift: they may be too easy or too hard for a real driver.
 
 ## 7. How the documentation works (so it stays true)
 | File | Who reads it | What it holds |

@@ -14,6 +14,7 @@ export function roamOffer(code: string, go: () => void, cls = ''): RoamOffer {
   text.append(title, sub);
   const btn = button('', () => { if (on) go(); }, 'hot');
   const key = h('span', 'rb-sub');
+  key.style.whiteSpace = 'nowrap';
   root.append(text, btn, key);
   document.body.appendChild(root);
   let on = false;

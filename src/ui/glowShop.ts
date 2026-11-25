@@ -5,6 +5,8 @@ import { button, h, money } from './uiKit';
 import { t } from '../i18n';
 
 const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
+/** After a purchase: every cash pill on screen shows the new total. */
+export const paintCash = (store: SaveStore): void => document.querySelectorAll('.rb-cash').forEach((el) => { el.textContent = money(store.data.cash); });
 
 /**
  * Underglow in the garage (Underground round, stage 4): a kit bought once per car. Without it the colours are a preview
@@ -30,7 +32,7 @@ export function glowRows(store: SaveStore, carId: string, carOwned: boolean, sho
   if (!kit && carOwned) {
     const short = store.data.cash < GLOW_PRICE;
     const b = button(short ? t('shop.noCash', { price: money(GLOW_PRICE) }) : t('shop.buyGlow', { price: money(GLOW_PRICE) }), () => {
-      if (buyItem(store, carId, 'glow')) { store.setGlow(carId, pick); show(pick); again(); }
+      if (buyItem(store, carId, 'glow')) { store.setGlow(carId, pick); show(pick); paintCash(store); again(); }
     }, short ? '' : 'hot');
     b.disabled = short;
     out.push(b);

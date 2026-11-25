@@ -48,7 +48,7 @@ interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: 
  * streamed around the camera, buildings and the quay as walls. The car is the player of a RaceManager that never starts,
  * so the engine sound, effects and camera follow it as in a race; Game hands this module the fixed step and the frame.
  */
-export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number; goTo(x: number, z: number): void; lab: RoamLab } {
+export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId, force?: boolean): void; routeLength(): number; goTo(x: number, z: number): void; lab: RoamLab } {
   const { engine, game } = d;
   let city: City | null = null;
   const tod = new TimeOfDay(engine.scene, d.store);
@@ -106,8 +106,8 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   };
 
   /** Fast travel: onto a road at the junction nearest the middle of the district's streets. */
-  const travel = (dist: DistrictId): void => {
-    if (!city || !city.acts.flow.canGo(dist)) return;
+  const travel = (dist: DistrictId, force = false): void => { // force: dev flags and labs skip the REP lock
+    if (!city || (!force && !city.acts.flow.canGo(dist))) return;
     const nodes = city.g.nodes.filter((n) => n.district === dist && n.edges.length > 1);
     if (!nodes.length) return;
     const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length, cz = nodes.reduce((a, n) => a + n.z, 0) / nodes.length;

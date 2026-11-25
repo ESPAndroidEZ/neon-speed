@@ -375,12 +375,12 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - freeDriveButton.ts (10) main wires Free Drive here once it is installed (the menu is built before). | const setFreeDrive, freeDriveButton
 - fullscreenButton.ts (75) One-time "Add to Home Screen" card for iPhone Safari (no Fullscreen API there). `force`... | fn showHomescreenHint, fullscreenButton
 - gapTags.ts (52) Under lap / position: the rival just ahead (red, how far you are behind) and just behin... | fn attachGapTags
-- garage.ts (201) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (202) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageConfig.ts (31) Menu / garage camera framing. Plain data plus one helper: no imports. | const GARAGE_CONFIG, garageLayout; type GarageLayout
-- garageLook.ts (123) Translated display name of a vinyl, rim, part or glow id. | fn lookRows
+- garageLook.ts (124) Translated display name of a vinyl, rim, part or glow id. | fn lookRows
 - garageParts.ts (27) Small helpers of the garage screen: cached stats, colour hex, bar clamp and the hold-to... | fn soundTest; const statsOf, hex, clamp01
 - gauge.ts (135) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
-- glowShop.ts (39) Underglow in the garage (Underground round, stage 4): a kit bought once per car. Withou... | fn glowRows
+- glowShop.ts (41) After a purchase: every cash pill on screen shows the new total. | fn glowRows; const paintCash
 - graphicsSettings.ts (148) Called after Auto quality is switched on or off (the watchdog reads the saved flag). | fn graphicsRows; iface GraphicsDeps, GraphicsRows
 - handlingOverlay.ts (52) Handling debug overlay (plan section 7), toggled with F4: per-axle load (N), slip angle... | const handlingOverlay
 - haptics.ts (22) Short haptic tick: Capacitor Haptics in the app, navigator.vibrate on Android browsers,... | fn buzz
@@ -415,7 +415,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roamHud.ts (41) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
 - roamMap.ts (109) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamMapCss.ts (12) Free Drive full map styles (menu look): canvas on the left, legend and buttons in a sid... | const MAP_CSS
-- roamOffer.ts (29) A small offer card under the Free Drive top bar (shops, challengers): title, one line, ... | fn roamOffer; iface RoamOffer
+- roamOffer.ts (30) A small offer card under the Free Drive top bar (shops, challengers): title, one line, ... | fn roamOffer; iface RoamOffer
 - roamPause.ts (36) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
 - roamToast.ts (21) A short message card over the Free Drive cards (the HUD pop-up sits under the job card ... | fn roamToast
 - roamWhere.ts (61) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
