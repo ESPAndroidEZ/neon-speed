@@ -3,12 +3,12 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-24 (NFS round: story places, chapters 4-5, REP, medals, duels, knockout, fly-by, time of day, police; see docs/nfs-vision.md status; deploy of this round pending).
+Updated: 2026-11-25 (checkpoint after the NFS round; build and all tests green; the last deploy attempts failed on the Teleport proxy timeout, so the NFS round is committed but NOT deployed).
 
 ## Next
-0. START HERE: `docs/master-plan.md` (status + evidence per item). Next for Claude: DEPLOYED 2026-11-21 (live 2a6611b, lap-board tables applied, lobby service installed). Open: W5.5 missions and jumps (owner input), live board write test (owner OK). W5.6 DONE (built by Claude; owner: no Qwen for this project) Qwen tasks 063-067, W5.7 bench + screenshot QA; qa #13 (neon-clear chroma) needs a bisect. Watch: city draw calls ~200-217 of 250 (LOW), `game/freeRoam.ts` 204 lines (new features in new modules).
-1. OWNER: review `docs/online-protocol.md`; send `docs/admin-request.md` (administrator adds `/ws/`); set `FEEDBACK_EMAIL`; decide jumps (2D physics) and give story input for city missions (W5.5 missions are blocked on it).
-2. Owner playtests on real phones (Free Drive never ran on a phone or a real GPU); qa-report open rows (#10, #13, #18, #23-#30); repo visibility (owner).
+1. DEPLOY: run `scripts/deploy-server.sh` from a network that reaches tele.true.nl:443 (timed out on 2026-11-24 and 11-25); then live-URL checks. Real-phone playtest of everything in docs/nfs-vision.md (never tried on a phone or real GPU); rerun `tests/lab/roam-bench.mjs` (docs/perf.md).
+2. Open UI/QA: duels button below the map cards, garage Look & details cramped on phones, Snow card 63 % vs 45 %, fly-by hidden by the loading card, cop visuals (white car now) and Day look to re-check on screenshots.
+3. Not built: jumps (2D physics), reverse/night map variants, district radio, 3D menu hero, results podium, daily goals; owner items in docs/inbox/2026-11-21-owner-playtest.md (tilt landscape lock, off-road feel, building sweep).
 
 ## Done
 2026-11-24 (NFS round, dev build, NOT deployed): everything in docs/nfs-vision.md sections 1-3 is built except jumps (blocked: 2D physics) and reverse/night map variants (skipped: tracks are bound to ids, palettes and lap boards): story places in the city (`roamStory`, rings + beam + person + call + offer card, the event runs normally and returns to the city), Chapter 4 and 5 + prologue + recaps, REP and car gate, Time Attack medals, rival duels, Knockout, race fly-by, Free Drive time of day, police chase (heat), speed goals, 6 more house songs, chase camera eases its zoom down slowly. Open: real-phone playtest of all of it, perf bench rerun (docs/perf.md: pins +3 draw calls and one person ~17, police 15 when out), codex screen (the Crew screen shows Wren and Adeyemi after chapters 3/4), deploy.

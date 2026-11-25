@@ -69,7 +69,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - missions.ts (69) Where a mission wants you: resolved from a place name by the game (null = place not ava... | class MissionRunner; const MISSION_R; type Resolve, MissionEvent
 - modelList.ts (9) GLB files found in public/models at build time (vite.config `define`); null in dev and ... | const modelPresent
 - perfTier.ts (58) What the first-run detection reads (structural, so tests can pass plain values). | fn guessTier, deviceHints, firstRunTier; iface DeviceHints
-- police.ts (50) Heat (docs/nfs-vision.md section 2): the police chase rules in Free Drive. Pure state; ... | class Heat; const MAX_HEAT, BUST_R, BUST_TIME, WANTED_KMH, copsFor, fineFor, escapeCash, escapeRep; type HeatEvent
+- police.ts (53) Heat (docs/nfs-vision.md section 2): the police chase rules in Free Drive. Pure state; ... | class Heat; const MAX_HEAT, BUST_R, BUST_TIME, WANTED_KMH, copsFor, fineFor, escapeCash, escapeRep; type HeatEvent
 - pwa.ts (49) Registers the offline service worker in production browsers (not inside the Capacitor s... | fn registerServiceWorker, showUpdatePrompt
 - quality.ts (171) Everything a quality tier switches. Systems read `qualityNow()` each frame, so changes ... | fn qualityNow, applyQuality, phoneDefaults; class AutoQuality; const qualityTier, WORK_LIMIT_MS, isPhone; iface QualityParams
 - raceContacts.ts (32) Car-car contacts: the player's are full crashes, rivals trade soft bumps. Returns the p... | fn resolveField, unstick
@@ -199,6 +199,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - lapFrames.ts (48) Samples per second of race time; the server's plausibility check (server/api/scores-lib... | fn bestLapOf; class LapFrames; const LAP_HZ
 - lapPop.ts (18) Pure text for the pop-up shown when a lap ends (no DOM, no i18n): "LAP 2  1:24.10  +0.31". | fn lapPop; iface LapPop
 - leaderboardHook.ts (69) The shared board client (null without server sync: the native app, or before boot ran). | fn leaderboard, installLapFrames, submitLapBoard, boardLine
+- menuLook.ts (14) Bloom is eased down in the menus: a white car facing the camera with its headlights on ... | fn attachMenuLook
 - nitroCue.ts (31) Nitro tank cues (display only): "EMPTY" when a burn runs the tank dry, then "READY" onc... | class NitroCue; const NITRO_EMPTY_AT, NITRO_READY_AT; type NitroCueKind
 - onlineRace.ts (107) The player as the room sees them: name and garage car. | fn installOnline; const saveOnlineName; iface OnlineDeps, Online
 - pause.ts (65) Pause state and saving: pause on Esc or a hidden tab, autosave when pausing or leaving,... | class PauseController
@@ -238,7 +239,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
-- enStory.ts (16) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
+- enStory.ts (17) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
 - es.ts (19) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
 - esContent.ts (19) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
@@ -259,7 +260,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
-- esStory.ts (16) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
+- esStory.ts (17) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
 - langPrefs.ts (27) The slice of the save store the language needs (no dependency on core/save). | fn initLang, chooseLang
 ## src/input
@@ -314,7 +315,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
 - roamContact.ts (179) Car vs the open city (pure, no allocation per step): tyre surface from the road index (... | class RoamContact
 - roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
-- roamPolice.ts (157) Police cars on the road graph (pure, fixed pool): each cop drives along the quickest ro... | class RoamPolice; const COPS
+- roamPolice.ts (158) Police cars on the road graph (pure, fixed pool): each cop drives along the quickest ro... | class RoamPolice; const COPS
 - roamTraffic.ts (219) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
 - surfaces.ts (137) What the tyres feel at one spot. Reused by the caller; never allocated per query. | class SurfaceMap; const createSurfaceHit; iface Puddle, SurfaceHit; type SurfaceKind
 - trackContact.ts (128) Car vs the street (pure, no allocation). Each step: find the track position, apply verg... | class TrackContact
@@ -389,17 +390,17 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - phoneCss.ts (19) Phone fixes from the UI audit (docs/ui-story.md): short landscape screens get a narrow ... | const PHONE_CSS
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
 - playerCode.ts (30) Settings rows for server saving: the player code (copy it, or type another to load that... | fn playerCodeRows
-- polishCss.ts (32) GUI polish round (owner 2026-11-23: "make the GUI better looking"): menu hierarchy, hor... | const POLISH_CSS
+- polishCss.ts (31) GUI polish round (owner 2026-11-23: "make the GUI better looking"): menu hierarchy, hor... | const POLISH_CSS
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - repChip.ts (14) Top-right header of the menus: the REP level with its bar, and the cash. | fn menuHeader
-- results.ts (86) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- roamCss.ts (64) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | fn injectRoamCss; const ROAM_CSS, ICON_RESPAWN, ICON_MAP, ICON_PAUSE
+- results.ts (102) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
+- roamCss.ts (65) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | fn injectRoamCss; const ROAM_CSS, ICON_RESPAWN, ICON_MAP, ICON_PAUSE
 - roamFullMap.ts (122) What the minimap owns and the full map reads. | fn fullMap; const ROAD_COL, MK; iface Marker, MapState, FullMap; type MarkerKind
 - roamHud.ts (41) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
 - roamMap.ts (105) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamMapCss.ts (12) Free Drive full map styles (menu look): canvas on the left, legend and buttons in a sid... | const MAP_CSS
 - roamPause.ts (35) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
-- roamWhere.ts (60) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
+- roamWhere.ts (61) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
@@ -418,8 +419,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - touchButton.ts (69) Shared look of the phone controls. Hit areas reach `--hit` beyond the visible shape (::... | fn holdButton, place; const TOUCH_CSS
 - touchControls.ts (206) Show or hide the overlay (the architect hides it in menus). | fn createTouchControls; iface TouchControls
 - touchLayout.ts (94) Phone button layout: where the player put each button (centre as a fraction of the scre... | fn sanitizeLayout, applyLayout, enableDrag, presetLayout; const sanitizeScale; type Layout, LayoutPreset
-- trackSelect.ts (115) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
-- trackTop.ts (33) Board shown on a map card: clear weather, the selected car's tier. Null for drift maps ... | fn trackBoardKey, topLine, fillTrackTops
+- trackSelect.ts (123) Draw the road outline of a map (north up) on a small canvas; the start line is the whit... | fn drawOutline, buildTrackSelect; iface TrackSelectDeps
+- trackTop.ts (34) Board shown on a map card: clear weather, the selected car's tier. Null for drift maps ... | fn trackBoardKey, topLine, fillTrackTops
 - tuneMenu.ts (128) Marks an unchanged stat in the upgrade preview so its segment can be dropped in any lan... | fn buildTuneMenu
 - tuneTip.ts (12) One line for the results screen after a lost race: an upgrade the player can buy now an... | fn tuneTip
 - uiKit.ts (47) Marks a main-menu button as a featured mode (cyan, one step below the magenta primary). | fn injectCss, wordmark, h, button, toast; const feat, money, lapText
@@ -480,7 +481,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - groundCarve.ts (57) Ground height with the roads laid in (W5.7 fix: on the hills the 16 m ground grid bulge... | fn groundAt
 - meetView.ts (28) The car meet: 8 parked show cars (instanced, lamps on) and a pink ring on the ground. 3... | fn meetGroup
 - pedView.ts (44) Pedestrians as one instanced mesh (one draw call): a simple figure (body, head) with a ... | class PedView
-- pinView.ts (60) Story places as rings on the street with a light beam over the one that is next: all ri... | fn pinView; iface PinView
+- pinView.ts (62) Story places as rings on the street with a light beam over the one that is next: all ri... | fn pinView; iface PinView
 - policeView.ts (44) The police cars: a dark body, a white door stripe and a light bar that flashes red and ... | fn policeView; iface PoliceView
 - roamLook.ts (73) Facade per district (docs/art-direction.md: downtown glass towers, old town brick, harb... | fn districtWalls, weatherSurfaces, districtFog
 - roofKit.ts (90) Roof clutter for Neon Harbor buildings (task 063, built by Claude): AC units, water tan... | fn roofDetails
