@@ -32,7 +32,11 @@ export function roamMap(g: RoadGraph, chunks: readonly ChunkInfo[], roads: RoadI
     route = r;
     if (route) for (const e of route.edges) onRoute[e] = 1;
   };
-  const plan = (): void => { const a = nearestNode(g, px, pz), b = nearestNode(g, wx, wz); setRoute(a >= 0 && b >= 0 ? findRoute(g, a, b) : null); };
+  const plan = (): void => {
+    const a = nearestNode(g, px, pz), b = nearestNode(g, wx, wz);
+    if (b >= 0) { wx = st.wx = g.nodes[b].x; wz = st.wz = g.nodes[b].z; } // a tap on water or a building snaps to the junction the route ends at, so arriving can finish
+    setRoute(a >= 0 && b >= 0 ? findRoute(g, a, b) : null);
+  };
 
   const drawMini = (traffic: RoamTraffic): void => {
     const s = mini.width, k = s / VIEW;

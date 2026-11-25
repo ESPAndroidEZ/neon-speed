@@ -70,6 +70,14 @@ export class RoamHeat {
     }
   }
 
+  /** The car was put somewhere else (respawn, fast travel): a wanted level stays, the cops are brought out again around the new spot. */
+  relocate(x: number, z: number): void {
+    this.px = x; this.pz = z;
+    if (this.heat.level === 0) return;
+    this.police.stop();
+    this.police.send(copsFor(this.heat.level), x, z);
+  }
+
   /** Leaving Free Drive ends the chase. */
   leave(): void { this.heat.reset(); this.cool = 0; this.stop(); }
 

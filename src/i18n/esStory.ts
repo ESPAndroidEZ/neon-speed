@@ -14,4 +14,5 @@ export const ES_STORY = {
   'maps.city': 'Circuitos de la ciudad (6 mapas más)', 'maps.cityLoading': 'Construyendo la ciudad…',
   'rep.lv': 'NV {n}', 'rep.tip': 'REP {into} / {need} para el siguiente nivel', 'rep.max': 'Nivel máximo alcanzado', 'rep.gain': '+{n} REP', 'rep.up': '¡NIVEL {n}!',
   'rep.upNote': 'Nivel {n}: +{cash}', 'garage.repLock': 'Llega al nivel {n}',
+  'roam.stuck': '¿Atascado? Pulsa el botón de reaparecer',
 } as const;

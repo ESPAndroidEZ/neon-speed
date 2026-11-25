@@ -32,6 +32,7 @@ import { Streamer } from '../world/open/streamer';
 import { roamHud, type RoamHud } from '../ui/roamHud';
 import { RoamMissions } from './roamMissions';
 import { RoamStory } from './roamStory';
+import { RoamStuck } from './roamStuck';
 import { TimeOfDay } from '../world/open/timeOfDay';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
@@ -53,7 +54,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   let ui: RoamHud | null = null;
   let menu: RoamPause | null = null;
   let mapFromDrive = false; // the M key / map button opened the map over the drive (Back resumes), not from the pause menu
-  let active = false;
+  let active = false, hinted = false; const stuck = new RoamStuck();
   let shownWeather: Weather | null = null;
   const cars = new Float32Array(2 * 41);
   const hit = createRoadHit(), p = { x: 0, z: 0 };
@@ -88,6 +89,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const h = city.contact.roads.pointAt(hit.edge, hit.s, 0, p);
     const back = Math.cos(h - st.heading) < 0 ? Math.PI : 0;
     car.reset(p.x, p.z, h + back);
+    city.traffic.scatter(p.x, p.z); stuck.reset(); hinted = false; city.acts.heat.relocate(p.x, p.z); // nobody on the spot; a chase carries on
     city.acts.place(p.x, p.z);
   };
 
@@ -97,7 +99,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const s = game.rm.player.car.state, cx = cellOf(city.g, s.position.x), cz = cellOf(city.g, s.position.z);
     city.traffic.scatter(s.position.x, s.position.z); // traffic and people around the new spot too
     city.peds.scatter(s.position.x, s.position.z);
-    city.acts.place(s.position.x, s.position.z); // a teleport is not a pass through a camera
+    city.acts.place(s.position.x, s.position.z); city.acts.heat.relocate(s.position.x, s.position.z); // a teleport is not a pass through a camera
     city.streamer.update(cx, cz); // the first update picks the wanted cells
     for (let i = 0; i < 100 && city.streamer.pending; i++) city.streamer.update(cx, cz);
   };
@@ -122,7 +124,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     if (on) menu?.open(); else { menu?.close(); city?.map.closeFull(); }
   };
 
-  const setCast = (on: boolean): void => { const c = engine.scene.getObjectByName('cast'); if (c) c.visible = on; };
+  const hint = (): void => d.hud.popUp(t('roam.stuck'), '#ffd27d'); const setCast = (on: boolean): void => { const c = engine.scene.getObjectByName('cast'); if (c) c.visible = on; };
 
   const leave = (): void => {
     active = false;
@@ -132,9 +134,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     if (city) engine.scene.remove(city.group);
     game.world.root.visible = true;
     setCast(true);
-    ui?.hide();
-    menu?.close();
-    city?.map.show(false);
+    ui?.hide(); mapFromDrive = false; city?.map.show(false); menu?.close(); // the map first: closing it must not reopen the pause menu
     shownWeather = null; tod.reset();
     game.setWeather(game.weather); // the race map's fog and look again
   };
@@ -152,6 +152,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     city.peds.step(dt, cars[0], cars[1], cars, t.agents.length + 1);
     c.update(r.car);
     city.acts.step(r.car, dt);
+    const sk = stuck.update(dt, r.car.state.speed, game.ctl.throttle, r.car.state.position.x, r.car.state.position.z); if (sk === 1 && !hinted) { hinted = true; hint(); } else if (sk === 2) respawn();
     city.missions.step(dt, r.car.state.position.x, r.car.state.position.z); city.story.step(r.car.state.position.x, r.car.state.position.z, r.car.state.speed);
     const tc = r.contact; // the race contact is idle here: mirror what the city reports, for sparks, shake and sound
     tc.impact = c.impact; tc.scrape = c.scrape; tc.offroad = c.offroad; tc.groundY = c.groundY; tc.pitch = c.pitch;

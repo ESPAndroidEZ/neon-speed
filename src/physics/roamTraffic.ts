@@ -48,7 +48,7 @@ export class RoamTraffic {
   private readonly g: RoadGraph;
   private readonly rnd: () => number;
   private readonly near: number[] = [];
-  private nx = 0; private nz = 0; // where `near` was collected
+  private nx = 0; private nz = 0; private lx = 0; private lz = 0; // where `near` was collected; the player, last step
   time = 0;
 
   constructor(g: RoadGraph, count = 40, seed = 3) {
@@ -62,7 +62,7 @@ export class RoamTraffic {
 
   /** Put every car on a road near (px, pz): call once when free roam starts or after a fast travel. */
   scatter(px: number, pz: number): void {
-    this.collectNear(px, pz);
+    this.collectNear(px, pz); this.lx = px; this.lz = pz;
     for (let i = 0; i < this.agents.length; i++) this.respawn(i);
     this.poses();
   }
@@ -73,7 +73,7 @@ export class RoamTraffic {
   }
 
   step(dt: number, px: number, pz: number, grip: number): void {
-    this.time += dt;
+    this.time += dt; this.lx = px; this.lz = pz;
     const g = this.g;
     for (let i = 0; i < this.agents.length; i++) {
       const a = this.agents[i], e = g.edges[a.edge];
@@ -201,7 +201,7 @@ export class RoamTraffic {
   private respawn(i: number): void {
     const a = this.agents[i];
     if (this.near.length === 0) return;
-    for (let tries = 0; tries < 6; tries++) {
+    for (let tries = 0; tries < 10; tries++) {
       const e = this.g.edges[this.near[Math.floor(this.rnd() * this.near.length)]];
       const na = this.g.nodes[e.a], nb = this.g.nodes[e.b];
       a.edge = e.id;
@@ -211,7 +211,7 @@ export class RoamTraffic {
       a.speed = Math.min(e.limit * 0.6, TURN_SPEED);
       this.stall[i] = 0; this.knock.clear(i);
       this.pose(i);
-      let clear = true;
+      let clear = Math.hypot(this.x[i] - this.lx, this.z[i] - this.lz) > 60; // never pops in next to the player
       for (let j = 0; j < this.agents.length && clear; j++) if (j !== i && Math.hypot(this.x[j] - this.x[i], this.z[j] - this.z[i]) < 15) clear = false;
       if (clear) return;
     }
