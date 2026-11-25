@@ -13,19 +13,23 @@ export interface WallReport { impact: number; scrape: number; readonly contact: 
  * a modest yaw kick, and turn the nose along the wall so the car slides on. Pure, no allocation. Moved unchanged out of
  * TrackContact (2026-11-20) so free roam's buildings and quay feel exactly like race walls.
  */
-/** `share` (0..1): how much of the bounce and rub the car takes (1 = a wall; a traffic car that is bumped away takes the rest). */
-export function wallHit(car: CarController, pen: number, nx: number, nz: number, px: number, pz: number, out: WallReport, share = 1): void {
+/**
+ * `share` (0..1): how much of the bounce and rub the car takes (1 = a wall; a traffic car that is bumped away takes the rest).
+ * (ovx, ovz): the obstacle's velocity (a moving traffic car: only the closing speed counts). `rest`: bounce (races 0.28).
+ */
+export function wallHit(car: CarController, pen: number, nx: number, nz: number, px: number, pz: number, out: WallReport, share = 1, ovx = 0, ovz = 0, rest = RESTITUTION): void {
   const st = car.state;
-  const vn = st.velocity.x * nx + st.velocity.z * nz;
+  const rvx = st.velocity.x - ovx, rvz = st.velocity.z - ovz;
+  const vn = rvx * nx + rvz * nz;
   let dvx = 0;
   let dvz = 0;
   let yawPush = 0; // normal impulse x lever arm, plus a quarter of the friction's (rubbing must not spin the car)
   const armX = px - st.position.x;
   const armZ = pz - st.position.z;
   if (vn < 0) {
-    const j = -(1 + RESTITUTION) * vn * share;
-    const tx = st.velocity.x - vn * nx;
-    const tz = st.velocity.z - vn * nz;
+    const j = -(1 + rest) * vn * share;
+    const tx = rvx - vn * nx;
+    const tz = rvz - vn * nz;
     const tl = Math.hypot(tx, tz);
     const fr = tl > 1e-4 ? Math.min(1, (WALL_MU * j) / tl) : 0;
     dvx = j * nx - tx * fr;

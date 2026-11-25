@@ -68,7 +68,7 @@ export class RoamTraffic {
 
   /** Stop car i for a few seconds (the player hit it). */
   release(i: number): void { this.respawn(i); this.pose(i); } // a challenger that starts racing leaves the street (reappears out of sight)
-  bump(i: number, vx = 0, vz = 0, side = 1): void { this.agents[i].speed = 0; this.stall[i] = 3; this.knock.hit(i, vx, vz, side); }
+  bump(i: number, vx = 0, vz = 0, side = 1): void { const a = this.agents[i], al = vx * Math.sin(this.h[i]) + vz * Math.cos(this.h[i]); if (al > 2) { a.speed = Math.min(40, a.speed + al * 0.45); this.stall[i] = 1.5; } else { a.speed = 0; this.stall[i] = 3; } this.knock.hit(i, vx, vz, side); } // (vx, vz): closing velocity; shoved from behind = pushed on, else stopped
 
   step(dt: number, px: number, pz: number, grip: number): void {
     this.pvx = (px - this.lx) / dt; this.pvz = (pz - this.lz) / dt; // the player's velocity, for following them
@@ -78,7 +78,7 @@ export class RoamTraffic {
       const a = this.agents[i], e = g.edges[a.edge];
       if (this.knock.active(i)) this.knock.step(i, dt, this.stall[i]);
       if (Math.hypot(this.x[i] - px, this.z[i] - pz) > DESPAWN_R) { if (Math.hypot(px - this.nx, pz - this.nz) > 120) this.collectNear(px, pz); this.respawn(i); continue; }
-      if (this.stall[i] > 0) { this.stall[i] -= dt; continue; }
+      if (this.stall[i] > 0) { this.stall[i] -= dt; a.speed = Math.max(0, a.speed - 5 * dt); a.s = Math.min(e.length - 0.1, Math.max(0.1, a.s + a.dir * a.speed * dt)); continue; } // shaken: rolls to a stop, no driving
       let want = Math.min(e.limit, this.cornerLimit(e, a.s, a.dir, grip));
       const toEnd = a.dir > 0 ? e.length - a.s : a.s;
       const end = g.nodes[a.dir > 0 ? e.b : e.a];

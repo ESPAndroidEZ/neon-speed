@@ -18,6 +18,7 @@ const POINTS: readonly (readonly [number, number])[] = [
 const BORDER = 6; // metres inside the world edge
 /** Share of a hit's impulse the player takes: a wall or a building takes none of it, a traffic car about half (it is bumped away). */
 const CAR_SHARE = 0.55, COP_SHARE = 0.7;
+const CITY_REST = 0.08; // bounce off city walls and cars (playtest: 60 km/h into a wall threw the car back at 17 km/h with the race walls' 0.28)
 /** Off-road in the city (fully off the kerb): grip and drag (1/s). Races keep their verge (0.6 / 0.5). */
 const CITY_OFF = { grip: 0.72, drag: 0.26 };
 
@@ -52,7 +53,7 @@ export class RoamContact {
   private readonly hash: GridHash;
   private readonly hit = createRoadHit();
   private wb = 0; private wnx = 0; private wnz = 0;
-  private pen = 0; private nx = 0; private nz = 0; private px = 0; private pz = 0; private share = 1;
+  private pen = 0; private nx = 0; private nz = 0; private px = 0; private pz = 0; private share = 1; private ovx = 0; private ovz = 0;
   private readonly ob: ObbOut = { pen: 0, nx: 0, nz: 0, px: 0, pz: 0 };
   private cx0 = 0; private cz0 = 0; private ch0 = 0;
   /** Last spot where the car touched nothing too deep (the seam fallback; a jump of over 6 m between steps is a teleport and clears it). */
@@ -102,7 +103,7 @@ export class RoamContact {
       this.probe(st.position.x, st.position.z, st.heading);
       if (this.pen <= 0) break;
       const imp = this.impact;
-      wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this, this.share);
+      wallHit(car, this.pen, this.nx, this.nz, this.px, this.pz, this, this.share, this.ovx, this.ovz, CITY_REST);
       this.impact = Math.max(imp, this.impact);
       if (pass === 2) { this.pen = 0; this.probe(st.position.x, st.position.z, st.heading); }
     }
@@ -110,7 +111,7 @@ export class RoamContact {
     if (this.pen > 0.05 && this.clean) car.nudge(this.cleanX - st.position.x, this.cleanZ - st.position.z, -st.velocity.x * 0.8, -st.velocity.z * 0.8, 0);
     else if (this.pen <= 0.05) { this.cleanX = st.position.x; this.cleanZ = st.position.z; this.clean = true; }
     this.lastX = st.position.x; this.lastZ = st.position.z;
-    if (this.hitCar >= 0 && this.impact > 2) this.traffic?.bump(this.hitCar, pvx, pvz, this.hitSide);
+    if (this.hitCar >= 0 && this.impact > 2) { const a = this.traffic?.agents[this.hitCar], h = this.traffic?.h[this.hitCar] ?? 0, v = a?.speed ?? 0; this.traffic?.bump(this.hitCar, pvx - Math.sin(h) * v, pvz - Math.cos(h) * v, this.hitSide); } // the closing velocity shoves it
     if (this.hitCop >= 0 && this.impact > 2) this.onCop?.(this.hitCop);
   }
 
@@ -145,16 +146,16 @@ export class RoamContact {
     this.boxes(this.police, true);
   }
 
-  private set(pen: number, nx: number, nz: number, px: number, pz: number, share = 1): boolean {
+  private set(pen: number, nx: number, nz: number, px: number, pz: number, share = 1, ovx = 0, ovz = 0): boolean {
     if (pen <= this.pen) return false;
-    this.pen = pen; this.nx = nx; this.nz = nz; this.px = px; this.pz = pz; this.share = share;
+    this.pen = pen; this.nx = nx; this.nz = nz; this.px = px; this.pz = pz; this.share = share; this.ovx = ovx; this.ovz = ovz;
     return true;
   }
 
   /** The car's box against one obstacle box; true when it became the deepest contact. */
-  private box(bx: number, bz: number, br: number, bw: number, bd: number, share: number): boolean {
-    const o = this.ob;
-    return obbHit(this.cx0, this.cz0, this.ch0, HALF_W, HALF_L, bx, bz, br, bw, bd, o) && this.set(o.pen, o.nx, o.nz, o.px, o.pz, share);
+  private box(bx: number, bz: number, br: number, bw: number, bd: number, share: number, ov = 0): boolean {
+    const o = this.ob; // ov: the obstacle's speed along its heading br (a moving traffic car)
+    return obbHit(this.cx0, this.cz0, this.ch0, HALF_W, HALF_L, bx, bz, br, bw, bd, o) && this.set(o.pen, o.nx, o.nz, o.px, o.pz, share, Math.sin(br) * ov, Math.cos(br) * ov);
   }
 
   private buildings(cx: number, cz: number): void {
@@ -201,7 +202,7 @@ export class RoamContact {
       const dx = this.cx0 - t.x[i], dz = this.cz0 - t.z[i];
       if (dx * dx + dz * dz > 64) continue;
       const sz = trafficSize(t.agents[i].variant);
-      if (!this.box(t.x[i], t.z[i], t.h[i], sz[0] / 2, sz[1] / 2, CAR_SHARE)) continue;
+      if (!this.box(t.x[i], t.z[i], t.h[i], sz[0] / 2, sz[1] / 2, CAR_SHARE, t.agents[i].speed)) continue;
       // which side of the traffic car was hit (for its spin): its local frame at the contact point
       const fx = Math.sin(t.h[i]), fz = Math.cos(t.h[i]), qx = this.ob.px - t.x[i], qz = this.ob.pz - t.z[i];
       this.hitCar = i; this.hitSide = Math.sign((qx * fz - qz * fx) * (qx * fx + qz * fz)) || 1;

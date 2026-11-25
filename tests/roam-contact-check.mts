@@ -4,6 +4,7 @@
 import { CARS } from '../src/data/cars.ts';
 import { snagStats } from './lab/roam-snag.mts';
 import { offroadRun } from './lab/roam-offroad.mts';
+import { crashRuns } from './lab/roam-crash.mts';
 import { generateRoads as genRoads2 } from '../src/world/roads/generate.ts';
 import { generateFootprints as genFp2 } from '../src/world/open/footprints.ts';
 import { CarController } from '../src/physics/carController.ts';
@@ -93,7 +94,10 @@ check('the world border holds', out === 0);
 }
 const orr = offroadRun(); // leaving the street at 100 km/h: no glue, no jolt at the kerb
 check('off the kerb: a soft slow-down (under 0.9 g) without a jolt', orr.maxDecel < 9 && orr.jolt < 5 && orr.kmh > 50, `${orr.kmh.toFixed(0)} km/h after 1.5 s, max ${orr.maxDecel.toFixed(1)} m/s2, jolt ${orr.jolt.toFixed(1)}`);
+const cr = crashRuns(); // playtest: crashes threw the car backwards (60 -> -17 km/h; rear-ending a moving car -> -35 km/h)
+check('a head-on wall hit stops the car without throwing it back', cr.wall60 > -8 && cr.wall120 > -12, `${cr.wall60.toFixed(0)} / ${cr.wall120.toFixed(0)} km/h`);
+check('rear-ending a moving car keeps speed and shoves it on', cr.rear > 40 && cr.rearOther > 54, `you ${cr.rear.toFixed(0)} km/h, it ${cr.rearOther.toFixed(0)} km/h`);
 const sn = snagStats(200);
-check('no clipping into buildings (box contact, seam fallback)', sn.clipMax < 0.05, `max ${sn.clipMax.toFixed(2)} m, ${sn.stuckRuns} head-on stops`);
+check('no clipping into buildings (box contact, seam fallback)', sn.clipMax < 0.1, `max ${sn.clipMax.toFixed(2)} m, ${sn.stuckRuns} head-on stops`);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

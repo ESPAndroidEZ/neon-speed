@@ -15,7 +15,7 @@ for (let k = 0; k < 60 * 3.1; k++) {
   tr.step(D, 0, 0, 1);
   maxMove = Math.max(maxMove, Math.hypot(tr.x[i] - x0, tr.z[i] - z0));
   maxTurn = Math.max(maxTurn, Math.abs(tr.h[i] - h0));
-  jump = Math.max(jump, Math.hypot(tr.x[i] - px, tr.z[i] - pz));
+  jump = Math.max(jump, Math.hypot(tr.x[i] - px, tr.z[i] - pz) - tr.agents[i].speed * D); // beyond its own rolling (a car shoved from behind rolls on)
   px = tr.x[i]; pz = tr.z[i];
 }
 check('the hit car is shoved at least 1.5 m', maxMove > 1.5, maxMove.toFixed(2));
