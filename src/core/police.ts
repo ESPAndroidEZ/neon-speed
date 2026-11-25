@@ -7,7 +7,9 @@ export const MAX_HEAT = 3;
 /** Metres: a cop this close counts; and the speed (m/s) below which it can arrest. */
 export const BUST_R = 14, BUST_SPEED = 22;
 /** Seconds of being caught to get busted, and of being clear to escape; clear = this far from every cop (m). */
-export const BUST_TIME = 4, ESCAPE_TIME = 7, ESCAPE_R = 130;
+export const BUST_TIME = 4, ESCAPE_TIME = 6, ESCAPE_R = 110;
+/** A chase that goes on this long (s) brings one more star. */
+export const ESCALATE_AFTER = 45;
 /** A speed camera flash at this speed (km/h) or faster calls the police. */
 export const WANTED_KMH = 200;
 

@@ -5,7 +5,6 @@ import { createRng } from '../core/rng';
 import { heightAt } from '../world/roads/height';
 
 export const COPS = 3;
-const TOP = 58; // m/s, about 210 km/h
 const ACCEL = 9, BRAKE = 16;
 const GAP = 6; // metres they hold behind the player
 const REPLAN = 1.3; // seconds between route updates per cop
@@ -26,6 +25,8 @@ export class RoamPolice {
   readonly boxes = new Float32Array(COPS * 3).fill(FAR);
   /** Cops out. */
   count = 0;
+  /** Top speed (m/s): set from the heat level (about 170 / 190 / 205 km/h), so a fast car can always get away. */
+  top = 47;
   private readonly edge = new Int32Array(COPS);
   private readonly dir = new Int8Array(COPS);
   private readonly s = new Float32Array(COPS);
@@ -83,7 +84,7 @@ export class RoamPolice {
         this.path[i] = r ? r.edges : [];
       }
       const dist = Math.hypot(px - this.x[i], pz - this.z[i]);
-      let want = Math.min(TOP, Math.max(16, pSpeed * 1.06 + 5), e.limit * 2.6);
+      let want = Math.min(this.top, Math.max(16, pSpeed * 1.06 + 5), e.limit * 2.6);
       if (dist < 18) want = Math.min(want, Math.max(0, pSpeed * 0.95 + (dist - GAP) * 0.8)); // hold station behind the player
       if (toEnd < 35) want = Math.min(want, 17 + toEnd * 0.6); // junction ahead: slow for the turn
       this.speed[i] += Math.max(-BRAKE * dt, Math.min(ACCEL * dt, want - this.speed[i]));

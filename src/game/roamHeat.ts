@@ -4,7 +4,7 @@ import type { CarController } from '../physics/carController';
 import type { RoamContact } from '../physics/roamContact';
 import type { Hud } from '../ui/hud';
 import { RoamPolice } from '../physics/roamPolice';
-import { copsFor, escapeCash, escapeRep, fineFor, Heat } from '../core/police';
+import { copsFor, ESCALATE_AFTER, escapeCash, escapeRep, fineFor, Heat } from '../core/police';
 import { policeView, type PoliceView } from '../world/open/policeView';
 import { heatHud, type HeatHud } from '../ui/heatHud';
 import { createRoadHit } from '../world/roads/roadIndex';
@@ -30,6 +30,7 @@ export class RoamHeat {
   private px = 0; private pz = 0;
   private clock = 0;
   private cool = 0;
+  private chase = 0; // seconds since the last star: a long chase brings another
 
   constructor(g: RoadGraph, group: Group, hud: Hud, contact: RoamContact, io: { cash(): number; pay(n: number): void; rep(n: number): void }) {
     this.hud = hud; this.contact = contact; this.io = io;
@@ -46,6 +47,7 @@ export class RoamHeat {
     if (this.cool > 0) return;
     this.cool = 6;
     if (!this.heat.raise()) return;
+    this.police.top = 42 + 5 * this.heat.level; this.chase = 0;
     this.police.send(copsFor(this.heat.level), this.px, this.pz);
     this.hud.popUp(t(this.heat.level === 1 ? 'heat.wanted' : 'heat.up', { n: this.heat.level }), '#ff4d6d');
   }
@@ -58,6 +60,7 @@ export class RoamHeat {
     if (this.contact.hitCar >= 0 && this.contact.impact > CRASH) this.wanted();
     if (this.heat.level === 0) { if (this.police.count) this.stop(); return; }
     const speed = Math.abs(st.speed), level = this.heat.level;
+    if (level < 3 && (this.chase += dt) > ESCALATE_AFTER) { this.cool = 0; this.wanted(); }
     this.police.step(dt, this.px, this.pz, speed);
     const ev = this.heat.step(dt, speed, this.police.nearest(this.px, this.pz));
     this.ui.update(this.heat.level, this.heat.bust);
@@ -74,7 +77,7 @@ export class RoamHeat {
   relocate(x: number, z: number): void {
     this.px = x; this.pz = z;
     if (this.heat.level === 0) return;
-    this.police.stop();
+    this.police.stop(); this.police.top = 42 + 5 * this.heat.level;
     this.police.send(copsFor(this.heat.level), x, z);
   }
 

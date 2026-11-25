@@ -20,6 +20,8 @@ export function roamMarkers(a: RoamActivities, s: RoamStory): () => readonly Mar
     for (const p of a.traps) add(p.x, p.z, 'trap');
     if (a.meetSpot) add(a.meetSpot.x, a.meetSpot.z, 'meet');
     for (let i = 0; i < a.tokens.tokens.length; i++) if (!a.tokens.got[i]) add(a.tokens.tokens[i].x, a.tokens.tokens[i].z, 'token');
+    const cops = a.heat.police;
+    for (let i = 0; i < cops.count; i++) add(cops.x[i], cops.z[i], 'cop'); // cops show while they chase
     out.length = n;
     return out;
   };

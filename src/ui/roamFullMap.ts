@@ -6,13 +6,13 @@ import { t } from '../i18n';
 import { button, h } from './uiKit';
 import { injectRoamCss } from './roamCss';
 
-export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job' | 'story' | 'storyDone' | 'storyLock';
+export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job' | 'story' | 'storyDone' | 'storyLock' | 'cop';
 export interface Marker { x: number; z: number; k: MarkerKind; label?: string }
 /** What the minimap owns and the full map reads. */
 export interface MapState { px: number; pz: number; ph: number; wx: number; wz: number; route: Route | null; markers: () => readonly Marker[] }
 
 export const ROAD_COL: Readonly<Record<string, string>> = { highway: '#8fa8d8', bridge: '#8fa8d8', avenue: '#cfd6e6', runway: '#5a6070' };
-export const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#b46bff', token: '#18d8ff', job: '#ffffff', story: '#ff3aa6', storyDone: '#3ddc97', storyLock: '#6a7286' };
+export const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#b46bff', token: '#18d8ff', job: '#ffffff', story: '#ff3aa6', storyDone: '#3ddc97', storyLock: '#6a7286', cop: '#4d8dff' };
 const KEYS: MarkerKind[] = ['story', 'storyDone', 'storyLock', 'race', 'zone', 'trap', 'meet', 'token'];
 const SIZE = 1024, BASE = 2048;
 
