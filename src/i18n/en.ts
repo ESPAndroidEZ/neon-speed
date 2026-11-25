@@ -5,6 +5,7 @@ import { EN_ONLINE } from './enOnline';
 import { EN_ACH } from './enAch';
 import { EN_LOOK } from './enLook';
 import { EN_STORY } from './enStory';
+import { EN_STREET } from './enStreet';
 
 /**
  * English UI strings: the reference table. Spanish (es.ts) must have exactly the same keys (tests/i18n-check).
@@ -19,6 +20,7 @@ export const EN = {
   ...EN_ONLINE,
   ...EN_LOOK,
   ...EN_STORY,
+  ...EN_STREET,
 } as const;
 
 export type StringKey = keyof typeof EN;

@@ -4,6 +4,7 @@ import type { ResultsExtra } from '../ui/results';
 import { isCityTrack, placeCityRaces, type CityRace } from '../core/cityRace';
 import { setTrackResolver } from '../data/tracks';
 import { generateRoads } from '../world/roads/generate';
+import { planCityEvent } from '../core/cityEvents';
 
 /** City seed: the same as Free Drive's city (game/freeRoam.ts build). */
 const SEED = 7;
@@ -11,14 +12,19 @@ const SEED = 7;
 export const RING = 9;
 const SLOW = 11;
 
-let planned: CityRace[] | null = null;
-/** The city races, planned once (from the city's graph when Free Drive builds it, else from a fresh graph). */
+let planned: CityRace[] | null = null, graph: RoadGraph | null = null;
+/** The city's road graph (Free Drive's own when it was built; node ids are the same for the same seed). */
+export const cityGraph = (): RoadGraph => (graph ??= generateRoads(SEED));
+/** The city races with a start ring, planned once (from the city's graph when Free Drive builds it, else from a fresh graph). */
 export function cityRaces(g?: RoadGraph): CityRace[] {
-  planned ??= placeCityRaces(g ?? generateRoads(SEED));
+  if (g) graph ??= g;
+  planned ??= placeCityRaces(cityGraph());
   return planned;
 }
+/** Any city event by map id: a ring race, or an outrun rebuilt from its id. */
+export const findCityEvent = (id: string): CityRace | null => planCityEvent(cityGraph(), id, cityRaces());
 // a saved or restarted city race finds its map even before Free Drive was opened this session
-setTrackResolver((id) => (isCityTrack(id) ? cityRaces().find((r) => r.id === id)?.def : undefined));
+setTrackResolver((id) => (isCityTrack(id) ? findCityEvent(id)?.def : undefined));
 
 /**
  * Between the Free Drive step and the launcher (game/cityRaceLaunch.ts): `offer` shows or hides the race offer,

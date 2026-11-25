@@ -1,7 +1,12 @@
 import type { RoamActivities } from './roamActivities';
 import type { Marker, MarkerKind } from '../ui/roamFullMap';
 import type { RoamStory } from './roamStory';
+import type { CityKind } from '../core/cityRace';
+import { CHALLENGERS } from './roamFlow';
+import { AREA_REP } from '../core/areaLocks';
+import { t } from '../i18n';
 
+const KIND_MARK: Record<CityKind, MarkerKind> = { circuit: 'race', sprint: 'sprint', drift: 'drift', run: 'run' };
 const TOKEN_SEEN = 300; // m: a neon token shows on the map only when you are this close (finding them is the game)
 const STORY: readonly MarkerKind[] = ['storyLock', 'story', 'storyDone'];
 
@@ -16,7 +21,11 @@ export function roamMarkers(a: RoamActivities, s: RoamStory, at: () => { x: numb
   return () => {
     n = 0;
     for (let i = 0; i < s.pins.length; i++) add(s.pins[i].x, s.pins[i].z, STORY[s.states[i]], s.labels[i]);
-    for (const r of a.races.races) add(r.x, r.z, 'race');
+    for (const r of a.races.races) add(r.x, r.z, KIND_MARK[r.kind]);
+    const f = a.flow, me = at();
+    for (const sh of f.shops) add(sh.x, sh.z, sh.kind);
+    for (let k = 0; k < CHALLENGERS.length; k++) { const c = f.challenger(k, me); if (c) add(c.x, c.z, 'challenger'); }
+    for (const c of f.centres) if (!f.open(c.id)) add(c.x, c.z, 'lock', t('area.lv', { n: AREA_REP[c.id] }));
     for (const z of a.zones) add(z.x, z.z, 'zone');
     for (const p of a.traps) add(p.x, p.z, 'trap');
     if (a.meetSpot) add(a.meetSpot.x, a.meetSpot.z, 'meet');

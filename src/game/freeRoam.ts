@@ -76,7 +76,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     group.add(trafficView.group, pedView.mesh);
     const map = roamMap(g, ci, contact.roads, () => { if (mapFromDrive) { mapFromDrive = false; game.paused = false; } else menu?.open(); });
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
-    const story = new RoamStory(g, group, d.store, acts, map);
+    const story = new RoamStory(g, group, d.store, acts, map); acts.flow.story = story;
     map.setMarkers(roamMarkers(acts, story, () => game.rm.player.car.state.position));
     const missions = new RoamMissions(g, acts, d.store, () => map);
     return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, story, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); story.dispose(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
@@ -107,7 +107,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   /** Fast travel: onto a road at the junction nearest the middle of the district's streets. */
   const travel = (dist: DistrictId): void => {
-    if (!city) return;
+    if (!city || !city.acts.flow.canGo(dist)) return;
     const nodes = city.g.nodes.filter((n) => n.district === dist && n.edges.length > 1);
     if (!nodes.length) return;
     const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length, cz = nodes.reduce((a, n) => a + n.z, 0) / nodes.length;

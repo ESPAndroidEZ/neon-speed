@@ -27,15 +27,27 @@ export interface CityRace {
   oz: number;
   /** Road-graph edges of the loop in driving order (GPS line on the map). */
   edges: number[];
+  /** Event type (Underground round): circuit laps, sprint (one run to the far side), drift (score), run (outrun vs one challenger). */
+  kind: CityKind;
+  /** Finish line in city coordinates (the start line for circuits and drift). */
+  fx: number;
+  fz: number;
 }
+export type CityKind = 'circuit' | 'sprint' | 'drift' | 'run';
+/** Map id per kind: `city-<district>` circuits (W5.5), `city-sprint-<district>`, `city-drift-<district>`, `city-run-<node>`. */
+export const cityId = (kind: CityKind, key: string): string => CITY_PREFIX + (kind === 'circuit' ? '' : `${kind}-`) + key;
 
 export const CITY_PREFIX = 'city-';
 export const isCityTrack = (id: string): boolean => id.startsWith(CITY_PREFIX);
 
 const NAMES: Record<DistrictId, string> = { downtown: 'Downtown Loop', harbour: 'Harbour Loop', oldtown: 'Old Town Loop', strip: 'Strip Loop', hills: 'Hills Loop', industrial: 'Industrial Loop', bay: 'Bay Loop' };
+const SUFFIX: Record<CityKind, string> = { circuit: ' Loop', sprint: ' Sprint', drift: ' Drift', run: ' Outrun' };
+const nameOf = (d: DistrictId, k: CityKind): string => NAMES[d].replace(' Loop', SUFFIX[k]);
 const BLURB = 'A street race through Neon Harbor, picked from the GPS.';
 /** Every player-visible text of the city maps (tests/lab/i18n-harvest.mts checks the Spanish). */
-export const CITY_TEXT: readonly string[] = [...Object.values(NAMES), ...Object.values(NAMES).map((n) => n.replace(' Loop', '')), BLURB];
+export const CITY_TEXT: readonly string[] = [...(Object.keys(NAMES) as DistrictId[]).flatMap((d) => (Object.keys(SUFFIX) as CityKind[]).map((k) => nameOf(d, k))), ...Object.values(NAMES).map((n) => n.replace(' Loop', '')), BLURB];
+/** Sprints and outruns end this far round the loop (the far side; the rest is the way back). */
+const SPRINT_END = 0.56;
 const FAST: ReadonlySet<string> = new Set(['highway', 'runway', 'bridge']); // no races over the motorway or the airport
 const LAPS = 2;
 const MIN_LEN = 1000, MAX_LEN = 2800;
@@ -103,7 +115,7 @@ function corners(p: [number, number][], w: number): Vertex[] {
 }
 
 /** The circuit for one loop of nodes/edges, or null when it fails the race-map rules. */
-function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[], edges: number[]): { def: TrackDef; length: number; ox: number; oz: number } | null {
+function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[], edges: number[], kind: CityKind): { def: TrackDef; length: number; ox: number; oz: number; fx: number; fz: number } | null {
   const pts = loopPoints(g, nodes, edges);
   if (pts.length < 4) return null;
   let far = 0; // a closed loop is simplified as two halves (start -> farthest point -> start)
@@ -119,21 +131,25 @@ function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[]
   for (let i = 0; i < vs.length; i++) { const b = vs[(i + 1) % vs.length], l = Math.hypot(b.x - vs[i].x, b.z - vs[i].z); if (l > bl) { bl = l; best = i; } }
   const a = vs[best], b = vs[(best + 1) % vs.length];
   const def: TrackDef = {
-    id, name: NAMES[district], district: NAMES[district].replace(' Loop', ''), blurb: BLURB,
-    theme: district === 'harbour' || district === 'industrial' ? 'port' : 'city', type: 'circuit', vertices: vs,
-    start: [a.x + (b.x - a.x) * 0.7, a.z + (b.z - a.z) * 0.7], laps: LAPS, propsDensity: 0.6, defaultWeather: 'CLEAR', recommendedWeather: ['CLEAR', 'RAIN'],
+    id, name: nameOf(district, kind), district: NAMES[district].replace(' Loop', ''), blurb: BLURB,
+    theme: district === 'harbour' || district === 'industrial' ? 'port' : 'city', type: kind === 'run' ? 'sprint' : kind, vertices: vs,
+    start: [a.x + (b.x - a.x) * 0.7, a.z + (b.z - a.z) * 0.7], laps: kind === 'sprint' || kind === 'run' ? 1 : LAPS, propsDensity: 0.6, defaultWeather: 'CLEAR', recommendedWeather: ['CLEAR', 'RAIN'],
   };
+  const sprint = def.type === 'sprint';
+  if (sprint) def.sprintEnd = SPRINT_END;
   const tr = buildTrack(def);
   if (tr.samples.length < 10) return null; // degenerate polygon (a leg of zero length)
-  return validateTrack(tr, { minLength: MIN_LEN, maxLength: MAX_LEN, sprint: false }).length ? null : { def, length: tr.length, ox, oz };
+  if (kind === 'drift') def.driftTarget = Math.round((tr.length * LAPS * 1.6) / 100) * 100; // measured with the drift bot (tests/city-events-check)
+  const f = tr.samples[sprint ? tr.raceSamples : 0].position;
+  return validateTrack(tr, { minLength: MIN_LEN, maxLength: MAX_LEN, sprint }).length ? null : { def, length: tr.length, ox, oz, fx: f.x + ox, fz: f.z + oz };
 }
 
 /** A loop that starts and ends at node `s`, or null. */
-export function planLoop(g: RoadGraph, s: number, id: string, district: DistrictId): CityRace | null {
+export function planLoop(g: RoadGraph, s: number, id: string, district: DistrictId, kind: CityKind = 'circuit', reach: readonly [number, number][] = REACH): CityRace | null {
   const skipE = new Uint8Array(g.edges.length);
   for (const e of g.edges) if (FAST.has(e.kind)) skipE[e.id] = 1;
   const n0 = g.nodes[s];
-  for (const [bx, bz] of REACH) {
+  for (const [bx, bz] of reach) {
     let t = -1, d = Infinity;
     for (const n of g.nodes) {
       if (n.edges.length < 2 || n.district !== district) continue;
@@ -149,11 +165,11 @@ export function planLoop(g: RoadGraph, s: number, id: string, district: District
     const back = findRoute(g, t, s, e2, n2);
     if (!back) continue;
     const nodes = [...out.nodes, ...back.nodes.slice(1)], edges = [...out.edges, ...back.edges];
-    const tr = toTrack(g, id, district, nodes, edges);
+    const tr = toTrack(g, id, district, nodes, edges, kind);
     if (!tr) continue;
     const e = g.edges[edges[0]], fwd = e.a === s, k = fwd ? 1 : e.pts.length / 2 - 2;
     const heading = Math.atan2(e.pts[k * 2] - n0.x, e.pts[k * 2 + 1] - n0.z);
-    return { id, district, x: n0.x, z: n0.z, heading, def: tr.def, length: tr.length, ox: tr.ox, oz: tr.oz, edges };
+    return { id, district, x: n0.x, z: n0.z, heading, def: tr.def, length: tr.length, ox: tr.ox, oz: tr.oz, edges, kind, fx: tr.fx, fz: tr.fz };
   }
   return null;
 }
@@ -168,7 +184,7 @@ export function placeCityRaces(g: RoadGraph): CityRace[] {
     const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length, cz = nodes.reduce((a, n) => a + n.z, 0) / nodes.length;
     nodes.sort((a, b) => Math.hypot(a.x - cx, a.z - cz) - Math.hypot(b.x - cx, b.z - cz));
     for (let i = 0; i < Math.min(12, nodes.length); i++) {
-      const r = planLoop(g, nodes[i].id, CITY_PREFIX + dist, dist);
+      const r = planLoop(g, nodes[i].id, cityId('circuit', dist), dist);
       if (r) { out.push(r); break; }
     }
   }

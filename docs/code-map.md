@@ -46,9 +46,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - shotSampler.ts (44) Working pose: a CameraPose plus roll (radians). | fn buildCurves, samplePath, addShake; const makePose, copyPose; iface Pose
 - shots.ts (105) Circular orbit around the subject. `angle` 0 = in front of the nose; increasing angle s... | fn createIntroShots, createFlybyShots; iface OrbitPath, SplinePath, CameraShot; type Pair, ShotPath
 ## src/core
+- areaLocks.ts (37) Areas that open with REP (Underground round, stage 2): Downtown and the Harbour are ope... | fn areaOpen, districtCentres; class AreaGuard; const AREA_REP
 - carMeet.ts (37) The car meet: a circle at a harbour junction and the parking slots of the cars that han... | fn placeCarMeet; class MeetWatch; iface CarMeet
 - career.ts (110) Story progress, stored inside the save. Pure functions over SaveData so they can be tes... | fn nextEvent, nextEvent3, nextEvent4, nextEvent5, applyChoice, evaluate, completeEvent; const defaultCareer, isDone, storyComplete, chapter4Open, chapter4Complete, chapter5Open, chapter5Complete, chapter3Open, chapter3Complete, playable, clampRel, isUnlocked, driftCash; iface CareerState, EventOutcome
-- cityRace.ts (176) City races in Free Drive (W5.5, docs/open-world.md): a GPS loop over Neon Harbor's road... | fn planLoop, placeCityRaces; const CITY_PREFIX, isCityTrack, CITY_TEXT; iface CityRace
+- cityEvents.ts (52) Every city event (Underground round): the W5.5 circuits plus a sprint and a drift run p... | fn placeCityEvents, planOutrun, planCityEvent; const kindOf
+- cityRace.ts (192) City races in Free Drive (W5.5, docs/open-world.md): a GPS loop over Neon Harbor's road... | fn planLoop, placeCityRaces; const cityId, CITY_PREFIX, isCityTrack, CITY_TEXT; iface CityRace; type CityKind
 - cutsceneTimeline.ts (99) Cutscene data types and the pure timeline maths (no three.js: unit tested). Coordinates... | fn sampleCut, activeLine, clipAt; const cutDuration, yawToward; iface CutShot, CutActor, CutLine, Cutscene, CutSample; type V3, CutEase, CutClip
 - driftZones.ts (54) A drift zone: a circle around a big junction (x, z, radius m). | fn placeDriftZones; class DriftRun; iface DriftZone
 - duels.ts (24) One rival duel (docs/nfs-vision.md section 2): you against one named rival on their map... | fn duelsFor; const duelLevel, duelCash, duelFlag; iface Duel
@@ -85,6 +87,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - save.ts (212) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
 - saveParse.ts (103) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
+- shops.ts (30) Shops as places in the city (Underground round, stage 2): the garage, a parts shop and ... | fn placeShops, shopAt; const SHOP_R; iface Shop; type ShopKind
 - speedTraps.ts (39) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; const TRAP_TIERS, TRAP_TIER_REP, trapTier; iface SpeedTrap
 - storyPins.ts (46) Where a story event waits in the city: a junction in its district. Ring radius in metres. | fn placeStoryPins, pinStates, greeter; const PIN_R; iface StoryPin; type PinState
 - streetName.ts (19) The name of the street an edge belongs to (Neon Harbor, task 066). On the grid, every b... | fn streetName
@@ -177,16 +180,17 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - cashSplit.ts (12) Where a race payout came from (display only): the finishing-position prize and the shar... | fn cashSplit; iface CashSplit
 - cast.ts (155) The people in the world, all on the people contract (src/types/people) and the procedur... | class Cast
 - chapterEnd.ts (11) What follows the last event of Chapter 3, 4 or 5 (shown once): the flag that remembers ... | fn chapterEnd
-- cityRaceLaunch.ts (58) City races (W5.5): the offer card in Free Drive, the start (a normal free race on the t... | fn installCityRaces
-- cityRaces.ts (61) City seed: the same as Free Drive's city (game/freeRoam.ts build). | fn cityRaces; class CityRaceSpots; const RING, CITY_HOOK
+- cityRaceLaunch.ts (63) City races (W5.5): the offer card in Free Drive, the start (a normal free race on the t... | fn installCityRaces
+- cityRaces.ts (67) City seed: the same as Free Drive's city (game/freeRoam.ts build). | fn cityRaces; class CityRaceSpots; const RING, cityGraph, findCityEvent, CITY_HOOK
 - coachLogic.ts (76) Driving coach: which control to hint next. Pure and allocation free; display lives in `... | fn coachUpdate; const COACH_STEPS, COACH_EXPIRE, COACH_MAX_RACES, newCoachMemory, newCoachRun; iface CoachMemory, CoachRun
 - cutscene.ts (108) Plays a cutscene (data/cutscenes*.ts) in the showroom: the camera follows the shots (co... | class CutscenePlayer; const getCutscenePlayer; iface CutsceneDeps
-- districtDone.ts (16) How much of a district is done, 0..100: its neon tokens taken, plus its story places fi... | fn districtPct
+- districtDone.ts (20) How much of a district is done, 0..100: its neon tokens taken, its story places finishe... | fn districtPct
 - driftRecord.ts (35) Tells the player when a banked drift beats their lifetime best (display only). | class DriftRecordCue
 - driverStats.ts (67) Lifetime driver record. Lives under its own localStorage key (`ns.stats`), not in the g... | fn newStats, parseStats, addRace, recordRace, loadStats; const STATS_KEY; iface DriverStats
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
-- freeDriveSetup.ts (22) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
+- flowLaunch.ts (71) Save a visit / win key once (`shop:<kind>`, `win:<map id>`): district completion counts... | fn markVisit, outrunNear, installFlow
+- freeDriveSetup.ts (25) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeFinish.ts (30) The end of a race that is not a story event (free race, rival duel, city race): the rec... | fn freeFinish
 - freeRace.ts (58) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
 - freeRoam.ts (219) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
@@ -217,9 +221,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - recap.ts (13) "Previously..." cards before the first event of a season chapter: once per save, skippa... | fn playRecap
 - repAward.ts (16) REP for a finished race (story events pay half as much again; a failed story event a th... | fn repNote
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
-- roamActivities.ts (162) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamActivities.ts (169) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
+- roamFlow.ts (127) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
 - roamHeat.ts (103) Free Drive police (docs/nfs-vision.md section 2): a speed camera flash at 200 km/h or a... | class RoamHeat
-- roamMarkers.ts (29) The full map's markers (race rings, drift zones, speed cameras, car meet, tokens not ye... | fn roamMarkers
+- roamMarkers.ts (38) The full map's markers (race rings, drift zones, speed cameras, car meet, tokens not ye... | fn roamMarkers
 - roamMissions.ts (73) Free Drive missions (data in data/world/missions.ts, logic in core/missions.ts): an off... | class RoamMissions
 - roamProgress.ts (85) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - roamStory.ts (155) Between the city (RoamStory.step) and the launcher (game/storyPinLaunch.ts): which ring... | class RoamStory; const STORY_HOOK, whoAt
@@ -235,7 +240,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - weatherCue.ts (21) Fires once per race when rain or snow has built up enough to cost grip (display only). | class WeatherCue; const WEATHER_CUE_AT
 - wrongWayLogic.ts (24) Wrong-way detector: the car is moving fast against the direction of the road for a whil... | fn newWrongWay, wrongWayUpdate; const WRONG_WAY_ON; iface WrongWayMemory
 ## src/i18n
-- en.ts (24) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
+- en.ts (26) English UI strings: the reference table. Spanish (es.ts) must have exactly the same key... | const EN; type StringKey
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (74) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
 - enGame.ts (69) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
@@ -243,9 +248,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enMenu.ts (94) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - enStory.ts (18) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
-- es.ts (19) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
+- enStreet.ts (13) Underground round (docs/underground-plan.md): challengers, shops, locked areas, city ev... | const EN_STREET
+- es.ts (21) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
-- esContent.ts (19) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
+- esContent.ts (20) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
 - esContentA.ts (153) Spanish for long content, part A: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_A
 - esContentB.ts (131) Spanish for long content, part B: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_B
 - esContentC.ts (129) Spanish for long content, part C: keyed by the exact English text in src/data (see esCo... | const ES_CONTENT_C
@@ -258,12 +264,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentJ.ts (53) Spanish for Chapter 4 "Neon Harbor" (src/data/story4.ts, storyLines4.ts). | const ES_CONTENT_J
 - esContentK.ts (10) Spanish for the story places of Free Drive (src/data/world/storyPlaces.ts) and the crew... | const ES_CONTENT_K
 - esContentL.ts (116) Spanish for Chapter 5 "The Bay Bridge", the Season 2 cutscenes and recaps, and the new ... | const ES_CONTENT_L
+- esContentM.ts (24) Spanish for the Underground round's content texts: city event names (core/cityRace CITY... | const ES_CONTENT_M
 - esControls.ts (76) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
 - esGame.ts (71) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (96) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
 - esStory.ts (18) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
+- esStreet.ts (13) Underground round: Spanish UI strings (same keys as enStreet.ts). | const ES_STREET
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
 - langPrefs.ts (27) The slice of the save store the language needs (no dependency on core/save). | fn initLang, chooseLang
 ## src/input
@@ -399,10 +407,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - repChip.ts (14) Top-right header of the menus: the REP level with its bar, and the cash. | fn menuHeader
 - results.ts (102) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
 - roamCss.ts (65) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | fn injectRoamCss; const ROAM_CSS, ICON_RESPAWN, ICON_MAP, ICON_PAUSE
-- roamFullMap.ts (122) What the minimap owns and the full map reads. | fn fullMap; const ROAD_COL, MK; iface Marker, MapState, FullMap; type MarkerKind
+- roamFullMap.ts (124) What the minimap owns and the full map reads. | fn fullMap; const ROAD_COL, MK, GLYPH; iface Marker, MapState, FullMap; type MarkerKind
 - roamHud.ts (41) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
 - roamMap.ts (109) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamMapCss.ts (12) Free Drive full map styles (menu look): canvas on the left, legend and buttons in a sid... | const MAP_CSS
+- roamOffer.ts (29) A small offer card under the Free Drive top bar (shops, challengers): title, one line, ... | fn roamOffer; iface RoamOffer
 - roamPause.ts (36) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
 - roamWhere.ts (61) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom

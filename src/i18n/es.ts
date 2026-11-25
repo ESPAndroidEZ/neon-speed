@@ -6,6 +6,7 @@ import { ES_ONLINE } from './esOnline';
 import { ES_ACH } from './esAch';
 import { ES_LOOK } from './esLook';
 import { ES_STORY } from './esStory';
+import { ES_STREET } from './esStreet';
 
 /** Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same keys as en.ts, enforced by the type. */
 export const ES: Record<StringKey, string> = {
@@ -16,4 +17,5 @@ export const ES: Record<StringKey, string> = {
   ...ES_ACH,
   ...ES_LOOK,
   ...ES_STORY,
+  ...ES_STREET,
 };

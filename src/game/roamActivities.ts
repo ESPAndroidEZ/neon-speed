@@ -18,6 +18,7 @@ import { tokenMesh } from '../world/open/tokenView';
 import { REP_FD } from '../core/rep';
 import { RoamHeat } from './roamHeat';
 import { WANTED_KMH } from '../core/police';
+import { RoamFlow } from './roamFlow';
 
 /**
  * Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that follow). Built with the city,
@@ -58,6 +59,8 @@ export class RoamActivities {
   private lastZ = 0;
   /** City race start rings (W5.5). */
   readonly races: CityRaceSpots;
+  /** Challengers, shops and REP-locked districts (Underground round). */
+  readonly flow: RoamFlow;
   /** Street and district line (task 066). */
   private readonly where: RoamWhere;
 
@@ -88,6 +91,8 @@ export class RoamActivities {
       this.meet = new MeetWatch(meet);
       contact.parked = Float32Array.from(meet.slots.flatMap((s) => [s.x, s.z, s.h]));
     }
+    this.flow = new RoamFlow(g, group, hud, contact.traffic ?? null, [...this.races.races, ...this.zones, ...(meet ? [meet] : [])], () => this.heat.heat.level > 0);
+    this.disposers.push(() => this.flow.dispose());
     this.disposers.push(() => { for (const m of [cams, rings, starts, this.tokenView.mesh]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); } });
   }
 
@@ -112,6 +117,7 @@ export class RoamActivities {
     this.lastZ = z;
     this.run.cancel();
     this.races.place(x, z);
+    this.flow.place(x, z);
     this.onPlace(x, z);
     this.where.reset();
   }
@@ -133,6 +139,7 @@ export class RoamActivities {
     }
     this.where.update(dt, x, z);
     this.heat.step(car, dt);
+    this.flow.step(car, dt);
     const ev = this.run.update(x, z, car.drift.bank + car.drift.chain);
     if (ev === 1) this.hud.popUp(t('roam.zoneIn'), '#18d8ff');
     else if (ev === 2) this.zoneDone(this.run.score);

@@ -153,8 +153,8 @@ export class Menu {
     this.mount(buildLoadMenu(this.d.slots, (id) => this.d.loadSlot(id), () => this.main()), 'other', 'main', () => this.load());
   }
 
-  tune(): void {
-    this.mount(buildTuneMenu(this.d.store, () => this.main()), 'other', 'main', () => this.tune());
+  tune(back = (): void => this.main()): void {
+    this.mount(buildTuneMenu(this.d.store, back), 'other', 'main', () => this.tune(back));
   }
 
   crew(): void {
@@ -181,9 +181,9 @@ export class Menu {
     this.mount(buildWeatherPick({ def, store: this.d.store, rivals: this.rivals, pick: (n) => { this.rivals = n; }, start: (w, n, id) => this.d.startRace(w, n, id), onBack: () => this.maps() }), 'other', 'main', () => this.weather(def));
   }
 
-  garage(): void {
-    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: () => this.main() });
-    this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage());
+  garage(back = (): void => this.main()): void {
+    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: back });
+    this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage(back));
   }
 
   /** The settings screen as an element; `back` is what its Back button does (main menu, or closing the overlay in the pause menu). */

@@ -6,14 +6,16 @@ import { t } from '../i18n';
 import { button, h } from './uiKit';
 import { injectRoamCss } from './roamCss';
 
-export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job' | 'story' | 'storyDone' | 'storyLock' | 'cop';
+export type MarkerKind = 'race' | 'trap' | 'zone' | 'meet' | 'token' | 'job' | 'story' | 'storyDone' | 'storyLock' | 'cop' | 'sprint' | 'drift' | 'drag' | 'run' | 'challenger' | 'garage' | 'parts' | 'paint' | 'lock';
 export interface Marker { x: number; z: number; k: MarkerKind; label?: string }
 /** What the minimap owns and the full map reads. */
 export interface MapState { px: number; pz: number; ph: number; wx: number; wz: number; route: Route | null; markers: () => readonly Marker[] }
 
 export const ROAD_COL: Readonly<Record<string, string>> = { highway: '#8fa8d8', bridge: '#8fa8d8', avenue: '#cfd6e6', runway: '#5a6070' };
-export const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#b46bff', token: '#18d8ff', job: '#ffffff', story: '#ff3aa6', storyDone: '#3ddc97', storyLock: '#6a7286', cop: '#4d8dff' };
-const KEYS: MarkerKind[] = ['story', 'storyDone', 'storyLock', 'race', 'zone', 'trap', 'meet', 'token'];
+export const MK: Record<MarkerKind, string> = { race: '#ffd27d', trap: '#ff5470', zone: '#7dff9a', meet: '#b46bff', token: '#18d8ff', job: '#ffffff', story: '#ff3aa6', storyDone: '#3ddc97', storyLock: '#6a7286', cop: '#4d8dff', sprint: '#ffb020', drift: '#7dff9a', drag: '#ff8a3d', run: '#ff2a9d', challenger: '#ff2a9d', garage: '#7dffcf', parts: '#7dffcf', paint: '#7dffcf', lock: '#3a4050' };
+/** Event and place icons: a letter on the dot (the same letter in the legend). */
+export const GLYPH: Partial<Record<MarkerKind, string>> = { race: 'C', sprint: 'S', drift: 'D', drag: '»', run: '!', challenger: '!', garage: 'G', parts: 'T', paint: 'P', lock: '×' };
+const KEYS: MarkerKind[] = ['story', 'storyDone', 'storyLock', 'race', 'sprint', 'drift', 'drag', 'challenger', 'garage', 'parts', 'paint', 'lock', 'zone', 'trap', 'meet', 'token'];
 const SIZE = 1024, BASE = 2048;
 
 export interface FullMap { open(): void; close(): void; readonly isOpen: boolean }
@@ -83,7 +85,7 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
       if (x < 0 || z < 0 || x > SIZE || z > SIZE) continue;
       cx.fillStyle = MK[m.k]; cx.strokeStyle = '#05060d'; cx.lineWidth = 2;
       if (m.k === 'story') star(x, z, 17);
-      else { cx.beginPath(); cx.arc(x, z, m.k === 'token' || m.k === 'storyLock' ? 6 : m.k === 'storyDone' ? 8 : 10, 0, Math.PI * 2); cx.fill(); cx.stroke(); }
+      else { const gl = GLYPH[m.k]; cx.beginPath(); cx.arc(x, z, gl ? 15 : m.k === 'token' || m.k === 'storyLock' ? 6 : m.k === 'storyDone' ? 8 : 10, 0, Math.PI * 2); cx.fill(); cx.stroke(); if (gl) { cx.fillStyle = m.k === 'lock' ? '#ff5470' : '#05060d'; cx.font = '800 20px system-ui,sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(gl, x, z + 1); cx.textBaseline = 'alphabetic'; } }
       if (m.label) { cx.font = '700 34px system-ui,sans-serif'; cx.textAlign = 'center'; cx.lineWidth = 7; cx.strokeStyle = '#05060dcc'; const lx = Math.min(SIZE - 8 - cx.measureText(m.label).width / 2, Math.max(8 + cx.measureText(m.label).width / 2, x)); cx.strokeText(m.label, lx, z - 26); cx.fillStyle = '#ffd1ea'; cx.fillText(m.label, lx, z - 26); }
     }
     cx.save(); cx.translate(X(s.px), Z(s.pz)); cx.rotate(s.ph); // heading 0 = +Z = up; a clockwise turn (+h) points right
@@ -101,7 +103,7 @@ export function fullMap(g: RoadGraph, s: MapState, pick: (x: number, z: number) 
   });
   const zoomBtn = button(t('map.zoomIn'), () => { zoom = zoom === 1 ? 3 : 1; zoomBtn.textContent = t(zoom === 1 ? 'map.zoomIn' : 'map.zoomOut'); draw(); });
   const key = h('div', 'rb-key');
-  for (const k of KEYS) { const i = document.createElement('i'); i.style.background = MK[k]; key.append(i, h('span', '', t(`map.${k}` as 'map.race'))); }
+  for (const k of KEYS) { const i = document.createElement('i'); i.style.background = MK[k]; const gl = GLYPH[k]; if (gl) { i.textContent = gl; i.style.cssText += `;color:${k === 'lock' ? '#ff5470' : '#05060d'};font:800 10px system-ui;display:inline-flex;align-items:center;justify-content:center;font-style:normal`; } key.append(i, h('span', '', t(`map.${k}` as 'map.race'))); }
   const side = h('div', 'rb-side');
   side.append(h('h2', 'rb-title', t('roam.map')), h('div', 'rb-sub', t('roam.mapHint')), key, zoomBtn, button(t('roam.clear'), () => { clear(); draw(); }), button(t('common.back'), () => close(), 'hot'));
   layer.append(cv, side);
