@@ -17,6 +17,8 @@ import { t } from '../i18n';
 
 /** Outrun rules (docs/research-open-world.md): first to the finish, or pull this far clear; lose when they lead by LOSE. */
 export const OUTRUN = { win: 300, lose: 400, minLen: 1000, maxLen: 1700, count: 3, cash: 1500, rep: 40, maxSecs: 240 } as const;
+/** Progress only counts within this distance (m) of the route; a shortcut through the same streets is fine. */
+const OFF_ROUTE = 45;
 const GRIP: Record<string, number> = { CLEAR: 1, RAIN: 0.72, SNOW: 0.63 };
 
 interface Run { racer: Racer; drv: CityDriver; path: CityPath; contact: RoamContact; pIdx: number; t: number; go: boolean; name: string; id: string; beat: number }
@@ -79,7 +81,7 @@ export function installOutrun(d: { game: Game; store: SaveStore; hud: Hud; goTo:
     if (!r.go) {
       const left = Math.ceil(OUTRUN.count - r.t);
       if (left < r.beat) { r.beat = left; hud.popUp(left > 0 ? String(left) : t('run.go'), left > 0 ? '#ffd27d' : '#3ddc97'); }
-      inp.throttle = 0; inp.brake = 1; inp.steer = 0; inp.nitro = false; inp.handbrake = false;
+      inp.throttle = 0; inp.brake = 0; inp.steer = 0; inp.nitro = false; inp.handbrake = true; // held at the line (the brake pedal at a standstill is reverse)
       if (r.t >= OUTRUN.count) r.go = true;
     } else r.drv.drive(rc, inp);
     rc.step(dt, inp, env);
@@ -88,8 +90,9 @@ export function installOutrun(d: { game: Game; store: SaveStore; hud: Hud; goTo:
     resolveCarPair(car, rc);
     // the player's progress on the route (a full search when far off it: a shortcut, a respawn)
     const pp = car.state.position;
-    r.pIdx = progressIndex(r.path, pp.x, pp.z, r.pIdx);
-    if ((r.path.x[r.pIdx] - pp.x) ** 2 + (r.path.z[r.pIdx] - pp.z) ** 2 > 3600) r.pIdx = nearestIndex(r.path, pp.x, pp.z);
+    let pi = progressIndex(r.path, pp.x, pp.z, r.pIdx);
+    if ((r.path.x[pi] - pp.x) ** 2 + (r.path.z[pi] - pp.z) ** 2 > 3600) pi = nearestIndex(r.path, pp.x, pp.z);
+    if ((r.path.x[pi] - pp.x) ** 2 + (r.path.z[pi] - pp.z) ** 2 < OFF_ROUTE * OFF_ROUTE) r.pIdx = pi; // off the route: progress waits (no win by driving away)
     const me = r.path.s[r.pIdx], them = r.drv.distance, lead = me - them, L = r.path.length;
     r.drv.pace = 1 + Math.max(-0.09, Math.min(0.09, lead / 2000)); // catch-up: a target-speed change only, capped like the race AI
     ui.update(L - Math.max(me, them), lead, OUTRUN.win, OUTRUN.lose);

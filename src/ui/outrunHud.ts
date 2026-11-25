@@ -20,9 +20,11 @@ export function outrunHud(): OutrunHud {
   bar.append(fill, mid);
   root.append(line, bar);
   document.body.appendChild(root);
+  const css = h('style', '', 'body.rb-outrun .rb-mission,body.rb-outrun .rb-city-offer{display:none!important}'); // the job card and offers wait during the race
+  document.head.appendChild(css);
   let who = '';
   return {
-    show: (name) => { who = name; root.style.display = 'flex'; },
+    show: (name) => { who = name; root.style.display = 'flex'; document.body.classList.add('rb-outrun'); },
     update: (toGo, lead, win, lose) => {
       line.textContent = t('run.hud', { name: who, km: (Math.max(0, toGo) / 1000).toFixed(2), lead: `${lead >= 0 ? '+' : ''}${Math.round(lead)}` });
       const f = lead >= 0 ? Math.min(1, lead / win) : Math.max(-1, lead / lose);
@@ -30,6 +32,6 @@ export function outrunHud(): OutrunHud {
       fill.style.width = `${Math.abs(f) * 50}%`;
       fill.style.background = f >= 0 ? '#3ddc97' : '#ff5470';
     },
-    hide: () => { root.style.display = 'none'; },
+    hide: () => { root.style.display = 'none'; document.body.classList.remove('rb-outrun'); },
   };
 }
