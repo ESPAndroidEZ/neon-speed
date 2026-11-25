@@ -3,7 +3,7 @@
 Baton: claude
 (One agent works at a time. The baton holder works; the other waits. Claude's /checkpoint passes it to Qwen when asked; scripts/qwen.sh returns it.)
 
-Updated: 2026-11-25 (checkpoint after the NFS round; build and all tests green; the last deploy attempts failed on the Teleport proxy timeout, so the NFS round is committed but NOT deployed).
+Updated: 2026-11-25 (Underground round stages 1-4 built, tested and DEPLOYED as 15f70a3 to notcarlos.mosidealus.nl; live check: phones start races, 1366/1920 race start and service-worker activation time out under software rendering, .wav served as application/octet-stream by the managed nginx).
 
 ## Next
 0. Underground round (docs/underground-plan.md): ALL 4 stages built 2026-11-25 (see its 'What was built'); real-phone playtest of Street style, challengers, shops, city events and the paint shop is the open item. 2026-11-25 Free Drive round built (stuck recovery, respawn keeps chase, GPS snap, winnable police, cop dots, token fog, district %): NOT deployed. Not built: repeatable jobs, cop line-of-sight, off-road dust.
@@ -201,3 +201,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-25 Claude: Free Drive fixes (roamStuck, relocate, GPS snap, traffic spawn gap), police tuning (top by heat, escape 110 m/6 s, escalation 45 s, cop markers), district % and token fog; tests green.
 - 2026-11-25 Claude: Underground Stage 1 done (Driving style Classic/Street, feel lab, driving-style-check); build + tests green.
 - 2026-11-25 Claude: Underground Stages 2-4 done (world flow, city event types, customisation + Street events); build + tests green; two Playwright QA passes at 844x390.
+- 2026-11-25 Claude: deployed 15f70a3 (Underground round + NFS round); health.php ok, live-check phone sizes PASS.

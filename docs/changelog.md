@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-25
+- **Deployed** to notcarlos.mosidealus.nl (version 15f70a3): everything below is live.
 - **Street life in Neon Harbor (Underground round, stages 2-4).**
   - **Challengers**: some traffic cars carry a pink spinning diamond. Pull up beside one and flash your lights (H, or the button) to race them one on one to the far side of a street loop.
   - **Shops in the city**: a Garage and a Paint shop in Downtown, a Parts shop at the Harbour. Stop in the teal ring and go in; Back brings you to the same street.
