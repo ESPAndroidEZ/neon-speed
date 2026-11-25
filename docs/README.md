@@ -19,3 +19,4 @@ Start with the file for your role. Everything is kept up to date at every checkp
 
 **The rule:** after every change, update the affected documents in the same step; end every session with `/checkpoint`.
 - `nfs-vision.md`: plan to make it feel like a real NFS game (story places in the city, modes, progression, looks, order of work).
+- `underground-plan.md`: next round (2026-11-25): Driving style Classic/Street, world flow, event types, customisation; ideas only, restore tag `driving-backup-2026-11-25`. Start a new window here.
