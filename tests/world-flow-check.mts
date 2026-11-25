@@ -47,5 +47,36 @@ check('the outrun ends part way (sprint end) and away from the start', tr.raceSa
 const ev = placeCityEvents(g);
 check('ring events: circuits, sprints and drift runs', ['circuit', 'sprint', 'drift'].every((k) => ev.some((e) => e.kind === k)), `${ev.length} events`);
 check('event ids are unique', new Set(ev.map((e) => e.id)).size === ev.length);
+// the locked border acts like a wall at the red gate: the car stays on the open side, facing the same way (no spin-around)
+{
+  const { Group } = await import('three');
+  const { RoamFlow, FLOW_HOOK } = await import('../src/game/roamFlow.ts');
+  const { roadCrossings } = await import('../src/world/open/lockGates.ts');
+  const { CarController } = await import('../src/physics/carController.ts');
+  const { applyTuning, createDefaultTuning } = await import('../src/physics/carTuning.ts');
+  const { WEATHER } = await import('../src/physics/weather.ts');
+  const { districtAt } = await import('../src/data/world/districtMap.ts');
+  FLOW_HOOK.level = () => 1;
+  const flow = new RoamFlow(g, [], new Group(), null, [], () => false);
+  const cr = roadCrossings(g).find((c) => areaOpen(c.a, 1) && !areaOpen(c.b, 1))!;
+  const car = new CarController(applyTuning(createDefaultTuning(), {}));
+  const h0 = cr.h, sx = cr.x - Math.sin(h0) * 25, sz = cr.z - Math.cos(h0) * 25;
+  car.reset(sx, sz, h0); car.nudge(0, 0, Math.sin(h0) * 15, Math.cos(h0) * 15, 0);
+  flow.place(sx, sz);
+  const inp = { throttle: 0.6, brake: 0, steer: 0, handbrake: false, nitro: false };
+  for (let i = 0; i < 240; i++) { car.step(1 / 60, inp, WEATHER.CLEAR); flow.step(car, 1 / 60); }
+  const p = car.state.position;
+  check('the car stays out of the locked district at the gate', areaOpen(districtAt(p.x, p.z), 1), `${cr.a} -> ${cr.b}`);
+  check('and still faces the way it drove (no spin-around)', Math.abs(Math.atan2(Math.sin(car.state.heading - h0), Math.cos(car.state.heading - h0))) < 0.35);
+  const gates = (flow as unknown as { gates: { mesh: { count: number } } }).gates;
+  check('red gates stand on the roads into locked districts', gates.mesh.count > 10, String(gates.mesh.count));
+  FLOW_HOOK.level = () => 30;
+  flow.step(car, 1 / 60);
+  check('all open: no gates', gates.mesh.count === 0);
+  car.reset(cr.x + Math.sin(h0) * 30, cr.z + Math.cos(h0) * 30, h0); FLOW_HOOK.level = () => 1;
+  flow.place(car.state.position.x, car.state.position.z);
+  for (let i = 0; i < 3; i++) { car.step(1 / 60, inp, WEATHER.CLEAR); flow.step(car, 1 / 60); }
+  check('a respawn inside a locked district is pulled back to the open side', areaOpen(districtAt(car.state.position.x, car.state.position.z), 1));
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

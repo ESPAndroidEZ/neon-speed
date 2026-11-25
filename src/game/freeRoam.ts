@@ -107,7 +107,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   /** Fast travel: onto a road at the junction nearest the middle of the district's streets. */
   const travel = (dist: DistrictId, force = false): void => { // force: dev flags and labs skip the REP lock
-    if (!city || (!force && !city.acts.flow.canGo(dist))) return;
+    if (!city || (!(city.acts.flow.free = force) && !city.acts.flow.canGo(dist))) return;
     const nodes = city.g.nodes.filter((n) => n.district === dist && n.edges.length > 1);
     if (!nodes.length) return;
     const cx = nodes.reduce((a, n) => a + n.x, 0) / nodes.length, cz = nodes.reduce((a, n) => a + n.z, 0) / nodes.length;

@@ -8,6 +8,7 @@ import { placeShops, shopAt, type Shop } from '../core/shops';
 import { districtAt } from '../data/world/districtMap';
 import { heightAt } from '../world/roads/height';
 import { zoneMesh } from '../world/open/zoneView';
+import { LockGates } from '../world/open/lockGates';
 import { t } from '../i18n';
 import { roamToast } from '../ui/roamToast';
 
@@ -57,6 +58,10 @@ export class RoamFlow {
   private clock = 0;
   private lockCool = 0;
   private racing = false;
+  private mask = -1;
+  private readonly gates: LockGates;
+  /** Dev flags and labs (forced fast travel) may drive in locked districts. */
+  free = false;
 
   constructor(g: RoadGraph, fs: readonly Footprint[], group: Group, traffic: RoamTraffic | null, avoid: readonly { x: number; z: number }[], busy: () => boolean) {
     this.traffic = traffic; this.g = g; this.fs = fs;
@@ -66,7 +71,8 @@ export class RoamFlow {
     this.ring = zoneMesh(this.shops.map((s) => ({ x: s.x, z: s.z, r: 10 })), 0x7dffcf);
     this.marks = new InstancedMesh(new OctahedronGeometry(0.75), new MeshBasicMaterial({ color: 0xff2a9d }), CHALLENGERS.length);
     this.marks.frustumCulled = false;
-    group.add(this.ring, this.marks);
+    this.gates = new LockGates(g);
+    group.add(this.ring, this.marks, this.gates.mesh);
   }
 
   /** Is the district open for this REP level (or the story)? */
@@ -83,7 +89,7 @@ export class RoamFlow {
 
   /** After a teleport: no shop offer until the car leaves the ring it stands in; a new safe spot. */
   place(x: number, z: number): void {
-    this.guard.reset();
+    if (this.free || this.open(districtAt(x, z))) this.guard.reset(); // a respawn into a locked district keeps the old safe spot (pulled back)
     this.armed = shopAt(this.shops, x, z) < 0;
     this.shopIn = -1; this.near = -1;
     FLOW_HOOK.shop(null); FLOW_HOOK.challenge(-1, 0, 0);
@@ -94,10 +100,14 @@ export class RoamFlow {
     this.clock += dt; this.lockCool = Math.max(0, this.lockCool - dt);
     if (this.story) { this.storyOpen.fill(0); const p = this.story; for (let i = 0; i < p.pins.length; i++) if (p.states[i] === 1) this.storyOpen[DISTRICTS.indexOf(p.pins[i].district)] = 1; }
     const d = districtAt(x, z), bad = this.guard.step(x, z, s.heading, d, this.open(d));
-    if (bad) {
-      car.reset(this.guard.safeX, this.guard.safeZ, this.guard.safeH + Math.PI);
-      if (this.lockCool === 0) { roamToast(t('area.locked', { d: t(`district.${bad}` as 'district.bay'), n: AREA_REP[bad] })); this.lockCool = 2.5; }
+    if (bad && !this.free) { // like a wall at the gate: back to the last open spot, the speed into the locked side taken away (no spin-around)
+      const bx = this.guard.safeX - x, bz = this.guard.safeZ - z, bl = Math.hypot(bx, bz) || 1, vin = -(s.velocity.x * bx + s.velocity.z * bz) / bl;
+      car.nudge(bx, bz, vin > 0 ? (bx / bl) * vin * 1.15 : 0, vin > 0 ? (bz / bl) * vin * 1.15 : 0, 0);
+      if (this.lockCool === 0) { roamToast(t('area.locked', { d: t(`district.${bad}` as 'district.bay'), n: AREA_REP[bad] })); this.lockCool = 6; }
     }
+    let mask = 0;
+    for (let k = 0; k < DISTRICTS.length; k++) if (!this.open(DISTRICTS[k])) mask |= 1 << k;
+    if (mask !== this.mask) { this.mask = mask; this.gates.update((dd) => !this.open(dd), String(mask)); } // red gates on the roads into locked districts
     // shops
     const at = shopAt(this.shops, x, z);
     if (at < 0) { this.armed = true; if (this.shopIn >= 0) { this.shopIn = -1; FLOW_HOOK.shop(null); } }
@@ -130,6 +140,7 @@ export class RoamFlow {
   }
 
   dispose(): void {
+    this.gates.dispose();
     for (const m of [this.ring, this.marks]) { m.geometry.dispose(); (m.material as { dispose(): void }).dispose(); }
   }
 }
