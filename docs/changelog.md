@@ -3,6 +3,13 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-25
+- **Free Drive feels better (open-world block, dev build, not deployed yet).**
+  - **No more snagging or clipping into buildings**: the car now collides as a real box. Before, a building corner could go up to 3.6 m into the car; now 0 in 200 test drives, and head-on stops dropped from 32 to 2.
+  - **Hitting traffic no longer feels like hitting a wall**: you keep about half the push, the other car is shoved away.
+  - **Leaving the street** onto plazas and lots no longer brakes the car like glue (1.5 g before, 0.8 g now, smooth at the kerb).
+  - **The camera no longer goes inside buildings** in narrow streets: it moves in when a wall is behind you and eases back out.
+  - **Smarter traffic**: cars follow each other smoothly, stop at lines and junctions without snapping, and never appear in front of you while you drive.
+  - **Challengers race you right there in the city**: flash your lights and the challenger leaves traffic and races you along a GPS route. Reach the finish first or pull 300 m clear to win $1,500 and REP; if they get 400 m ahead you lose.
 - **Deployed** to notcarlos.mosidealus.nl (version 15f70a3): everything below is live.
 - **Street life in Neon Harbor (Underground round, stages 2-4).**
   - **Challengers**: some traffic cars carry a pink spinning diamond. Pull up beside one and flash your lights (H, or the button) to race them one on one to the far side of a street loop.

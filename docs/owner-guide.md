@@ -96,6 +96,8 @@ Run these in the Claude prompt with `!` in front, or in a WSL terminal. For anyt
 
 - Underground round (challengers, shops, locked areas, city sprint/drift/drag, Street events, paint shop): checked by unit tests, bots and headless screenshots only; not played by a person on a phone. Drift targets (about 1.2 points per metre) are set from bots that do not try to drift: they may be too easy or too hard for a real driver.
 
+- Open-world block (collisions, traffic model, camera arm, in-city outrun): measured with labs and one headless browser run; nobody has driven it by hand yet, and the rival's pace on hill roads and in rain is untested.
+
 ## 7. How the documentation works (so it stays true)
 | File | Who reads it | What it holds |
 |---|---|---|

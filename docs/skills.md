@@ -51,6 +51,9 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | challengers, shops, REP areas (Free Drive) | `game/roamFlow.ts` (RoamFlow in RoamActivities, `FLOW_HOOK`), `game/flowLaunch.ts`, `core/areaLocks.ts`, `core/shops.ts`, cards `ui/roamOffer.ts`, `ui/roamToast.ts`; test `world-flow-check` |
 | city event types (sprint, drift, drag, outrun) | `core/cityRace.ts` kinds, `core/cityEvents.ts` (ids rebuild maps), `core/cityDrag.ts`, `game/cityRaces.ts findCityEvent`, `game/cityRaceLaunch.ts` (rivals per kind); map letters `ui/roamFullMap.ts GLYPH`; Street events screen `ui/eventsMenu.ts`; test `city-events-check`, lab `tests/lab/city-drift.mts` |
 | paint shop items (underglow kit, vinyls) | `core/shopItems.ts` (`SaveData.bought`), `ui/glowShop.ts`, `ui/garageLook.ts`, new vinyls `world/vinylC.ts`; test `paint-shop-check` |
+| city collisions, off-road, camera arm | `physics/obbHit.ts` (box vs box), `physics/roamContact.ts` (3 passes, seam fallback, CITY_OFF ground, `rayFree` camera line of sight), `wallHit(..., share)`; `camera/chaseCam.ts clip` (set by freeRoam); labs `tests/lab/roam-snag.mts`, `roam-offroad.mts` |
+| city traffic driving | `physics/idm.ts` (Intelligent Driver Model) used in `physics/roamTraffic.ts` step; respawn out of the view cone; test `roam-traffic-check` |
+| in-city outrun (challengers) | `physics/cityDriver.ts` (route polyline, speed profile, pure pursuit), `game/roamOutrun.ts` (state, rules OUTRUN, rival racer + view, `FLOW_HOOK.tick`), `ui/outrunHud.ts`; lab `tests/lab/city-driver.mts`, test `city-driver-check`; research `docs/research-open-world.md` |
 | server saving (player code, sync) | `core/serverSync.ts`, `boot.ts`, `ui/playerCode.ts`, `server/api/storage.php`, `server/db/*`, section 6 |
 
 ## 4. Playbooks
