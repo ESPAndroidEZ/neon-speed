@@ -40,6 +40,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - boot.ts (24) Entry point: load the player's progress from the server (a few seconds at most, then th...
 ## src/camera
 - aspectFrame.ts (52) Reference shape the chase camera was tuned on. | fn framing; const REF_ASPECT, horizontalFov; iface Framing
+- cameraStyle.ts (15) Street camera: stays closer and lower at speed, follows the heading a little faster, bi... | fn chaseStyle; const STREET_CAM
 - chaseCam.ts (164) Fraction of the slip angle the camera yaw follows. | fn createChaseTuning; class ChaseCam; iface ChaseTuning
 - cinematicCam.ts (195) Engine's camera. The cinematic rig and the chase rig share it. | class CinematicCam; iface CinematicOptions
 - shotSampler.ts (44) Working pose: a CameraPose plus roll (radians). | fn buildCurves, samplePath, addShake; const makePose, copyPose; iface Pose
@@ -81,8 +82,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - roamSaveParse.ts (33) The Free Drive part of a save (`SaveData.roam`, contract `RoamSave` in types/world.ts),... | fn parseRoam; const emptyRoam
 - route.ts (89) GPS for Neon Harbor: the quickest way over the road graph (A*, cost = length / speed li... | fn nearestNode, findRoute; iface Route
-- save.ts (211) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
-- saveParse.ts (102) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- save.ts (212) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
+- saveParse.ts (103) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
 - speedTraps.ts (39) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; const TRAP_TIERS, TRAP_TIER_REP, trapTier; iface SpeedTrap
 - storyPins.ts (46) Where a story event waits in the city: a junction in its district. Ring radius in metres. | fn placeStoryPins, pinStates, greeter; const PIN_R; iface StoryPin; type PinState
@@ -94,7 +95,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - wakeLock.ts (50) Screen wake lock while a race runs, so the phone does not dim mid-race. `set(true)` req... | class WakeLock
 ## src/data
 - barks.ts (83) Pre-race taunts for the versus screen (task 014). Keyed by rival id, four lines each. | const BARKS
-- carBuild.ts (21) What the player has done to each car: installed upgrades and the tuning setup (the save... | fn applyBuild; const getBuild, setBuild
+- carBuild.ts (23) What the player has done to each car: installed upgrades and the tuning setup (the save... | fn applyBuild; const getBuild, setBuild
 - carReal.ts (56) Real-world reference specs per car (typical published figures for the version named) an... | fn stageSpec; const REAL; iface StageSpec, RealSpec; type Drive
 - carSpecs.ts (76) Real specs for the v2 handling model (contract: types/cars.ts), from docs/car-data.md. ... | fn withSpec; const SPECS
 - cars.ts (144) The ONLY place real brand and model names appear. Swap this file for fictional cars if ... | const CARS, findCar, modelUrl, PAINTS, GLOWS; iface ModelConfig, CarSpec
@@ -166,7 +167,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - exhaustFx.ts (59) Nitro particles per second per exhaust (before the quality tier's particle scale). | class ExhaustFx
 - finalFx.ts (74) One final pass before output: radial speed blur, chromatic aberration, vignette and fil... | class FinalFx
 - headlights.ts (56) Two pooled headlight SpotLights, assigned each frame to the player's car and the neares... | class HeadlightPool
-- juice.ts (156) Visual feedback: tyre smoke / spray / powder, skid marks, sparks, flames, backfire, rai... | class Juice
+- juice.ts (157) Visual feedback: tyre smoke / spray / powder, skid marks, sparks, flames, backfire, rai... | class Juice
 - particles.ts (113) Y acceleration (m/s^2): negative falls, positive rises (smoke). | class ParticlePool; iface PoolOptions
 - skidMarks.ts (80) Seconds a mark takes to fade out completely. | class SkidMarks; const SKID_LIFE
 - tyreFx.ts (75) Per-surface look of tyre clouds: colour, size, lift and how many per second at full slide. | class TyreFx
@@ -239,7 +240,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enControls.ts (74) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
 - enGame.ts (69) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
 - enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
-- enMenu.ts (91) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
+- enMenu.ts (94) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - enStory.ts (18) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
 - es.ts (19) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
@@ -260,7 +261,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esControls.ts (76) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
 - esGame.ts (71) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
 - esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
-- esMenu.ts (93) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
+- esMenu.ts (96) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
 - esStory.ts (18) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
@@ -275,7 +276,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - padMenu.ts (81) Move focus up or down the buttons and inputs of the topmost menu layer. Runs on a press... | class PadMenu
 - padNavLogic.ts (58) Gamepad menu navigation, pure part: turns held buttons into fire-once-then-repeat press... | fn newPadNav, primePadNav, stepPadNav, padBits; const PAD_UP; iface PadNavState
 - pulseLatch.ts (49) Tap-to-pulse button state for the phone handbrake and nitro. A press is LATCHED until t... | class PulseLatch
-- steerRamp.ts (37) Digital-steering ramp rates (per second), blended from the slow set to the fast set as ... | class SteerRamp; const KEY_RAMP; iface RampRates
+- steerRamp.ts (43) Digital-steering ramp rates (per second), blended from the slow set to the fast set as ... | class SteerRamp; const KEY_RAMP, STREET_RAMP; iface RampRates
 - tiltInput.ts (98) Screen angle in degrees (0 portrait, 90 / 270 landscape). | class TiltInput; const screenAngle; type TiltPermission
 - tiltMap.ts (103) Tilt steering maths, pure (no DOM), so tests can feed synthetic orientation events. | fn rollFrom, steerFromRoll, smoothSteer, sanitizeTilt; const defaultTilt, MIN_INPLANE, wrapDeg; iface TiltPrefs, Roll
 ## src
@@ -304,6 +305,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - driftScorer.ts (46) Chain scoring: points grow with speed x angle x chain time; banked after a calm spell, ... | class DriftScorer
 - driveEvents.ts (54) Event types pushed by the drivetrain. | class EventReader, EventChannel; const EV_UPSHIFT, EV_DOWNSHIFT, EV_LIFT, EV_CUT, EV_BACKFIRE
 - drivetrain.ts (152) Engine, automatic 6-speed gearbox, reverse and nitro. Outputs one drive force at the wh... | class Drivetrain
+- drivingStyle.ts (49) Driving style (setting `drivingStyle`). CLASSIC = the approved handling, bit for bit (n... | fn streetTuning, applyStyle; const DRIVING_STYLES, STYLE, STREET_FEEL; type DrivingStyle
 - dyno.ts (30) Newton metres at the crank (with full boost on turbo cars). | fn dynoCurve; iface DynoCurve
 - gearbox.ts (4) Gearbox choice (Settings > Gearbox). The player's drivetrain follows it; rivals always ... | const GEARBOX, manualNow
 ## src/physics/legacy
@@ -355,7 +357,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - crewMenu.ts (64) Characters whose relationship value is shown once Chapter 2 starts. | fn buildCrewMenu
 - dailyButton.ts (16) Main-menu button for today's challenge: shows the map and weather, starts that free race. | fn dailyButton
 - dialogue.ts (187) Speaker card with a portrait (mood changes the face), typewriter text, click / Enter / ... | class DialogueBox; const DIALOGUE
-- drivingSettings.ts (158) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
+- drivingSettings.ts (161) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - duelMenu.ts (37) Rival duels (docs/nfs-vision.md): one card per rival with their car, map and weather; a... | fn buildDuelMenu
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
 - feedback.ts (114) Small, non-identifying device facts that help with bug reports (only sent if the player... | fn openSupport
@@ -406,7 +408,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
 - saveUi.ts (42) One line of detail for a save: event, car, lap, position, weather, race time, date. | fn describe, slotList, buildLoadMenu
-- settings.ts (206) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
+- settings.ts (209) Receives the weather physics level. | fn applySettings, buildSettings; iface SettingsDeps
 - settingsTabs.ts (24) Two panes with a tab bar on top: the few settings everyone needs, and the full list und... | fn settingsTabs
 - soundSettings.ts (111) Settings row: engine sound from the recorded loops or from the procedural synth. | fn engineSoundRow, soundMixRow, musicStyleRow, nowPlayingRow, soundCredits
 - statsCard.ts (29) Time raced as "2 h 05 min" or "14 min". | fn hoursMinutes, statsCard

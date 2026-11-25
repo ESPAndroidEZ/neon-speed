@@ -52,7 +52,7 @@ Free Drive city Neon Harbor (roads, traffic, peds, police/heat, speed cameras, d
 Stage 1 -> /checkpoint -> Stage 2 -> /checkpoint -> Stage 3 -> /checkpoint -> Stage 4 -> /checkpoint -> deploy with `scripts/deploy-server.sh` and check the live URL. Visual QA with Playwright subagents at 844x390 on a snapshot of HEAD (see docs/skills.md).
 
 ## Progress
-- [ ] Stage 1 Driving style
+- [x] Stage 1 Driving style (2026-11-25: docs/feel.md, tests/driving-style-check.mts)
 - [ ] Stage 2 World flow
 - [ ] Stage 3 Event types
 - [ ] Stage 4 Menus and customisation

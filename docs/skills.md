@@ -47,6 +47,7 @@ For Claude and Qwen. Read this first, then `docs/handoff.md` (status), then `doc
 | menus / garage / tuning | `ui/menu.ts`, `ui/garage.ts` (+`garageLook`), `ui/tuneMenu.ts`, `ui/menuCss.ts` (all menu CSS) |
 | phone orientation, launch gas | `ui/rotateHint.ts` (landscape card + lock), `ui/touchControls.ts` (`starting`, `startgas` pedal), `game/inputSetup.ts` |
 | tutorial, subtitles | `ui/howToPlay.ts` (once, key `rb-howto`), `ui/subtitles.ts` (`SUBTITLES.on`, default off) |
+| driving style Classic / Street | `physics/drivingStyle.ts` (STREET_FEEL, applied in `data/carBuild.ts applyBuild`, player only), `camera/cameraStyle.ts`, `input/steerRamp.ts STREET_RAMP` (only ramps built with `styled = true`), `fx/juice.ts` blur; labs `tests/lab/feel*.mts`; test `driving-style-check`; numbers `docs/feel.md` |
 | server saving (player code, sync) | `core/serverSync.ts`, `boot.ts`, `ui/playerCode.ts`, `server/api/storage.php`, `server/db/*`, section 6 |
 
 ## 4. Playbooks

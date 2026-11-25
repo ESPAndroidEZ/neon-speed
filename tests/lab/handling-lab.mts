@@ -4,12 +4,13 @@ import { TRACKS } from '../../src/data/tracks/index.ts';
 import { BOTS } from './bots.mts';
 import { runLaps, WEATHERS, type LapStats } from './laps.mts';
 
-/* Handling lab: bot drivers on every car x map x weather. Usage: npx tsx tests/lab/handling-lab.mts <label> [assist]. */
+/* Handling lab: bot drivers on every car x map x weather. Usage: npx tsx tests/lab/handling-lab.mts <label> [assist] [street]. */
 const label = process.argv[2] ?? 'run';
 const assist = (process.argv[3] ?? 'STANDARD') as 'BEGINNER' | 'STANDARD' | 'PRO';
+const mod = process.argv[4] === 'street' ? (await import('../../src/physics/drivingStyle.ts')).streetTuning : undefined;
 const rows: (LapStats & { car: string; track: string; weather: string; bot: string })[] = [];
 for (const bot of BOTS) for (const c of CARS) for (const tr of TRACKS) for (const w of WEATHERS)
-  rows.push({ car: c.id, track: tr.id, weather: w, bot, ...runLaps({ car: c.id, track: tr.id, weather: w, bot, assist }) });
+  rows.push({ car: c.id, track: tr.id, weather: w, bot, ...runLaps({ car: c.id, track: tr.id, weather: w, bot, assist, mod }) });
 
 const f = (v: number, d = 2): string => v.toFixed(d);
 function agg(sel: (r: (typeof rows)[number]) => boolean): string {

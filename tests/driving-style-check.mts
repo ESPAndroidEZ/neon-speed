@@ -38,7 +38,7 @@ for (const c of CARS) {
   check(`${c.id}: Street nitro pushes harder`, st.nitroGain > cl.nitroGain * 1.2, `+${cl.nitroGain.toFixed(1)} -> +${st.nitroGain.toFixed(1)} km/h`);
   check(`${c.id}: Street launch not slower`, st.t100 <= cl.t100 + 0.01, `${cl.t100.toFixed(2)} -> ${st.t100.toFixed(2)} s`);
   check(`${c.id}: Street handbrake still swings the car (slip within 6 deg, turn not less)`, Math.abs(st.hbSlip - cl.hbSlip) < 0.105 && st.hbTurn >= cl.hbTurn, `${(st.hbSlip * 57.3).toFixed(0)} deg, ${(st.hbTurn * 57.3).toFixed(0)} deg`);
-  if (c.id === '350z' || c.id === 'rx7') check(`${c.id}: Street power slide starts easier on the gas`, st.powerSlip > cl.powerSlip * 1.3, `${(cl.powerSlip * 57.3).toFixed(0)} -> ${(st.powerSlip * 57.3).toFixed(0)} deg`);
+  if (c.id === '350z' || c.id === 'rx7') check(`${c.id}: Street power slide starts easier on the gas`, st.powerSlip > cl.powerSlip * 1.2, `${(cl.powerSlip * 57.3).toFixed(0)} -> ${(st.powerSlip * 57.3).toFixed(0)} deg`);
 }
 
 // rivals never get the Street multipliers (aiTuning does not go through applyBuild)

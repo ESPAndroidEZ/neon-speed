@@ -3,6 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-25
+- **Driving style setting (Underground round, stage 1).** Settings > Basic > Driving style: Classic (default, exactly as before) or Street: grippier, tighter turns at street speeds, the 350Z and RX-7 slide easier on the gas, nitro about 40 % stronger and longer with more blur, quicker keyboard/touch steering, a closer camera. Rivals are not affected. Measured in `docs/feel.md`.
 - **Free Drive fixes and a better open world (dev build, not deployed yet).**
   - **Stuck car**: on the gas but not moving for 4 s shows "Stuck? Press the respawn button"; after 9 s (water counts double) the car is put back on the road by itself.
   - **Respawn and fast travel** no longer drop you into traffic, and they no longer shake off the police: the wanted level stays and the cops are brought out again around you.

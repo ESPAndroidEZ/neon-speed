@@ -20,9 +20,8 @@ export const STREET_FEEL = {
   minSteer: 1.08,
   /** Auto counter-steer when the stick centres mid-slide: a smoother drift exit. */
   driftAssist: 1.35,
-  /** Drive costs a little more rear side grip: a slide starts easier on the gas. */
+  /** Drive costs more rear side grip: a slide starts easier on the gas (the floor stays: a lower one spun the clumsy bot in rain). */
   powerSlide: 1.25,
-  powerFloor: 0.75,
   /** Nitro: extra torque share x1.4, burns 20 % slower (a longer kick). */
   nitroExtra: 1.4,
   nitroBurn: 0.8,
@@ -39,7 +38,6 @@ export function streetTuning(t: CarTuning): void {
   t.minSteerScale = Math.min(0.6, t.minSteerScale * f.minSteer);
   t.driftAssist = Math.min(1, t.driftAssist * f.driftAssist);
   t.powerSlide = Math.min(0.95, t.powerSlide * f.powerSlide);
-  t.powerFloor *= f.powerFloor;
   t.nitroTorqueMul = 1 + (t.nitroTorqueMul - 1) * f.nitroExtra;
   t.nitroBurnPerSec *= f.nitroBurn;
   t.yawDamping *= f.yawDamping;
