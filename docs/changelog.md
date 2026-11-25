@@ -9,6 +9,9 @@ Updated at every checkpoint. One short section per working day or session. Techn
   - **Leaving the street** onto plazas and lots no longer brakes the car like glue (1.5 g before, 0.8 g now, smooth at the kerb).
   - **The camera no longer goes inside buildings** in narrow streets: it moves in when a wall is behind you and eases back out.
   - **Smarter traffic**: cars follow each other smoothly, stop at lines and junctions without snapping, and never appear in front of you while you drive.
+  - **Crashes no longer throw you backwards**: hitting a wall head-on stops the car (60 km/h used to bounce you back at 17 km/h), and rear-ending a car shoves it on instead of stopping you dead.
+  - **Locked districts are visible**: red barriers stand across every road into a district you can't enter yet; the barrier stops you like a wall instead of spinning you around.
+  - **Clearer HUD**: a job offer folds to one line after 5 s so the road ahead stays clear; the WANTED badge no longer covers the full-screen button; map level badges no longer cover district names.
   - **Challengers race you right there in the city**: flash your lights and the challenger leaves traffic and races you along a GPS route. Reach the finish first or pull 300 m clear to win $1,500 and REP; if they get 400 m ahead you lose.
 - **Deployed** to notcarlos.mosidealus.nl (version 15f70a3): everything below is live.
 - **Street life in Neon Harbor (Underground round, stages 2-4).**

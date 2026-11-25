@@ -224,11 +224,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - repAward.ts (16) REP for a finished race (story events pay half as much again; a failed story event a th... | fn repNote
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
 - roamActivities.ts (169) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
-- roamFlow.ts (132) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
+- roamFlow.ts (146) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
 - roamHeat.ts (103) Free Drive police (docs/nfs-vision.md section 2): a speed camera flash at 200 km/h or a... | class RoamHeat
 - roamMarkers.ts (38) The full map's markers (race rings, drift zones, speed cameras, car meet, tokens not ye... | fn roamMarkers
 - roamMissions.ts (73) Free Drive missions (data in data/world/missions.ts, logic in core/missions.ts): an off... | class RoamMissions
-- roamOutrun.ts (108) Outrun rules (docs/research-open-world.md): first to the finish, or pull this far clear... | fn installOutrun; const OUTRUN
+- roamOutrun.ts (111) Outrun rules (docs/research-open-world.md): first to the finish, or pull this far clear... | fn installOutrun; const OUTRUN
 - roamProgress.ts (85) Free Drive progress in the profile save (`SaveData.roam`): camera / drift-zone bests an... | class RoamProgress
 - roamStory.ts (155) Between the city (RoamStory.step) and the launcher (game/storyPinLaunch.ts): which ring... | class RoamStory; const STORY_HOOK, whoAt
 - roamStuck.ts (22) Free Drive stuck detector (pure): the car is stuck when it is on the gas but not moving... | class RoamStuck
@@ -331,7 +331,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 ## src/physics
 - obbHit.ts (35) Box against box on the ground plane (separating axis test): the car's box (centre, head... | fn obbHit; iface ObbOut
 - obstacles.ts (27) A static circular obstacle (parked car half, bollard). | class ObstacleField; iface Obstacle
-- roamContact.ts (218) Share of a hit's impulse the player takes: a wall or a building takes none of it, a tra... | class RoamContact
+- roamContact.ts (219) Share of a hit's impulse the player takes: a wall or a building takes none of it, a tra... | class RoamContact
 - roamPeds.ts (104) A car this close (m) makes a pedestrian step back onto the far edge of the sidewalk; cl... | class RoamPeds
 - roamPolice.ts (159) Police cars on the road graph (pure, fixed pool): each cop drives along the quickest ro... | class RoamPolice; const COPS
 - roamTraffic.ts (219) Traffic lights: each axis gets green, then yellow, then the other axis (s). | fn lightFor, yellowLeft; class RoamTraffic; const LIGHT_GREEN, TRAFFIC_LAT_G
@@ -345,7 +345,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - v2Step.ts (130) Cornering stiffness grows slower than load: a more heavily loaded axle needs more slip ... | fn stepV2
 - v2Tyre.ts (32) v2 tyres, pure arithmetic (no allocation). Load sensitivity: mu = mu0 * (1 - k * (Fz / ... | fn axleCaps, diffCap; const CAP, lateralCurve
 ## src/physics
-- wallHit.ts (49) What a wall contact reports back (TrackContact and RoamContact both expose these). | fn wallHit; iface WallReport
+- wallHit.ts (53) What a wall contact reports back (TrackContact and RoamContact both expose these). | fn wallHit; iface WallReport
 - weather.ts (8) Starting values; tune live. Grip multiplies tyres AND brakes. | const WEATHER
 - weatherLevels.ts (61) Tyre grip per level (also scales braking): [NORMAL, AGGRESSIVE, EXTREME]. | fn fillEnv; const LEVELS, gripFor, envFor; iface PhysicsEnv; type PhysicsLevel
 ## src/render
@@ -406,7 +406,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - noSelect.ts (7) Long-press on a phone must never select text, open a context menu or the image/link cal... | fn installNoSelect
 - nowPlaying.ts (34) The tiny "Now playing: <song>" line (Settings > Advanced > Sound, on by default). The m... | fn setNowPlaying
 - onlineMenu.ts (97) Online screen: name, create or join a room by code; in the room the player list, the ho... | fn buildOnlineMenu
-- outrunHud.ts (35) The in-city outrun's bar under the Free Drive top bar: rival name, metres to the finish... | fn outrunHud; iface OutrunHud
+- outrunHud.ts (37) The in-city outrun's bar under the Free Drive top bar: rival name, metres to the finish... | fn outrunHud; iface OutrunHud
 - pauseMenu.ts (108) Extra buttons under the list (full screen, recalibrate tilt); nulls are skipped. | class PauseMenu; iface PauseHandlers
 - phoneCss.ts (19) Phone fixes from the UI audit (docs/ui-story.md): short landscape screens get a narrow ... | const PHONE_CSS
 - photo.ts (63) What photo mode needs from the engine: the canvas and a way to draw one more frame of t... | fn photoName, takePhoto, photoButton; iface PhotoSource
@@ -415,14 +415,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - portraits.ts (130) Draw hair behind (`back`) or in front of (`front`) the face. | fn drawPortrait, portraitEl
 - repChip.ts (14) Top-right header of the menus: the REP level with its bar, and the cash. | fn menuHeader
 - results.ts (102) Story events add an objective verdict and their own buttons. | class ResultsScreen; iface ResultsExtra
-- roamCss.ts (65) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | fn injectRoamCss; const ROAM_CSS, ICON_RESPAWN, ICON_MAP, ICON_PAUSE
+- roamCss.ts (66) Free Drive overlay styles in the menu style (docs/ui-style.md): glass pills, cyan hairl... | fn injectRoamCss; const ROAM_CSS, ICON_RESPAWN, ICON_MAP, ICON_PAUSE
 - roamFullMap.ts (124) What the minimap owns and the full map reads. | fn fullMap; const ROAD_COL, MK, GLYPH; iface Marker, MapState, FullMap; type MarkerKind
 - roamHud.ts (41) Free Drive top bar (menu style): Respawn and Pause icon buttons (phones have no keyboar... | fn roamHud; iface RoamHud
 - roamMap.ts (109) Free Drive minimap (rotates with the car) and full map (tap to set a waypoint; GPS rout... | fn roamMap; iface RoamMap
 - roamMapCss.ts (12) Free Drive full map styles (menu look): canvas on the left, legend and buttons in a sid... | const MAP_CSS
 - roamOffer.ts (30) A small offer card under the Free Drive top bar (shops, challengers): title, one line, ... | fn roamOffer; iface RoamOffer
 - roamPause.ts (36) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
-- roamToast.ts (21) A short message card over the Free Drive cards (the HUD pop-up sits under the job card ... | fn roamToast
+- roamToast.ts (22) A short message card over the Free Drive cards (the HUD pop-up sits under the job card ... | fn roamToast
 - roamWhere.ts (61) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
@@ -502,6 +502,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - footprints.ts (86) Free space between the sidewalk and a building front (m). | fn cornerOf, overlaps, generateFootprints
 - furnitureGeo.ts (55) Street furniture as plain boxes appended to a chunk's ROOFS arrays (the dark material t... | fn furnitureGeo
 - groundCarve.ts (57) Ground height with the roads laid in (W5.7 fix: on the hills the 16 m ground grid bulge... | fn groundAt
+- lockGates.ts (70) Where roads cross into another district: point, road heading, width, and the two distri... | fn roadCrossings; class LockGates
 - meetView.ts (28) The car meet: 8 parked show cars (instanced, lamps on) and a pink ring on the ground. 3... | fn meetGroup
 - pedView.ts (44) Pedestrians as one instanced mesh (one draw call): a simple figure (body, head) with a ... | class PedView
 - pinView.ts (62) Story places as rings on the street with a light beam over the one that is next: all ri... | fn pinView; iface PinView
