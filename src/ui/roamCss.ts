@@ -46,6 +46,7 @@ body.rb-calling .rb-where,body.rb-offer .rb-call,body.rb-has-mission .rb-call{di
 @media (max-height:480px){.rb-story-offer .rb-pt canvas{width:44px;height:44px}.rb-story-offer .rb-st-i{display:none}.rb-story-offer{max-width:min(470px,calc(100vw - 150px))}.rb-call{top:calc(max(var(--sp-2),var(--safe-t)) + 64px);max-width:min(460px,calc(100vw - 150px))}}
 body.rb-has-mission .rb-where{display:none!important}body.rb-has-mission .rb-city-offer{top:calc(max(var(--sp-3),var(--safe-t)) + 124px)}
 .rb-mission{left:50%!important;transform:translateX(-50%);max-width:min(440px,calc(100vw - 260px))}
+.rb-heat{top:calc(max(12px,var(--safe-t)) + 96px)!important} /* below the full-screen button (playtest: WANTED sat on it) */
 
 .rb-roam-mini{position:fixed;left:max(12px,var(--safe-l));bottom:max(12px,var(--safe-b));width:150px;height:150px;border-radius:50%;z-index:11;display:none;box-shadow:0 0 0 2px #18d8ff55,0 0 18px #0008}
 @media (pointer:coarse){.rb-roam-mini{left:auto;bottom:auto;right:max(12px,var(--safe-r));top:max(12px,var(--safe-t));width:112px;height:112px}}

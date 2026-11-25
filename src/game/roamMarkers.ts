@@ -25,7 +25,7 @@ export function roamMarkers(a: RoamActivities, s: RoamStory, at: () => { x: numb
     const f = a.flow, me = at();
     for (const sh of f.shops) add(sh.x, sh.z, sh.kind);
     for (let k = 0; k < CHALLENGERS.length; k++) { const c = f.challenger(k, me); if (c) add(c.x, c.z, 'challenger'); }
-    for (const c of f.centres) if (!f.open(c.id)) add(c.x, c.z, 'lock', t('area.lv', { n: AREA_REP[c.id] }));
+    for (const c of f.centres) if (!f.open(c.id)) add(c.x, c.z - 160, 'lock', t('area.lv', { n: AREA_REP[c.id] })); // south of the district name, not on it
     for (const z of a.zones) add(z.x, z.z, 'zone');
     for (const p of a.traps) add(p.x, p.z, 'trap');
     if (a.meetSpot) add(a.meetSpot.x, a.meetSpot.z, 'meet');

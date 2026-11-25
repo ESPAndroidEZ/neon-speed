@@ -5,7 +5,7 @@ export interface MissionCard { offer(name: string, brief: string): void; active(
 
 const CSS = `.rb-mission{position:fixed;left:max(var(--sp-3),var(--safe-l));top:calc(max(var(--sp-3),var(--safe-t)) + 56px);z-index:12;display:none;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3);max-width:min(380px,calc(100vw - 2*var(--sp-3) - 190px));background:var(--panel);border:1px solid #18d8ff88;border-left:3px solid var(--magenta);border-radius:var(--radius-sm);font:600 clamp(12px,.3vw + 9px,15px) var(--font);color:var(--text);box-shadow:0 8px 24px #000a}
 .rb-mission .rb-mt{font-weight:900;color:var(--cyan)}.rb-mission .rb-mb{color:var(--text-dim);font-weight:500;font-size:.92em}
-.rb-mission .rb-btn{min-width:0;padding:var(--sp-2) var(--sp-4)}.rb-mission .rb-clk{font-variant-numeric:tabular-nums;font-weight:900;color:var(--amber)}`;
+.rb-mission .rb-btn{min-width:0;padding:var(--sp-2) var(--sp-4)}.rb-mission.min{padding:4px 10px;opacity:.88}.rb-mission.min .rb-mb{display:none}.rb-mission.min .rb-btn{padding:4px 12px;min-height:34px}.rb-mission .rb-clk{font-variant-numeric:tabular-nums;font-weight:900;color:var(--amber)}`;
 
 /** Mission card (menu style): an offer with Go (button or G key), then the clock and distance, then a short result. */
 export function missionCard(accept: () => void): MissionCard {
@@ -19,10 +19,10 @@ export function missionCard(accept: () => void): MissionCard {
   const go = button(t('mission.go'), () => { if (offering) accept(); }, 'hot');
   root.append(text, go);
   document.body.appendChild(root);
-  let offering = false, timer = 0;
+  let offering = false, timer = 0, shrink = 0;
   window.addEventListener('keydown', (e) => { if (offering && !e.repeat && e.code === 'KeyG') accept(); });
   const set = (a: string, b: string, showGo: boolean): void => {
-    if (title.textContent !== a) title.textContent = a;
+    if (title.textContent !== a) { title.textContent = a; root.classList.remove('min'); clearTimeout(shrink); if (showGo) shrink = window.setTimeout(() => root.classList.add('min'), 5000); } // an offer folds to one line after 5 s: the road ahead stays clear (playtest)
     if (body.textContent !== b) body.textContent = b;
     go.style.display = showGo ? '' : 'none';
     root.style.display = 'flex';
