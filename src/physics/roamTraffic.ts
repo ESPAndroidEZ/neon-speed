@@ -1,14 +1,12 @@
 import type { RoadGraph, TrafficAgent } from '../types/world';
 import { createRng } from '../core/rng';
 import { TrafficKnock } from './trafficKnock';
+import { IDM, idmAccel } from './idm';
 
 /** Traffic lights: each axis gets green, then yellow, then the other axis (s). */
 export const LIGHT_GREEN = 12, LIGHT_YELLOW = 3, LIGHT_CYCLE = 2 * (LIGHT_GREEN + LIGHT_YELLOW);
-/** Corner speed cap: lateral acceleration a traffic car may use (m/s^2) at grip 1; below the player's car (~0.9 g). */
-export const TRAFFIC_LAT_G = 0.55 * 9.81;
-const GAP = 9; // metres kept to the car ahead (bumper to bumper incl. car length)
-const ACCEL = 2.2, BRAKE = 6;
-const TURN_SPEED = 7; // m/s through a junction
+export const TRAFFIC_LAT_G = 0.55 * 9.81; // corner speed cap: lateral acceleration a traffic car may use (m/s^2) at grip 1; below the player's car (~0.9 g)
+const BRAKE = 6, TURN_SPEED = 7; // m/s^2 assumed by the yellow-light decision (driving itself is IDM, physics/idm); m/s through a junction
 const SPAWN_R = 320, DESPAWN_R = 420;
 
 /** Where in its cycle the light at `n` is for a car heading (dx, dz): 0..LIGHT_CYCLE s (lights alternate the two axes). */
@@ -42,6 +40,7 @@ export class RoamTraffic {
   readonly z: Float32Array;
   readonly h: Float32Array;
   private readonly stall: Float32Array;
+  private leadV = 0; private pvx = 0; private pvz = 0;
   readonly knock: TrafficKnock; // shove and spin of cars the player hit
   /** Per car, the decision taken when its light turned yellow: 0 none, 1 go, 2 stop (kept until green or the next street). */
   private readonly yellow: Int8Array;
@@ -73,6 +72,7 @@ export class RoamTraffic {
   }
 
   step(dt: number, px: number, pz: number, grip: number): void {
+    this.pvx = (px - this.lx) / dt; this.pvz = (pz - this.lz) / dt; // the player's velocity, for following them
     this.time += dt; this.lx = px; this.lz = pz;
     const g = this.g;
     for (let i = 0; i < this.agents.length; i++) {
@@ -93,12 +93,12 @@ export class RoamTraffic {
       }
       const going = this.yellow[i] === 1 && stopAt > -1;
       if (toEnd < 30 && !going) want = Math.min(want, TURN_SPEED + toEnd * 0.4); // ease off for the turn at the junction
-      if (stopAt > 0 && stopAt < 8 && this.occupied(end, i)) want = Math.min(want, Math.max(0, stopAt - 1)); // give way: someone is in the junction
-      const late = lamp === 1 && this.yellow[i] === 2;
-      if (stopAt > -1 && ((lamp === 2 && !going) || late)) want = Math.min(want, Math.max(0, Math.sqrt(Math.max(0, 2 * BRAKE * 0.6 * stopAt))));
+      let acc = idmAccel(a.speed, want, Infinity, 0); // IDM (physics/idm): free road toward `want`; stop line, busy junction and car ahead are leaders
+      if (stopAt > 0 && stopAt < 8 && this.occupied(end, i)) acc = Math.min(acc, idmAccel(a.speed, want, stopAt - 1 + IDM.s0, a.speed)); // give way
+      if (stopAt > -1 && ((lamp === 2 && !going) || (lamp === 1 && this.yellow[i] === 2))) acc = Math.min(acc, idmAccel(a.speed, want, stopAt + IDM.s0, a.speed));
       const ahead = this.gapAhead(i, px, pz);
-      if (ahead < 40) want = Math.min(want, Math.max(0, (ahead - GAP) * 0.9));
-      a.speed += Math.max(-BRAKE * dt, Math.min(ACCEL * dt, want - a.speed));
+      if (ahead < 80) acc = Math.min(acc, idmAccel(a.speed, want, ahead - IDM.len, a.speed - this.leadV));
+      a.speed = Math.max(0, a.speed + acc * dt);
       a.s += a.dir * a.speed * dt;
       if (a.s > e.length || a.s < 0) this.turn(i, end.id);
     }
@@ -152,7 +152,7 @@ export class RoamTraffic {
       if (j === i) continue;
       const dx = (j < this.agents.length ? this.x[j] : px) - this.x[i], dz = (j < this.agents.length ? this.z[j] : pz) - this.z[i];
       const along = dx * hx + dz * hz, side = Math.abs(dx * hz - dz * hx);
-      if (along > 0 && side < 2.2 && along < best) best = along;
+      if (along > 0 && side < 2.2 && along < best) { best = along; this.leadV = j < this.agents.length ? this.agents[j].speed * Math.cos(this.h[j] - this.h[i]) : Math.max(-60, Math.min(60, this.pvx * hx + this.pvz * hz)); } // leader speed along our heading
     }
     return best;
   }
