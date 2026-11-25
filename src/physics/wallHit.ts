@@ -13,7 +13,8 @@ export interface WallReport { impact: number; scrape: number; readonly contact: 
  * a modest yaw kick, and turn the nose along the wall so the car slides on. Pure, no allocation. Moved unchanged out of
  * TrackContact (2026-11-20) so free roam's buildings and quay feel exactly like race walls.
  */
-export function wallHit(car: CarController, pen: number, nx: number, nz: number, px: number, pz: number, out: WallReport): void {
+/** `share` (0..1): how much of the bounce and rub the car takes (1 = a wall; a traffic car that is bumped away takes the rest). */
+export function wallHit(car: CarController, pen: number, nx: number, nz: number, px: number, pz: number, out: WallReport, share = 1): void {
   const st = car.state;
   const vn = st.velocity.x * nx + st.velocity.z * nz;
   let dvx = 0;
@@ -22,7 +23,7 @@ export function wallHit(car: CarController, pen: number, nx: number, nz: number,
   const armX = px - st.position.x;
   const armZ = pz - st.position.z;
   if (vn < 0) {
-    const j = -(1 + RESTITUTION) * vn;
+    const j = -(1 + RESTITUTION) * vn * share;
     const tx = st.velocity.x - vn * nx;
     const tz = st.velocity.z - vn * nz;
     const tl = Math.hypot(tx, tz);

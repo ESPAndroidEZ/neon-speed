@@ -2,6 +2,7 @@
  * buildings are walls (never inside one), the quay stops the car at the water, the Bay Bridge carries it over the water
  * on its deck, and the world border holds. */
 import { CARS } from '../src/data/cars.ts';
+import { snagStats } from './lab/roam-snag.mts';
 import { CarController } from '../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning } from '../src/physics/carTuning.ts';
 import { RoamContact } from '../src/physics/roamContact.ts';
@@ -78,5 +79,8 @@ car.reset(g.half - 40, 0, Math.PI / 2); // heading +x toward the edge
 let out = 0;
 drive(5, gas, () => { if (Math.abs(car.state.position.x) > g.half) out++; });
 check('the world border holds', out === 0);
+// box-vs-box contact (physics/obbHit): 200 drives into building corners and faces never leave the car inside a building
+const sn = snagStats(200);
+check('no clipping into buildings (box contact, seam fallback)', sn.clipMax < 0.05, `max ${sn.clipMax.toFixed(2)} m, ${sn.stuckRuns} head-on stops`);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);
