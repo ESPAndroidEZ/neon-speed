@@ -2,6 +2,16 @@
 
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
+## 2026-11-25
+- **Free Drive fixes and a better open world (dev build, not deployed yet).**
+  - **Stuck car**: on the gas but not moving for 4 s shows "Stuck? Press the respawn button"; after 9 s (water counts double) the car is put back on the road by itself.
+  - **Respawn and fast travel** no longer drop you into traffic, and they no longer shake off the police: the wanted level stays and the cops are brought out again around you.
+  - **GPS**: a waypoint set on water or a building snaps to the nearest junction, so you can arrive and finish it. Leaving Free Drive with the map open no longer pops the pause menu.
+  - **Traffic** never appears next to your car.
+  - **Police are winnable**: cop top speed grows with the stars (about 170 / 190 / 205 km/h), escape needs 110 m for 6 s, a chase of 45 s adds a star, and cops show as blue dots on the minimap and map.
+  - **Discovery**: neon tokens show on the full map only when you are within 300 m; the pause menu shows each district's completion % (tokens plus story places).
+  - Not done yet: repeatable jobs (taxi, delivery), cop line-of-sight, off-road dust.
+
 ## 2026-11-24
 - **The NFS round (dev build, not deployed yet).** The plan in `docs/nfs-vision.md` is built:
   - **Story places in the city.** Every story event waits at a glowing ring in its district (pink beam, a person standing on the corner with a floating diamond). Drive in slowly, the card shows who it is (portrait, role, a one-line introduction the first time) and Start/Enter begins the event; after it you are back in the city. Entering Free Drive gives a phone call from the next person and sets your GPS. The full map shows story stars (pink = next, green = done, grey = locked).

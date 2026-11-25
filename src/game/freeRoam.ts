@@ -33,6 +33,7 @@ import { roamHud, type RoamHud } from '../ui/roamHud';
 import { RoamMissions } from './roamMissions';
 import { RoamStory } from './roamStory';
 import { RoamStuck } from './roamStuck';
+import { districtPct } from './districtDone';
 import { TimeOfDay } from '../world/open/timeOfDay';
 import { roamPause, type RoamPause } from '../ui/roamPause';
 import type { DistrictId } from '../types/world';
@@ -76,7 +77,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
     const map = roamMap(g, ci, contact.roads, () => { if (mapFromDrive) { mapFromDrive = false; game.paused = false; } else menu?.open(); });
     const acts = new RoamActivities(g, group, d.hud, contact, () => findCar(d.store.data.selected).name);
     const story = new RoamStory(g, group, d.store, acts, map);
-    map.setMarkers(roamMarkers(acts, story));
+    map.setMarkers(roamMarkers(acts, story, () => game.rm.player.car.state.position));
     const missions = new RoamMissions(g, acts, d.store, () => map);
     return { g, fs, contact, streamer, group, mats, traffic, trafficView, peds, pedView, map, acts, missions, story, progress: new RoamProgress(d.store, acts, g.half), dispose: () => { missions.stop(); story.dispose(); streamer.clear(); mats.dispose(); trafficView.dispose(); pedView.dispose(); acts.dispose(); } };
   };
@@ -209,7 +210,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.syncView(true);
       active = true;
       ui ??= roamHud({ respawn, pause: () => setPaused(!game.paused), map: () => { if (game.paused || !city) return; mapFromDrive = true; game.paused = true; city.map.open(); } });
-      menu ??= roamPause({ time: { label: () => t(`tod.${tod.tod}` as StringKey), cycle: () => { tod.cycle(); if (tod.tod === 'night') game.setWeather(game.weather); } }, map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
+      menu ??= roamPause({ time: { label: () => t(`tod.${tod.tod}` as StringKey), cycle: () => { tod.cycle(); if (tod.tod === 'night') game.setWeather(game.weather); } }, map: () => { menu?.close(); city?.map.open(); }, resume: () => setPaused(false), travel: (t) => { setPaused(false); travel(t); }, pct: (k) => (city ? districtPct(city.acts, city.story, k) : 0), respawn: () => { setPaused(false); respawn(); }, exit: () => { setPaused(false); d.toMenu(); }, photo: { canvas: engine.renderer.domElement, render: () => engine.composer.render(0.016) } });
       ui.show();
       city.map.show(true);
       city.story.enter();

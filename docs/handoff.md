@@ -6,7 +6,8 @@ Baton: claude
 Updated: 2026-11-25 (checkpoint after the NFS round; build and all tests green; the last deploy attempts failed on the Teleport proxy timeout, so the NFS round is committed but NOT deployed).
 
 ## Next
-1. DEPLOY: run `scripts/deploy-server.sh` from a network that reaches tele.true.nl:443 (timed out on 2026-11-24 and 11-25); then live-URL checks. Real-phone playtest of everything in docs/nfs-vision.md (never tried on a phone or real GPU); rerun `tests/lab/roam-bench.mjs` (docs/perf.md).
+0. 2026-11-25 Free Drive round built (stuck recovery, respawn keeps chase, GPS snap, winnable police, cop dots, token fog, district %): NOT deployed. Not built: repeatable jobs, cop line-of-sight, off-road dust.
+1. (deployed once on 2026-11-25 at the NFS round; redeploy) run `scripts/deploy-server.sh` from a network that reaches tele.true.nl:443 (timed out on 2026-11-24 and 11-25); then live-URL checks. Real-phone playtest of everything in docs/nfs-vision.md (never tried on a phone or real GPU); rerun `tests/lab/roam-bench.mjs` (docs/perf.md).
 2. Open UI/QA: duels button below the map cards, garage Look & details cramped on phones, Snow card 63 % vs 45 %, fly-by hidden by the loading card, cop visuals (white car now) and Day look to re-check on screenshots.
 3. Not built: jumps (2D physics), reverse/night map variants, district radio, 3D menu hero, results podium, daily goals; owner items in docs/inbox/2026-11-21-owner-playtest.md (tilt landscape lock, off-road feel, building sweep).
 
@@ -195,3 +196,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-20 Claude (owner: a prompt to start everything incl. open world, auto songs, leaderboard, lobby, server settings): wrote master-plan.md and prompts/everything.md; checkpoint skill now updates master-plan statuses.
 - 2026-11-20 Claude (owner: songs must change by themselves, then master plan in order): W4.1-W4.6 done (music director, shuffle, crossfade, Auto style, Now playing, 4 songs); build OK, tests 0 FAIL, join render ALL PASS. Next: W1.
 - 2026-11-20 Claude: W1 built (backup + restore test + timer, logrotate, health.php, admin request, server/README.md); read-only server checks only; nothing installed or deployed. Next: owner OK, then W2.
+- 2026-11-25 Claude: Free Drive fixes (roamStuck, relocate, GPS snap, traffic spawn gap), police tuning (top by heat, escape 110 m/6 s, escalation 45 s, cop markers), district % and token fog; tests green.
