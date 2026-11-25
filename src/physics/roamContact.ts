@@ -108,6 +108,24 @@ export class RoamContact {
     if (this.hitCop >= 0 && this.impact > 2) this.onCop?.(this.hitCop);
   }
 
+  /**
+   * Camera line of sight (the chase camera's spring arm in Free Drive): the free fraction 0..1 of the segment from the
+   * car (ax, az) to the camera (bx, bz) at height y, sampled every 0.8 m against buildings taller than y. No allocation.
+   */
+  rayFree(ax: number, az: number, bx: number, bz: number, y: number): number {
+    const len = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.ceil(len / 0.8));
+    for (let k = 1; k <= n; k++) {
+      const t = k / n, x = ax + (bx - ax) * t, z = az + (bz - az) * t, list = this.hash.at(x, z);
+      for (let i = 0; i < list.length; i++) {
+        const f = this.fs[list[i]];
+        if (f.height < y) continue;
+        const fx = Math.sin(f.rot), fz = Math.cos(f.rot), dx = x - f.x, dz = z - f.z;
+        if (Math.abs(dx * fz - dz * fx) < f.hw + 0.3 && Math.abs(dx * fx + dz * fz) < f.hd + 0.3) return (k - 1) / n;
+      }
+    }
+    return 1;
+  }
+
   /** Every obstacle against the car box at (x, z, h): the deepest contact ends up in pen / nx / nz / px / pz / share. */
   private probe(x: number, z: number, h: number): void {
     const sh = Math.sin(h), ch = Math.cos(h);

@@ -66,6 +66,10 @@ export class ChaseCam implements CameraRig {
   private slipFilt = 0;
   /** Speed fraction for the zoom: it follows speed up quickly but eases down slowly, so a long handbrake slide does not pull the camera in (owner 2026-11-21). */
   private spFilt = 0;
+  /** Line of sight (Free Drive sets it: RoamContact.rayFree): free fraction car -> camera; null = open roads (races). */
+  clip: ((ax: number, az: number, bx: number, bz: number, y: number) => number) | null = null;
+  /** Spring arm: the boom length factor, in at once when a wall is behind the car, out slowly. */
+  private arm = 1;
   /** Per-aspect framing (portrait pulls back and widens, ultrawide caps the horizontal view). */
   private readonly frame: Framing = { fov: 60, dist: 1, height: 1, lookAhead: 0 };
 
@@ -135,7 +139,14 @@ export class ChaseCam implements CameraRig {
     const sy = Math.sin(this.yaw);
     const cy = Math.cos(this.yaw);
     const p = car.position;
-    this._pose.position.set(p.x - sy * this.dist, this.height + this.gy, p.z - cy * this.dist);
+    let d = this.dist;
+    if (this.clip) {
+      const f = this.clip(p.x, p.z, p.x - sy * d, p.z - cy * d, this.height - 0.5); // height above the car's ground (buildings stand on theirs)
+      const want = f < 1 ? Math.max(0.3, f - 0.06) : 1;
+      this.arm = want < this.arm ? want : damp(this.arm, want, 1.6, frameDt);
+      d *= this.arm;
+    } else this.arm = 1;
+    this._pose.position.set(p.x - sy * d, this.height + this.gy, p.z - cy * d);
     const ahead = 4 + fr.lookAhead;
     this._pose.lookAt.set(p.x + sy * ahead, 1.0 + this.gy, p.z + cy * ahead);
     this._pose.fov = this.fov;

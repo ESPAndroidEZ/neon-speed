@@ -142,5 +142,24 @@ check('nitro kick is smooth (no jitter)', n.pos < POS_MAX && n.fov < FOV_MAX, `f
   for (let i = 0; i < 60; i++) chase.step(1 / 60);
   check('and it opens up again quickly when the car speeds up', chase.pose.fov > far - 6, `${chase.pose.fov.toFixed(1)} vs ${far.toFixed(1)}`);
 }
+// spring arm (Free Drive): a wall behind the car pulls the camera in at once; it eases back out over about a second
+{
+  const cam = new ChaseCam(new PerspectiveCamera(60, 16 / 9, 0.1, 1000));
+  const st = { position: { x: 0, y: 0, z: 0 }, heading: 0, velocity: { x: 0, y: 0, z: 0 }, speed: 0, yawRate: 0, slipAngle: 0 };
+  cam.setTarget(st);
+  for (let i = 0; i < 30; i++) cam.step(1 / 60);
+  const far = Math.hypot(cam.pose.position.x, cam.pose.position.z);
+  let wall = true;
+  cam.clip = () => (wall ? 0.4 : 1);
+  cam.step(1 / 60);
+  const near = Math.hypot(cam.pose.position.x, cam.pose.position.z);
+  wall = false;
+  for (let i = 0; i < 12; i++) cam.step(1 / 60);
+  const mid = Math.hypot(cam.pose.position.x, cam.pose.position.z);
+  for (let i = 0; i < 240; i++) cam.step(1 / 60);
+  const back = Math.hypot(cam.pose.position.x, cam.pose.position.z);
+  check('spring arm: in at once behind a wall', near < far * 0.45, `${far.toFixed(2)} -> ${near.toFixed(2)} m`);
+  check('spring arm: out slowly, then all the way', mid < far * 0.75 && Math.abs(back - far) < 0.05, `${mid.toFixed(2)} then ${back.toFixed(2)} m`);
+}
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
 process.exit(failed ? 1 : 0);

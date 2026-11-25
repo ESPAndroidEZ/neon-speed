@@ -130,7 +130,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
   const leave = (): void => {
     active = false;
     city?.progress.save(); city?.acts.heat.leave(); city?.missions.stop(); // the last spot from the frame updates; leaving ends the chase and the job
-    game.roam = null;
+    game.roam = null; game.chase.clip = null;
     city?.streamer.clear();
     if (city) engine.scene.remove(city.group);
     game.world.root.visible = true;
@@ -203,7 +203,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
       game.rm.player.car.reset(from?.x ?? 0, from?.z ?? 0, from?.h ?? 0);
       respawn();
       prime();
-      game.roam = { step, frame };
+      game.roam = { step, frame }; game.chase.clip = (ax, az, bx, bz, y) => city?.contact.rayFree(ax, az, bx, bz, y) ?? 1; // camera spring arm in the streets
       game.state = 'FREEROAM';
       game.paused = false;
       game.views.update(0, 0);

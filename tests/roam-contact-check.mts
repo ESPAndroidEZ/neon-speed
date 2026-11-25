@@ -3,6 +3,8 @@
  * on its deck, and the world border holds. */
 import { CARS } from '../src/data/cars.ts';
 import { snagStats } from './lab/roam-snag.mts';
+import { generateRoads as genRoads2 } from '../src/world/roads/generate.ts';
+import { generateFootprints as genFp2 } from '../src/world/open/footprints.ts';
 import { CarController } from '../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning } from '../src/physics/carTuning.ts';
 import { RoamContact } from '../src/physics/roamContact.ts';
@@ -80,6 +82,14 @@ let out = 0;
 drive(5, gas, () => { if (Math.abs(car.state.position.x) > g.half) out++; });
 check('the world border holds', out === 0);
 // box-vs-box contact (physics/obbHit): 200 drives into building corners and faces never leave the car inside a building
+// camera line of sight: through a tall building the free part is short, along an open road it is all free
+{
+  const gg = genRoads2(7), ff = genFp2(gg), cc = new RoamContact(gg, ff);
+  const b = ff.find((q) => q.height > 8 && q.hw > 6)!, fx = Math.sin(b.rot), fz = Math.cos(b.rot);
+  const out = cc.rayFree(b.x + fz * (b.hw + 4), b.z - fx * (b.hw + 4), b.x - fz * (b.hw + 4), b.z + fx * (b.hw + 4), 3);
+  check('camera ray through a building is cut at its wall', out > 0 && out < 0.2, out.toFixed(2));
+  check('camera ray over a low height sees above the roof line only when higher', cc.rayFree(b.x + fz * (b.hw + 4), b.z - fx * (b.hw + 4), b.x - fz * (b.hw + 4), b.z + fx * (b.hw + 4), b.height + 1) === 1);
+}
 const sn = snagStats(200);
 check('no clipping into buildings (box contact, seam fallback)', sn.clipMax < 0.05, `max ${sn.clipMax.toFixed(2)} m, ${sn.stuckRuns} head-on stops`);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
