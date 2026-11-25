@@ -6,7 +6,7 @@ Baton: claude
 Updated: 2026-11-25 (Underground round stages 1-4 built, tested and DEPLOYED as 15f70a3 to notcarlos.mosidealus.nl; live check: phones start races, 1366/1920 race start and service-worker activation time out under software rendering, .wav served as application/octet-stream by the managed nginx).
 
 ## Next
-1. Real-phone playtest of the Underground round (Street style, challengers, shops, REP areas, city sprint/drift/drag, Street events, paint shop) and tune drift targets / REP levels from it. DEPLOYED as 15f70a3 on 2026-11-25.
+1. Real-phone playtest of the Underground round (Street style, challengers, shops, REP areas, city sprint/drift/drag, Street events, paint shop) and tune drift targets / REP levels from it. DEPLOYED as a0cdce8 on 2026-11-25 (incl. the open-world block).
 2. Open QA: live-check 1366/1920 race start + service worker activation time out (software rendering?), .wav served as octet-stream by managed nginx (admin request), sprint minimap shows the whole loop, garage look panel still cramped on phones, earlier items (duels button, Snow card %, fly-by under loading card, cop/Day look).
 3. Not built: outrun lead-by-distance rule, per-kind ring colours, jumps, map variants, district radio, results podium, daily goals; owner items in docs/inbox/2026-11-21-owner-playtest.md.
 
@@ -204,3 +204,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-25 Claude: deployed 15f70a3 (Underground round + NFS round); health.php ok, live-check phone sizes PASS.
 - 2026-11-25 Claude: end-of-session checkpoint; build + 1880 tests green; Next rewritten.
 - 2026-11-25 Claude: open-world block (contact, traffic IDM, camera arm, off-road, in-city outrun); build + tests green; not deployed.
+- 2026-11-25 Claude: open-world block + playtest fixes deployed (a0cdce8); live-check phones PASS, 1366/1920 race start time out as before.

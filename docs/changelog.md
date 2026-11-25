@@ -3,7 +3,7 @@
 Updated at every checkpoint. One short section per working day or session. Technical detail is in `docs/handoff.md` (Done) and `docs/skills.md`.
 
 ## 2026-11-25
-- **Free Drive feels better (open-world block, dev build, not deployed yet).**
+- **Free Drive feels better (open-world block, DEPLOYED as a0cdce8).**
   - **No more snagging or clipping into buildings**: the car now collides as a real box. Before, a building corner could go up to 3.6 m into the car; now 0 in 200 test drives, and head-on stops dropped from 32 to 2.
   - **Hitting traffic no longer feels like hitting a wall**: you keep about half the push, the other car is shoved away.
   - **Leaving the street** onto plazas and lots no longer brakes the car like glue (1.5 g before, 0.8 g now, smooth at the kerb).
