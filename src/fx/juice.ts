@@ -6,6 +6,7 @@ import { qualityNow } from '../core/quality';
 import { setLightGlow } from '../world/carLights';
 import type { Game } from '../game/game';
 import { WEATHER } from '../physics/weather';
+import { STYLE } from '../physics/drivingStyle';
 import { createWeatherFx, type WeatherFx } from '../world/weatherFx';
 import { ExhaustFx } from './exhaustFx';
 import { FinalFx } from './finalFx';
@@ -148,7 +149,7 @@ export class Juice {
     const nitro = p.drivetrain.nitroActive;
     if (nitro && !this.wasNitro) this.engine.kickBloom(0.2); // a small pulse; more blew the night image out
     this.wasNitro = nitro;
-    const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? 0.15 : 0);
+    const target = smoothstep(30, 80, Math.abs(p.state.speed)) * 0.6 + (nitro ? (STYLE.id === 'STREET' ? 0.4 : 0.15) : 0); // Street: a stronger edge blur on nitro
     this.streak = damp(this.streak, target, 3, dt);
     this.post.width = this.engine.renderer.domElement.width;
     this.post.update(dt, this.streak * GRAPHICS.motionBlur);

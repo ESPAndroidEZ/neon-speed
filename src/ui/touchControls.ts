@@ -1,6 +1,6 @@
 import type { CarInput, InputSource } from '../types/game';
 import type { ControlPrefs, ControlScheme } from '../input/controlPrefs';
-import { SteerRamp } from '../input/steerRamp';
+import { KEY_RAMP, SteerRamp } from '../input/steerRamp';
 import { ICONS } from './icons';
 import { holdButton, place, TOUCH_CSS } from './touchButton';
 import { applyLayout, enableDrag, type Layout } from './touchLayout';
@@ -41,7 +41,7 @@ export function createTouchControls(container: HTMLElement, opts?: { onReset?: (
   let gas = 0, brake = 0, handbrake = false, nitro = false, visible = true;
   let stick = 0, left = false, right = false, auto = false, lastT = 0, editing = false, shiftUp = false, shiftDown = false;
   let stopDrag: (() => void) | null = null;
-  const ramp = new SteerRamp();
+  const ramp = new SteerRamp(KEY_RAMP, true);
   const root = document.createElement('div');
   root.className = 'rb-tc';
   root.addEventListener('contextmenu', (e) => e.preventDefault());

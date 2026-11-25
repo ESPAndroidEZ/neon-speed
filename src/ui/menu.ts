@@ -37,7 +37,7 @@ export interface MenuDeps {
   engine: Engine;
   voice: Voice;
   auto: { enabled: boolean };
-  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number; fovMin: number; fovMax: number } } };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: import('../camera/chaseCam').ChaseTuning } };
   hud?: { setScale(s: number): void };
   /** Show a car as the 3D backdrop. */
   showroom: (car: CarSpec, paint: number, glow?: number) => void;

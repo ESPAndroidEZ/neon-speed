@@ -21,6 +21,8 @@ import { applyUiSizes } from './uiSizes';
 import { engineSoundRow, musicStyleRow, nowPlayingRow, soundCredits, soundMixRow } from './soundSettings';
 import { setNowPlaying } from './nowPlaying';
 import { ENGINE_SOURCE, MUSIC_SOURCE } from '../audio/audioParams';
+import { chaseStyle } from '../camera/cameraStyle';
+import type { ChaseTuning } from '../camera/chaseCam';
 
 export interface SettingsDeps {
   store: SaveStore;
@@ -29,7 +31,7 @@ export interface SettingsDeps {
   voice: Voice;
   auto: { enabled: boolean };
   /** Receives the weather physics level. */
-  game: { physicsLevel: PhysicsLevel; chase: { tuning: { shake: number; fovMin: number; fovMax: number } } };
+  game: { physicsLevel: PhysicsLevel; chase: { tuning: ChaseTuning } };
   hud?: { setScale(s: number): void };
   /** Called after a driving setting changes (copies the saved values into physics and the gamepad). */
   onDriving?: () => void;
@@ -60,6 +62,7 @@ export function applySettings(d: Omit<SettingsDeps, 'onBack'>): void {
   SUBTITLES.on = s.subtitles;
   GEARBOX.manual = s.gearbox === 'manual';
   d.game.chase.tuning.shake = { OFF: 0, LOW: 0.5, NORMAL: 1 }[s.cameraShake];
+  chaseStyle(d.game.chase.tuning, s.drivingStyle);
 }
 
 export function buildSettings(d: SettingsDeps): HTMLElement {

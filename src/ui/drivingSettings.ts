@@ -4,6 +4,7 @@ import { LOOK_IDS, LOOKS, setLook } from '../core/looks';
 import { storyComplete } from '../core/career';
 import { AI_SETTING, DIFFICULTIES } from '../physics/aiDifficulty';
 import { DRIVING, HANDLING } from '../physics/assists';
+import { STYLE } from '../physics/drivingStyle';
 import { unitsRow } from './unitsRow';
 import { button, h } from './uiKit';
 import { t, tx } from '../i18n';
@@ -20,6 +21,7 @@ export function applyDrivingSettings(store: SaveStore, pad?: { deadZone: number;
   DRIVING.sens = s.steerSens;
   HANDLING.model = s.handlingModel;
   DRIVING.stability = s.stability;
+  STYLE.id = s.drivingStyle;
   setLook(s.look);
   applyCalm(s.calmUi);
   applyColorSafe(s.colorSafe);
@@ -154,5 +156,6 @@ export function drivingRows(store: SaveStore, onChange: () => void): { basic: HT
   const gear = choiceRow(t('drv.gearbox'), ['auto', 'manual'] as const, () => s.gearbox, (v) => { s.gearbox = v; GEARBOX.manual = v === 'manual'; save(); }, 'hint.gearbox');
   const model = choiceRow(t('drv.handling'), ['legacy', 'v2'] as const, () => s.handlingModel, (v) => { s.handlingModel = v; save(); }, 'hint.model');
   const stab = choiceRow(t('drv.stability'), ['OFF', 'LIGHT', 'FULL'] as const, () => s.stability, (v) => { s.stability = v; save(); }, 'hint.stab');
-  return { basic: [assist, hint, ...gear, diff, diffHint], advanced: [lookRow, ...model, ...stab, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow(), textSizeRow()] };
+  const style = choiceRow(t('drv.style'), ['CLASSIC', 'STREET'] as const, () => s.drivingStyle, (v) => { s.drivingStyle = v; STYLE.id = v; save(); }, 'hint.style');
+  return { basic: [assist, hint, ...style, ...gear, diff, diffHint], advanced: [lookRow, ...model, ...stab, range(t('drv.steerSens'), 'steerSens', 0.6, 1.4, 0.05), range(t('drv.deadzone'), 'padDeadzone', 0.02, 0.4, 0.02), rumble, calm, cb, unitsRow(), textSizeRow()] };
 }

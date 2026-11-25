@@ -76,6 +76,7 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   if (s.weatherPhysics === 'NORMAL' || s.weatherPhysics === 'AGGRESSIVE' || s.weatherPhysics === 'EXTREME') out.settings.weatherPhysics = s.weatherPhysics;
   if (s.assist === 'BEGINNER' || s.assist === 'STANDARD' || s.assist === 'PRO') out.settings.assist = s.assist;
   if (s.handlingModel === 'legacy' || s.handlingModel === 'v2') out.settings.handlingModel = s.handlingModel; // older saves: the default
+  if (s.drivingStyle === 'CLASSIC' || s.drivingStyle === 'STREET') out.settings.drivingStyle = s.drivingStyle;
   if (s.stability === 'OFF' || s.stability === 'LIGHT' || s.stability === 'FULL') out.settings.stability = s.stability;
   out.settings.steerSens = num(s.steerSens, 1, 0.6, 1.4);
   out.settings.rumble = s.rumble !== false;

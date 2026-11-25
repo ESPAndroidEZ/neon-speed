@@ -1,11 +1,11 @@
-import { SteerRamp } from './steerRamp';
+import { KEY_RAMP, SteerRamp } from './steerRamp';
 import type { CarInput, InputSource } from '../types/game';
 import { DEFAULT_KEYS, KeyBindings } from './keyBindings';
 
 /** WASD / arrows, Space handbrake, Shift nitro (all remappable except the arrows). Steering ramps so taps are gentle and holds reach full lock. */
 export class KeyboardInput implements InputSource {
   private readonly down = new Set<string>();
-  private readonly ramp = new SteerRamp();
+  private readonly ramp = new SteerRamp(KEY_RAMP, true);
   /** Car speed in km/h, set each frame by the game: the ramps soften as it rises. */
   speedKph = 0;
   private last = performance.now();
