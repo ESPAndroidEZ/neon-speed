@@ -1,6 +1,6 @@
 import { carNav, navButton } from './carNav';
 import { REV_TEST } from '../audio/revTest';
-import { CARS, GLOWS, PAINTS, type CarSpec } from '../data/cars';
+import { CARS, PAINTS, type CarSpec } from '../data/cars';
 import type { SaveStore } from '../core/save';
 import type { CarVisual } from '../world/proceduralCar';
 import { setYawOverride } from '../world/modelPrefs';
@@ -8,6 +8,7 @@ import { modelStatus, statusListeners } from '../world/carFactory';
 import { lookRows } from './garageLook';
 import { clamp01, hex, soundTest, statsOf } from './garageParts';
 import { button, h, money } from './uiKit';
+import { glowRows } from './glowShop';
 import { onLangChange, t, tx } from '../i18n';
 import { garageLayout } from './garageConfig';
 import { carLevel, repLevel } from '../core/rep';
@@ -22,6 +23,8 @@ export interface GarageDeps {
   /** Register a callback fired when a GLB replaces the procedural body. */
   onSwap: (fn: (() => void) | null) => void;
   onBack: () => void;
+  /** Open with the look panel showing (the city's paint shop). */
+  openLook?: boolean;
 }
 
 /** Dev-only GLB yaw calibration row and nose arrow (`?calib` in a dev build). */
@@ -51,11 +54,11 @@ export function buildGarage(d: GarageDeps): HTMLElement {
   carNav(root, goPrev, goNext); // keys + swipe, no arrow glyphs
   const watch = window.setInterval(() => { if (!root.isConnected) { REV_TEST.stop(); d.visual()?.calibrate?.setArrow(false); window.clearInterval(watch); } }, 400);
   let yaw = 0;
-  let lookOpen = false; // the appearance panel is collapsed until asked for
+  let lookOpen = d.openLook ?? false; // collapsed until asked for (the city's paint shop opens it)
   let shown = d.store.data.selected; // the menu already put the selected car on show
 
   const paintOf = (c: CarSpec): number => d.store.data.paint[c.id] ?? c.color;
-  const glowOf = (c: CarSpec): number => d.store.data.glow[c.id] ?? GLOWS[0];
+  const glowOf = (c: CarSpec): number => d.store.data.glow[c.id] ?? 0; // no kit = no underglow (core/shopItems)
   const bar = (label: string, v: number, text: string): string =>
     `<div class="rb-row" style="justify-content:space-between;flex-wrap:nowrap"><span style="min-width:100px;flex:none;text-align:left;white-space:nowrap">${label}</span><div class="rb-bar"><i style="width:${Math.round(clamp01(v) * 100)}%"></i></div><span style="width:92px;white-space:nowrap;text-align:right;opacity:.8">${text}</span></div>`;
   const swatches = (list: readonly number[], cur: number, pick: (c: number) => void): HTMLElement => {
@@ -137,15 +140,7 @@ export function buildGarage(d: GarageDeps): HTMLElement {
     panel.append(toggle);
     if (lookOpen) { // the rarely used extras sit behind the toggle: how the car drives, underglow, finish, rims...
       if (c.tuning.v2) panel.append(h('div', 'rb-note', tx(c.tuning.v2.spec.character))); // layout character (data/carSpecs)
-      panel.append(
-        h('div', 'rb-sub', t('garage.underglow')),
-        swatches(GLOWS, glowOf(c), (g) => {
-          if (owned) d.store.setGlow(c.id, g);
-          else d.store.data.glow[c.id] = g;
-          d.visual()?.setUnderglow(g);
-          render();
-        }),
-      );
+      panel.append(...glowRows(d.store, c.id, owned, (g) => d.visual()?.setUnderglow(g), render)); // a kit bought once per car (paint shop)
     }
     if (lookOpen) panel.append(lookRows(d.store, c.id, owned, (l) => d.visual()?.setAppearance?.(l, paintOf(c)), () => d.preview(c, paintOf(c), glowOf(c))));
     const cal = calibration(c);

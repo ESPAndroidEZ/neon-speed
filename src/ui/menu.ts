@@ -20,6 +20,7 @@ import { buildTrackSelect } from './trackSelect';
 import { buildWeatherPick } from './weatherPick';
 import { buildDuelMenu } from './duelMenu';
 import { dailyButton } from './dailyButton'; import { freeDriveButton } from './freeDriveButton';
+import { eventsButton } from './eventsMenu';
 import type { TrackDef } from '../data/tracks';
 import { menuHeader } from './repChip';
 import { button, feat, h, injectCss, wordmark } from './uiKit';
@@ -138,7 +139,7 @@ export class Menu {
       c.title = describe(latest.snap);
       stack.append(c);
     }
-    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), feat(button(t('menu.freeRace'), () => this.maps())), feat(freeDriveButton()), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
+    stack.append(button(t('menu.story'), () => this.story(), latest ? '' : 'hot'), feat(button(t('menu.freeRace'), () => this.maps())), feat(freeDriveButton()), eventsButton(this.d.store), button(t('menu.online'), () => this.online()), dailyButton((w, n, id) => this.d.startRace(w, n, id)), button(t('menu.garage'), () => this.garage()), button(t('menu.tuning'), () => this.tune()), button(t('menu.crew'), () => this.crew()), ...(latest ? [button(t('menu.load'), () => this.load())] : []), button(t('menu.settings'), () => this.settings()));
     const install = installButton();
     if (install) stack.append(install);
     el.append(stack, langCorner()); // after the stack so the menu's first focus stays on the first menu button
@@ -181,9 +182,9 @@ export class Menu {
     this.mount(buildWeatherPick({ def, store: this.d.store, rivals: this.rivals, pick: (n) => { this.rivals = n; }, start: (w, n, id) => this.d.startRace(w, n, id), onBack: () => this.maps() }), 'other', 'main', () => this.weather(def));
   }
 
-  garage(back = (): void => this.main()): void {
-    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: back });
-    this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage(back));
+  garage(back = (): void => this.main(), openLook = false): void {
+    const el = buildGarage({ store: this.d.store, preview: this.d.showroom, visual: this.d.visual, onSwap: this.d.onSwap, onBack: back, openLook });
+    this.mount(el, 'other', garageLayout(window.innerWidth), () => this.garage(back, openLook));
   }
 
   /** The settings screen as an element; `back` is what its Back button does (main menu, or closing the overlay in the pause menu). */

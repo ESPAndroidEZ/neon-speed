@@ -45,7 +45,9 @@ export class RacerViews {
     this.env = env;
   }
 
-  add(racer: Racer, spec: CarSpec, paint: number, glow = 0x2a6bff): RacerView {
+  /** `glow` undefined: rivals get the stock blue underglow, the player none (the kit is a paint-shop item, core/shopItems). */
+  add(racer: Racer, spec: CarSpec, paint: number, glowIn?: number): RacerView {
+    const glow = glowIn ?? (racer.isPlayer ? 0 : 0x2a6bff);
     const holder = new Group();
     let v: RacerView;
     const visual = createCarVisual(spec, paint, glow, this.env, (nv) => this.swap(v, nv), racer.isPlayer ? getLoadout(spec.id) : { ...defaultLoadout(), plate: rivalPlate(racer.name) });

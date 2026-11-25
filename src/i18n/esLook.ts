@@ -4,6 +4,7 @@ import type { EN_LOOK } from './enLook';
 export const ES_LOOK: Record<keyof typeof EN_LOOK, string> = {
   'lookid.stripes': 'Rayas', 'lookid.racing': 'Competición', 'lookid.checker': 'Cuadros', 'lookid.tiger': 'Tigre', 'lookid.wave': 'Ola',
   'lookid.shards': 'Esquirlas', 'lookid.scales': 'Escamas', 'lookid.circuit': 'Circuito', 'lookid.speed-lines': 'Líneas de velocidad',
+  'lookid.skyline': 'Horizonte', 'lookid.split-fade': 'Degradado partido', 'lookid.pinstripe': 'Filetes',
   'lookid.cross-hatch': 'Trama cruzada', 'lookid.stars': 'Estrellas', 'lookid.zigzag': 'Zigzag', 'lookid.halftone': 'Semitono',
   'lookid.five': 'Cinco radios', 'lookid.multi': 'Multirradio',
   'lookid.solid': 'Fijo', 'lookid.pulse': 'Pulso', 'lookid.rainbow': 'Arcoíris', 'lookid.chase': 'Persecución',

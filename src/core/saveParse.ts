@@ -46,6 +46,10 @@ export function parseSave(raw: string | null, base: SaveData, knownCars: readonl
   if (typeof j.trackBest === 'object' && j.trackBest !== null) {
     for (const [k, v] of Object.entries(j.trackBest as Record<string, unknown>)) if (typeof v === 'number' && Number.isFinite(v) && v > 0 && k.length < 40) out.trackBest[k] = v;
   }
+  if (typeof j.bought === 'object' && j.bought !== null) {
+    out.bought = {};
+    for (const [id, l] of Object.entries(j.bought as Record<string, unknown>)) if (knownCars.includes(id) && Array.isArray(l)) out.bought[id] = l.filter((k): k is string => typeof k === 'string' && k.length < 40).slice(0, 64);
+  }
   if (typeof j.loadouts === 'object' && j.loadouts !== null) {
     for (const [id, l] of Object.entries(j.loadouts as Record<string, unknown>)) if (knownCars.includes(id)) out.loadouts[id] = sanitizeLoadout(l);
   }

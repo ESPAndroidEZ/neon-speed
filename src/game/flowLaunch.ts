@@ -49,7 +49,7 @@ export function installFlow(d: { engine: Engine; game: Game; hud: Hud; store: Sa
   });
   FLOW_HOOK.shop = (s) => {
     shop = s?.kind ?? null;
-    if (!s) shopCard.hide(); else shopCard.show(t(`shop.${s.kind}`), t(`shop.${s.kind}.i`), t('shop.enter'), t('city.key'));
+    if (!s) shopCard.hide(); else shopCard.show(t(`shop.${s.kind}`), t(`shop.${s.kind}.i`), t('shop.enter'), t('shop.key'));
   };
 
   const chCard = roamOffer('KeyH', () => {

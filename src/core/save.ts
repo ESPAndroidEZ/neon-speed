@@ -46,6 +46,8 @@ export interface SaveData {
   roam?: RoamSave;
   /** Reputation points (core/rep): races, story and Free Drive add to it. Absent = 0. */
   rep?: number;
+  /** Paint-shop items bought per car (core/shopItems: `glow`, `vinyl:<id>`). Absent = none. */
+  bought?: Record<string, string[]>;
 }
 
 /** Minimal storage shape so tests can pass an in-memory object. localStorage satisfies it. */

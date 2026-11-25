@@ -85,9 +85,10 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - rng.ts (11) Small deterministic PRNG (mulberry32): same seed, same city. | fn createRng
 - roamSaveParse.ts (33) The Free Drive part of a save (`SaveData.roam`, contract `RoamSave` in types/world.ts),... | fn parseRoam; const emptyRoam
 - route.ts (89) GPS for Neon Harbor: the quickest way over the road graph (A*, cost = length / speed li... | fn nearestNode, findRoute; iface Route
-- save.ts (212) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
-- saveParse.ts (103) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
+- save.ts (214) Small / Medium / Large for HUD elements (subtitles, minimap). | class SaveStore; const defaultSave; iface SaveData, KeyValueStore; type Quality, UiSize
+- saveParse.ts (107) Parse and sanitise stored JSON. Anything corrupt falls back to defaults field by field;... | fn parseSave; const num
 - serverSync.ts (194) Server storage. The game's progress (save, save slots, achievements, stats, ghosts) liv... | fn newPlayerCode, normalizeCode, installSync; class ServerSync; const SYNC_KEY, CODE_RE, showCode, getSync; iface SyncStore, SyncDeps; type SyncStatus
+- shopItems.ts (28) Look items bought in the paint shop (Underground round, stage 4): an underglow kit and ... | fn ownsItem, buyItem; const GLOW_PRICE, VINYL_PRICE, itemPrice
 - shops.ts (30) Shops as places in the city (Underground round, stage 2): the garage, a parts shop and ... | fn placeShops, shopAt; const SHOP_R; iface Shop; type ShopKind
 - speedTraps.ts (39) One speed camera: a line across the road at (x, z), along the road's direction (tx, tz)... | fn placeSpeedTraps, crossed; const TRAP_TIERS, TRAP_TIER_REP, trapTier; iface SpeedTrap
 - storyPins.ts (46) Where a story event waits in the city: a junction in its district. Ring radius in metres. | fn placeStoryPins, pinStates, greeter; const PIN_R; iface StoryPin; type PinState
@@ -191,7 +192,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - extras.ts (34) HUD extras tied to the current track: the minimap (hidden outside races). | fn installMinimap
 - finalLap.ts (19) Fires once when the player starts the last lap of a multi-lap race (display only). | class FinalLapCue
 - flowLaunch.ts (71) Save a visit / win key once (`shop:<kind>`, `win:<map id>`): district completion counts... | fn markVisit, outrunNear, installFlow
-- freeDriveSetup.ts (25) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
+- freeDriveSetup.ts (28) Dev only (devStart `?roam=<district>`): open Free Drive in a district without the menu. | fn wireFreeDrive
 - freeFinish.ts (30) The end of a race that is not a story event (free race, rival duel, city race): the rec... | fn freeFinish
 - freeRace.ts (59) Free race bookkeeping for the map that was just driven: personal bests per map and weat... | fn finishFreeRace, pbNote
 - freeRoam.ts (219) Labs only (tests/lab/roam-activities.mjs): where the first drift zone and camera are, a... | fn installFreeRoam; iface RoamLab
@@ -216,14 +217,14 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - posCue.ts (32) Detects a real change of the player's race position (display only). | class PosCue
 - raceFeedback.ts (99) Race feedback that reads the game and writes the HUD: the corner guide (next corner + B... | fn attachRaceFeedback
 - raceStats.ts (43) Per-race driving stats for the results screen (display only: reads the game, never feed... | class RaceStats; const raceStats
-- racerViews.ts (101) Interpolated world pose, valid after update(). | fn rivalPlate; class RacerViews; iface RacerView
+- racerViews.ts (103) Interpolated world pose, valid after update(). | fn rivalPlate; class RacerViews; iface RacerView
 - radio.ts (132) Race is on (countdown over, not finished). | class RadioDirector; iface RadioSnapshot
 - radioHook.ts (40) DJ Switch's radio: feeds the race to the RadioDirector a few times per second and shows... | fn installRadio
 - recap.ts (13) "Previously..." cards before the first event of a season chapter: once per save, skippa... | fn playRecap
 - repAward.ts (16) REP for a finished race (story events pay half as much again; a failed story event a th... | fn repNote
 - resultGap.ts (6) Gap to the winner for the results table: "+0.83" for a finisher behind the winner, "" f... | fn resultGap
 - roamActivities.ts (169) Free Drive activities (W5.4): speed cameras (and the drift zones and car meet that foll... | class RoamActivities
-- roamFlow.ts (127) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
+- roamFlow.ts (125) Traffic cars that are challengers (fixed pool slots: the pool recycles them around the ... | class RoamFlow; const CHALLENGERS, FLOW_HOOK
 - roamHeat.ts (103) Free Drive police (docs/nfs-vision.md section 2): a speed camera flash at 200 km/h or a... | class RoamHeat
 - roamMarkers.ts (38) The full map's markers (race rings, drift zones, speed cameras, car meet, tokens not ye... | fn roamMarkers
 - roamMissions.ts (73) Free Drive missions (data in data/world/missions.ts, logic in core/missions.ts): an off... | class RoamMissions
@@ -245,11 +246,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - enAch.ts (21) Achievements (game/achievements): name and how to get it. Spanish in esAch.ts with the ... | const EN_ACH
 - enControls.ts (74) Phone controls, tilt, full screen, car navigation, language (English). | const EN_CONTROLS
 - enGame.ts (69) Race, story, HUD, pause, save and system messages: English UI strings. | const EN_GAME
-- enLook.ts (13) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
+- enLook.ts (14) Garage look options (vinyl, rim, part and glow names). Keys are `lookid.<id>`; ids come... | const EN_LOOK
 - enMenu.ts (94) Menus, settings, garage, tuning, maps: English UI strings. Placeholders use {name}. | const EN_MENU
 - enOnline.ts (14) Online races: English UI strings. | const EN_ONLINE
 - enStory.ts (18) Story places in Free Drive (docs/nfs-vision.md): English UI strings. | const EN_STORY
-- enStreet.ts (14) Underground round (docs/underground-plan.md): challengers, shops, locked areas, city ev... | const EN_STREET
+- enStreet.ts (16) Underground round (docs/underground-plan.md): challengers, shops, locked areas, city ev... | const EN_STREET
 - es.ts (21) Spanish UI strings (Spain Spanish: coche, móvil, conducir, matrícula, vosotros). Same k... | const ES
 - esAch.ts (23) Logros (español neutro). Mismas claves que enAch.ts. | const ES_ACH
 - esContent.ts (20) Spanish for long content, keyed by the exact English text in src/data (radio, barks, ti... | const ES_CONTENT
@@ -268,11 +269,11 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - esContentM.ts (26) Spanish for the Underground round's content texts: city event names (core/cityRace CITY... | const ES_CONTENT_M
 - esControls.ts (76) Controles del móvil, inclinación, pantalla completa, navegación de coches, idioma. | const ES_CONTROLS
 - esGame.ts (71) Carrera, historia, HUD, pausa, guardado y mensajes del sistema (español neutro). Mismas... | const ES_GAME
-- esLook.ts (15) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
+- esLook.ts (16) Opciones de aspecto del garaje (vinilos, llantas, piezas, luces). Mismas claves que enL... | const ES_LOOK
 - esMenu.ts (96) Menús, ajustes, garaje, tuning y mapas (español neutro). Mismas claves que enMenu.ts. | const ES_MENU
 - esOnline.ts (16) Carreras online (español neutro). Mismas claves que enOnline.ts. | const ES_ONLINE
 - esStory.ts (18) Story places in Free Drive: Spanish UI strings (same keys as enStory.ts). | const ES_STORY
-- esStreet.ts (14) Underground round: Spanish UI strings (same keys as enStreet.ts). | const ES_STREET
+- esStreet.ts (16) Underground round: Spanish UI strings (same keys as enStreet.ts). | const ES_STREET
 - index.ts (56) Names shown in the chooser, each in its own language. | fn setLang, onLangChange, fill, t, tx; const LANGS, LANG_NAME, detectLang, getLang, table; type Lang
 - langPrefs.ts (27) The slice of the save store the language needs (no dependency on core/save). | fn initLang, chooseLang
 ## src/input
@@ -369,15 +370,17 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - drivingSettings.ts (161) Copy the saved driving preferences into the physics singleton and the gamepad. | fn applyDrivingSettings, drivingRows
 - duelMenu.ts (37) Rival duels (docs/nfs-vision.md): one card per rival with their car, map and weather; a... | fn buildDuelMenu
 - dynoGraph.ts (44) Draws a dyno chart: torque (cyan) and power (magenta) against rpm, with grid, axes, pea... | fn drawDyno
+- eventsMenu.ts (63) What the street-events screen needs (wired by game/freeDriveSetup once Free Drive is in... | fn openEvents; const setEvents, eventsButton; iface EventsDeps
 - feedback.ts (114) Small, non-identifying device facts that help with bug reports (only sent if the player... | fn openSupport
 - freeDriveButton.ts (10) main wires Free Drive here once it is installed (the menu is built before). | const setFreeDrive, freeDriveButton
 - fullscreenButton.ts (75) One-time "Add to Home Screen" card for iPhone Safari (no Fullscreen API there). `force`... | fn showHomescreenHint, fullscreenButton
 - gapTags.ts (52) Under lap / position: the rival just ahead (red, how far you are behind) and just behin... | fn attachGapTags
-- garage.ts (206) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
+- garage.ts (201) Show this car as the backdrop (rebuilds the 3D car). | fn buildGarage; iface GarageDeps
 - garageConfig.ts (31) Menu / garage camera framing. Plain data plus one helper: no imports. | const GARAGE_CONFIG, garageLayout; type GarageLayout
-- garageLook.ts (106) Translated display name of a vinyl, rim, part or glow id. | fn lookRows
+- garageLook.ts (123) Translated display name of a vinyl, rim, part or glow id. | fn lookRows
 - garageParts.ts (27) Small helpers of the garage screen: cached stats, colour hex, bar clamp and the hold-to... | fn soundTest; const statsOf, hex, clamp01
 - gauge.ts (135) Large tacho and speed gauge: a 270-degree arc with ticks and a redline zone, a gradient... | class ArcGauge
+- glowShop.ts (39) Underglow in the garage (Underground round, stage 4): a kit bought once per car. Withou... | fn glowRows
 - graphicsSettings.ts (148) Called after Auto quality is switched on or off (the watchdog reads the saved flag). | fn graphicsRows; iface GraphicsDeps, GraphicsRows
 - handlingOverlay.ts (52) Handling debug overlay (plan section 7), toggled with F4: per-axle load (N), slip angle... | const handlingOverlay
 - haptics.ts (22) Short haptic tick: Capacitor Haptics in the app, navigator.vibrate on Android browsers,... | fn buzz
@@ -392,7 +395,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - layoutEditor.ts (51) "Edit buttons" screen for phones: the real touch buttons stay on screen and can be drag... | fn openLayoutEditor
 - loadingCard.ts (24) Short loading card with a lore tip while a race is being set up. Also masks the car mod... | class LoadingCard
 - loadoutList.ts (30) | fn buildLoadoutList
-- menu.ts (197) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
+- menu.ts (198) Screen and phone-control rows for Settings (ui/controlSettings). | class Menu; iface MenuDeps
 - menuCss.ts (93) Base menu styles (docs/ui-style.md): dark glass panels, cyan hairlines, magenta for the... | const MENU_CSS
 - minimap.ts (139) A 2d context or throw; returning a non-null type so it is usable inside closures. | fn createMinimap; iface Minimap
 - missionCard.ts (42) Mission card (menu style): an offer with Go (button or G key), then the clock and dista... | fn missionCard; iface MissionCard
@@ -414,6 +417,7 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - roamMapCss.ts (12) Free Drive full map styles (menu look): canvas on the left, legend and buttons in a sid... | const MAP_CSS
 - roamOffer.ts (29) A small offer card under the Free Drive top bar (shops, challengers): title, one line, ... | fn roamOffer; iface RoamOffer
 - roamPause.ts (36) Free Drive pause: Resume, fast travel to a district, photo (PNG without the UI), respaw... | fn roamPause; iface RoamPause
+- roamToast.ts (21) A short message card over the Free Drive cards (the HUD pop-up sits under the job card ... | fn roamToast
 - roamWhere.ts (61) Where you are in Free Drive (task 066): "Pier Road · Harbour" above the minimap; on ent... | class RoamWhere
 - roomList.ts (53) "Kestrel Bay · rain · 3/8" for one open room (plain text: the track id comes from anoth... | fn roomText, roomList; const pickRoom
 - rotateHint.ts (32) Landscape only on phones. Where the browser allows it the orientation is locked (instal... | fn installRotateHint
@@ -551,7 +555,8 @@ One line per file: `name (lines) description | exports by kind`. Search here bef
 - trackValidate.ts (91) Closest allowed ratio of corner radius to half the road width (plus a fixed margin of 2... | fn validateTrack; iface TrackRules, Problem
 - tunnelBridge.ts (92) Indices of the first and last sample of a zone's main run (null if absent). | fn zoneRun, buildTunnel, buildBridge
 - vinylB.ts (95) | const VINYLS_B
-- vinylLayer.ts (68) Vinyl painters: each paints one pattern onto a transparent `size` x `size` canvas in `c... | fn makeVinylMap; const VINYL_PAINTERS, VINYL_IDS; type VinylPainter
+- vinylC.ts (31) Underground-round vinyls (our own designs): a harbour skyline, a two-tone split fade an... | const VINYLS_C
+- vinylLayer.ts (69) Vinyl painters: each paints one pattern onto a transparent `size` x `size` canvas in `c... | fn makeVinylMap; const VINYL_PAINTERS, VINYL_IDS; type VinylPainter
 - wallArt.ts (53) Draw a stylised red hand (palm, thumb and four fingers) centred at (x, y); `s` is the p... | fn drawHandprint, drawWall
 - weatherFx.ts (153) Per display frame. `speed` = car speed (m/s) for wind lines. | fn createWeatherFx; const RAIN_BOX, SNOW_BOX, RAIN_N, SNOW_N; iface WeatherFx
 - windLines.ts (65) White wind lines racing past the camera at high speed. Laid out along the camera's (cut... | class WindLines

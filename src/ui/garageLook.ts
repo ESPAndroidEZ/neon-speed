@@ -4,7 +4,8 @@ import { PAINTS } from '../data/cars';
 import { PART_SLOTS, PARTS } from '../world/carParts';
 import { RIM_IDS } from '../world/rims';
 import { VINYL_IDS } from '../world/vinylLayer';
-import { h } from './uiKit';
+import { button, h, money } from './uiKit';
+import { buyItem, ownsItem, VINYL_PRICE } from '../core/shopItems';
 import { t, tx } from '../i18n';
 import type { StringKey } from '../i18n';
 
@@ -18,11 +19,15 @@ const hex = (n: number): string => `#${n.toString(16).padStart(6, '0')}`;
  * pattern, calipers, stance and plate. `live` re-applies cheap changes on the showing car; `rebuild` re-creates the car (rims).
  */
 export function lookRows(store: SaveStore, carId: string, owned: boolean, live: (l: Loadout) => void, rebuild: () => void): HTMLElement {
-  const l: Loadout = store.data.loadouts[carId] ?? defaultLoadout();
+  const l: Loadout = structuredClone(store.data.loadouts[carId] ?? defaultLoadout()); // a working copy: previews never leak into the save
+  let ownedKind = l.vinyl.kind; // the vinyl on the car when the panel opened is owned (core/shopItems ownsItem)
   const root = h('div');
+  const has = (k: string | null): boolean => !k || k === ownedKind || ownsItem(store, carId, `vinyl:${k}`);
   const commit = (heavy = false): void => {
-    if (owned) store.setLoadout(carId, l);
-    else store.data.loadouts[carId] = l; // preview only until bought
+    const keep = structuredClone(l);
+    if (!has(keep.vinyl.kind)) keep.vinyl.kind = ownedKind; // an unbought vinyl only shows on the car
+    if (owned) store.setLoadout(carId, keep);
+    else store.data.loadouts[carId] = keep; // preview only until bought
     if (heavy) rebuild();
     else live(l);
   };
@@ -72,7 +77,19 @@ export function lookRows(store: SaveStore, carId: string, owned: boolean, live: 
   label(t('look.finish'));
   chips(FINISH_IDS.map((id) => ({ id, name: tx(FINISHES[id].name) })), l.finish, (id) => { l.finish = id as Loadout['finish']; commit(); });
   label(t('look.vinyl'));
-  chips([{ id: '', name: t('look.none') }, ...VINYL_IDS.map((id) => ({ id, name: lookName(id) }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); });
+  const buyBox = h('div', 'rb-row');
+  const refreshBuy = (): void => {
+    buyBox.replaceChildren();
+    const k = l.vinyl.kind;
+    if (!k || has(k) || !owned) return;
+    const short = store.data.cash < VINYL_PRICE;
+    const b = button(t(short ? 'shop.noCash' : 'shop.buyVinyl', { price: money(VINYL_PRICE) }), () => { if (buyItem(store, carId, `vinyl:${k}`)) { ownedKind = k; commit(); refreshBuy(); } }, short ? '' : 'hot');
+    b.disabled = short;
+    buyBox.append(b, h('span', 'rb-sub', t('shop.preview')));
+  };
+  chips([{ id: '', name: t('look.none') }, ...VINYL_IDS.map((id) => ({ id, name: lookName(id) + (has(id) ? '' : ' $') }))], l.vinyl.kind ?? '', (id) => { l.vinyl.kind = id || null; commit(); refreshBuy(); });
+  root.append(buyBox);
+  refreshBuy();
   swatches(PAINTS, l.vinyl.color, (c) => { l.vinyl.color = c; commit(); });
   slider(t('look.scale'), 0.5, 2, 0.1, l.vinyl.scale, (v) => (l.vinyl.scale = v));
   slider(t('look.rotate'), -90, 90, 5, l.vinyl.rotation, (v) => (l.vinyl.rotation = v));

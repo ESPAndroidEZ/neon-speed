@@ -3,13 +3,13 @@ import type { DistrictId, RoadGraph } from '../types/world';
 import { DISTRICTS } from '../types/world';
 import type { CarController } from '../physics/carController';
 import type { RoamTraffic } from '../physics/roamTraffic';
-import type { Hud } from '../ui/hud';
 import { AREA_REP, AreaGuard, districtCentres } from '../core/areaLocks';
 import { placeShops, shopAt, type Shop } from '../core/shops';
 import { districtAt } from '../data/world/districtMap';
 import { heightAt } from '../world/roads/height';
 import { zoneMesh } from '../world/open/zoneView';
 import { t } from '../i18n';
+import { roamToast } from '../ui/roamToast';
 
 /** Traffic cars that are challengers (fixed pool slots: the pool recycles them around the player, so some are always near). */
 export const CHALLENGERS: readonly number[] = [5, 18, 31];
@@ -42,7 +42,6 @@ export class RoamFlow {
   private readonly marks: InstancedMesh;
   private readonly m = new Matrix4();
   private readonly ring: ReturnType<typeof zoneMesh>;
-  private readonly hud: Hud;
   private readonly traffic: RoamTraffic | null;
   private readonly busy: () => boolean;
   private shopIn = -1;
@@ -51,8 +50,7 @@ export class RoamFlow {
   private clock = 0;
   private lockCool = 0;
 
-  constructor(g: RoadGraph, group: Group, hud: Hud, traffic: RoamTraffic | null, avoid: readonly { x: number; z: number }[], busy: () => boolean) {
-    this.hud = hud;
+  constructor(g: RoadGraph, group: Group, traffic: RoamTraffic | null, avoid: readonly { x: number; z: number }[], busy: () => boolean) {
     this.traffic = traffic;
     this.busy = busy;
     this.shops = placeShops(g, avoid);
@@ -71,7 +69,7 @@ export class RoamFlow {
   /** Fast travel: refuse a locked district with the same message as the border. */
   canGo(d: DistrictId): boolean {
     if (this.open(d)) return true;
-    this.hud.popUp(t('area.locked', { d: t(`district.${d}` as 'district.bay'), n: AREA_REP[d] }), '#ff5470');
+    roamToast(t('area.locked', { d: t(`district.${d}` as 'district.bay'), n: AREA_REP[d] }));
     return false;
   }
 
@@ -90,7 +88,7 @@ export class RoamFlow {
     const d = districtAt(x, z), bad = this.guard.step(x, z, s.heading, d, this.open(d));
     if (bad) {
       car.reset(this.guard.safeX, this.guard.safeZ, this.guard.safeH + Math.PI);
-      if (this.lockCool === 0) { this.hud.popUp(t('area.locked', { d: t(`district.${bad}` as 'district.bay'), n: AREA_REP[bad] }), '#ff5470'); this.lockCool = 2.5; }
+      if (this.lockCool === 0) { roamToast(t('area.locked', { d: t(`district.${bad}` as 'district.bay'), n: AREA_REP[bad] })); this.lockCool = 2.5; }
     }
     // shops
     const at = shopAt(this.shops, x, z);

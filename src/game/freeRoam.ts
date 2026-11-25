@@ -48,7 +48,7 @@ interface City { g: RoadGraph; fs: Footprint[]; contact: RoamContact; streamer: 
  * streamed around the camera, buildings and the quay as walls. The car is the player of a RaceManager that never starts,
  * so the engine sound, effects and camera follow it as in a race; Game hands this module the fixed step and the frame.
  */
-export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number; lab: RoamLab } {
+export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store: SaveStore; toMenu: () => void }): { enter(): void; travel(d: DistrictId): void; routeLength(): number; goTo(x: number, z: number): void; lab: RoamLab } {
   const { engine, game } = d;
   let city: City | null = null;
   const tod = new TimeOfDay(engine.scene, d.store);
@@ -184,7 +184,7 @@ export function installFreeRoam(d: { engine: Engine; game: Game; hud: Hud; store
 
   return {
     travel,
-    routeLength: () => city?.map.route?.length ?? 0, // labs: the GPS route (m), 0 = none
+    routeLength: () => city?.map.route?.length ?? 0, goTo: (x, z) => city?.map.waypoint(x, z), // labs: the GPS route (m), 0 = none; goTo: set the GPS (street events)
     lab: { spots: () => ({ zone: city?.acts.zones[0] ?? null, trap: city?.acts.traps[0] ?? null, meet: city?.acts.meetSpot ?? null, pins: city?.story.pins ?? [] }), placeAt: (x, z, h, v = 0) => { const c = game.rm.player.car; c.reset(x, z, h); prime(); c.nudge(0, 0, Math.sin(h) * v, Math.cos(h) * v, 0); }, wanted: () => city?.acts.heat.wanted(), tod: (k) => { tod.set(k); if (k === 'night') game.setWeather(game.weather); } },
     enter: () => {
       city ??= build();

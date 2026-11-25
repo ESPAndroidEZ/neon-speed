@@ -6,7 +6,7 @@ export const MAP_CSS = `
 .rb-fmap .rb-side h2{margin:0;font-size:var(--fs-lg)}
 .rb-fmap .rb-side .rb-btn{min-height:44px;margin:0;min-width:0;width:100%}
 .rb-fmap .rb-key{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-1) var(--sp-2);align-items:center;font-size:var(--fs-sm);color:var(--text-dim)}
-.rb-fmap .rb-key i{width:12px;height:12px;border-radius:50%;display:block}
+.rb-fmap .rb-key i{width:14px;height:14px;border-radius:50%;display:block;flex:none}
 @media (max-aspect-ratio:1/1){.rb-fmap{flex-direction:column!important}.rb-fmap canvas{width:min(94vw,56vh);height:min(94vw,56vh)}.rb-fmap .rb-side{width:min(94vw,420px)}}
-@media (max-height:480px){.rb-fmap{gap:var(--sp-3)}.rb-fmap canvas{width:min(100vw - 230px,88vh);height:min(100vw - 230px,88vh)}.rb-fmap .rb-side{width:200px}.rb-fmap .rb-key>*:nth-child(n+7){display:none}.rb-fmap .rb-side .rb-sub{display:none}}
+@media (max-height:480px){.rb-fmap{gap:var(--sp-3)}.rb-fmap canvas{width:min(100vw - 230px,88vh);height:min(100vw - 230px,88vh)}.rb-fmap .rb-side{width:200px}.rb-fmap .rb-key{grid-template-columns:auto 1fr auto 1fr;gap:3px 5px;font-size:10px;line-height:1.1}.rb-fmap .rb-key i{width:13px;height:13px}.rb-fmap .rb-side .rb-sub{display:none}}
 `;

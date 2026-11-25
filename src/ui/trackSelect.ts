@@ -111,11 +111,11 @@ export function buildTrackSelect(d: TrackSelectDeps): HTMLElement {
     return card;
   };
   for (const def of TRACKS) row.append(makeCard(def));
-  // the six city circuits (one loop per district of Neon Harbor) are built on demand: the road network takes a moment to generate
+  // the six city circuits (one loop per district of Neon Harbor) are built on demand: the road network takes a moment to generate. Sprints, drift runs and the drag are on the Street events screen.
   const city = button(t('maps.city'), () => {
     city.disabled = true;
     city.textContent = t('maps.cityLoading');
-    window.setTimeout(() => { for (const r of cityRaces()) row.append(makeCard(r.def)); city.remove(); fillTrackTops(root); }, 40);
+    window.setTimeout(() => { for (const r of cityRaces()) if (r.kind === 'circuit') row.append(makeCard(r.def)); city.remove(); fillTrackTops(root); }, 40);
   });
   root.append(row, city, ...(d.onDuels ? [button(t('duel.open'), d.onDuels)] : []), button(t('common.back'), d.onBack));
   fillTrackTops(root); // online top 3 per map, filled in when the server answers
