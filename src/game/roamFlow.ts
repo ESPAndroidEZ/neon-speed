@@ -17,6 +17,8 @@ export const CHALLENGERS: readonly number[] = [5, 18, 31];
 const NEAR = 14;
 /** A challenger's marker shows within this range (m). */
 const SEEN = 260;
+/** A challenger further than this (m) re-enters traffic near the player (out of view), so there is always one to find. */
+const KEEP = 360;
 
 /** Between the city step and the launcher (game/flowLaunch.ts): REP level, saved keys, and the two offers. */
 export const FLOW_HOOK = {
@@ -105,6 +107,7 @@ export class RoamFlow {
     let close = -1;
     for (let k = 0; k < CHALLENGERS.length; k++) {
       const i = CHALLENGERS[k];
+      if (tr && i < tr.agents.length && Math.hypot(tr.x[i] - x, tr.z[i] - z) > KEEP) tr.release(i); // challengers stay around: a far one comes back into traffic nearby, out of sight
       const ok = tr !== null && i < tr.agents.length && Math.hypot(tr.x[i] - x, tr.z[i] - z) < SEEN;
       if (ok && tr) {
         const cx = tr.x[i], cz = tr.z[i];
