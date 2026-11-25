@@ -21,4 +21,6 @@ export const ES_CONTENT_M: Record<string, string> = {
   'Bay Sprint': 'Sprint de la Bahía',
   'Bay Drift': 'Derrape de la Bahía',
   'Bay Outrun': 'Persecución de la Bahía',
+  'Runway Drag': 'Aceleración en la pista', 'Runway': 'La pista',
+  'A straight line on the old runway: launch, shift on time, hold it flat.': 'Una recta en la vieja pista del aeropuerto: sal bien, cambia a tiempo y pie a fondo.',
 };

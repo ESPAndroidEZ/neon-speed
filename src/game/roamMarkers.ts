@@ -6,7 +6,7 @@ import { CHALLENGERS } from './roamFlow';
 import { AREA_REP } from '../core/areaLocks';
 import { t } from '../i18n';
 
-const KIND_MARK: Record<CityKind, MarkerKind> = { circuit: 'race', sprint: 'sprint', drift: 'drift', run: 'run' };
+const KIND_MARK: Record<CityKind, MarkerKind> = { circuit: 'race', sprint: 'sprint', drift: 'drift', run: 'run', drag: 'drag' };
 const TOKEN_SEEN = 300; // m: a neon token shows on the map only when you are this close (finding them is the game)
 const STORY: readonly MarkerKind[] = ['storyLock', 'story', 'storyDone'];
 

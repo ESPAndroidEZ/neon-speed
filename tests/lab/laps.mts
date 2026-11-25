@@ -1,6 +1,7 @@
 import { wrapAngle } from '../../src/core/math.ts';
 import { CARS } from '../../src/data/cars.ts';
-import { TRACKS, buildTrack } from '../../src/data/tracks/index.ts';
+import { TRACKS, buildTrack, findTrackDef } from '../../src/data/tracks/index.ts';
+import '../../src/game/cityRaces.ts';
 import { applyDriving, DRIVING, type AssistLevel } from '../../src/physics/assists.ts';
 import { CarController } from '../../src/physics/carController.ts';
 import { applyTuning, createDefaultTuning, type CarTuning } from '../../src/physics/carTuning.ts';
@@ -18,7 +19,7 @@ const built = new Map<string, { track: Track; layout: ReturnType<typeof layoutPr
 function world(id: string): { track: Track; layout: ReturnType<typeof layoutProps> } {
   let w = built.get(id);
   if (!w) {
-    const def = TRACKS.find((t) => t.id === id)!;
+    const def = findTrackDef(id); // fixed maps, and city maps through the resolver (game/cityRaces)
     const track = buildTrack(def);
     built.set(id, (w = { track, layout: layoutProps(track, 17, def.propsDensity) }));
   }
@@ -30,6 +31,8 @@ export interface LapStats {
   lapMean: number; lapSd: number;
   /** Share of moving time with |slip| above 0.15 rad, and slip percentiles (rad). */
   driftShare: number; slip90: number; slip99: number;
+  /** Drift points banked plus the open chain at the end (drift maps). */
+  driftPts: number;
 }
 
 export interface RunOpts { car: string; track: string; weather: Weather; bot: BotKind; laps?: number; seed?: number; assist?: AssistLevel; tune?: Partial<CarTuning>; mod?: (t: CarTuning, id: string) => void; trace?: string[] }
@@ -92,5 +95,5 @@ export function runLaps(o: RunOpts): LapStats {
   const mean = times.reduce((a, b) => a + b, 0) / Math.max(1, times.length);
   const sd = Math.sqrt(times.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, times.length));
   DRIVING.level = 'STANDARD';
-  return { laps: times.length, spins, stuck, hits, lapMean: mean || 999, lapSd: sd, driftShare: drift / Math.max(1, moving), slip90: pct(0.9), slip99: pct(0.99) };
+  return { laps: times.length, spins, stuck, hits, lapMean: mean || 999, lapSd: sd, driftShare: drift / Math.max(1, moving), slip90: pct(0.9), slip99: pct(0.99), driftPts: car.drift.bank + car.drift.chain };
 }

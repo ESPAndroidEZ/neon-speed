@@ -12,6 +12,8 @@ import { AI_SETTING } from '../physics/aiDifficulty';
 import { t, tx } from '../i18n';
 
 const RIVALS = 3;
+/** Rivals per event type: drift runs are scored alone, drag and outrun are one on one. */
+const rivalsFor = (r: CityRace): number => (r.kind === 'drift' ? 0 : r.kind === 'drag' || r.kind === 'run' ? 1 : RIVALS);
 const mmss = (sec: number): string => `${Math.floor(sec / 60)}:${(sec % 60).toFixed(2).padStart(5, '0')}`;
 
 /**
@@ -29,7 +31,7 @@ export function installCityRaces(d: { engine: Engine; game: Game; store: SaveSto
     offered = null;
     const car = findCar(store.data.selected), w = game.weather;
     lastField = given ?? null;
-    const field = given ?? (r.kind === 'drift' ? [] : competitiveField(RIVALS, car, store.data.upgrades[car.id] ?? {})); // same tier, full skill, your upgrades
+    const field = given ?? (r.kind === 'drift' ? [] : competitiveField(rivalsFor(r), car, store.data.upgrades[car.id] ?? {})); // same tier, full skill, your upgrades
     game.startRace({ car, paint: store.data.paint[car.id] ?? car.color, glow: store.data.glow[car.id], weather: w, laps: r.def.laps, trackId: r.id, cinematic: false, flyby: store.data.settings.raceIntro, agents: field, meta: { rivalIds: field.map((f) => f.agent.id), skillScale: 1, wet: w !== 'CLEAR', eventId: null, level: AI_SETTING.level } });
   };
   const offer = cityRaceOffer(() => { if (offered && game.state === 'FREEROAM' && !game.paused) start(offered); });
@@ -38,8 +40,9 @@ export function installCityRaces(d: { engine: Engine; game: Game; store: SaveSto
     offered = r;
     if (!r) { offer.hide(); return; }
     const best = store.data.trackBest[`${r.id}:${game.weather}`];
-    const info = t('city.info', { laps: r.def.laps, km: (r.length / 1000).toFixed(1), n: RIVALS }) + (best ? ` · ${t('city.best', { time: mmss(best) })}` : '');
-    offer.show(r.def.name, info);
+    const km = ((r.def.sprintEnd ?? 1) * r.length / 1000).toFixed(1);
+    const info = r.kind === 'circuit' ? t('city.info', { laps: r.def.laps, km, n: RIVALS }) : t(`ev.info.${r.kind}`, { km, n: rivalsFor(r), laps: r.def.laps, target: (r.def.driftTarget ?? 0).toLocaleString() });
+    offer.show(r.def.name, info + (best ? ` · ${t('city.best', { time: mmss(best) })}` : ''), t(`ev.${r.kind}`));
   };
   // left Free Drive: hide the card (a pause keeps it; Enter is ignored while paused)
   d.engine.onFrame(() => { if (offer.shown && game.state !== 'FREEROAM') offer.hide(); });

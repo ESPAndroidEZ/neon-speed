@@ -1,12 +1,13 @@
 import type { RoadGraph } from '../types/world';
-import { CITY_PREFIX, cityId, planLoop, placeCityRaces, type CityKind, type CityRace } from './cityRace';
+import { planDrag } from './cityDrag';
+import { CITY_PREFIX, cityId, planLoop, placeCityRaces, type CityKind, type CityRace, type LoopKind } from './cityRace';
 
 /**
  * Every city event (Underground round): the W5.5 circuits plus a sprint and a drift run per district (start rings), and
  * outruns planned on demand from a challenger's junction. Ids say how to rebuild each map (`planCityEvent`), so a saved
  * or restarted race finds its map without the city. Pure; allocates only when planning.
  */
-const KINDS: readonly CityKind[] = ['sprint', 'drift'];
+const KINDS: readonly LoopKind[] = ['sprint', 'drift'];
 /** Start rings of different events keep this far apart (m). */
 const APART = 90;
 
@@ -24,6 +25,8 @@ export function placeCityEvents(g: RoadGraph): CityRace[] {
       if (r) { out.push(r); break; }
     }
   }
+  const drag = planDrag(g);
+  if (drag) out.push(drag);
   return out;
 }
 

@@ -22,6 +22,7 @@ export function finishFreeRace(store: SaveStore, def: TrackDef, weather: Weather
     const record = store.recordTrack(`${def.id}:drift`, r.driftScore, false);
     const medal = medalLine(store, driftMedal(def.driftTarget, r.driftScore), driftMedal(def.driftTarget, before));
     const passed = r.driftScore >= (def.driftTarget ?? 0);
+    if (isCityTrack(def.id)) return CITY_HOOK.result(r, def.id); // a city drift run returns to Free Drive
     return {
       objective: t('free.drift', { score: r.driftScore.toLocaleString(), target: (def.driftTarget ?? 0).toLocaleString() }) + (record ? ` · ${t('free.newBest')}` : ''),
       passed,

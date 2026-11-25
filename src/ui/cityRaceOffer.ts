@@ -2,7 +2,7 @@ import { injectRoamCss } from './roamCss';
 import { t, tx } from '../i18n';
 import { button, h } from './uiKit';
 
-export interface CityRaceOffer { show(name: string, info: string): void; hide(): void; readonly shown: boolean }
+export interface CityRaceOffer { show(name: string, info: string, kind?: string): void; hide(): void; readonly shown: boolean }
 
 /**
  * The race offer in Free Drive (W5.5): a small card under the top bar when the car stops in a gold start ring.
@@ -25,7 +25,7 @@ export function cityRaceOffer(start: () => void): CityRaceOffer {
     if (on && !e.repeat && (e.code === 'Enter' || e.code === 'NumpadEnter')) { e.preventDefault(); start(); }
   });
   return {
-    show: (name, info) => { title.textContent = t('city.offer', { name: tx(name) }); sub.textContent = info; on = true; root.style.display = 'flex'; document.body.classList.add('rb-offer'); },
+    show: (name, info, kind) => { title.textContent = kind ? `${kind.toUpperCase()} · ${tx(name)}` : t('city.offer', { name: tx(name) }); sub.textContent = info; on = true; root.style.display = 'flex'; document.body.classList.add('rb-offer'); },
     hide: () => { if (!on) return; on = false; root.style.display = 'none'; document.body.classList.remove('rb-offer'); },
     get shown() { return on; },
   };

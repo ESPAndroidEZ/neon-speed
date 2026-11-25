@@ -33,7 +33,9 @@ export interface CityRace {
   fx: number;
   fz: number;
 }
-export type CityKind = 'circuit' | 'sprint' | 'drift' | 'run';
+export type CityKind = 'circuit' | 'sprint' | 'drift' | 'run' | 'drag';
+/** Kinds planned as a GPS loop (the drag strip is its own map, core/cityDrag). */
+export type LoopKind = Exclude<CityKind, 'drag'>;
 /** Map id per kind: `city-<district>` circuits (W5.5), `city-sprint-<district>`, `city-drift-<district>`, `city-run-<node>`. */
 export const cityId = (kind: CityKind, key: string): string => CITY_PREFIX + (kind === 'circuit' ? '' : `${kind}-`) + key;
 
@@ -41,11 +43,11 @@ export const CITY_PREFIX = 'city-';
 export const isCityTrack = (id: string): boolean => id.startsWith(CITY_PREFIX);
 
 const NAMES: Record<DistrictId, string> = { downtown: 'Downtown Loop', harbour: 'Harbour Loop', oldtown: 'Old Town Loop', strip: 'Strip Loop', hills: 'Hills Loop', industrial: 'Industrial Loop', bay: 'Bay Loop' };
-const SUFFIX: Record<CityKind, string> = { circuit: ' Loop', sprint: ' Sprint', drift: ' Drift', run: ' Outrun' };
-const nameOf = (d: DistrictId, k: CityKind): string => NAMES[d].replace(' Loop', SUFFIX[k]);
+const SUFFIX: Record<LoopKind, string> = { circuit: ' Loop', sprint: ' Sprint', drift: ' Drift', run: ' Outrun' };
+const nameOf = (d: DistrictId, k: LoopKind): string => NAMES[d].replace(' Loop', SUFFIX[k]);
 const BLURB = 'A street race through Neon Harbor, picked from the GPS.';
 /** Every player-visible text of the city maps (tests/lab/i18n-harvest.mts checks the Spanish). */
-export const CITY_TEXT: readonly string[] = [...(Object.keys(NAMES) as DistrictId[]).flatMap((d) => (Object.keys(SUFFIX) as CityKind[]).map((k) => nameOf(d, k))), ...Object.values(NAMES).map((n) => n.replace(' Loop', '')), BLURB];
+export const CITY_TEXT: readonly string[] = [...(Object.keys(NAMES) as DistrictId[]).flatMap((d) => (Object.keys(SUFFIX) as LoopKind[]).map((k) => nameOf(d, k))), ...Object.values(NAMES).map((n) => n.replace(' Loop', '')), BLURB, 'Runway Drag', 'Runway', 'A straight line on the old runway: launch, shift on time, hold it flat.'];
 /** Sprints and outruns end this far round the loop (the far side; the rest is the way back). */
 const SPRINT_END = 0.56;
 const FAST: ReadonlySet<string> = new Set(['highway', 'runway', 'bridge']); // no races over the motorway or the airport
@@ -115,7 +117,7 @@ function corners(p: [number, number][], w: number): Vertex[] {
 }
 
 /** The circuit for one loop of nodes/edges, or null when it fails the race-map rules. */
-function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[], edges: number[], kind: CityKind): { def: TrackDef; length: number; ox: number; oz: number; fx: number; fz: number } | null {
+function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[], edges: number[], kind: LoopKind): { def: TrackDef; length: number; ox: number; oz: number; fx: number; fz: number } | null {
   const pts = loopPoints(g, nodes, edges);
   if (pts.length < 4) return null;
   let far = 0; // a closed loop is simplified as two halves (start -> farthest point -> start)
@@ -139,13 +141,13 @@ function toTrack(g: RoadGraph, id: string, district: DistrictId, nodes: number[]
   if (sprint) def.sprintEnd = SPRINT_END;
   const tr = buildTrack(def);
   if (tr.samples.length < 10) return null; // degenerate polygon (a leg of zero length)
-  if (kind === 'drift') def.driftTarget = Math.round((tr.length * LAPS * 1.6) / 100) * 100; // measured with the drift bot (tests/city-events-check)
+  if (kind === 'drift') def.driftTarget = Math.round((tr.length * LAPS * 1.2) / 100) * 100; // 1.2 pts per m: bots that do not try score 400-3200 (tests/lab/city-drift.mts)
   const f = tr.samples[sprint ? tr.raceSamples : 0].position;
   return validateTrack(tr, { minLength: MIN_LEN, maxLength: MAX_LEN, sprint }).length ? null : { def, length: tr.length, ox, oz, fx: f.x + ox, fz: f.z + oz };
 }
 
 /** A loop that starts and ends at node `s`, or null. */
-export function planLoop(g: RoadGraph, s: number, id: string, district: DistrictId, kind: CityKind = 'circuit', reach: readonly [number, number][] = REACH): CityRace | null {
+export function planLoop(g: RoadGraph, s: number, id: string, district: DistrictId, kind: LoopKind = 'circuit', reach: readonly [number, number][] = REACH): CityRace | null {
   const skipE = new Uint8Array(g.edges.length);
   for (const e of g.edges) if (FAST.has(e.kind)) skipE[e.id] = 1;
   const n0 = g.nodes[s];

@@ -9,5 +9,6 @@ export const ES_STREET = {
   'ch.none': 'Desde aquí no hay carrera: prueba otra calle',
   'map.challenger': 'Rival', 'map.garage': 'Garaje', 'map.parts': 'Tienda de piezas', 'map.paint': 'Taller de pintura', 'map.lock': 'Zona cerrada',
   'map.sprint': 'Sprint urbano', 'map.drift': 'Derrape', 'map.drag': 'Aceleración', 'map.run': 'Persecución',
+  'ev.info.sprint': '{km} km hasta la meta · {n} rivales', 'ev.info.drift': '{laps} vueltas · {target} puntos para ganar', 'ev.info.drag': '{km} km de recta · {n} rival · cambio manual: cambia al llegar al corte', 'ev.info.run': '{km} km · {n} rival',
   'ev.circuit': 'Circuito', 'ev.sprint': 'Sprint', 'ev.drift': 'Derrape', 'ev.run': 'Persecución', 'ev.drag': 'Aceleración',
 } as const;

@@ -9,5 +9,6 @@ export const EN_STREET = {
   'ch.none': 'No way to race from here: try another street',
   'map.challenger': 'Challenger', 'map.garage': 'Garage', 'map.parts': 'Parts shop', 'map.paint': 'Paint shop', 'map.lock': 'Locked area',
   'map.sprint': 'Street sprint', 'map.drift': 'Drift run', 'map.drag': 'Drag race', 'map.run': 'Outrun',
+  'ev.info.sprint': '{km} km to the finish · {n} rivals', 'ev.info.drift': '{laps} laps · score {target} to win', 'ev.info.drag': '{km} km straight · {n} rival · manual gears: shift at the redline', 'ev.info.run': '{km} km · {n} rival',
   'ev.circuit': 'Circuit', 'ev.sprint': 'Sprint', 'ev.drift': 'Drift', 'ev.run': 'Outrun', 'ev.drag': 'Drag',
 } as const;

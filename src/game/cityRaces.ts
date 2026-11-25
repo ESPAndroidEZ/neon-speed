@@ -1,10 +1,10 @@
 import type { RoadGraph } from '../types/world';
 import type { RaceResult } from '../core/raceManager';
 import type { ResultsExtra } from '../ui/results';
-import { isCityTrack, placeCityRaces, type CityRace } from '../core/cityRace';
+import { isCityTrack, type CityRace } from '../core/cityRace';
 import { setTrackResolver } from '../data/tracks';
 import { generateRoads } from '../world/roads/generate';
-import { planCityEvent } from '../core/cityEvents';
+import { placeCityEvents, planCityEvent } from '../core/cityEvents';
 
 /** City seed: the same as Free Drive's city (game/freeRoam.ts build). */
 const SEED = 7;
@@ -18,7 +18,7 @@ export const cityGraph = (): RoadGraph => (graph ??= generateRoads(SEED));
 /** The city races with a start ring, planned once (from the city's graph when Free Drive builds it, else from a fresh graph). */
 export function cityRaces(g?: RoadGraph): CityRace[] {
   if (g) graph ??= g;
-  planned ??= placeCityRaces(cityGraph());
+  planned ??= placeCityEvents(cityGraph()); // circuits, sprints, drift runs, the drag strip (Underground round)
   return planned;
 }
 /** Any city event by map id: a ring race, or an outrun rebuilt from its id. */
