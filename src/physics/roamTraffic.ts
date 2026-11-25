@@ -67,9 +67,7 @@ export class RoamTraffic {
   }
 
   /** Stop car i for a few seconds (the player hit it). */
-  bump(i: number, vx = 0, vz = 0, side = 1): void {
-    this.agents[i].speed = 0; this.stall[i] = 3; this.knock.hit(i, vx, vz, side);
-  }
+  bump(i: number, vx = 0, vz = 0, side = 1): void { this.agents[i].speed = 0; this.stall[i] = 3; this.knock.hit(i, vx, vz, side); }
 
   step(dt: number, px: number, pz: number, grip: number): void {
     this.pvx = (px - this.lx) / dt; this.pvz = (pz - this.lz) / dt; // the player's velocity, for following them
@@ -211,7 +209,8 @@ export class RoamTraffic {
       a.speed = Math.min(e.limit * 0.6, TURN_SPEED);
       this.stall[i] = 0; this.knock.clear(i);
       this.pose(i);
-      let clear = Math.hypot(this.x[i] - this.lx, this.z[i] - this.lz) > 60; // never pops in next to the player
+      const rx = this.x[i] - this.lx, rz = this.z[i] - this.lz, rd = Math.hypot(rx, rz), pv = Math.hypot(this.pvx, this.pvz); // never pops in next to the player, nor in view ahead (within 200 m, a 106 deg cone)
+      let clear = rd > 60 && !(pv > 3 && rd < 200 && (rx * this.pvx + rz * this.pvz) / (rd * pv) > 0.6);
       for (let j = 0; j < this.agents.length && clear; j++) if (j !== i && Math.hypot(this.x[j] - this.x[i], this.z[j] - this.z[i]) < 15) clear = false;
       if (clear) return;
     }

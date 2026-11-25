@@ -65,6 +65,25 @@ check('one-way streets only driven a -> b', dry.wrongWay === 0 && bendy.wrongWay
 check('old town: no red lights run either', bendy.red === 0, `${bendy.red}`);
 check('old town bends: speed within sqrt(0.55 g x R) (below the player car)', bendy.bends > 200 && bendy.overBend === 0, `${bendy.overBend} of ${bendy.bends} bend samples over`);
 check('rain: the bend speed cap scales with the weather grip', wet.bends > 200 && wet.overBend === 0, `${wet.overBend} of ${wet.bends} over`);
+// spawning out of sight: a player driving at 30 m/s never sees a car appear within 200 m in the cone ahead
+{
+  const tr = new RoamTraffic(g, 40, 9);
+  let px = 0, pz = -1200, inView = 0, spawns = 0;
+  tr.scatter(px, pz);
+  const wx = tr.agents.map((_, i) => tr.x[i]), wz = tr.agents.map((_, i) => tr.z[i]);
+  for (let k = 0; k < 60 * 60; k++) {
+    pz += 30 / 60; // north at 108 km/h (through buildings: only the traffic's view of the player matters)
+    tr.step(D, px, pz, 1);
+    tr.agents.forEach((_a, i) => {
+      const jump = Math.hypot(tr.x[i] - wx[i], tr.z[i] - wz[i]) > 25; wx[i] = tr.x[i]; wz[i] = tr.z[i];
+      if (!jump || k < 2) return;
+      spawns++;
+      const rx = tr.x[i] - px, rz = tr.z[i] - pz, rd = Math.hypot(rx, rz);
+      if (rd < 200 && rz / rd > 0.6) inView++;
+    });
+  }
+  check('traffic never pops in ahead of a moving player', spawns > 20 && inView === 0, `${inView} of ${spawns} respawns in view`);
+}
 // the player stands in a lane right ahead of a car: it stops behind
 {
   const tr = new RoamTraffic(g, 1, 9);
