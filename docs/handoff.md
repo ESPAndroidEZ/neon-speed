@@ -6,10 +6,9 @@ Baton: claude
 Updated: 2026-11-25 (Underground round stages 1-4 built, tested and DEPLOYED as 15f70a3 to notcarlos.mosidealus.nl; live check: phones start races, 1366/1920 race start and service-worker activation time out under software rendering, .wav served as application/octet-stream by the managed nginx).
 
 ## Next
-0. Underground round (docs/underground-plan.md): ALL 4 stages built 2026-11-25 (see its 'What was built'); real-phone playtest of Street style, challengers, shops, city events and the paint shop is the open item. 2026-11-25 Free Drive round built (stuck recovery, respawn keeps chase, GPS snap, winnable police, cop dots, token fog, district %): NOT deployed. Not built: repeatable jobs, cop line-of-sight, off-road dust.
-1. (deployed once on 2026-11-25 at the NFS round; redeploy) run `scripts/deploy-server.sh` from a network that reaches tele.true.nl:443 (timed out on 2026-11-24 and 11-25); then live-URL checks. Real-phone playtest of everything in docs/nfs-vision.md (never tried on a phone or real GPU); rerun `tests/lab/roam-bench.mjs` (docs/perf.md).
-2. Open UI/QA: duels button below the map cards, garage Look & details cramped on phones, Snow card 63 % vs 45 %, fly-by hidden by the loading card, cop visuals (white car now) and Day look to re-check on screenshots.
-3. Not built: jumps (2D physics), reverse/night map variants, district radio, 3D menu hero, results podium, daily goals; owner items in docs/inbox/2026-11-21-owner-playtest.md (tilt landscape lock, off-road feel, building sweep).
+1. Real-phone playtest of the Underground round (Street style, challengers, shops, REP areas, city sprint/drift/drag, Street events, paint shop) and tune drift targets / REP levels from it. DEPLOYED as 15f70a3 on 2026-11-25.
+2. Open QA: live-check 1366/1920 race start + service worker activation time out (software rendering?), .wav served as octet-stream by managed nginx (admin request), sprint minimap shows the whole loop, garage look panel still cramped on phones, earlier items (duels button, Snow card %, fly-by under loading card, cop/Day look).
+3. Not built: outrun lead-by-distance rule, per-kind ring colours, jumps, map variants, district radio, results podium, daily goals; owner items in docs/inbox/2026-11-21-owner-playtest.md.
 
 ## Done
 2026-11-25 Underground round Stages 2-4 (details in docs/underground-plan.md): challengers + outruns, shops as rings, REP-locked districts, map icons + legend, city sprint / drift / drag events, Street events screen, underglow kit + vinyls as paid items, 3 new vinyls. Tests: world-flow-check, city-events-check, paint-shop-check. Save: optional `SaveData.bought` (parsed in saveParse). Contracts unchanged (`types/game.ts` untouched).
@@ -202,3 +201,4 @@ Round 3 additions: procedural cars got smoothed silhouettes (Chaikin-rounded pro
 - 2026-11-25 Claude: Underground Stage 1 done (Driving style Classic/Street, feel lab, driving-style-check); build + tests green.
 - 2026-11-25 Claude: Underground Stages 2-4 done (world flow, city event types, customisation + Street events); build + tests green; two Playwright QA passes at 844x390.
 - 2026-11-25 Claude: deployed 15f70a3 (Underground round + NFS round); health.php ok, live-check phone sizes PASS.
+- 2026-11-25 Claude: end-of-session checkpoint; build + 1880 tests green; Next rewritten.
