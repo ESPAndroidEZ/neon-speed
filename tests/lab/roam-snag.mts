@@ -44,7 +44,7 @@ export function snagStats(n = 60): SnagStats {
     const lx = corner ? sx * f.hw : sx * f.hw, lz = corner ? sz * f.hd : 0;
     const fx = Math.sin(f.rot), fz = Math.cos(f.rot);
     const tx = f.x + lx * fz + lz * fx, tz = f.z - lx * fx + lz * fz; // local -> world (x axis (fz,-fx), z axis (fx,fz))
-    const ang = Math.atan2(tx - f.x, tz - f.z) + ((i % 5) - 2) * 0.35; // outward direction, bent
+    const ang = Math.atan2(tx - f.x, tz - f.z) + [-1.22, -0.6, 0, 0.6, 1.22][i % 5]; // outward direction, bent (+-1.22 rad = about 20 deg to the wall: a glancing hit)
     const sx0 = tx + Math.sin(ang) * 14, sz0 = tz + Math.cos(ang) * 14, head = ang + Math.PI;
     if (fs.some((q) => Math.hypot(q.x - sx0, q.z - sz0) < 60 && overlapDepth(sx0, sz0, head, q) > 0)) continue; // the start spot must be clear (lab, not game)
     const glance = Math.abs((i % 5) - 2) === 2;
@@ -52,7 +52,7 @@ export function snagStats(n = 60): SnagStats {
     car.reset(sx0, sz0, head);
     const v = 12 + (i % 3) * 10;
     car.nudge(0, 0, Math.sin(head) * v, Math.cos(head) * v, 0);
-    let clip = 0, still = 0, hit = false, after = 0;
+    let clip = 0, still = 0, hit = false, after = 0, vHit = 0, vHalf = -1, sHit = -1;
     for (let s = 0; s < 150; s++) {
       car.step(D, inp, env);
       contact.update(car);
@@ -60,14 +60,15 @@ export function snagStats(n = 60): SnagStats {
       let o = 0;
       for (const q of [f]) o = Math.max(o, overlapDepth(p.x, p.z, car.state.heading, q));
       clip = Math.max(clip, o);
-      if (contact.impact > 0.5) hit = true;
+      if (contact.impact > 0.5 && !hit) { hit = true; vHit = Math.abs(car.state.speed); sHit = s; }
+      if (hit && s === sHit + 30) vHalf = Math.abs(car.state.speed);
       if (hit && Math.abs(car.state.speed) < 1.5) still++;
       if (hit && s > 140) after = Math.abs(car.state.speed);
     }
     runs++; clipMax = Math.max(clipMax, clip); clipSum += clip;
     if (process.env.SNAG_DEBUG && clip > 0.3) console.log(`run ${i} clip ${clip.toFixed(2)} v ${v} corner ${corner} hw ${f.hw.toFixed(1)} hd ${f.hd.toFixed(1)} start-overlap ${overlapDepth(sx0, sz0, head, f).toFixed(2)}`);
     if (still > 60) stuck++;
-    if (glance) { glancing++; if (after > 5) kept++; }
+    if (glance) { glancing++; if (after > 5) kept++; if (process.env.SNAG_GLANCE && hit) console.log(`glance run ${i} corner ${corner} v ${v} at hit ${vHit.toFixed(1)} 0.5 s later ${vHalf.toFixed(1)} end ${after.toFixed(1)}`); }
   }
   return { runs, clipMax, clipMean: clipSum / Math.max(1, runs), stuckRuns: stuck, keptGlancing: kept / Math.max(1, glancing) };
 }

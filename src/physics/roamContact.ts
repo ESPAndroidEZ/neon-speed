@@ -8,6 +8,7 @@ import { heightAt, slopeAlong } from '../world/roads/height';
 import { RoadIndex, createRoadHit } from '../world/roads/roadIndex';
 import { trafficSize } from './trafficSize';
 import { GridHash } from '../world/roads/spatial';
+import { SIDEWALK } from '../world/roads/grammar';
 import { obbHit, type ObbOut } from './obbHit';
 
 const HALF_W = 0.92, HALF_L = 2.1; // car half width / length (same as TrackContact)
@@ -17,6 +18,8 @@ const POINTS: readonly (readonly [number, number])[] = [
 const BORDER = 6; // metres inside the world edge
 /** Share of a hit's impulse the player takes: a wall or a building takes none of it, a traffic car about half (it is bumped away). */
 const CAR_SHARE = 0.55, COP_SHARE = 0.7;
+/** Off-road in the city (fully off the kerb): grip and drag (1/s). Races keep their verge (0.6 / 0.5). */
+const CITY_OFF = { grip: 0.72, drag: 0.26 };
 
 /**
  * Car vs the open city (pure, no allocation per step): tyre surface from the road index (asphalt, wet, kerb, grass),
@@ -70,11 +73,14 @@ export class RoamContact {
     const kind = this.roads.surfaceAt(x, z, this.rain);
     const sf = SURFACES[kind];
     this.offroad = kind === 'grass';
-    car.surfaceGrip = sf.grip;
-    car.surfaceDrag = sf.drag;
     car.steerAuthority = 1;
     const h = this.roads.nearest(x, z, this.hit);
     const e = h.edge >= 0 ? this.graph.edges[h.edge] : null;
+    // city ground off the sidewalk (plazas, lots, verges) is wide, not a race verge: blend from the kerb over 5 m to a
+    // softer off-road (a hard step to grass drag at 100 km/h braked the car at ~1.5 g, owner playtest 2026-11-21 item 8)
+    const off = kind === 'grass' ? Math.min(1, Math.max(0, ((e ? h.dist - e.width / 2 : 99) - SIDEWALK) / 5)) : -1;
+    car.surfaceGrip = off < 0 ? sf.grip : SURFACES.curb.grip + (CITY_OFF.grip - SURFACES.curb.grip) * off;
+    car.surfaceDrag = off < 0 ? sf.drag : SURFACES.curb.drag + (CITY_OFF.drag - SURFACES.curb.drag) * off;
     if (e?.ys && h.dist <= e.width / 2 + 1) { // bridge deck / ramp: the edge's own profile
       let k = 0;
       while (k + 2 < e.cum.length && e.cum[k + 1] < h.s) k++;
@@ -108,10 +114,7 @@ export class RoamContact {
     if (this.hitCop >= 0 && this.impact > 2) this.onCop?.(this.hitCop);
   }
 
-  /**
-   * Camera line of sight (the chase camera's spring arm in Free Drive): the free fraction 0..1 of the segment from the
-   * car (ax, az) to the camera (bx, bz) at height y, sampled every 0.8 m against buildings taller than y. No allocation.
-   */
+  /** Camera line of sight (chase-cam spring arm): free fraction 0..1 of car (ax, az) -> camera (bx, bz) at height y; 0.8 m steps vs buildings taller than y. */
   rayFree(ax: number, az: number, bx: number, bz: number, y: number): number {
     const len = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.ceil(len / 0.8));
     for (let k = 1; k <= n; k++) {

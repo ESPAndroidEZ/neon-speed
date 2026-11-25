@@ -3,6 +3,7 @@
  * on its deck, and the world border holds. */
 import { CARS } from '../src/data/cars.ts';
 import { snagStats } from './lab/roam-snag.mts';
+import { offroadRun } from './lab/roam-offroad.mts';
 import { generateRoads as genRoads2 } from '../src/world/roads/generate.ts';
 import { generateFootprints as genFp2 } from '../src/world/open/footprints.ts';
 import { CarController } from '../src/physics/carController.ts';
@@ -90,6 +91,8 @@ check('the world border holds', out === 0);
   check('camera ray through a building is cut at its wall', out > 0 && out < 0.2, out.toFixed(2));
   check('camera ray over a low height sees above the roof line only when higher', cc.rayFree(b.x + fz * (b.hw + 4), b.z - fx * (b.hw + 4), b.x - fz * (b.hw + 4), b.z + fx * (b.hw + 4), b.height + 1) === 1);
 }
+const orr = offroadRun(); // leaving the street at 100 km/h: no glue, no jolt at the kerb
+check('off the kerb: a soft slow-down (under 0.9 g) without a jolt', orr.maxDecel < 9 && orr.jolt < 5 && orr.kmh > 50, `${orr.kmh.toFixed(0)} km/h after 1.5 s, max ${orr.maxDecel.toFixed(1)} m/s2, jolt ${orr.jolt.toFixed(1)}`);
 const sn = snagStats(200);
 check('no clipping into buildings (box contact, seam fallback)', sn.clipMax < 0.05, `max ${sn.clipMax.toFixed(2)} m, ${sn.stuckRuns} head-on stops`);
 console.log(failed ? `\n${failed} FAILED` : '\nALL PASS');
